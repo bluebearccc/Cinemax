@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+    <meta name="description" content="" />
+    <meta name="author" content="" />
+    <title>Customer Management - Cinemax Admin</title>
+    <link th:href="@{/css/admin/styles.css}" rel="stylesheet" />
+    <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+    <a class="navbar-brand ps-3" th:href="@{/}">Cinemax</a>
+    <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+    <!-- Navbar-->
+    <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+                <li><a class="dropdown-item" th:href="@{/settings}">Settings</a></li>
+                <li><hr class="dropdown-divider" /></li>
+                <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<div id="layoutSidenav">
+    <div id="layoutSidenav_nav">
+        <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+            <div class="sb-sidenav-menu">
+                <div class="nav">
+                    <div class="sb-sidenav-menu-heading">Core</div>
+                    <a class="nav-link" th:href="@{/admin}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+                        Dashboard
+                    </a>
+                    <div class="sb-sidenav-menu-heading">Interface</div>
+                    <a class="nav-link active" th:href="@{/admin/customer}">
+                        <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+                        Customers
+                    </a>
+                </div>
+            </div>
+            <div class="sb-sidenav-footer">
+                <div class="small">Logged in as:</div>
+                Admin User
+            </div>
+        </nav>
+    </div>
+    <div id="layoutSidenav_content">
+        <main>
+            <div class="container-fluid px-4">
+                <h1 class="mt-4">Customer Management</h1>
+                <ol class="breadcrumb mb-4">
+                    <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
+                    <li class="breadcrumb-item active">Customers</li>
+                </ol>
+
+                <!-- Success/Error Messages -->
+                <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <i class="fas fa-check-circle me-1"></i>
+                    <span th:text="${successMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                    <i class="fas fa-exclamation-circle me-1"></i>
+                    <span th:text="${errorMessage}"></span>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+
+                <!-- Customer Table -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="d-flex align-items-center">
+                                <i class="fas fa-table me-1"></i>
+                                <span>Customer List</span>
+                            </div>
+                            <div class="d-flex align-items-center">
+                                <!-- Search Form -->
+                                <form th:action="@{/admin/customer/search}" method="get" class="d-flex me-3">
+                                    <div class="input-group" style="width: 300px;">
+                                        <input class="form-control"
+                                               type="text"
+                                               name="keyword"
+                                               th:value="${keyword}"
+                                               placeholder="Search customers..." />
+                                        <button class="btn btn-outline-primary" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </form>
+                                <!-- Modified Add Button to trigger modal -->
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+                                    <i class="fas fa-plus me-1"></i>Add New Customer
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div th:if="${customers != null and !customers.isEmpty()}">
+                            <table id="datatablesSimple" class="table table-striped">
+                                <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>
+                                        Full Name
+                                        <div class="btn-group ms-2" role="group">
+                                            <a th:href="@{/admin/customer/sort/asc}" 
+                                               class="btn btn-sm btn-outline-secondary" 
+                                               title="Sort A-Z">
+                                                <i class="fas fa-sort-alpha-down"></i>
+                                            </a>
+                                            <a th:href="@{/admin/customer/sort/desc}" 
+                                               class="btn btn-sm btn-outline-secondary" 
+                                               title="Sort Z-A">
+                                                <i class="fas fa-sort-alpha-up"></i>
+                                            </a>
+                                        </div>
+                                    </th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="customer : ${customers}">
+                                    <td th:text="${customer.customerID}"></td>
+                                    <td th:text="${customer.fullName}"></td>
+                                    <td th:text="${customer.account?.email ?: 'N/A'}"></td>
+                                    <td th:text="${customer.phone ?: 'N/A'}"></td>
+                                    <td>
+                                        <span th:if="${customer.account?.status}" class="badge bg-success">Active</span>
+                                        <span th:unless="${customer.account?.status}" class="badge bg-danger">Inactive</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex gap-2">
+                                            <!-- Edit Button -->
+                                            <a th:href="@{'/admin/customer/edit/' + ${customer.customerID}}"
+                                               class="btn btn-sm btn-primary"
+                                               title="Edit Customer">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+
+                                            <!-- Delete Form -->
+                                            <form th:action="@{'/admin/customer/delete/' + ${customer.customerID}}"
+                                                  method="post"
+                                                  style="display: inline;"
+                                                  th:id="'deleteForm-' + ${customer.customerID}">
+                                                <button type="button"
+                                                        class="btn btn-sm btn-danger"
+                                                        title="Delete Customer"
+                                                        th:onclick="'confirmDelete(' + ${customer.customerID} + ')'">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div th:if="${customers == null or customers.isEmpty()}" class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No customers found</h5>
+                            <p class="text-muted">
+                                <span th:if="${keyword}">No customers match your search criteria.</span>
+                                <span th:unless="${keyword}">Start by adding your first customer.</span>
+                            </p>
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addCustomerModal">
+                                <i class="fas fa-plus me-1"></i>Add New Customer
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        <!-- Footer -->
+        <footer class="py-4 bg-light mt-auto">
+            <div class="container-fluid px-4">
+                <div class="d-flex align-items-center justify-content-between small">
+                    <div class="text-muted">Copyright &copy; <span th:text="${#dates.year(#dates.createNow())}">2023</span> Cinemax</div>
+                    <div>
+                        <a th:href="@{/privacy}">Privacy Policy</a>
+                        &middot;
+                        <a th:href="@{/terms}">Terms &amp; Conditions</a>
+                    </div>
+                </div>
+            </div>
+        </footer>
+    </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal fade" id="addCustomerModal" tabindex="-1" aria-labelledby="addCustomerModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="addCustomerModalLabel">
+                    <i class="fas fa-user-plus me-2"></i>Add New Customer
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form th:action="@{/admin/customer/add}" method="post">
+                <div class="modal-body">
+                    <div class="row">
+                        <!-- Customer Information -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-user me-1"></i>Customer Information
+                            </h6>
+                            
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">Full Name <span class="text-danger">*</span></label>
+                                <input type="text" class="form-control" id="fullName" name="fullName" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone">
+                            </div>
+
+                        </div>
+                        
+                        <!-- Account Information -->
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3">
+                                <i class="fas fa-key me-1"></i>Account Information
+                            </h6>
+                            
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                <input type="email" class="form-control" id="email" name="email" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password <span class="text-danger">*</span></label>
+                                <input type="password" class="form-control" id="password" name="password" required>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Role <span class="text-danger">*</span></label>
+                                <select class="form-select" id="role" name="role" required>
+                                    <option value="">Select Role</option>
+                                    <option value="CUSTOMER">Customer</option>
+                                    <option value="EMPLOYEE">Employee</option>
+                                    <option value="ADMIN">Admin</option>
+                                </select>
+                            </div>
+                            
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="status" name="status" checked>
+                                    <label class="form-check-label" for="status">
+                                        Account Active
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-1"></i>Cancel
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-1"></i>Save Customer
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script th:src="@{/js/admin/scripts.js}"></script>
+<script>
+    function confirmDelete(customerId) {
+        if (confirm('Are you sure you want to delete this customer? This action cannot be undone.')) {
+            document.getElementById('deleteForm-' + customerId).submit();
+        }
+    }
+</script>
+</body>
+</html>

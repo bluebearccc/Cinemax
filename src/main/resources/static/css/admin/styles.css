@@ -11241,3 +11241,95 @@ body {
   font-size: 0.75rem;
   border-radius: 0.375rem !important;
 }
+
+/* Custom styles for datatable */
+#datatablesSimple {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+#datatablesSimple th,
+#datatablesSimple td {
+  padding: 12px 15px;
+  text-align: center; /* Căn giữa nội dung */
+  border: 1px solid #ddd; /* Thêm đường viền cho cells */
+  vertical-align: middle;
+}
+
+/* Định dạng độ rộng cho từng cột */
+#datatablesSimple th:nth-child(1), /* ID */
+#datatablesSimple td:nth-child(1) {
+  width: 5%;
+}
+
+#datatablesSimple th:nth-child(2), /* Name */
+#datatablesSimple td:nth-child(2) {
+  width: 20%;
+}
+
+#datatablesSimple th:nth-child(3), /* Email */
+#datatablesSimple td:nth-child(3) {
+  width: 20%;
+}
+
+#datatablesSimple th:nth-child(4), /* Phone */
+#datatablesSimple td:nth-child(4) {
+  width: 15%;
+}
+
+#datatablesSimple th:nth-child(5), /* Address */
+#datatablesSimple td:nth-child(5) {
+  width: 20%;
+}
+
+#datatablesSimple th:nth-child(6), /* Status */
+#datatablesSimple td:nth-child(6) {
+  width: 10%;
+}
+
+#datatablesSimple th:nth-child(7), /* Actions */
+#datatablesSimple td:nth-child(7) {
+  width: 10%;
+}
+
+/* Style cho header */
+#datatablesSimple thead th {
+  background-color: #f8f9fa;
+  font-weight: bold;
+  border-bottom: 2px solid #dee2e6;
+}
+
+/* Style cho các hàng */
+#datatablesSimple tbody tr:nth-of-type(even) {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+#datatablesSimple tbody tr:hover {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+
+/* Style cho status badges */
+#datatablesSimple .badge {
+  padding: 8px 12px;
+  border-radius: 4px;
+  font-weight: 500;
+  width: 80px;
+  display: inline-block;
+}
+
+/* Style cho action buttons */
+#datatablesSimple .btn {
+  padding: 4px 8px;
+  margin: 0 3px;
+}
+
+/* Responsive table */
+@media screen and (max-width: 768px) {
+  .table-responsive {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}

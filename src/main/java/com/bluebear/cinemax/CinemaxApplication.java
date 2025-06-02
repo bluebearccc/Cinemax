@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.main;
+package com.bluebear.cinemax;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

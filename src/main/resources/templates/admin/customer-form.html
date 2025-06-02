@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <meta name="description" content="" />
+  <meta name="author" content="" />
+  <title th:text="${isEdit} ? 'Edit Customer - Cinemax Admin' : 'Add Customer - Cinemax Admin'">Customer Form</title>
+  <link th:href="@{/css/admin/styles.css}" rel="stylesheet" />
+  <script src="https://use.fontawesome.com/releases/v6.3.0/js/all.js" crossorigin="anonymous"></script>
+</head>
+<body class="sb-nav-fixed">
+<nav class="sb-topnav navbar navbar-expand navbar-dark bg-dark">
+  <a class="navbar-brand ps-3" th:href="@{/}">Cinemax</a>
+  <button class="btn btn-link btn-sm order-1 order-lg-0 me-4 me-lg-0" id="sidebarToggle" href="#!"><i class="fas fa-bars"></i></button>
+  <!-- Navbar-->
+  <ul class="navbar-nav ms-auto ms-md-0 me-3 me-lg-4">
+    <li class="nav-item dropdown">
+      <a class="nav-link dropdown-toggle" id="navbarDropdown" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false"><i class="fas fa-user fa-fw"></i></a>
+      <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="navbarDropdown">
+        <li><a class="dropdown-item" th:href="@{/settings}">Settings</a></li>
+        <li><hr class="dropdown-divider" /></li>
+        <li><a class="dropdown-item" th:href="@{/logout}">Logout</a></li>
+      </ul>
+    </li>
+  </ul>
+</nav>
+<div id="layoutSidenav">
+  <div id="layoutSidenav_nav">
+    <nav class="sb-sidenav accordion sb-sidenav-dark" id="sidenavAccordion">
+      <div class="sb-sidenav-menu">
+        <div class="nav">
+          <div class="sb-sidenav-menu-heading">Core</div>
+          <a class="nav-link" th:href="@{/admin}">
+            <div class="sb-nav-link-icon"><i class="fas fa-tachometer-alt"></i></div>
+            Dashboard
+          </a>
+          <div class="sb-sidenav-menu-heading">Interface</div>
+          <a class="nav-link active" th:href="@{/admin/customer}">
+            <div class="sb-nav-link-icon"><i class="fas fa-users"></i></div>
+            Customers
+          </a>
+        </div>
+      </div>
+      <div class="sb-sidenav-footer">
+        <div class="small">Logged in as:</div>
+        Admin User
+      </div>
+    </nav>
+  </div>
+  <div id="layoutSidenav_content">
+    <main>
+      <div class="container-fluid px-4">
+        <h1 class="mt-4" th:text="${isEdit} ? 'Edit Customer' : 'Add New Customer'">Customer Form</h1>
+        <ol class="breadcrumb mb-4">
+          <li class="breadcrumb-item"><a th:href="@{/admin}">Dashboard</a></li>
+          <li class="breadcrumb-item"><a th:href="@{/admin/customer}">Customers</a></li>
+          <li class="breadcrumb-item active" th:text="${isEdit} ? 'Edit' : 'Add'">Form</li>
+        </ol>
+
+        <!-- Customer Form -->
+        <div class="row justify-content-center">
+          <div class="col-lg-8">
+            <div class="card">
+              <div class="card-header">
+                <h5 class="mb-0">
+                  <i class="fas fa-user me-1"></i>
+                  <span th:text="${isEdit} ? 'Edit Customer Information' : 'Add New Customer'">Customer Information</span>
+                </h5>
+              </div>
+              <div class="card-body">
+                <form th:action="${isEdit} ? @{/admin/customer/update} : @{/admin/customer/save}"
+                      th:object="${customer}"
+                      method="post"
+                      novalidate>
+
+                  <!-- Hidden ID field for edit -->
+                  <input th:if="${isEdit}" type="hidden" th:field="*{customerID}" />
+                  <input th:if="${isEdit and customer.account != null}" type="hidden" th:field="*{account.id}" />
+
+                  <div class="row">
+                    <!-- Full Name -->
+                    <div class="col-md-6 mb-3">
+                      <label for="fullName" class="form-label">
+                        Full Name <span class="text-danger">*</span>
+                      </label>
+                      <input type="text"
+                             class="form-control"
+                             id="fullName"
+                             th:field="*{fullName}"
+                             placeholder="Enter full name"
+                             required>
+                      <div class="invalid-feedback">
+                        Please provide a valid full name.
+                      </div>
+                    </div>
+
+                    <!-- Phone -->
+                    <div class="col-md-6 mb-3">
+                      <label for="phone" class="form-label">Phone Number</label>
+                      <input type="tel"
+                             class="form-control"
+                             id="phone"
+                             th:field="*{phone}"
+                             placeholder="e.g., +84 123 456 789">
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <!-- Email -->
+                    <div class="col-md-6 mb-3">
+                      <label for="email" class="form-label">
+                        Email Address <span class="text-danger">*</span>
+                      </label>
+                      <input type="email"
+                             class="form-control"
+                             id="email"
+                             th:field="*{account.email}"
+                             placeholder="Enter email address"
+                             required>
+                      <div class="invalid-feedback">
+                        Please provide a valid email address.
+                      </div>
+                    </div>
+
+                    <!-- Password (only for new customers) -->
+                    <div class="col-md-6 mb-3" th:if="${!isEdit}">
+                      <label for="password" class="form-label">
+                        Password <span class="text-danger">*</span>
+                      </label>
+                      <input type="password"
+                             class="form-control"
+                             id="password"
+                             th:field="*{account.password}"
+                             placeholder="Enter password"
+                             minlength="6"
+                             required>
+                      <div class="invalid-feedback">
+                        Password must be at least 6 characters long.
+                      </div>
+                    </div>
+
+                    <!-- Status (only for edit) -->
+                    <div class="col-md-6 mb-3" th:if="${isEdit}">
+                      <label for="status" class="form-label">Status</label>
+                      <select class="form-select" id="status" th:field="*{account.status}">
+                        <option value="true">Active</option>
+                        <option value="false">Inactive</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <!-- Hidden role field -->
+                  <input type="hidden"
+                         th:field="*{account.role}"
+                         th:value="${isEdit and customer.account != null} ? *{account.role} : 'CUSTOMER'" />
+
+                  <!-- Form Actions -->
+                  <div class="row mt-4">
+                    <div class="col-12">
+                      <hr>
+                      <div class="d-flex justify-content-between">
+                        <a th:href="@{/admin/customer}" class="btn btn-secondary">
+                          <i class="fas fa-arrow-left me-1"></i>
+                          Back to List
+                        </a>
+                        <div>
+                          <button type="reset" class="btn btn-outline-secondary me-2">
+                            <i class="fas fa-undo me-1"></i>
+                            Reset
+                          </button>
+                          <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-save me-1"></i>
+                            <span th:text="${isEdit} ? 'Update Customer' : 'Create Customer'">Save</span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+    <!-- Footer -->
+    <footer class="py-4 bg-light mt-auto">
+      <div class="container-fluid px-4">
+        <div class="d-flex align-items-center justify-content-between small">
+          <div class="text-muted">Copyright &copy; <span th:text="${#dates.year(#dates.createNow())}">2023</span> Cinemax</div>
+          <div>
+            <a th:href="@{/privacy}">Privacy Policy</a>
+            &middot;
+            <a th:href="@{/terms}">Terms &amp; Conditions</a>
+          </div>
+        </div>
+      </div>
+    </footer>
+  </div>
+</div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script th:src="@{/js/admin/scripts.js}"></script>
+
+<script>
+  // Bootstrap form validation
+  (function() {
+    'use strict';
+    window.addEventListener('load', function() {
+      var forms = document.getElementsByClassName('needs-validation');
+      var validation = Array.prototype.filter.call(forms, function(form) {
+        form.addEventListener('submit', function(event) {
+          if (form.checkValidity() === false) {
+            event.preventDefault();
+            event.stopPropagation();
+          }
+          form.classList.add('was-validated');
+        }, false);
+      });
+    }, false);
+  })();
+</script>
+</body>
+</html>
