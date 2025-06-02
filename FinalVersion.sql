@@ -1,6 +1,6 @@
-﻿CREATE DATABASE a;
+﻿CREATE DATABASE CINEMAX;
 
-USE a;
+USE CINEMAX;
 
 
 CREATE TABLE Account (
@@ -97,7 +97,7 @@ CREATE TABLE Schedule (
 CREATE TABLE Employee (
   EmployeeID int IDENTITY PRIMARY KEY,
   Position   varchar(255) CHECK (Position IN ('Admin', 'Staff', 'Cashier', 'Customer Officer')),
-  Status     varchar(20) NOT NULL,
+  Status     varchar(20) CHECK(Status IN ('Active', 'Inactive')) NOT NULL,
   AccountID  int NOT NULL,
   TheaterID  int NOT NULL,
   AdminID  int NULL,
@@ -141,6 +141,7 @@ CREATE TABLE Theater_Stock (
   Quantity        int NOT NULL,
   UnitPrice       decimal(10, 2) NOT NULL,
   Image           varchar(255) NOT NULL,
+  Status          varchar(20) CHECK(Status IN ('Active', 'Inactive')) NOT NULL,
   FOREIGN KEY (TheaterID) REFERENCES Theater(TheaterID)
 );
 
@@ -285,12 +286,12 @@ INSERT INTO Detail_Seat (InvoiceID, SeatID, Status, ScheduleID) VALUES (2, 2, 'B
 INSERT INTO Detail_Seat (InvoiceID, SeatID, Status, ScheduleID) VALUES (3, 3, 'Booked', 3);
 
 -- Theater_Stock
-INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image)
-VALUES (1, 'Popcorn 1', 10, 20.00, 'popcorn1.jpg');
-INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image)
-VALUES (1, 'Popcorn 2', 20, 20.00, 'popcorn2.jpg');
-INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image)
-VALUES (1, 'Popcorn 3', 30, 20.00, 'popcorn3.jpg');
+INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image, Status)
+VALUES (1, 'Popcorn 1', 10, 20.00, 'popcorn1.jpg', 'Active');
+INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image, Status)
+VALUES (1, 'Popcorn 2', 20, 20.00, 'popcorn2.jpg', 'Active');
+INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image, Status)
+VALUES (1, 'Popcorn 3', 30, 20.00, 'popcorn3.jpg', 'Active');
 
 -- Detail_FD
 INSERT INTO Detail_FD (InvoiceID, Theater_StockID, Quantity, TotalPrice)
