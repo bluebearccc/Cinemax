@@ -1,13 +1,13 @@
-﻿CREATE DATABASE a;
+﻿CREATE DATABASE Cinemax;
 
-USE a;
+USE Cinemax;
 
 
 CREATE TABLE Account (
   AccountID int IDENTITY PRIMARY KEY,
   Email     varchar(50) NOT NULL UNIQUE,
-  Password  varchar(50) NOT NULL,
-  Role      varchar(50) CHECK (Role IN ('Admin', 'Customer', 'Staff', 'Cashier', 'Customer Officer')),
+  [Password]  varchar(50), -- password cho null nếu người dùng đăng nhập bằng Oauth2
+  [Role]      varchar(50) CHECK ([Role] IN ('Admin', 'Customer', 'Staff', 'Cashier', 'Customer_Officer')),
   Status bit DEFAULT 0
 );
 
@@ -61,7 +61,6 @@ CREATE TABLE Theater (
   Address      nvarchar(100) NOT NULL,
   Image        varchar(255) NOT NULL,
   RoomQuantity int NOT NULL,
-  AdminID   int NULL -- để tránh vòng lặp, thêm FOREIGN KEY ở cuối
 );
 
 CREATE TABLE Room (
@@ -96,8 +95,8 @@ CREATE TABLE Schedule (
 
 CREATE TABLE Employee (
   EmployeeID int IDENTITY PRIMARY KEY,
-  Position   varchar(255) CHECK (Position IN ('Admin', 'Staff', 'Cashier', 'Customer Officer')),
-  Status     varchar(20) NOT NULL,
+  Position   varchar(255) CHECK (Position IN ('Admin', 'Staff', 'Cashier', 'Customer_Officer')),
+  Status     varchar(20) CHECK(Status IN ('Active', 'In_Active')),
   AccountID  int NOT NULL,
   TheaterID  int NOT NULL,
   AdminID  int NULL,
@@ -256,8 +255,8 @@ INSERT INTO Schedule (StartTime, EndTime, MovieID, RoomID)
 VALUES (DATEADD(DAY, 3, GETDATE()), DATEADD(HOUR, 2, DATEADD(DAY, 3, GETDATE())), 3, 3);
 
 -- Thêm tài khoản cho nhân viên
-INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee5@example.com', 'pass5', 'Staff', 1);
-INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee6@example.com', 'pass6', 'Staff', 1);
+INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee5@example.com', 'pass5', 'Admin', 1);
+INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee6@example.com', 'pass6', 'Cashier', 1);
 INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee7@example.com', 'pass7', 'Staff', 1);
 
 -- Employee
