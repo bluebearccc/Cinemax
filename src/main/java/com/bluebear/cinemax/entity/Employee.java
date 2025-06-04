@@ -1,60 +1,45 @@
 package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Nationalized;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
+@Table(name = "Employee")
 public class Employee {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "EmployeeID")
+    private Integer employeeId;
 
-    @Column(name = "first_name")
-    private String first_name;
+    @Column(name = "Position", length = 255, nullable = false)
+    private String position;
 
-    @Column(name = "last_name")
-    private String last_name;
+    @Column(name = "Status", length = 50, nullable = false)
+    private String status;
 
-    @Column(name = "email")
-    private String email;
+    @OneToOne
+    @JoinColumn(name = "AccountID", nullable = false)
+    private Account account;
 
-    public Employee() {
-    }
+    //    @ManyToOne(fetch = FetchType.LAZY)
+//    @JoinColumn(name = "TheaterID", nullable = false)
+//    private Theater theater;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TheaterID" , nullable = false, referencedColumnName = "TheaterID")
+    private Theater theater;
 
-    public Employee(String first_name, String last_name, String email) {
-        this.first_name = first_name;
-        this.last_name = last_name;
-        this.email = email;
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "AdminID")
+    private Employee admin;
 
-    public int getId() {
-        return id;
-    }
+    @Nationalized
+    @Column(name = "FullName", length = 100, nullable = false)
+    private String fullName;
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getFirst_name() {
-        return first_name;
-    }
-
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
-    }
-
-    public String getLast_name() {
-        return last_name;
-    }
-
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
 }
