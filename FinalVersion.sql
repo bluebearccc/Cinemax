@@ -61,7 +61,6 @@ CREATE TABLE Theater (
   Address      nvarchar(100) NOT NULL,
   Image        varchar(255) NOT NULL,
   RoomQuantity int NOT NULL,
-  AdminID   int NULL -- để tránh vòng lặp, thêm FOREIGN KEY ở cuối
 );
 
 CREATE TABLE Room (
@@ -106,10 +105,6 @@ CREATE TABLE Employee (
   FOREIGN KEY (TheaterID) REFERENCES Theater(TheaterID),
   FOREIGN KEY (AdminID) REFERENCES Employee(EmployeeID)
 );
-
--- Thêm FK ManagerID vào Theater (sau khi Customer đã có)
-ALTER TABLE Theater
-ADD CONSTRAINT FK_Theater_Manager FOREIGN KEY (AdminID) REFERENCES Employee(EmployeeID);
 
 CREATE TABLE Invoice (
   InvoiceID   int IDENTITY PRIMARY KEY,
@@ -234,8 +229,8 @@ INSERT INTO Promotion (PromotionCode, Discount, StartTime, EndTime, Quantity, Ac
 VALUES ('PROMO2', 20, GETDATE(), DATEADD(DAY, 30, GETDATE()), 120, 'Available');
 
 -- Theater
-INSERT INTO Theater (TheaterName, Address, Image, RoomQuantity) VALUES ('Theater 0', 'Address 0', 'theater0.jpg', 5);
-INSERT INTO Theater (TheaterName, Address, Image, RoomQuantity) VALUES ('Theater 1', 'Address 1', 'theater1.jpg', 6);
+INSERT INTO Theater (TheaterName, Address, Image, RoomQuantity) VALUES ('Theater 0', 'Address 0', 'theater0.jpg', 3);
+INSERT INTO Theater (TheaterName, Address, Image, RoomQuantity) VALUES ('Theater 1', 'Address 1', 'theater1.jpg', 3);
 
 -- Room
 INSERT INTO Room (TheaterID, Name, Collumn, Row, TypeOfRoom) VALUES (1, 'Room1', 10, 10, 'Single');
