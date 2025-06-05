@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>OTP Verification</title>
+    <link th:href="@{/css/common/otp-verify.css}" rel="stylesheet">
+</head>
+<body>
+<div class="bg-animation">
+    <div class="floating-shape shape-1"></div>
+    <div class="floating-shape shape-2"></div>
+    <div class="floating-shape shape-3"></div>
+    <div class="floating-shape shape-4"></div>
+</div>
+
+<div class="container">
+    <div class="header-section">
+        <div class="otp-icon">
+            <img th:src="@{/images/otplogo.png}" alt="Security Icon">
+        </div>
+
+        <h1>OTP Verification</h1>
+    </div>
+
+    <!-- Form OTP -->
+    <form class="otp-form" id="otpForm" th:action="@{/otp}" method="POST">
+        <input id="usermail" type="hidden" name="email" th:value="${email}">
+        <div class="otp-input-container">
+            <input type="number"
+                   class="otp-input"
+                   id="otpInput"
+                   name="otp"
+                   maxlength="6"
+                   minlength="6"
+                   placeholder="Enter 6-digit OTP code"
+                   autocomplete="off"
+                   required>
+        <p class="error-message" th:text="${error}" id="confirmError"></p>
+        </div>
+        <button type="submit" class="verify-btn" id="verifyBtn">
+            Verify OTP
+        </button>
+    </form>
+
+    <!-- Nút trở về login -->
+    <a th:href="@{/login}" class="back-to-login-btn">
+        ← Back to Login
+    </a>
+
+    <div class="resend-section">
+        <p class="resend-text">Didn't receive the OTP?</p>
+        <button class="resend-btn" id="resendBtn" type="button" onclick="resendOtp()">
+            Resend Code
+        </button>
+        <p id="resendMessage" style="display: none; color: green; margin-top: 10px;">
+            OTP Sended!
+        </p>
+    </div>
+
+    <div class="help-text">
+        <strong>💡 Note:</strong>
+        The OTP code is valid for 5 minutes. If you don't receive the email, please check your spam folder or click "Resend Code".
+    </div>
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+    let email = document.getElementById("usermail").value;
+
+    function resendOtp() {
+        console.log('hehehehe');
+        $.ajax({
+            url: "/resendotp",
+            type: "GET",
+            data: {
+                email: email,
+            },
+            success: function (data) {
+                document.getElementById("resendMessage").style.display = "block";
+            },
+            error: function (xhr, status, error) {
+                alert("something went wrong " + error);
+            }
+        });
+    }
+
+    setTimeout(function () {
+        document.getElementById("resendMessage").style.display = "none";
+    }, 5000);
+
+</script>
+</body>
+</html>

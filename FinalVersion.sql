@@ -1,13 +1,13 @@
-﻿CREATE DATABASE Cinemax;
+﻿CREATE DATABASE CINEMAX;
 
-USE Cinemax;
+USE CINEMAX;
 
 
 CREATE TABLE Account (
   AccountID int IDENTITY PRIMARY KEY,
   Email     varchar(50) NOT NULL UNIQUE,
-  [Password]  varchar(50), -- password cho null nếu người dùng đăng nhập bằng Oauth2
-  [Role]      varchar(50) CHECK ([Role] IN ('Admin', 'Customer', 'Staff', 'Cashier', 'Customer_Officer')),
+  Password  varchar(50) NOT NULL,
+  Role      varchar(50) CHECK (Role IN ('Admin', 'Customer', 'Staff', 'Cashier', 'Customer Officer')),
   Status bit DEFAULT 0
 );
 
@@ -95,8 +95,8 @@ CREATE TABLE Schedule (
 
 CREATE TABLE Employee (
   EmployeeID int IDENTITY PRIMARY KEY,
-  Position   varchar(255) CHECK (Position IN ('Admin', 'Staff', 'Cashier', 'Customer_Officer')),
-  Status     varchar(20) CHECK(Status IN ('Active', 'In_Active')),
+  Position   varchar(255) CHECK (Position IN ('Admin', 'Staff', 'Cashier', 'Customer Officer')),
+  Status     varchar(20) CHECK(Status IN ('Active', 'Inactive')) NOT NULL,
   AccountID  int NOT NULL,
   TheaterID  int NOT NULL,
   AdminID  int NULL,
@@ -105,10 +105,6 @@ CREATE TABLE Employee (
   FOREIGN KEY (TheaterID) REFERENCES Theater(TheaterID),
   FOREIGN KEY (AdminID) REFERENCES Employee(EmployeeID)
 );
-
--- Thêm FK ManagerID vào Theater (sau khi Customer đã có)
-ALTER TABLE Theater
-ADD CONSTRAINT FK_Theater_Manager FOREIGN KEY (AdminID) REFERENCES Employee(EmployeeID);
 
 CREATE TABLE Invoice (
   InvoiceID   int IDENTITY PRIMARY KEY,
@@ -140,6 +136,7 @@ CREATE TABLE Theater_Stock (
   Quantity        int NOT NULL,
   UnitPrice       decimal(10, 2) NOT NULL,
   Image           varchar(255) NOT NULL,
+  Status          varchar(20) CHECK(Status IN ('Active', 'Inactive')) NOT NULL,
   FOREIGN KEY (TheaterID) REFERENCES Theater(TheaterID)
 );
 
@@ -232,8 +229,8 @@ INSERT INTO Promotion (PromotionCode, Discount, StartTime, EndTime, Quantity, Ac
 VALUES ('PROMO2', 20, GETDATE(), DATEADD(DAY, 30, GETDATE()), 120, 'Available');
 
 -- Theater
-INSERT INTO Theater (TheaterName, Address, Image, RoomQuantity) VALUES ('Theater 0', 'Address 0', 'theater0.jpg', 5);
-INSERT INTO Theater (TheaterName, Address, Image, RoomQuantity) VALUES ('Theater 1', 'Address 1', 'theater1.jpg', 6);
+INSERT INTO Theater (TheaterName, Address, Image, RoomQuantity) VALUES ('Theater 0', 'Address 0', 'theater0.jpg', 3);
+INSERT INTO Theater (TheaterName, Address, Image, RoomQuantity) VALUES ('Theater 1', 'Address 1', 'theater1.jpg', 3);
 
 -- Room
 INSERT INTO Room (TheaterID, Name, Collumn, Row, TypeOfRoom) VALUES (1, 'Room1', 10, 10, 'Single');
@@ -255,8 +252,8 @@ INSERT INTO Schedule (StartTime, EndTime, MovieID, RoomID)
 VALUES (DATEADD(DAY, 3, GETDATE()), DATEADD(HOUR, 2, DATEADD(DAY, 3, GETDATE())), 3, 3);
 
 -- Thêm tài khoản cho nhân viên
-INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee5@example.com', 'pass5', 'Admin', 1);
-INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee6@example.com', 'pass6', 'Cashier', 1);
+INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee5@example.com', 'pass5', 'Staff', 1);
+INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee6@example.com', 'pass6', 'Staff', 1);
 INSERT INTO Account (Email, Password, Role, Status) VALUES ('employee7@example.com', 'pass7', 'Staff', 1);
 
 -- Employee
@@ -284,12 +281,12 @@ INSERT INTO Detail_Seat (InvoiceID, SeatID, Status, ScheduleID) VALUES (2, 2, 'B
 INSERT INTO Detail_Seat (InvoiceID, SeatID, Status, ScheduleID) VALUES (3, 3, 'Booked', 3);
 
 -- Theater_Stock
-INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image)
-VALUES (1, 'Popcorn 1', 10, 20.00, 'popcorn1.jpg');
-INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image)
-VALUES (1, 'Popcorn 2', 20, 20.00, 'popcorn2.jpg');
-INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image)
-VALUES (1, 'Popcorn 3', 30, 20.00, 'popcorn3.jpg');
+INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image, Status)
+VALUES (1, 'Popcorn 1', 10, 20.00, 'popcorn1.jpg', 'Active');
+INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image, Status)
+VALUES (1, 'Popcorn 2', 20, 20.00, 'popcorn2.jpg', 'Active');
+INSERT INTO Theater_Stock (TheaterID, FoodName, Quantity, UnitPrice, Image, Status)
+VALUES (1, 'Popcorn 3', 30, 20.00, 'popcorn3.jpg', 'Active');
 
 -- Detail_FD
 INSERT INTO Detail_FD (InvoiceID, Theater_StockID, Quantity, TotalPrice)

@@ -2,6 +2,7 @@ package com.bluebear.cinemax.controller;
 
 import com.bluebear.cinemax.dto.AccountDTO;
 import com.bluebear.cinemax.dto.CustomerDTO;
+import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
 import com.bluebear.cinemax.service.AccountService;
 import com.bluebear.cinemax.service.CustomerService;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -56,7 +58,7 @@ public class GoogleOAuthController {
     }
 
     @GetMapping("/callback")
-    public String googleCallback(@RequestParam String code, HttpSession session, Model model) {
+    public String googleCallback(@RequestParam String code, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         // B1: Lấy access_token
         String tokenUrl = "https://oauth2.googleapis.com/token";
 
@@ -93,7 +95,7 @@ public class GoogleOAuthController {
         AccountDTO account = accountService.findAccountByEmail(email);
         if (account == null) {
             String password = UUID.randomUUID().toString();
-            account = new AccountDTO(email, password, Role.Customer, true);
+            account = new AccountDTO(email, password, Role.Customer, Account_Status.Active);
             accountService.save(account);
 
             account = accountService.findAccountByEmail(email);
@@ -102,6 +104,9 @@ public class GoogleOAuthController {
             customerService.save(customer);
 
             session.setAttribute("customer", customer);
+        } else if (account.getStatus() == Account_Status.Banned) {
+            redirectAttributes.addFlashAttribute("error", "Opps! this account has been banned.");
+            return "redirect:/login";
         } else {
             CustomerDTO customer = customerService.getUserByAccountID(account.getId());
             session.setAttribute("customer", customer);

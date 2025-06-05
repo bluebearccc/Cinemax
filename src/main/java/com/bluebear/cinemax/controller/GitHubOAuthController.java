@@ -2,6 +2,7 @@ package com.bluebear.cinemax.controller;
 
 import com.bluebear.cinemax.dto.AccountDTO;
 import com.bluebear.cinemax.dto.CustomerDTO;
+import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
 import com.bluebear.cinemax.service.AccountService;
 import com.bluebear.cinemax.service.CustomerService;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.IOException;
 import java.net.URLEncoder;
@@ -58,7 +60,7 @@ public class GitHubOAuthController {
     }
 
     @GetMapping("/callback")
-    public String githubCallback(@RequestParam String code, Model model, HttpSession session) {
+    public String githubCallback(@RequestParam String code, Model model, HttpSession session, RedirectAttributes redirectAttributes) {
         String accessTokenUrl = "https://github.com/login/oauth/access_token";
 
         HttpHeaders headers = new HttpHeaders();
@@ -71,6 +73,7 @@ public class GitHubOAuthController {
 
         HttpEntity<?> request = new HttpEntity<>(body, headers);
         ResponseEntity<Map> response = restTemplate.postForEntity(accessTokenUrl, request, Map.class);
+        assert response.getBody() != null;
         String accessToken = (String) response.getBody().get("access_token");
 
         HttpHeaders userHeaders = new HttpHeaders();
@@ -107,7 +110,7 @@ public class GitHubOAuthController {
         AccountDTO account = accountService.findAccountByEmail(email);
         if (account == null) {
             String password = UUID.randomUUID().toString();
-            account = new AccountDTO(email, password, Role.Customer, true);
+            account = new AccountDTO(email, password, Role.Customer, Account_Status.Active);
             accountService.save(account);
 
             account = accountService.findAccountByEmail(email);
@@ -116,6 +119,9 @@ public class GitHubOAuthController {
             customerService.save(customer);
 
             session.setAttribute("customer", customer);
+        } else if (account.getStatus() == Account_Status.Banned) {
+            redirectAttributes.addFlashAttribute("error", "Opps! this account has been banned.");
+            return "redirect:/login";
         } else {
             CustomerDTO customer = customerService.getUserByAccountID(account.getId());
             session.setAttribute("customer", customer);

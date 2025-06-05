@@ -4,48 +4,79 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link th:href="@{/css/common/loginStyleSheet.css}" rel="stylesheet">
+    <link th:href="@{/css/common/login-stylesheet.css}" rel="stylesheet">
 </head>
 <body>
-<div class="login-container">
-    <div class="login-left">
-        <h1 class="mb-4">Welcome back!</h1>
-        <form th:action="@{/login}" method="POST">
-            <div class="mb-3">
-                <label for="email" class="form-label">Email</label>
-                <input type="email" class="form-control" id="email" name="email" placeholder="Enter your email address">
+    <div class="header">
+        <div class="logo">
+            <div class="logo-icon">C</div>
+            <span class="logo-text">CinemaMax</span>
+        </div>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#home">HOME</a></li>
+                <li><a href="#movies">MOVIES</a></li>
+                <li><a href="#theaters">THEATERS</a></li>
+                <li><a href="#blog">BLOG</a></li>
+                <li><a href="#contact">CONTACT</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <div class="login-container">
+        <div class="login-header">
+            <h1 class="login-title">Welcome Back</h1>
+            <p class="login-subtitle">Sign in to continue to CinemaMax</p>
+        </div>
+
+        <form id="loginForm" th:action="@{/login}" method="POST">
+            <div class="form-group">
+                <label for="email" class="form-label">Email Address</label>
+                <input
+                        type="email"
+                        id="email"
+                        name="email"
+                        class="form-input"
+                        placeholder="Enter your email"
+                        required
+                >
             </div>
-            <div class="mb-3">
+
+            <div class="form-group">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" name="password" placeholder="Enter your password">
-            </div>
-            <div class="mb-3 text-end" style="display: flex; flex-direction: row; justify-content: space-between">
-                <p th:text="${error}" style="color: red; display: inline"></p>
-                <a href="#" class="text-decoration-none">Forgot your password?</a>
-            </div>
-            <button type="submit" class="btn btn-login mb-3">Login</button>
-
-            <div class="text-center my-2">or</div>
-
-            <div class="d-flex gap-2 mb-3">
-
-                <a th:href="@{oauth/google/login}" type="button" class="btn social-btn w-100">
-                    <img th:src="@{/images/google.png}" alt="Google">Google
-                </a>
-                <a th:href="@{oauth/github/login}" type="button" class="btn social-btn w-100">
-                    <img th:src="@{/images/github.png}" alt="Github">Github
-                </a>
+                <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        class="form-input"
+                        placeholder="Enter your password"
+                        required
+                >
             </div>
 
-            <div class="text-center">
-                <p>Don't have an account?</p>
-                <a href="#" class="btn btn-light w-100">Create account</a>
+            <div class="forgot-password">
+                <p class="error" th:text="${error}"></p>
+                <a th:href="@{/forgotpassword}" id="forgotPasswordLink">Forgot Password?</a>
             </div>
+
+            <button type="submit" class="login-btn" id="loginBtn">
+                Sign In
+            </button>
         </form>
+
+        <div class="social-buttons">
+            <a th:href="@{oauth/google/login}" class="social-btn google" id="googleLogin" title="Login with Google">
+                <img th:src="@{/images/google.jpg}" alt="Google"/>
+            </a>
+            <a th:href="@{oauth/github/login}" class="social-btn github" id="githubLogin" title="Login with GitHub">
+                <img th:src="@{/images/github.png}" alt="GitHub"/>
+            </a>
+        </div>
+
+        <div class="create-account">
+            Don't have an account?
+            <a th:href="@{/register}" id="createAccountLink">Create Account</a>
+        </div>
     </div>
-    <div class="login-right">
-    </div>
-</div>
 </body>
 </html>
