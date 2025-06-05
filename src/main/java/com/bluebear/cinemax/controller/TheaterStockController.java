@@ -1,24 +1,31 @@
 package com.bluebear.cinemax.controller;
 
-import com.bluebear.cinemax.service.*;
 import com.bluebear.cinemax.entity.Detail_FD;
 import com.bluebear.cinemax.entity.Employee;
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.entity.TheaterStock;
+import com.bluebear.cinemax.service.DetailFD_ServiceImpl;
+import com.bluebear.cinemax.service.EmployeeServiceImpl;
+import com.bluebear.cinemax.service.TheaterServiceImpl;
+import com.bluebear.cinemax.service.TheaterStockServiceImpl;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
-
+import com.bluebear.cinemax.utils.ExcelGeneratoForDetailItemSold;
 @Controller
 @RequestMapping("/theater_stock")
 public class TheaterStockController {
@@ -43,7 +50,7 @@ public class TheaterStockController {
         model.addAttribute("theaterStocks", searchResults);
         model.addAttribute("size", searchResults.size());
         model.addAttribute("theaterName", e.getTheater().getTheaterName());
-        return "staff/tables";
+        return "staff/list";
     }
 
     @PostMapping("/showFormForUpdate")
@@ -53,24 +60,26 @@ public class TheaterStockController {
             Employee e = employeeService.getEmployeeById(2);
             model.addAttribute("employee", e);
             model.addAttribute("theaterStock", theaterStock);
-            return "staff/add-new-item";
+            return "staff/add_edit";
         }
         return "redirect:/theater_stock";
     }
 
     @GetMapping("/add_stock")
     public String showForm(Model theModel) {
+        boolean isAdd = true;
         Employee e = employeeService.getEmployeeById(2);
         theModel.addAttribute("employee", e);
         theModel.addAttribute("theaterStock", new TheaterStock());
-        return "staff/add-new-item";
+        theModel.addAttribute("add", isAdd);
+        return "staff/add_edit";
     }
 
     @PostMapping("/delete")
     public String delete(@RequestParam("stockId") Integer stockId, Model theModel,
                          RedirectAttributes redirectAttributes) {
         TheaterStock theaterStock = theaterStockServiceImpl.findById(stockId);
-        String message = "Canot delete because item is sold";
+        String message = "Canot delete because this item is sold";
         if(theaterStockServiceImpl.isDeleted(stockId)) {
             if (theaterStock.getImage() != null && !theaterStock.getImage().isEmpty()) {
                 try {
@@ -134,7 +143,7 @@ public class TheaterStockController {
         theModel.addAttribute("theaterStocks", theaterStockServiceImpl.findByTheaterId(e.getTheater().getTheaterId()));
         theModel.addAttribute("size", theaterStockServiceImpl.findByTheaterId(e.getTheater().getTheaterId()).size());
         theModel.addAttribute("theaterName", theaterStockServiceImpl.findByTheaterId(e.getTheater().getTheaterId()).get(0).getTheater().getTheaterName());
-        return "staff/tables";
+        return "staff/list";
     }
 
     @GetMapping("/item_sold_details")
@@ -143,6 +152,28 @@ public class TheaterStockController {
         theModel.addAttribute("employee", e);
         List<Detail_FD> detail_FDs = detailFDService.findByTheaterStockID(stockId);
         theModel.addAttribute("detail_FDs", detail_FDs);
-        return "staff/view-items-sold";
+        return "staff/item-sold";
     }
+
+    @GetMapping("/getItemData")
+    @ResponseBody
+    public TheaterStock getItemData(@RequestParam("stockId") Integer stockId) {
+        return theaterStockServiceImpl.findById(stockId);
+    }
+
+    @GetMapping("/export_to_excel")
+    public void exportIntoExcelFile(@RequestParam("stockId") Integer stockId, HttpServletResponse response) throws IOException {
+        response.setContentType("application/octet-stream");
+        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+        String currentDateTime = dateFormatter.format(new Date());
+
+        String headerKey = "Content-Disposition";
+        String headerValue = "attachment; filename=item_sold_details_" + currentDateTime + ".xlsx";
+        response.setHeader(headerKey, headerValue);
+
+        List <Detail_FD> listFDs = detailFDService.findByTheaterStockID(stockId);
+        ExcelGeneratoForDetailItemSold generator = new ExcelGeneratoForDetailItemSold(listFDs);
+        generator.generateExcelFile(response);
+    }
+
 }
