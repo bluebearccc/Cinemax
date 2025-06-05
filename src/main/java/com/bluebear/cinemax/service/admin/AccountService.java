@@ -10,4 +10,5 @@ public interface AccountService {
     Optional<Account> findByEmail(String email);
     List<Account> findAll();
     void deleteById(Integer id);
+    void updateStatus(Integer id, boolean status);
 }

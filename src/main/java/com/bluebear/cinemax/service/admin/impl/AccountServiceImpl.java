@@ -3,6 +3,7 @@ package com.bluebear.cinemax.service.admin.impl;
 import com.bluebear.cinemax.entity.Account;
 import com.bluebear.cinemax.repository.admin.AccountRepository;
 import com.bluebear.cinemax.service.admin.AccountService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -38,5 +39,11 @@ public class AccountServiceImpl implements AccountService {
     @Override
     public void deleteById(Integer id) {
         accountRepository.deleteById(id);
+    }
+
+    @Transactional
+    @Override
+    public void updateStatus(Integer id, boolean status) {
+        accountRepository.updateAccountStatus(id, status);
     }
 }

@@ -15,7 +15,7 @@ public class Account {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "AccountID")
-    private int id;
+    private Integer id;
 
     @Column(name = "Email", nullable = false, unique = true, length = 50)
     private String email;

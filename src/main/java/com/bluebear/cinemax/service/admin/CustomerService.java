@@ -12,4 +12,8 @@ public interface CustomerService {
     Customer save(Customer customer);
     Optional<Customer> findById(Integer id);
     void deleteById(Integer id);
+    List<Customer> findByNameContainingOrderByFullNameAsc(String keyword);
+    List<Customer> findByNameContainingOrderByFullNameDesc(String keyword);
+    public Customer findCustomerById(Integer id);
+
 }
