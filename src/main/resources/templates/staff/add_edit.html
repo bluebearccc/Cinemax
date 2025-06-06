@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food And Drink</title>
+    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 28px;
+        }
+
+        .breadcrumb {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        .breadcrumb a {
+            color: #667eea;
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .form-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .form-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 40px;
+            margin-bottom: 30px;
+        }
+
+        .form-column {
+            flex: 1;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .form-input:disabled {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .radio-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 8px;
+        }
+
+        .radio-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .radio-item input[type="radio"] {
+            margin: 0;
+        }
+
+        .radio-item label {
+            margin: 0;
+            cursor: pointer;
+        }
+
+        .image-upload-area {
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            padding: 40px;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s;
+            margin-top: 10px;
+        }
+
+        .image-upload-area:hover {
+            border-color: #667eea;
+        }
+
+        .image-upload-area.dragover {
+            border-color: #667eea;
+            background-color: #f8f9ff;
+        }
+
+        .current-image {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-bottom: 10px;
+        }
+
+        .image-preview {
+            margin-top: 10px;
+        }
+
+        .image-preview img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .form-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+            min-width: 100px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .error-message {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+
+        .employee-info {
+            background: #f8f9fa;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: 200px;
+            }
+
+            .main-content {
+                margin-left: 200px;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .form-buttons {
+                flex-direction: column;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .sidebar {
+                width: 100%;
+                height: auto;
+                position: relative;
+            }
+
+            .main-content {
+                margin-left: 0;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="logo">
+        <h6 th:text="${employee.getFullName()}">Employee Name</h6>
+    </div>
+    <ul class="nav-menu">
+        <li class="nav-item">
+            <a href="#" th:href="@{/theater_stock}" class="nav-link active">
+                <span class="icon">🍿</span>
+                 Food and Drinks
+            </a>
+        </li>
+    </ul>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="breadcrumb">
+                <a href="#" th:href="@{/theater_stock}">Food and Drinks</a> >
+                <span th:text="${add} ? 'Add New Item' : 'Update'"></span>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <div class="form-header">
+            <p class="form-subtitle">Complete the item information</p>
+        </div>
+
+        <form th:action="@{/theater_stock/process_stock}"
+              th:object="${theaterStock}"
+              method="post"
+              enctype="multipart/form-data"
+              id="stockForm"
+              onsubmit="return validateForm()">
+
+            <input type="hidden" th:field="*{stockId}">
+            <input type="hidden" name="theaterID" th:value="${employee.theater.theaterId}">
+
+            <div class="form-row">
+                <!-- Left Column - General Information -->
+                <div class="form-column">
+                    <!-- Theater -->
+                    <div class="form-group">
+                        <label class="form-label">Theater</label>
+                        <input type="text" class="form-input" th:value="${employee.theater.getTheaterName()}" disabled>
+                    </div>
+
+                    <!-- Name -->
+                    <div class="form-group">
+                        <label class="form-label">Name</label>
+                        <input type="text"
+                               class="form-input"
+                               th:field="*{itemName}"
+                               maxlength="20"
+                               placeholder="Enter item name"
+                               required>
+                        <div class="error-message" id="nameError"></div>
+                    </div>
+
+                    <!-- Quantity -->
+                    <div class="form-group">
+                        <label class="form-label">Quantity</label>
+                        <input type="number"
+                               class="form-input"
+                               th:field="*{quantity}"
+                               min="0"
+                               step="1"
+                               placeholder="Enter quantity"
+                               required>
+                        <div class="error-message" id="quantityError"></div>
+                    </div>
+
+                    <!-- Price -->
+                    <div class="form-group">
+                        <label class="form-label">Price</label>
+                        <input type="number"
+                               step="0.01"
+                               class="form-input"
+                               th:field="*{price}"
+                               min="0"
+                               max="99999999.99"
+                               placeholder="Enter price"
+                               required>
+                        <div class="error-message" id="priceError"></div>
+                    </div>
+
+                    <!-- Status -->
+                    <div class="form-group">
+                        <label class="form-label">Set Status</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio"
+                                       id="statusActive"
+                                       name="status"
+                                       value="Active"
+                                       th:field="*{status}"
+                                       th:checked="${theaterStock.status == 'Active'}"
+                                       checked>
+                                <label for="statusActive">Active</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio"
+                                       id="statusInactive"
+                                       name="status"
+                                       value="Inactive"
+                                       th:field="*{status}"
+                                       th:checked="${theaterStock.status == 'Inactive'}">
+                                <label for="statusInactive">Inactive</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="statusError"></div>
+                    </div>
+                </div>
+
+                <!-- Right Column - Image Upload -->
+                <div class="form-column">
+                    <div class="form-group">
+                        <label class="form-label">Current Image:</label>
+                        <img th:if="${theaterStock.image}"
+                             th:src="${theaterStock.image}"
+                             class="current-image"
+                             alt="Current Image">
+                        <input type="hidden" th:field="*{image}">
+                    </div>
+
+                    <!-- Image Upload -->
+                    <div class="form-group">
+                        <label class="form-label">Upload New Image</label>
+                        <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+                            <div>📸</div>
+                            <p>Click to upload or drag and drop</p>
+                            <small>PNG, JPG, GIF up to 10MB</small>
+                        </div>
+                        <input type="file"
+                               id="imageInput"
+                               name="imageInput"
+                               accept="image/*"
+                               style="display: none;"
+                               onchange="previewImage(this)">
+                        <div id="imagePreview" class="image-preview"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Buttons -->
+            <div class="form-buttons">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <button type="reset" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                <a th:href="@{/theater_stock}" class="btn btn-danger">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Image preview functionality
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                input.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Reset form functionality
+    function resetForm() {
+        document.getElementById('stockForm').reset();
+        document.getElementById('imagePreview').innerHTML = '';
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        document.getElementById('statusActive').checked = true;
+    }
+
+    // Validation function
+    function validateForm() {
+        let isValid = true;
+
+        // Clear previous error messages
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+        // Get form values
+        const name = document.querySelector('input[name="itemName"]').value.trim();
+        const quantity = document.querySelector('input[name="quantity"]').value;
+        const price = document.querySelector('input[name="price"]').value;
+        const status = document.querySelector('input[name="status"]:checked');
+        const imageInput = document.getElementById('imageInput');
+        const currentImage = document.querySelector('input[name="image"]').value;
+
+        // Validate Name
+        const nameRegex = /^[a-zA-Z0-9\s]+$/;
+        if (!name) {
+            document.getElementById('nameError').textContent = 'Name is required';
+            isValid = false;
+        } else if (!nameRegex.test(name)) {
+            document.getElementById('nameError').textContent = 'Name can only contain letters, numbers, and spaces';
+            isValid = false;
+        } else if (name.length > 20) {
+            document.getElementById('nameError').textContent = 'Name cannot exceed 20 characters';
+            isValid = false;
+        }
+
+        // Validate Quantity
+        if (!quantity) {
+            document.getElementById('quantityError').textContent = 'Quantity is required';
+            isValid = false;
+        } else if (!/^\d+$/.test(quantity) || parseInt(quantity) <= 0) {
+            document.getElementById('quantityError').textContent = 'Quantity must be a positive whole number';
+            isValid = false;
+        }
+
+        // Validate Price
+        if (!price) {
+            document.getElementById('priceError').textContent = 'Price is required';
+            isValid = false;
+        } else if (price < 0) {
+            document.getElementById('priceError').textContent = 'Price must be a positive number';
+            isValid = false;
+        } else if (price > 99999999.99) {
+            document.getElementById('priceError').textContent = 'Price cannot exceed 99,999,999.99';
+            isValid = false;
+        }
+
+        // Validate Status
+        if (!status) {
+            document.getElementById('statusError').textContent = 'Please select a status';
+            isValid = false;
+        }
+
+        // Validate Image
+        if (!imageInput.files || imageInput.files.length === 0) {
+            if (!currentImage || currentImage.trim() === '') {
+                alert('Please upload an image');
+                isValid = false;
+            }
+        } else {
+            const file = imageInput.files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload a valid image file');
+                isValid = false;
+            }
+        }
+
+        return isValid;
+    }
+
+    // Real-time validation for name field
+    document.querySelector('input[name="itemName"]').addEventListener('input', function(e) {
+        const nameRegex = /^[a-zA-Z0-9\s]+$/;
+        const nameError = document.getElementById('nameError');
+        const value = e.target.value.trim();
+
+        if (value && !nameRegex.test(value)) {
+            nameError.textContent = 'Name can only contain letters, numbers, and spaces';
+        } else {
+            nameError.textContent = '';
+        }
+    });
+
+    // Real-time validation for quantity field
+    document.querySelector('input[name="quantity"]').addEventListener('input', function(e) {
+        const quantityError = document.getElementById('quantityError');
+        const value = e.target.value;
+
+        if (value && (!Number.isInteger(Number(value)) || Number(value) < 0)) {
+            quantityError.textContent = 'Quantity must be a positive whole number';
+        } else {
+            quantityError.textContent = '';
+        }
+    });
+
+    // Real-time validation for price field
+    document.querySelector('input[name="price"]').addEventListener('input', function(e) {
+        const priceError = document.getElementById('priceError');
+        const value = e.target.value;
+
+        if (value && (Number(value) < 0 || Number(value) > 99999999.99)) {
+            priceError.textContent = 'Price must be between 0 and 99,999,999.99';
+        } else {
+            priceError.textContent = '';
+        }
+    });
+
+    // Drag and drop functionality
+    const uploadArea = document.querySelector('.image-upload-area');
+
+    uploadArea.addEventListener('dragover', function (e) {
+        e.preventDefault();
+        this.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function (e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function (e) {
+        e.preventDefault();
+        this.classList.remove('dragover');
+
+        const files = e.dataTransfer.files;
+        if (files.length > 0 && files[0].type.startsWith('image/')) {
+            document.getElementById('imageInput').files = files;
+            previewImage(document.getElementById('imageInput'));
+        }
+    });
+</script>
+</body>
+
+</html>

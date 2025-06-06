@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html   xmlns:th="http://www.thymeleaf.org"
+        lang="en">
+<head>
+  <meta charset="utf-8" />
+  <link rel="apple-touch-icon" sizes="76x76" th:href="@{/staff/img/apple-icon.png}">
+  <link rel="icon" type="image/png" th:href="@{/staff/img/apple-icon.png}">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+  <title>
+  </title>
+  <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0, shrink-to-fit=no' name='viewport' />
+  <!--     Fonts and icons     -->
+  <link rel="stylesheet" type="text/css" th:href="@{/staff/css/roboto-text-font-style.css}" />
+  <link rel="stylesheet" type="text/css" th:href="@{/staff/css/fontawesome.css}" />
+  <!-- CSS Files -->
+  <link th:href="@{/staff/css/material-dashboard.minf066.css}" rel="stylesheet" />
+</head>
+<body class="dark-edition">
+<div class="wrapper ">
+  <div class="sidebar" data-color="purple" data-background-color="black" data-image="../e/img/sidebar-2.jpg">
+    <div class="logo"><a href="http://www.creative-tim.com/" class="simple-text logo-normal">
+    <span th:text="${employee.getFullName()}"></span>
+    </a></div>
+    <div class="sidebar-wrapper">
+      <ul class="nav">
+        <li class="nav-item active ">
+          <a class="nav-link" th:href="@{/theater_stock}">
+            <i class="material-icons">content_paste</i>
+            <p>Manage Food and Drinks</p>
+          </a>
+        </li>
+      </ul>
+    </div>
+  </div>
+  <div class="main-panel">
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-transparent navbar-absolute fixed-top " id="navigation-example">
+      <div class="container-fluid">
+        <div class="navbar-wrapper">
+          <a class="navbar-brand" th:href="@{/theater_stock}"><u>View List item</u></a>
+        </div>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" aria-controls="navigation-index" aria-expanded="false" aria-label="Toggle navigation" data-target="#navigation-example">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+          <span class="navbar-toggler-icon icon-bar"></span>
+        </button>
+        <div class="collapse navbar-collapse justify-content-end">
+          <ul class="navbar-nav">
+            <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)">
+                <i class="material-icons">dashboard</i>
+                <p class="d-lg-none d-md-block">
+                  Stats
+                </p>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="javascript:void(0)">
+                <i class="material-icons">person</i>
+                <p class="d-lg-none d-md-block">
+                  Account
+                </p>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <!-- End Navbar -->
+    <div class="content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <div class="card">
+              <div class="card-header card-header-primary">
+                <h4 class="card-title ">Sales Report</h4>
+                 <!--<form class="navbar-form" th:action="@{/theater_stock/search}" method="get">
+                  <div class="input-group no-border">
+                    <input type="text" name="itemName" class="form-control" placeholder="Enter food or drinks's name...">
+                    <button type="submit" class="btn btn-default btn-round btn-just-icon">
+                      <i class="material-icons">search</i>
+                      <div class="ripple-container"></div>
+                    </button>
+                  </div>
+                </form> -->
+              </div>
+              <div class="card-body">
+                <div class="table-responsive">
+                  <table class="table">
+                    <thead class="text-primary">
+                    <th>InvoiceID</th>
+                    <th>Name</th>
+                    <th>Quantity Sold</th>
+                    <th>Date Sold</th>
+                    <th>TotalPrice</th>
+                    </thead>
+                    <tbody>
+                    <tr th:each="detail : ${detail_FDs}">
+                      <td th:text="${detail.invoice.invoiceID}"></td>
+                      <td th:text="${detail.theaterStock.itemName}"></td>
+                      <td th:text="${detail.quantity}"></td>
+                      <td th:text="${#dates.format(detail.invoice.getBookingDate(), 'dd/MM/yyyy')}"></td>
+                      <td th:text="${#numbers.formatCurrency(detail.totalPrice)}"></td>
+                    </tr>
+                    <!-- Hiển thị thông báo khi không có dữ liệu -->
+                    <tr th:if="${#lists.isEmpty(detail_FDs)}">
+                      <td colspan="6" class="text-center">No items sold found</td>
+                    </tr>
+                    </tbody>
+
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        <!--   Core JS Files   -->
+<script th:src="@{/staff/js/core/jquery.min.js}"></script>
+<script th:src="@{/staff/js/core/popper.min.js}"></script>
+<script th:src="@{/staff/js/core/bootstrap-material-design.min.js}"></script>
+<script th:src="@{/staff/js/core/default-passive-events.js}"></script>
+<script th:src="@{/staff/js/plugins/perfect-scrollbar.jquery.min.js}"></script>
+<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700|Roboto+Slab:400,700|Material+Icons" rel="stylesheet">
+
+</body>
+</html>
