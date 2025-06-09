@@ -1,7 +1,7 @@
-package com.bluebear.cinemax.service;
+package com.bluebear.cinemax.service.staff;
 
-import com.bluebear.cinemax.dto.Detail_FDRepository;
-import com.bluebear.cinemax.dto.TheaterStockRepository;
+import com.bluebear.cinemax.repository.staff.Detail_FDRepository;
+import com.bluebear.cinemax.repository.staff.TheaterStockRepository;
 import com.bluebear.cinemax.entity.TheaterStock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class TheaterStockServiceImpl implements TheaterStockService{
+public class TheaterStockServiceImpl implements TheaterStockService {
     @Autowired
     TheaterStockRepository theaterStockRepository;
     @Autowired

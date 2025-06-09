@@ -1,6 +1,6 @@
-package com.bluebear.cinemax.service;
+package com.bluebear.cinemax.service.staff;
 
-import com.bluebear.cinemax.dto.TheaterRepository;
+import com.bluebear.cinemax.repository.staff.TheaterRepository;
 import com.bluebear.cinemax.entity.Theater;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

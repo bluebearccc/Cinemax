@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enums.Theater_Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -34,6 +35,9 @@ public class Theater {
 
     @Column(name = "AdminID")
     private long adminId;
+
+    @Column(name = "Status", length = 50, nullable = false)
+    private Theater_Status  status;
 
     @OneToMany(mappedBy = "theater")
     private Set<TheaterStock> theaterStock;

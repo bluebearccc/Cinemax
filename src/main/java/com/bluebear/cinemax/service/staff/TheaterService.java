@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.service;
+package com.bluebear.cinemax.service.staff;
 
 import com.bluebear.cinemax.entity.Theater;
 

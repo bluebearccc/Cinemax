@@ -1,6 +1,6 @@
-package com.bluebear.cinemax.service;
+package com.bluebear.cinemax.service.staff;
 
-import com.bluebear.cinemax.dto.Detail_FDRepository;
+import com.bluebear.cinemax.repository.staff.Detail_FDRepository;
 import com.bluebear.cinemax.entity.Detail_FD;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 
 @Service
-public class DetailFD_ServiceImpl implements  DetaillFD_Service{
+public class DetailFD_ServiceImpl implements DetaillFD_Service {
 
     @Autowired
     Detail_FDRepository detail_FDRepository;

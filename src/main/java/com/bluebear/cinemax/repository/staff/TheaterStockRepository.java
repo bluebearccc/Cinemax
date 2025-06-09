@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.dto;
+package com.bluebear.cinemax.repository.staff;
 
 import com.bluebear.cinemax.entity.TheaterStock;
 import org.springframework.data.jpa.repository.JpaRepository;

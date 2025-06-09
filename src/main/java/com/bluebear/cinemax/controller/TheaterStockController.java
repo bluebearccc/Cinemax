@@ -4,10 +4,10 @@ import com.bluebear.cinemax.entity.Detail_FD;
 import com.bluebear.cinemax.entity.Employee;
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.entity.TheaterStock;
-import com.bluebear.cinemax.service.DetailFD_ServiceImpl;
-import com.bluebear.cinemax.service.EmployeeServiceImpl;
-import com.bluebear.cinemax.service.TheaterServiceImpl;
-import com.bluebear.cinemax.service.TheaterStockServiceImpl;
+import com.bluebear.cinemax.service.staff.DetailFD_ServiceImpl;
+import com.bluebear.cinemax.service.staff.EmployeeServiceImpl;
+import com.bluebear.cinemax.service.staff.TheaterServiceImpl;
+import com.bluebear.cinemax.service.staff.TheaterStockServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -25,7 +25,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
-import com.bluebear.cinemax.utils.ExcelGeneratoForDetailItemSold;
+import com.bluebear.cinemax.config.ExcelGeneratoForDetailItemSold;
 @Controller
 @RequestMapping("/theater_stock")
 public class TheaterStockController {

@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enums.Employee_Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -21,7 +22,7 @@ public class Employee {
     private String position;
 
     @Column(name = "Status", length = 50, nullable = false)
-    private String status;
+    private Employee_Status status;
 
     @OneToOne
     @JoinColumn(name = "AccountID", nullable = false)

@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.utils;
+package com.bluebear.cinemax.config;
 
 import com.bluebear.cinemax.entity.Detail_FD;
 import jakarta.servlet.ServletOutputStream;
