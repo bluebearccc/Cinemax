@@ -1,10 +1,9 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.SeatStatus;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "Detail_Seat")
@@ -17,19 +16,15 @@ public class DetailSeat {
     @Column(name = "ID")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "InvoiceID", nullable = false)
     private Invoice invoice;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "SeatID", nullable = false)
     private Seat seat;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 10)
-    private SeatStatus status;
-
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ScheduleID", nullable = false)
     private Schedule schedule;
 }

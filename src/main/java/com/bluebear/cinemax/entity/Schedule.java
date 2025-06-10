@@ -1,11 +1,10 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.TheaterStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -26,18 +25,23 @@ public class Schedule {
     @Column(name = "EndTime", nullable = false)
     private LocalDateTime endTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MovieID", nullable = false)
     private Movie movie;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RoomID", nullable = false)
     private Room room;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 20)
-    private TheaterStatus status;
+    @Column(name = "Status", nullable = false)
+    private ScheduleStatus status;
 
-    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<DetailSeat> detailSeats;
+
+    public enum ScheduleStatus {
+        Active, Inactive
+    }
 }

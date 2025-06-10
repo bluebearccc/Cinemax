@@ -1,7 +1,6 @@
-﻿CREATE DATABASE Cinemax;
+﻿create database a
 
-USE Cinemax;
-
+use a
 
 CREATE TABLE Account (
   AccountID int IDENTITY PRIMARY KEY,
@@ -45,12 +44,12 @@ CREATE TABLE Customer (
   AccountID  int NOT NULL,
   FullName   nvarchar(100) NOT NULL,
   Phone      varchar(20),
-  Point	     int
+  Point	     int,
   FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
 );
 
 CREATE TABLE Promotion (
-  PromodtionID  int IDENTITY PRIMARY KEY,
+  PromotionID   int IDENTITY PRIMARY KEY,  -- Sửa từ PromodtionID thành PromotionID
   PromotionCode varchar(10) NOT NULL UNIQUE,
   Discount      int NOT NULL,
   StartTime     datetime NOT NULL,
@@ -75,7 +74,7 @@ CREATE TABLE Room (
   Collumn    int NOT NULL,
   Row        int NOT NULL,
   TypeOfRoom varchar(20) CHECK (TypeOfRoom IN ('Couple', 'Single')),
-  Status	 varchar(20) CHECK (Status IN ('Active', 'Inactive'))	  
+  Status	 varchar(20) CHECK (Status IN ('Active', 'Inactive')),  -- Thêm dấu phẩy
   FOREIGN KEY (TheaterID) REFERENCES Theater(TheaterID)
 );
 
@@ -86,7 +85,7 @@ CREATE TABLE Seat (
   Position  varchar(10) NOT NULL,
   IsVIP     bit NOT NULL,
   UnitPrice decimal(10, 2) NOT NULL,
-  Status	varchar(20) CHECK (Status IN ('Active', 'Inactive'))	
+  Status	varchar(20) CHECK (Status IN ('Active', 'Inactive')),  -- Thêm dấu phẩy
   FOREIGN KEY (RoomID) REFERENCES Room(RoomID)
 );
 
@@ -96,7 +95,7 @@ CREATE TABLE Schedule (
   EndTime    datetime NOT NULL,
   MovieID    int NOT NULL,
   RoomID     int NOT NULL,
-  Status	 varchar(20) CHECK (Status IN ('Active', 'Inactive'))	
+  Status	 varchar(20) CHECK (Status IN ('Active', 'Inactive')),  -- Thêm dấu phẩy
   FOREIGN KEY (MovieID) REFERENCES Movie(MovieID),
   FOREIGN KEY (RoomID) REFERENCES Room(RoomID)
 );
@@ -107,7 +106,7 @@ CREATE TABLE Employee (
   Status     varchar(20) CHECK(Status IN ('Active', 'Inactive')),
   AccountID  int NOT NULL,
   TheaterID  int NOT NULL,
-  AdminID  int NULL,
+  AdminID    int NULL,
   FullName   nvarchar(100) NOT NULL,
   FOREIGN KEY (AccountID) REFERENCES Account(AccountID),
   FOREIGN KEY (TheaterID) REFERENCES Theater(TheaterID),
@@ -118,12 +117,13 @@ CREATE TABLE Invoice (
   InvoiceID   int IDENTITY PRIMARY KEY,
   CustomerID  int NOT NULL,
   EmployeeID  int NULL,
+  PromotionID int NULL,  -- Thêm cột PromotionID
   Discount	  float NULL,				--giá tiền
   BookingDate datetime NOT NULL,
   Totalprice  decimal(10, 2) NOT NULL,
   FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
   FOREIGN KEY (EmployeeID) REFERENCES Employee(EmployeeID),
-  FOREIGN KEY (PromotionID) REFERENCES Promotion(PromodtionID)
+  FOREIGN KEY (PromotionID) REFERENCES Promotion(PromotionID)  -- Sửa tham chiếu
 );
 
 CREATE TABLE Detail_Seat (
@@ -140,7 +140,7 @@ CREATE TABLE Detail_Seat (
 CREATE TABLE Theater_Stock (	--đồ ăn thức uống
   Theater_StockID int IDENTITY PRIMARY KEY,
   TheaterID       int NOT NULL,
-  FoodName            nvarchar(20) NOT NULL,
+  FoodName        nvarchar(20) NOT NULL,
   Quantity        int NOT NULL,
   UnitPrice       decimal(10, 2) NOT NULL,
   Image           varchar(255) NOT NULL,
@@ -172,7 +172,7 @@ CREATE TABLE ServiceFeedback (
   ID         int IDENTITY PRIMARY KEY,
   CustomerID int NOT NULL,
   Content    nvarchar(100),
-  Status      varchar(10) CHECK (Status IN ('Suported', 'Not_Suported')),
+  Status     varchar(10) CHECK (Status IN ('Suported', 'Not_Suported')),
   FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
 );
 
@@ -187,4 +187,3 @@ CREATE TABLE History (
   UpdatedAt datetime NOT NULL,
   FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
 );
-

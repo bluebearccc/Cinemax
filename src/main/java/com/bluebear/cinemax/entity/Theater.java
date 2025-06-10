@@ -1,11 +1,10 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.TheaterStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
@@ -32,15 +31,22 @@ public class Theater {
     private Integer roomQuantity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 20)
+    @Column(name = "Status", nullable = false)
     private TheaterStatus status;
 
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Room> rooms;
 
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Employee> employees;
 
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<TheaterStock> theaterStocks;
+
+    public enum TheaterStatus {
+        Active, Inactive
+    }
 }

@@ -1,11 +1,10 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.MovieStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
@@ -30,11 +29,11 @@ public class Movie {
     @Column(name = "Image", nullable = false)
     private String image;
 
+    @Column(name = "Banner", nullable = false)
+    private String banner;
+
     @Column(name = "Studio", length = 100)
     private String studio;
-
-    @Column(name = "Genre", nullable = false)
-    private String genre;
 
     @Column(name = "Duration", nullable = false)
     private Integer duration;
@@ -42,10 +41,10 @@ public class Movie {
     @Column(name = "Trailer", nullable = false)
     private String trailer;
 
-    @Column(name = "MovieRate", precision = 3, scale = 1)
+    @Column(name = "MovieRate", nullable = false, precision = 3, scale = 1)
     private BigDecimal movieRate;
 
-    @Column(name = "Actor", nullable = false, columnDefinition = "NVARCHAR(MAX)")
+    @Column(name = "Actor", nullable = false, columnDefinition = "nvarchar(MAX)")
     private String actor;
 
     @Column(name = "StartDate", nullable = false)
@@ -55,15 +54,22 @@ public class Movie {
     private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 10)
+    @Column(name = "Status", nullable = false)
     private MovieStatus status;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<MovieGenre> movieGenres;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Schedule> schedules;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<MovieFeedback> movieFeedbacks;
+
+    public enum MovieStatus {
+        Active, Removed
+    }
 }

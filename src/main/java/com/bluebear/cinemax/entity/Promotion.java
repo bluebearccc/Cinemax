@@ -1,11 +1,12 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.PromotionStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import java.time.LocalDateTime;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "Promotion")
@@ -15,7 +16,7 @@ import lombok.NoArgsConstructor;
 public class Promotion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "PromodtionID")
+    @Column(name = "PromotionID")
     private Integer promotionId;
 
     @Column(name = "PromotionCode", nullable = false, unique = true, length = 10)
@@ -34,6 +35,14 @@ public class Promotion {
     private Integer quantity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 20)
+    @Column(name = "Status", nullable = false)
     private PromotionStatus status;
+
+    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Invoice> invoices;
+
+    public enum PromotionStatus {
+        Available, Expired
+    }
 }

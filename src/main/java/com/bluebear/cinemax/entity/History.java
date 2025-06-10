@@ -1,11 +1,9 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.HistoryAction;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
 @Entity
@@ -32,13 +30,17 @@ public class History {
     private String newValue;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Action", length = 20)
+    @Column(name = "Action", nullable = false)
     private HistoryAction action;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "AccountID", nullable = false)
     private Account account;
 
     @Column(name = "UpdatedAt", nullable = false)
     private LocalDateTime updatedAt;
+
+    public enum HistoryAction {
+        Update, Delete
+    }
 }

@@ -1,0 +1,280 @@
+:root {
+    --primary-color: #1a1a2e;
+    --secondary-color: #16213e;
+    --accent-color: #e94560;
+    --gold-color: #ffd700;
+    --text-light: #ffffff;
+    --text-muted: #a8a8a8;
+    --success-color: #28a745;
+    --warning-color: #ffc107;
+    --vip-color: #9b59b6;
+    --vip-border-color: #8e44ad;
+    --couple-color: #e74c3c;
+    --couple-border-color: #c0392b;
+}
+body {
+    background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-light);
+}
+.navbar-custom {
+    background: rgba(26, 26, 46, 0.95);
+    backdrop-filter: blur(10px);
+    border-bottom: 2px solid var(--accent-color);
+}
+.card-custom {
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+}
+.btn-custom {
+    background: linear-gradient(45deg, var(--accent-color), #ff6b6b);
+    border: none;
+    border-radius: 25px;
+    padding: 10px 25px;
+    color: white;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(233, 69, 96, 0.3);
+}
+.btn-custom:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(233, 69, 96, 0.4);
+    color: white;
+}
+.btn-gold {
+    background: linear-gradient(45deg, var(--gold-color), #ffed4e);
+    color: var(--primary-color);
+    font-weight: bold;
+}
+.btn-gold:hover {
+    color: var(--primary-color);
+    transform: translateY(-2px);
+}
+.movie-card {
+    background: rgba(255, 255, 255, 0.08);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    height: 100%;
+}
+.movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(233, 69, 96, 0.2);
+    border-color: var(--accent-color);
+}
+.movie-card.selected {
+    border-color: var(--gold-color);
+    box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+}
+.seat {
+    width: 35px;
+    height: 35px;
+    margin: 3px;
+    border: 2px solid #555;
+    border-radius: 8px;
+    background: #333;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    color: white;
+    font-weight: 500;
+    vertical-align: middle;
+}
+.seat:hover:not(.occupied) {
+    transform: scale(1.1);
+}
+.seat.available {
+    background: #4CAF50;
+    border-color: #45a049;
+}
+.seat.available.vip {
+    background: var(--vip-color);
+    border-color: var(--vip-border-color);
+}
+.seat.couple {
+    width: 76px;
+    font-weight: bold;
+}
+.seat.available.couple {
+    background: var(--couple-color);
+    border-color: var(--couple-border-color);
+}
+.seat.selected {
+    background: var(--gold-color);
+    border-color: #e6c200;
+    color: var(--primary-color);
+    font-weight: bold;
+}
+.seat.occupied {
+    background: var(--accent-color);
+    border-color: #d63545;
+    cursor: not-allowed;
+}
+.screen {
+    background: linear-gradient(45deg, #fff, #f0f0f0);
+    height: 20px;
+    border-radius: 50px;
+    margin: 20px auto;
+    color: #333;
+    text-align: center;
+    line-height: 20px;
+    font-weight: bold;
+    width: 80%;
+}
+.checkout-summary {
+    background: rgba(255, 255, 255, 0.05);
+    border-left: 4px solid var(--gold-color);
+    padding: 20px;
+    border-radius: 10px;
+}
+.step-indicator {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+.step {
+    flex: 1;
+    text-align: center;
+    position: relative;
+}
+.step::after {
+    content: '';
+    position: absolute;
+    top: 15px;
+    left: 50%;
+    width: 100%;
+    height: 2px;
+    background: #555;
+    z-index: 1;
+}
+.step:last-child::after {
+    display: none;
+}
+.step-circle {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: #555;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 10px;
+    position: relative;
+    z-index: 2;
+    font-weight: bold;
+}
+.step.active .step-circle {
+    background: var(--accent-color);
+}
+.step.completed .step-circle {
+    background: var(--success-color);
+}
+.step.completed::after {
+    background: var(--success-color);
+}
+.payment-method {
+    background: rgba(255, 255, 255, 0.08);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
+    padding: 20px;
+    margin: 10px 0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.payment-method:hover {
+    border-color: var(--accent-color);
+}
+.payment-method.selected {
+    border-color: var(--gold-color);
+    background: rgba(255, 215, 0, 0.1);
+}
+.modal-custom .modal-content {
+    background: var(--secondary-color);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 15px;
+}
+.form-control {
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 8px;
+}
+.form-control:focus {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: var(--gold-color);
+    color: white;
+    box-shadow: 0 0 0 0.2rem rgba(255, 215, 0, 0.25);
+}
+.form-control::placeholder {
+    color: var(--text-muted);
+}
+.price-highlight {
+    color: var(--gold-color);
+    font-weight: bold;
+    font-size: 1.2em;
+}
+.food-modal-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+}
+.food-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    object-fit: cover;
+}
+.quantity-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.quantity-btn {
+    width: 35px;
+    height: 35px;
+    border: none;
+    border-radius: 50%;
+    background: var(--accent-color);
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.quantity-btn:hover {
+    transform: scale(1.1);
+}
+.quantity-input {
+    width: 60px;
+    text-align: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    color: white;
+    border-radius: 5px;
+    padding: 5px;
+}
+.selected-food-list {
+    max-height: 200px;
+    overflow-y: auto;
+}
+.selected-food-item {
+    background: rgba(255, 215, 0, 0.1);
+    border: 1px solid var(--gold-color);
+    border-radius: 8px;
+    padding: 10px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}

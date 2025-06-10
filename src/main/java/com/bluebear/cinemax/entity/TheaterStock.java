@@ -1,11 +1,10 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.TheaterStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -20,7 +19,7 @@ public class TheaterStock {
     @Column(name = "Theater_StockID")
     private Integer theaterStockId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
@@ -37,9 +36,14 @@ public class TheaterStock {
     private String image;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 20)
-    private TheaterStatus status;
+    @Column(name = "Status")
+    private StockStatus status;
 
-    @OneToMany(mappedBy = "theaterStock", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "theaterStock", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<DetailFD> detailFDs;
+
+    public enum StockStatus {
+        Active, Inactive
+    }
 }

@@ -1,12 +1,10 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.SeatType;
-import com.bluebear.cinemax.enums.TheaterStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -21,12 +19,12 @@ public class Seat {
     @Column(name = "SeatID")
     private Integer seatId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RoomID", nullable = false)
     private Room room;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "SeatType", length = 10)
+    @Column(name = "SeatType", nullable = false)
     private SeatType seatType;
 
     @Column(name = "Position", nullable = false, length = 10)
@@ -39,10 +37,18 @@ public class Seat {
     private BigDecimal unitPrice;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 20)
-    private TheaterStatus status;
+    @Column(name = "Status", nullable = false)
+    private SeatStatus status;
 
-    @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<DetailSeat> detailSeats;
-}
 
+    public enum SeatType {
+        Couple, Single
+    }
+
+    public enum SeatStatus {
+        Active, Inactive
+    }
+}

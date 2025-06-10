@@ -1,10 +1,9 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.ServiceFeedbackStatus;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import jakarta.persistence.*;
 
 @Entity
 @Table(name = "ServiceFeedback")
@@ -17,7 +16,7 @@ public class ServiceFeedback {
     @Column(name = "ID")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "CustomerID", nullable = false)
     private Customer customer;
 
@@ -25,6 +24,10 @@ public class ServiceFeedback {
     private String content;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 10)
-    private ServiceFeedbackStatus status;
+    @Column(name = "Status", nullable = false)
+    private ServiceStatus status;
+
+    public enum ServiceStatus {
+        Suported, Not_Suported
+    }
 }

@@ -1,12 +1,10 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.RoomType;
-import com.bluebear.cinemax.enums.TheaterStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
@@ -20,7 +18,7 @@ public class Room {
     @Column(name = "RoomID")
     private Integer roomId;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
@@ -34,16 +32,26 @@ public class Room {
     private Integer row;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "TypeOfRoom", length = 20)
+    @Column(name = "TypeOfRoom", nullable = false)
     private RoomType typeOfRoom;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 20)
-    private TheaterStatus status;
+    @Column(name = "Status", nullable = false)
+    private RoomStatus status;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Seat> seats;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Schedule> schedules;
+
+    public enum RoomType {
+        Couple, Single
+    }
+
+    public enum RoomStatus {
+        Active, Inactive
+    }
 }

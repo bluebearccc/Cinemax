@@ -1,12 +1,10 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.EmployeePosition;
-import com.bluebear.cinemax.enums.TheaterStatus;
-import jakarta.persistence.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.util.List;
 
 @Entity
@@ -21,31 +19,41 @@ public class Employee {
     private Integer employeeId;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Position")
-    private EmployeePosition position;
+    @Column(name = "Position", nullable = false)
+    private Position position;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 20)
-    private TheaterStatus status;
+    @Column(name = "Status", nullable = false)
+    private EmployeeStatus status;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "AccountID", nullable = false)
     private Account account;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "AdminID")
     private Employee admin;
 
     @Column(name = "FullName", nullable = false, length = 100)
     private String fullName;
 
-    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Employee> subordinates;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<Invoice> invoices;
+
+    public enum Position {
+        Admin, Staff, Cashier, Customer_Officer
+    }
+
+    public enum EmployeeStatus {
+        Active, Inactive
+    }
 }

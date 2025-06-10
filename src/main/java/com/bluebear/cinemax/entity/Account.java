@@ -1,10 +1,11 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.*;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.AllArgsConstructor;
+import java.util.List;
 
 @Entity
 @Table(name = "Account")
@@ -24,16 +25,30 @@ public class Account {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Role", length = 50)
-    private AccountRole role;
+    @Column(name = "Role", nullable = false)
+    private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 10)
+    @Column(name = "Status", nullable = false)
     private AccountStatus status;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
-    private Customer customer;
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Customer> customers;
 
-    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
-    private Employee employee;
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Employee> employees;
+
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<History> histories;
+
+    public enum Role {
+        Admin, Customer, Staff, Cashier, Customer_Officer
+    }
+
+    public enum AccountStatus {
+        Active, Banned
+    }
 }

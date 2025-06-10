@@ -1,10 +1,9 @@
 package com.bluebear.cinemax.entity;
 
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 
 @Entity
@@ -18,11 +17,11 @@ public class DetailFD {
     @Column(name = "ID")
     private Integer id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "InvoiceID", nullable = false)
     private Invoice invoice;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Theater_StockID", nullable = false)
     private TheaterStock theaterStock;
 
