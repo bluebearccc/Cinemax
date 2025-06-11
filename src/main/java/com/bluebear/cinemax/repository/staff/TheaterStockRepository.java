@@ -16,7 +16,7 @@ public interface TheaterStockRepository extends JpaRepository<TheaterStock, Inte
            nativeQuery = true)
     List<TheaterStock> findByTheater_TheaterId(@Param("theaterId") Integer theaterId);
     
-    @Query(value = "SELECT * FROM Theater_Stock ts WHERE LOWER(ts.FoodName) LIKE LOWER(CONCAT('%', :itemName, '%'))",
+    @Query(value = "SELECT * FROM Theater_Stock ts WHERE LOWER(ts.FoodName) LIKE LOWER(CONCAT('%', :itemName, '%')) AND ts.TheaterID = :theaterId",
        nativeQuery = true)
-    List<TheaterStock> findByItemNameContainingIgnoreCase(@Param("itemName") String itemName);
+    List<TheaterStock> findByItemNameContainingIgnoreCase(@Param("itemName") String itemName, @Param("theaterId") Integer theaterId);
 }

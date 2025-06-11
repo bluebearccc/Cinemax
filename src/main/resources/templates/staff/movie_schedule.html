@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html
+        xmlns:th="http://www.thymeleaf.org"
+        lang="en"
+>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movies List</title>
+    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+
+</head>
+<body>
+<div class="sidebar">
+    <div class="user-info">
+        <div class="user-avatar">M</div>
+        <div class="user-name" >Mary Johnson</div>
+    </div>
+
+    <a href="#" class="sidebar-item">
+        <div class="sidebar-icon">🏠</div>
+        <div class="sidebar-text">Home</div>
+    </a>
+    <a th:href="@{/theater_stock}" class="sidebar-item ">
+        <div class="sidebar-icon">🍿</div>
+        <div class="sidebar-text">Food and Drinks</div>
+    </a>
+    <a th:href="@{/movie_schedule}" class="sidebar-item active ">
+        <div class="sidebar-icon">🎬</div>
+        <div class="sidebar-text">Set Schedule</div>
+    </a>
+</div>
+<div class="main-content">
+    <h1 class="page-title">Movies List</h1>
+
+    <div class="search-container">
+        <form th:action="@{/movie_schedule/search}" method="get" class="search-form">
+            <input type="text" name="name" class="search-input" th:value="${param.keyword}" placeholder="Search for movies by name...">
+            <button type="submit" class="search-button">🔍 Tìm kiếm</button>
+        </form>
+    </div>
+    <div class="movie-grid">
+
+        <div th:each="x : ${movies}" class="movie-column">
+            <div class="movie-card">
+                <div class="movie-poster"><img th:src="${x.image}" alt="Movie Poster"></div>
+                <div class="movie-title" th:text="${x.movieName}"></div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

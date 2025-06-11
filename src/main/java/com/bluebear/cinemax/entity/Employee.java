@@ -21,6 +21,7 @@ public class Employee {
     @Column(name = "Position", length = 255, nullable = false)
     private String position;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "Status", length = 50, nullable = false)
     private Employee_Status status;
 

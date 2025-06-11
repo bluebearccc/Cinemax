@@ -33,9 +33,7 @@ public class Theater {
     @Column(name = "RoomQuantity", nullable = false)
     private Integer roomQuantity;
 
-    @Column(name = "AdminID")
-    private long adminId;
-
+    @Enumerated(EnumType.STRING)
     @Column(name = "Status", length = 50, nullable = false)
     private Theater_Status  status;
 

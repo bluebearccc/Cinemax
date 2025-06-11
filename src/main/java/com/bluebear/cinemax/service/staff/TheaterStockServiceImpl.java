@@ -32,8 +32,8 @@ public class TheaterStockServiceImpl implements TheaterStockService {
         return theaterStockRepository.findAll();
     }
 
-    public List<TheaterStock> findByItemName(String itemName){
-        return theaterStockRepository.findByItemNameContainingIgnoreCase(itemName);
+    public List<TheaterStock> findByItemName(String itemName, Integer theaterId){
+        return theaterStockRepository.findByItemNameContainingIgnoreCase(itemName, theaterId);
     }
 
     @Override

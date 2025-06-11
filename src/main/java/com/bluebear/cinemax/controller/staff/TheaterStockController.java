@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.controller;
+package com.bluebear.cinemax.controller.staff;
 
 import com.bluebear.cinemax.entity.Detail_FD;
 import com.bluebear.cinemax.entity.Employee;
@@ -45,7 +45,7 @@ public class TheaterStockController {
     @GetMapping("/search")
     public String searchTheaterStock(@RequestParam("itemName") String itemName, Model model) {
         Employee e = employeeService.getEmployeeById(2);
-        List<TheaterStock> searchResults = theaterStockServiceImpl.findByItemName(itemName);
+        List<TheaterStock> searchResults = theaterStockServiceImpl.findByItemName(itemName, e.getTheater().getTheaterId() );
         model.addAttribute("employee", e);
         model.addAttribute("theaterStocks", searchResults);
         model.addAttribute("size", searchResults.size());
@@ -139,10 +139,11 @@ public class TheaterStockController {
     @GetMapping
     public String listTheaterStock(Model theModel) {
         Employee e = employeeService.getEmployeeById(2);
+        List<TheaterStock> theaterStocks = theaterStockServiceImpl.findByTheaterId(e.getTheater().getTheaterId());
         theModel.addAttribute("employee", e);
-        theModel.addAttribute("theaterStocks", theaterStockServiceImpl.findByTheaterId(e.getTheater().getTheaterId()));
-        theModel.addAttribute("size", theaterStockServiceImpl.findByTheaterId(e.getTheater().getTheaterId()).size());
-        theModel.addAttribute("theaterName", theaterStockServiceImpl.findByTheaterId(e.getTheater().getTheaterId()).get(0).getTheater().getTheaterName());
+        theModel.addAttribute("theaterStocks", theaterStocks);
+        theModel.addAttribute("size", theaterStocks.size());
+        theModel.addAttribute("theaterName", e.getTheater().getTheaterName());
         return "staff/list";
     }
 

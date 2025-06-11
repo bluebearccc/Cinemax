@@ -12,7 +12,7 @@ public interface TheaterStockService {
 
     public List<TheaterStock> findAllTheaterStock();
 
-    public List<TheaterStock> findByItemName(String itemName);
+    public List<TheaterStock> findByItemName(String itemName, Integer theaterId);
 
     public TheaterStock findById(Integer id);
 

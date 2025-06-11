@@ -1,6 +1,6 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.Theater_Status;
+import com.bluebear.cinemax.enums.TheaterStock_Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -32,8 +32,9 @@ public class TheaterStock {
     @Column(name = "UnitPrice", nullable = false)
     private Double price;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "Status", length = 50, nullable = false)
-    private Theater_Status status;
+    private TheaterStock_Status status;
 
     @OneToMany(mappedBy = "theaterStock")
     private Set<Detail_FD> detail_FD;

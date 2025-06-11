@@ -6,92 +6,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Food And Drink</title>
     <link rel="stylesheet" th:href="@{/staff/css/style.css}">
-    <style>
-        /* Notification styles */
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 8px;
-            color: white;
-            font-weight: 500;
-            z-index: 1000;
-            max-width: 400px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            transform: translateX(100%);
-            transition: transform 0.3s ease-in-out;
-        }
 
-        .notification.show {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            background-color: #10b981;
-        }
-
-        .notification.error {
-            background-color: #ef4444;
-        }
-
-        .notification.warning {
-            background-color: #f59e0b;
-        }
-
-        .notification .close-btn {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 18px;
-            float: right;
-            cursor: pointer;
-            margin-left: 10px;
-            padding: 0;
-            line-height: 1;
-        }
-
-        .alert {
-            margin-bottom: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            font-weight: 500;
-        }
-
-        .alert.success {
-            background-color: #d1fae5;
-            color: #065f46;
-            border: 1px solid #10b981;
-        }
-
-        .alert.error {
-            background-color: #fee2e2;
-            color: #991b1b;
-            border: 1px solid #ef4444;
-        }
-
-        .alert.warning {
-            background-color: #fef3c7;
-            color: #92400e;
-            border: 1px solid #f59e0b;
-        }
-    </style>
 </head>
 
 <body>
 <!-- Sidebar -->
 <div class="sidebar">
-    <div class="logo">
-        <h6 th:text="${employee.getFullName()}">Employee Name</h6>
+    <div class="user-info">
+        <div class="user-avatar" th:text="${#strings.substring(employee.getFullName(), 0, 1)}">M</div>
+        <div class="user-name" th:text="${employee.getFullName()}">Mary Johnson</div>
     </div>
-    <ul class="nav-menu">
-        <li class="nav-item">
-            <a th:href="@{/theater_stock}" class="nav-link active">
-                <span class="icon">🍿</span>
-                Food and Drinks
-            </a>
-        </li>
-    </ul>
+
+    <a href="#" class="sidebar-item">
+        <div class="sidebar-icon">🏠</div>
+        <div class="sidebar-text">Home</div>
+    </a>
+    <a th:href="@{/theater_stock}" class="sidebar-item active">
+        <div class="sidebar-icon">🍿</div>
+        <div class="sidebar-text">Food and Drinks</div>
+    </a>
+    <a th:href="@{/movie_schedule}" class="sidebar-item ">
+        <div class="sidebar-icon">🎬</div>
+        <div class="sidebar-text">Set Schedule</div>
+    </a>
 </div>
 
 <!-- Main Content -->
