@@ -12,16 +12,39 @@ import java.util.List;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
-    // Tìm suất chiếu theo phim và ngày
-    List<Schedule> findByMovie_MovieIdAndStartTimeBetween(Integer movieId, LocalDateTime startDate, LocalDateTime endDate);
 
-    // Tìm suất chiếu theo rạp và ngày
-    @Query("SELECT s FROM Schedule s WHERE s.room.theater.theaterId = :theaterId AND DATE(s.startTime) = :date AND s.status = :status")
-    List<Schedule> findByTheaterAndDateAndStatus(@Param("theaterId") Integer theaterId, @Param("date") LocalDate date, @Param("status") Schedule.ScheduleStatus status);
+    List<Schedule> findByMovie_MovieIdAndStatus(Integer movieId, Schedule.ScheduleStatus status);
 
-    // Tìm suất chiếu active theo phòng
-    List<Schedule> findByRoom_RoomIdAndStatusOrderByStartTime(Integer roomId, Schedule.ScheduleStatus status);
+    @Query("SELECT s FROM Schedule s WHERE s.movie.movieId = :movieId AND s.status = :status AND CAST(s.startTime AS date) = :date ORDER BY s.startTime")
+    List<Schedule> findByMovieAndDate(
+            @Param("movieId") Integer movieId,
+            @Param("status") Schedule.ScheduleStatus status,
+            @Param("date") LocalDate date
+    );
 
-    // Tìm suất chiếu đang hoạt động
-    List<Schedule> findByStatusAndStartTimeAfterOrderByStartTime(Schedule.ScheduleStatus status, LocalDateTime currentTime);
+    @Query("SELECT s FROM Schedule s WHERE s.movie.movieId = :movieId " +
+            "AND s.status = :status " +
+            "AND s.startTime >= :currentDateTime " +
+            "AND CAST(s.startTime AS DATE) = :currentDate " +
+            "ORDER BY s.startTime ASC")
+    List<Schedule> findAvailableSchedulesToday(
+            @Param("movieId") Integer movieId,
+            @Param("status") Schedule.ScheduleStatus status,
+            @Param("currentDateTime") LocalDateTime currentDateTime,
+            @Param("currentDate") LocalDate currentDate
+    );
+
+    @Query("SELECT s FROM Schedule s WHERE s.movie.movieId = :movieId " +
+            "AND s.status = :status " +
+            "AND s.startTime >= :startOfDay " +
+            "AND s.startTime < :startOfNextDay " +
+            "AND s.startTime >= :currentDateTime " +
+            "ORDER BY s.startTime ASC")
+    List<Schedule> findAvailableSchedulesTodayByRange(
+            @Param("movieId") Integer movieId,
+            @Param("status") Schedule.ScheduleStatus status,
+            @Param("currentDateTime") LocalDateTime currentDateTime,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("startOfNextDay") LocalDateTime startOfNextDay
+    );
 }

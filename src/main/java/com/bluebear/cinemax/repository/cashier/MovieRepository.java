@@ -14,12 +14,19 @@ import java.util.List;
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
-    Page<Movie> findAllByStatusOrderByMovieName(Movie.MovieStatus status, Pageable pageable);
+    // Sửa từ "Id" thành "MovieId" để khớp với tên field trong entity
+    List<Movie> findByMovieIdAndStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+            Integer movieId,
+            Movie.MovieStatus status,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 
-    // Tìm phim đang chiếu
-    List<Movie> findByStatusAndStartDateBeforeAndEndDateAfterOrderByMovieName(Movie.MovieStatus status, LocalDate currentDate1, LocalDate currentDate2);
-    // Tìm phim theo tên
-    List<Movie> findByMovieNameContainingIgnoreCaseAndStatus(String movieName, Movie.MovieStatus status);
+    List<Movie> findByStatusAndStartDateLessThanEqualAndEndDateGreaterThanEqual(
+            Movie.MovieStatus status,
+            LocalDate startDate,
+            LocalDate endDate
+    );
 
     // Tìm phim theo thể loại
     @Query("SELECT DISTINCT m FROM Movie m JOIN m.movieGenres mg WHERE mg.genre.genreId = :genreId AND m.status = :status")

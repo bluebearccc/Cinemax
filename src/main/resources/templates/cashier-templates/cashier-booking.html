@@ -18,50 +18,55 @@
         <div class="navbar-nav ms-auto">
             <span class="navbar-text me-3">
                 <i class="fas fa-user-circle me-1"></i>
-                Cashier: <span id="cashierName">Admin</span>
+                Cashier: <span>Admin</span>
             </span>
-            <button class="btn btn-outline-light btn-sm" onclick="logout()">
+            <a href="/cashier/" class="btn btn-outline-light btn-sm">
                 <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
-            </button>
+            </a>
         </div>
     </div>
 </nav>
+
 <div class="container-fluid py-4">
+    <!-- Step Indicator -->
     <div class="step-indicator">
-        <div class="step active" id="step1">
+        <div class="step" th:class="${currentStep >= 1} ? 'step active' : 'step'">
             <div class="step-circle">1</div>
             <small>Chọn Phim</small>
         </div>
-        <div class="step" id="step2">
+        <div class="step" th:class="${currentStep >= 2} ? 'step active' : 'step'">
             <div class="step-circle">2</div>
             <small>Chọn Suất</small>
         </div>
-        <div class="step" id="step3">
+        <div class="step" th:class="${currentStep >= 3} ? 'step active' : 'step'">
             <div class="step-circle">3</div>
             <small>Chọn Ghế</small>
         </div>
-        <div class="step" id="step4">
+        <div class="step" th:class="${currentStep >= 4} ? 'step active' : 'step'">
             <div class="step-circle">4</div>
             <small>Thông Tin</small>
         </div>
-        <div class="step" id="step5">
+        <div class="step" th:class="${currentStep >= 5} ? 'step active' : 'step'">
             <div class="step-circle">5</div>
             <small>Thanh Toán</small>
         </div>
     </div>
+
     <div class="row">
         <div class="col-lg-8">
-            <div class="card card-custom mb-4 step-content" id="movieSelection">
-                <div class="card-header"><h5 class="mb-0"><i class="fas fa-film me-2"></i>Đang Chiếu</h5></div>
+            <div class="card card-custom mb-4" th:if="${currentStep == 1}">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-film me-2"></i>Đang Chiếu</h5>
+                </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-4 mb-4" th:each="movie : ${movies}">
                             <a th:href="@{'/cashier/' + ${movie.movieId}}">
-                            <div class="card movie-card">
-                                    <img th:src="@{${movie.getImage()}}"  class="card-img-top" alt="Ảnh phim" style="height: 300px; object-fit: cover;">
+                                <div class="card movie-card">
+                                    <img th:src="@{${movie.getImage()}}" class="card-img-top" alt="Ảnh phim" style="height: 300px; object-fit: cover;">
                                     <div class="card-body">
                                         <h5 class="card-title" th:text="${movie.movieName}"></h5>
-                                        <p class="card-text" th:text="${movie.duration}"></p>
+                                        <p class="card-text" th:text="${movie.duration + ' phút'}"></p>
                                     </div>
                                 </div>
                             </a>
@@ -70,158 +75,265 @@
                 </div>
             </div>
 
-            <div class="card card-custom mb-4 step-content d-none" id="scheduleSelection">
+            <div class="card card-custom mb-4" th:if="${currentStep == 2}">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Chọn Suất Chiếu & Loại Phòng</h5>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="goBackToStep(1)">
+                    <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Chọn Suất Chiếu</h5>
+                    <a href="/cashier/" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-arrow-left me-1"></i>Chọn phim khác
-                    </button>
+                    </a>
                 </div>
                 <div class="card-body">
-                    <div id="selectedMovieDetails" class="mb-3"></div>
+                    <div class="mb-3">
+                        <h6 th:text="${selectedMovie.movieName}"></h6>
+                        <p class="text-muted" th:text="${selectedMovie.duration + ' phút'}"></p>
+                    </div>
                     <hr>
-                    <div id="scheduleList">
-                        <h6>Hôm nay - <span id="currentDate"></span></h6>
-                        <div class="row">
-                            <h6 class="mt-2 text-light"><i class="fas fa-couch me-2 text-primary"></i>Phòng chiếu thường</h6>
-                            <div class="col-md-3 mb-2">
-                                <button class="btn btn-outline-primary w-100" onclick="selectSchedule('09:00', 'A1', 'regular')">
-                                    09:00 <br><small>(Phòng A1)</small>
-                                </button>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <button class="btn btn-outline-primary w-100" onclick="selectSchedule('15:00', 'A2', 'regular')">
-                                    15:00 <br><small>(Phòng A2)</small>
-                                </button>
-                            </div>
+                    <h6>Hôm nay - <span th:text="${currentDate}"></span></h6>
 
-                            <h6 class="mt-3 text-light"><i class="fas fa-heart me-2 text-danger"></i>Phòng chiếu đôi (Sweetbox)</h6>
-                            <div class="col-md-3 mb-2">
-                                <button class="btn btn-outline-danger w-100" onclick="selectSchedule('18:00', 'C1', 'couple')">
-                                    18:00 <br><small>(Phòng C1)</small>
-                                </button>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <button class="btn btn-outline-danger w-100" onclick="selectSchedule('21:00', 'C2', 'couple')">
-                                    21:00 <br><small>(Phòng C2)</small>
-                                </button>
-                            </div>
+                    <!-- Debug: Show all schedules -->
+                    <div class="alert alert-info mb-3">
+                        <p><strong>Debug Info:</strong></p>
+                        <p>Total schedules: <span th:text="${schedules != null ? schedules.size() : 0}"></span></p>
+                        <div th:each="schedule, iterStat : ${schedules}">
+                            <small>
+                                Schedule [[${iterStat.index + 1}]]:
+                                Time = <span th:text="${schedule.startTime}"></span>,
+                                Room = <span th:text="${schedule.room.name}"></span>,
+                                Type = <span th:text="${schedule.room.typeOfRoom}"></span>
+                            </small>
                         </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-2" th:each="schedule : ${schedules}">
+                            <form action="/cashier/select-schedule" method="post">
+                                <input type="hidden" name="time" th:value="${#temporals.format(schedule.startTime, 'HH:mm')}">
+                                <input type="hidden" name="roomName" th:value="${schedule.room.name}">
+                                <input type="hidden" name="roomType" th:value="${schedule.room.typeOfRoom == 'Couple' ? 'couple' : 'regular'}">
+                                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleId}">
+                                <button type="submit" th:class="${schedule.getRoom().getTypeOfRoom() == 'Couple' ? 'btn btn-outline-danger w-100' : 'btn btn-outline-primary w-100'}">
+                                    <span th:text="${#temporals.format(schedule.getStartTime(), 'HH:mm')}"></span><br>
+                                    <small>
+                                        Phòng <span th:text="${schedule.room.name}"></span><br>
+                                        <span th:text="${schedule.room.typeOfRoom == 'Couple' ? 'Ghế đôi' : 'Ghế đơn'}"></span>
+                                    </small>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div th:if="${schedules == null or schedules.isEmpty()}" class="text-center py-4">
+                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
+                        <h5 class="text-muted">Không có suất chiếu</h5>
+                        <p class="text-muted">Phim này hiện tại không có suất chiếu nào.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="card card-custom mb-4 step-content d-none" id="seatSelection">
+            <div class="card card-custom mb-4" th:if="${currentStep == 3}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-couch me-2"></i>Chọn Ghế</h5>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="goBackToStep(2)">
+                    <a th:href="@{'/cashier/' + ${selectedMovie.movieId}}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-arrow-left me-1"></i>Chọn suất khác
-                    </button>
+                    </a>
                 </div>
                 <div class="card-body">
-                    <div class="screen mb-4">MÀN HÌNH</div>
-                    <div id="seatMap" class="text-center"></div>
-                    <div id="seatLegend" class="row mt-4 justify-content-center">
+                    <!-- Thông tin phim và suất chiếu -->
+                    <div class="mb-3">
+                        <h6 th:text="${selectedMovie.movieName}"></h6>
+                        <p class="text-muted">
+                            <span th:text="${selectedSchedule.time}"></span> -
+                            Phòng <span th:text="${selectedSchedule.roomName}"></span>
+                        </p>
                     </div>
-                    <div class="mt-4 text-center">
-                        <button class="btn btn-custom" id="continueToInfoBtn" onclick="goToNextStep()" disabled>
-                            <i class="fas fa-user-edit me-1"></i>Nhập thông tin
-                        </button>
+
+                    <div th:if="${availableSeats != null and !availableSeats.isEmpty()}">
+                        <form action="/cashier/select-seats" method="post" onsubmit="return validateSeatSelection()">
+                            <h6>Chọn ghế:</h6>
+                            <div class="row">
+                                <div class="col-md-2 mb-2" th:each="seat : ${availableSeats}">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="selectedSeats"
+                                               th:value="${seat.position}" th:id="'seat_' + ${seat.seatId}">
+                                        <label class="form-check-label" th:for="'seat_' + ${seat.seatId}">
+                                            <strong th:text="${seat.position}"></strong><br>
+                                            <small th:text="${seat.seatType}"></small><br>
+                                            <small class="text-success" th:text="${#numbers.formatDecimal(seat.unitPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></small>
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-warning btn-lg mt-4">
+                                <i class="fas fa-arrow-right me-2"></i>Tiếp tục
+                            </button>
+                        </form>
+                    </div>
+
+                    <div th:if="${availableSeats == null or availableSeats.isEmpty()}" class="text-center py-4">
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+                        <h5 class="text-warning">Không có ghế trống</h5>
+                        <p class="text-muted">Suất chiếu này đã hết ghế.</p>
                     </div>
                 </div>
             </div>
 
-            <div class="card card-custom mb-4 step-content d-none" id="customerInfo">
+            <div class="card card-custom mb-4" th:if="${currentStep == 4}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông Tin Khách Hàng</h5>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="goBackToStep(3)">
+                    <a href="/cashier/back-to-seats" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-arrow-left me-1"></i>Chọn lại ghế
-                    </button>
+                    </a>
                 </div>
                 <div class="card-body">
-                    <form id="customerForm">
+                    <!-- Thông tin phim và ghế đã chọn -->
+                    <div class="mb-4">
+                        <h6 th:text="${selectedMovie.movieName}"></h6>
+                        <p class="text-muted">
+                            <span th:text="${selectedSchedule.time}"></span> -
+                            Phòng <span th:text="${selectedSchedule.roomName}"></span><br>
+                            <strong>Ghế đã chọn:</strong>
+                            <span th:each="seat, iterStat : ${selectedSeats}">
+                                <span th:text="${seat}"></span><span th:if="${!iterStat.last}">, </span>
+                            </span>
+                        </p>
+                    </div>
+                    <hr>
+
+                    <form action="/cashier/customer-info" method="post" id="customerForm">
                         <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Họ và tên</label>
-                                <input type="text" class="form-control" id="customerName" required>
+                            <!-- Cột trái: Thông tin khách hàng -->
+                            <div class="col-md-6">
+                                <h6 class="mb-3"><i class="fas fa-user-circle me-2"></i>Thông tin khách hàng</h6>
+
+                                <!-- Tìm kiếm khách hàng -->
+                                <div class="mb-3">
+                                    <label class="form-label">Tìm khách hàng</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="customerSearch"
+                                               placeholder="Nhập email hoặc số điện thoại..." autocomplete="off">
+                                        <button type="button" class="btn btn-outline-warning" onclick="searchCustomer()">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                    <div id="searchResults" class="mt-2" style="display: none;"></div>
+                                </div>
+
+                                <div class="row">
+                                    <div class="col-md-6 mb-3">
+                                        <label for="customerName" class="form-label">Họ tên *</label>
+                                        <input type="text" class="form-control" id="customerName" name="customerName" required>
+                                    </div>
+                                    <div class="col-md-6 mb-3">
+                                        <label for="customerPhone" class="form-label">Số điện thoại *</label>
+                                        <input type="tel" class="form-control" id="customerPhone" name="customerPhone" required>
+                                    </div>
+                                </div>
+
+                                <div class="mb-3">
+                                    <label for="customerEmail" class="form-label">Email</label>
+                                    <input type="email" class="form-control" id="customerEmail" name="customerEmail">
+                                </div>
+
+                                <div class="mb-3">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="isNewCustomer" name="isNewCustomer">
+                                        <label class="form-check-label" for="isNewCustomer">
+                                            Khách hàng mới (tạo tài khoản)
+                                        </label>
+                                    </div>
+                                </div>
+
+                                <!-- Áp dụng khuyến mãi -->
+                                <div class="mb-3">
+                                    <label class="form-label">Khuyến mãi</label>
+                                    <select class="form-control" name="promotionId" id="promotionSelect">
+                                        <option value="">Không áp dụng</option>
+                                        <option value="1">Giảm 10% - Khách hàng VIP</option>
+                                        <option value="2">Giảm 5% - Sinh viên</option>
+                                        <option value="3">Combo đặc biệt</option>
+                                    </select>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Số điện thoại</label>
-                                <input type="tel" class="form-control" id="customerPhone" required>
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Email</label>
-                                <input type="email" class="form-control" id="customerEmail">
+
+                            <!-- Cột phải: Chọn đồ ăn -->
+                            <div class="col-md-6">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                    <h6><i class="fas fa-hamburger me-2"></i>Đồ ăn & Nước uống</h6>
+                                    <button type="button" class="btn btn-sm btn-outline-warning" data-bs-toggle="modal" data-bs-target="#foodModal">
+                                        <i class="fas fa-plus me-1"></i>Thêm
+                                    </button>
+                                </div>
+
+                                <!-- Danh sách đồ ăn đã chọn -->
+                                <div id="selectedFoodList" class="selected-food-list">
+                                    <div class="text-center text-muted py-3" id="noFoodMessage">
+                                        <i class="fas fa-utensils fa-2x mb-2"></i>
+                                        <p>Chưa chọn đồ ăn nào</p>
+                                        <small>Nhấn "Thêm" để chọn đồ ăn</small>
+                                    </div>
+                                </div>
+
+                                <!-- Ghi chú -->
+                                <div class="mt-3">
+                                    <label for="orderNote" class="form-label">Ghi chú</label>
+                                    <textarea class="form-control" id="orderNote" name="orderNote" rows="3"
+                                              placeholder="Ghi chú đặc biệt..."></textarea>
+                                </div>
                             </div>
                         </div>
-                    </form>
-                    <div class="mt-4">
-                        <h6><i class="fas fa-utensils me-2"></i>Bắp nước (tùy chọn)</h6>
-                        <button class="btn btn-custom mb-3" data-bs-toggle="modal" data-bs-target="#foodModal">
-                            <i class="fas fa-plus me-1"></i>Chọn đồ ăn & thức uống
-                        </button>
-                        <div id="selectedFoodList" class="selected-food-list"></div>
-                    </div>
-                    <div class="mt-4">
-                        <h6><i class="fas fa-ticket-alt me-2"></i>Voucher giảm giá</h6>
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="voucherCode" placeholder="Nhập mã voucher">
-                            <button class="btn btn-custom" type="button" onclick="applyVoucher()">
-                                <i class="fas fa-check me-1"></i>Áp dụng
+
+                        <hr class="my-4">
+
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-arrow-right me-2"></i>Tiếp tục thanh toán
                             </button>
                         </div>
-                        <div id="voucherInfo" class="mt-2"></div>
-                    </div>
-                    <div class="mt-4 text-center">
-                        <button class="btn btn-custom" onclick="goToNextStep()">
-                            <i class="fas fa-credit-card me-1"></i>Đi đến thanh toán
-                        </button>
-                    </div>
+                    </form>
                 </div>
             </div>
 
-            <div class="card card-custom mb-4 step-content d-none" id="paymentSection">
-                <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-credit-card me-2"></i>Thanh Toán</h5>
-                    <button class="btn btn-outline-secondary btn-sm" onclick="goBackToStep(4)">
-                        <i class="fas fa-arrow-left me-1"></i>Quay lại
-                    </button>
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <div class="payment-method" onclick="selectPayment('cash')">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-money-bill-wave fa-2x text-success me-3"></i>
-                                    <div>
-                                        <h6 class="mb-1">Tiền mặt</h6>
-                                        <small class="text-muted">Thanh toán trực tiếp</small>
+            <!-- Food Selection Modal -->
+            <div class="modal fade modal-custom" id="foodModal" tabindex="-1" aria-labelledby="foodModalLabel" aria-hidden="true">
+                <div class="modal-dialog modal-lg">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="foodModalLabel">
+                                <i class="fas fa-hamburger me-2"></i>Chọn đồ ăn & nước uống
+                            </h5>
+                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="row" th:if="${foodMenu != null}">
+                                <div class="col-md-6 mb-3" th:each="food : ${foodMenu}">
+                                    <div class="food-modal-item">
+                                        <div class="row align-items-center">
+                                            <div class="col-3">
+                                                <img src="https://via.placeholder.com/80x80?text=Food"
+                                                     class="food-image" alt="Food">
+                                            </div>
+                                            <div class="col-6">
+                                                <h6 th:text="${food.name}" class="mb-1"></h6>
+                                                <p class="text-warning mb-0" th:text="${#numbers.formatDecimal(food.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></p>
+                                            </div>
+                                            <div class="col-3">
+                                                <div class="quantity-controls">
+                                                    <button type="button" class="quantity-btn" th:onclick="'decreaseQuantity(' + ${food.id} + ')'">-</button>
+                                                    <input type="number" th:id="'quantity_' + ${food.id}" class="quantity-input" value="0" min="0" max="10">
+                                                    <button type="button" class="quantity-btn" th:onclick="'increaseQuantity(' + ${food.id} + ')'">+</button>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-md-6">
-                            <div class="payment-method" onclick="selectPayment('vnpay')">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-mobile-alt fa-2x text-primary me-3"></i>
-                                    <div>
-                                        <h6 class="mb-1">VNPay</h6>
-                                        <small class="text-muted">Thanh toán qua VNPay</small>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div id="cashPayment" class="mt-4 d-none">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Tiền khách đưa</label>
-                                <input type="number" class="form-control" id="cashReceived" placeholder="0">
-                            </div>
-                            <div class="col-md-6">
-                                <label class="form-label">Tiền thừa</label>
-                                <input type="number" class="form-control" id="changeAmount" readonly>
-                            </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                            <button type="button" class="btn btn-warning" onclick="addSelectedFood()">
+                                <i class="fas fa-check me-2"></i>Thêm vào đơn hàng
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -229,391 +341,83 @@
         </div>
 
         <div class="col-lg-4">
-            <div class="card card-custom sticky-top">
-                <div class="card-header"><h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Tóm tắt đơn hàng</h5></div>
+            <div class="card card-custom">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Chi tiết giá</h5>
+                </div>
                 <div class="card-body">
-                    <div id="orderSummary">
-                        <div id="initialSummary" class="text-center text-muted">
-                            <i class="fas fa-info-circle me-2"></i>
-                            <p>Chưa chọn phim</p>
-                        </div>
-                        <div id="fullSummary" class="d-none">
-                            <h6 id="summaryMovieName">Tên phim</h6>
-                            <p class="text-muted mb-1"><small>Thời lượng: <span id="summaryDuration">0</span> phút</small></p>
-                            <div id="summarySchedule" class="mb-2">
-                                <p class="text-muted mb-1"><small>Suất chiếu: <span id="summaryScheduleTime"></span></small></p>
-                                <p class="text-muted mb-1"><small>Phòng: <span id="summaryRoomNumber"></span></small></p>
-                            </div>
-                            <div id="summarySeats" class="mb-2">
-                                <p class="text-muted mb-1"><small>Ghế: <span id="summarySeatNumbers"></span></small></p>
+                    <div th:if="${priceBreakdown != null}">
+                        <div th:if="${priceBreakdown.ticketItems != null and !priceBreakdown.ticketItems.isEmpty()}">
+                            <h6 class="text-muted mb-2">Vé xem phim:</h6>
+                            <div class="d-flex justify-content-between mb-1" th:each="item : ${priceBreakdown.ticketItems}">
+                                <span th:text="${item.description}"></span>
+                                <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                             </div>
                         </div>
+
+                        <div th:if="${priceBreakdown.foodItems != null and !priceBreakdown.foodItems.isEmpty()}" class="mt-3">
+                            <h6 class="text-muted mb-2">Bắp nước:</h6>
+                            <div class="d-flex justify-content-between mb-1" th:each="item : ${priceBreakdown.foodItems}">
+                                <span th:text="${item.description}"></span>
+                                <span th:text="${#numbers.formatDecimal(item.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Total -->
+                        <hr class="my-3">
+                        <div class="d-flex justify-content-between">
+                            <strong>Tổng cộng:</strong>
+                            <strong class="text-warning" th:text="${#numbers.formatDecimal(priceBreakdown.total, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
+                        </div>
                     </div>
-                    <hr>
-                    <div class="checkout-summary">
-                        <div class="d-flex justify-content-between mb-2"><span>Tổng tiền vé:</span><span id="ticketTotal">0₫</span></div>
-                        <div class="d-flex justify-content-between mb-2"><span>Bắp nước:</span><span id="foodTotal">0₫</span></div>
-                        <div class="d-flex justify-content-between mb-2"><span>Giảm giá:</span><span id="discountAmount" class="text-success">-0₫</span></div>
-                        <hr>
-                        <div class="d-flex justify-content-between align-items-center"><strong>Tổng cộng:</strong><strong class="price-highlight" id="grandTotal">0₫</strong></div>
-                    </div>
-                    <div class="mt-4">
-                        <button class="btn btn-gold w-100" id="checkoutButton" onclick="processCheckout()" disabled>
-                            <i class="fas fa-check-circle me-1"></i>Thanh Toán
-                        </button>
+
+                    <div th:unless="${priceBreakdown != null}" class="text-center text-muted py-4">
+                        <i class="fas fa-calculator fa-2x mb-3"></i>
+                        <p>Chưa có thông tin giá</p>
+                        <small>Vui lòng chọn ghế để xem chi tiết</small>
                     </div>
                 </div>
             </div>
         </div>
+
     </div>
 </div>
-
-<div class="modal fade modal-custom" id="foodModal" tabindex="-1">
-    <div class="modal-dialog modal-lg modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-utensils me-2"></i>Chọn Bắp Nước</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" id="foodModalBody">
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Hủy</button>
-                <button type="button" class="btn btn-custom" onclick="confirmFoodSelection()">Xác nhận</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<div class="modal fade modal-custom" id="successModal" tabindex="-1">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content text-center">
-            <div class="modal-body p-4">
-                <i class="fas fa-check-circle fa-4x text-success mb-3"></i>
-                <h5 class="modal-title mb-3">Thanh toán thành công!</h5>
-                <p>Cảm ơn quý khách đã sử dụng dịch vụ của Cinemax.</p>
-                <button type="button" class="btn btn-custom mt-2" onclick="resetSystem()">Giao dịch mới</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+</body>
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        // ===================================================================================
-        // STATE & CONFIGURATION
-        // ===================================================================================
-        let currentStep = 1;
-        let order = {};
-
-        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-
-        // ===================================================================================
-        // HELPER FUNCTIONS
-        // ===================================================================================
-        const formatCurrency = (amount) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
-
-        const resetSystem = () => location.reload();
-
-        const updateStepIndicator = (targetStep) => {
-            document.querySelectorAll('.step').forEach((step, index) => {
-                step.classList.remove('active', 'completed');
-                if (index < targetStep - 1) {
-                    step.classList.add('completed');
-                } else if (index === targetStep - 1) {
-                    step.classList.add('active');
+        const seats = document.querySelectorAll('.seat.available input[type="checkbox"]');
+        seats.forEach(seat => {
+            seat.addEventListener('change', function() {
+                if (this.checked) {
+                    this.parentElement.classList.add('selected');
+                    this.parentElement.classList.remove('available');
+                } else {
+                    this.parentElement.classList.remove('selected');
+                    this.parentElement.classList.add('available');
                 }
             });
-        };
-
-        const showStepContent = (stepNumber) => {
-            document.querySelectorAll('.step-content').forEach(content => content.classList.add('d-none'));
-            const stepIdMap = ['movieSelection', 'scheduleSelection', 'seatSelection', 'customerInfo', 'paymentSection'];
-            const contentToShow = document.getElementById(stepIdMap[stepNumber - 1]);
-            if (contentToShow) {
-                contentToShow.classList.remove('d-none');
-            }
-        };
-
-        const goToStep = (stepNumber) => {
-            currentStep = stepNumber;
-            updateStepIndicator(currentStep);
-            showStepContent(currentStep);
-        };
-
-        window.goBackToStep = (step) => goToStep(step);
-
-        window.selectSchedule = (time, roomName, roomType) => {
-            order.schedule = time;
-            order.room = { name: roomName, type: roomType };
-            order.seats = [];
-
-            document.getElementById('summaryScheduleTime').textContent = time;
-            const roomTypeText = roomType === 'couple' ? 'Phòng đôi' : 'Phòng thường';
-            document.getElementById('summaryRoomNumber').textContent = `${roomName} (${roomTypeText})`;
-
-            generateSeatMap(roomName, roomType);
-            updateSeatLegend(roomType);
-            updateTotals();
-            goToStep(3);
-        };
-
-        const generateSeatMap = (roomName, roomType) => {
-            const seatMap = document.getElementById('seatMap');
-            seatMap.innerHTML = '';
-            const prices = { regular: 75000, vip: 95000, couple: 190000 };
-
-            if (roomType === 'couple') {
-                const rows = 5;
-                const cols = 8;
-
-                const occupiedSeats = new Set();
-                for (let i = 0; i < (rows * (cols / 2) * 0.2); i++) { // ~20% occupied
-                    const randomRow = String.fromCharCode(65 + Math.floor(Math.random() * rows));
-                    const randomCol = (Math.floor(Math.random() * (cols / 2)) * 2) + 1;
-                    occupiedSeats.add(`${randomRow}${randomCol}-${randomCol + 1}`);
-                }
-
-                for (let i = 0; i < rows; i++) {
-                    const rowChar = String.fromCharCode(65 + i);
-                    const rowDiv = document.createElement('div');
-                    for (let j = 1; j <= cols; j += 2) {
-                        const seat = document.createElement('div');
-                        const seatId = `${rowChar}${j}-${j + 1}`;
-                        seat.className = 'seat couple';
-                        seat.textContent = seatId;
-
-                        if (occupiedSeats.has(seatId)) {
-                            seat.classList.add('occupied');
-                        } else {
-                            seat.classList.add('available');
-                            seat.onclick = () => toggleSeatSelection(seat, seatId, prices.couple);
-                        }
-                        rowDiv.appendChild(seat);
-                    }
-                    seatMap.appendChild(rowDiv);
-                }
-
-            } else { // 'regular' room type
-                const rows = 8;
-                const cols = 12;
-
-                const occupiedSeats = new Set();
-                for (let i = 0; i < (rows * cols * 0.2); i++) { // ~20% occupied
-                    const randomRow = String.fromCharCode(65 + Math.floor(Math.random() * rows));
-                    const randomCol = Math.floor(Math.random() * cols) + 1;
-                    occupiedSeats.add(`${randomRow}${randomCol}`);
-                }
-
-                for (let i = 0; i < rows; i++) {
-                    const rowChar = String.fromCharCode(65 + i);
-                    const rowDiv = document.createElement('div');
-                    for (let j = 1; j <= cols; j++) {
-                        const seat = document.createElement('div');
-                        const seatId = `${rowChar}${j}`;
-                        let price;
-                        let typeClass;
-
-                        if (i < 4) { // Regular seats
-                            price = prices.regular;
-                            typeClass = 'regular';
-                        } else { // VIP seats
-                            price = prices.vip;
-                            typeClass = 'vip';
-                        }
-
-                        seat.className = 'seat';
-                        seat.classList.add(typeClass);
-                        seat.textContent = seatId;
-
-                        if (occupiedSeats.has(seatId)) {
-                            seat.classList.add('occupied');
-                        } else {
-                            seat.classList.add('available');
-                            seat.onclick = () => toggleSeatSelection(seat, seatId, price);
-                        }
-                        rowDiv.appendChild(seat);
-                    }
-                    seatMap.appendChild(rowDiv);
-                }
-            }
-        };
-
-        const updateSeatLegend = (roomType) => {
-            const legendDiv = document.getElementById('seatLegend');
-            let legendItems = '';
-
-            if (roomType === 'couple') {
-                legendItems = `<div class="col-auto text-center px-2"><span class="seat available couple"></span><br><small>Ghế đôi</small></div>`;
-            } else { // 'regular'
-                legendItems = `
-                <div class="col-auto text-center px-2"><span class="seat available"></span><br><small>Thường</small></div>
-                <div class="col-auto text-center px-2"><span class="seat available vip"></span><br><small>VIP</small></div>
-            `;
-            }
-
-            legendItems += `
-            <div class="col-auto text-center px-2"><span class="seat selected"></span><br><small>Đang chọn</small></div>
-            <div class="col-auto text-center px-2"><span class="seat occupied"></span><br><small>Đã bán</small></div>
-        `;
-
-            legendDiv.innerHTML = legendItems;
-        };
-
-        const toggleSeatSelection = (seatElement, seatId, price) => {
-            const seatIndex = order.seats.findIndex(s => s.id === seatId);
-            if (seatIndex > -1) {
-                order.seats.splice(seatIndex, 1);
-                seatElement.classList.remove('selected');
-            } else {
-                order.seats.push({ id: seatId, price });
-                seatElement.classList.add('selected');
-            }
-            updateTotals();
-        };
-
-        window.goToNextStep = () => {
-            if (currentStep === 4) { // from Info to Payment
-                const name = document.getElementById('customerName').value.trim();
-                const phone = document.getElementById('customerPhone').value.trim();
-                if (!name || !phone) {
-                    alert('Vui lòng nhập đầy đủ Họ tên và Số điện thoại.');
-                    return;
-                }
-                order.customer = { name, phone, email: document.getElementById('customerEmail').value };
-            }
-            if (currentStep < 5) {
-                goToStep(currentStep + 1);
-            }
-        };
-
-        // ===================================================================================
-        // FOOD, VOUCHER, AND PAYMENT
-        // ===================================================================================
-
-        const loadFoodModal = () => {
-            const modalBody = document.getElementById('foodModalBody');
-            modalBody.innerHTML = '';
-            foodMenu.forEach(item => {
-                const currentQty = order.food.find(f => f.id === item.id)?.quantity || 0;
-                modalBody.innerHTML += `
-                <div class="food-modal-item d-flex align-items-center justify-content-between">
-                    <div class="d-flex align-items-center">
-                        <img src="${item.image}" alt="${item.name}" class="food-image me-3">
-                        <div>
-                            <h6 class="mb-1">${item.name}</h6>
-                            <p class="mb-0 text-warning">${formatCurrency(item.price)}</p>
-                        </div>
-                    </div>
-                    <div class="quantity-controls">
-                        <button class="quantity-btn" onclick="updateFoodQuantity(${item.id}, -1)">-</button>
-                        <input type="number" class="quantity-input" id="food-qty-${item.id}" value="${currentQty}" min="0">
-                        <button class="quantity-btn" onclick="updateFoodQuantity(${item.id}, 1)">+</button>
-                    </div>
-                </div>`;
-            });
-        };
-
-        window.updateFoodQuantity = (foodId, change) => {
-            const input = document.getElementById(`food-qty-${foodId}`);
-            let newValue = parseInt(input.value) + change;
-            if (newValue < 0) newValue = 0;
-            input.value = newValue;
-        };
-
-        window.confirmFoodSelection = () => {
-            order.food = [];
-            foodMenu.forEach(item => {
-                const quantity = parseInt(document.getElementById(`food-qty-${item.id}`).value);
-                if (quantity > 0) {
-                    order.food.push({ ...item, quantity });
-                }
-            });
-            bootstrap.Modal.getInstance(document.getElementById('foodModal')).hide();
-            updateSelectedFoodList();
-            updateTotals();
-        };
-
-        const updateSelectedFoodList = () => {
-            const listDiv = document.getElementById('selectedFoodList');
-            listDiv.innerHTML = '';
-            if (order.food.length === 0) {
-                listDiv.innerHTML = '<p class="text-muted small">Chưa chọn sản phẩm nào.</p>';
-                return;
-            }
-            order.food.forEach(item => {
-                listDiv.innerHTML += `
-                <div class="selected-food-item">
-                    <span>${item.name} (x${item.quantity})</span>
-                    <span>${formatCurrency(item.price * item.quantity)}</span>
-                </div>`;
-            });
-        };
-
-        window.applyVoucher = () => {
-            const code = document.getElementById('voucherCode').value.trim().toUpperCase();
-            const voucherInfoDiv = document.getElementById('voucherInfo');
-            if (code === 'GEMINI10') {
-                order.voucher = { code, discountPercent: 10 };
-                voucherInfoDiv.innerHTML = `<span class="text-success">Áp dụng thành công voucher giảm 10% tổng hóa đơn!</span>`;
-            } else {
-                order.voucher = null;
-                voucherInfoDiv.innerHTML = `<span class="text-danger">Mã voucher không hợp lệ.</span>`;
-            }
-            updateTotals();
-        };
-
-        window.selectPayment = (method) => {
-            order.paymentMethod = method;
-            document.querySelectorAll('.payment-method').forEach(el => el.classList.remove('selected'));
-            event.currentTarget.classList.add('selected');
-            document.getElementById('cashPayment').classList.toggle('d-none', method !== 'cash');
-        };
-
-        document.getElementById('cashReceived').addEventListener('input', (e) => {
-            const cashReceived = parseFloat(e.target.value) || 0;
-            const change = cashReceived - order.totals.grandTotal;
-            document.getElementById('changeAmount').value = change >= 0 ? formatCurrency(change) : formatCurrency(0);
         });
-
-        window.processCheckout = () => {
-            if(!order.paymentMethod) { alert("Vui lòng chọn phương thức thanh toán."); return; }
-            if(order.paymentMethod === 'cash') {
-                const cashReceived = parseFloat(document.getElementById('cashReceived').value) || 0;
-                if(cashReceived < order.totals.grandTotal) { alert("Tiền khách đưa không đủ!"); return; }
-            }
-            console.log("FINAL ORDER:", order);
-            successModal.show();
-        };
-
-
-        const updateTotals = () => {
-            order.totals.tickets = order.seats.reduce((sum, seat) => sum + seat.price, 0);
-            document.getElementById('ticketTotal').textContent = formatCurrency(order.totals.tickets);
-            document.getElementById('summarySeatNumbers').textContent = order.seats.map(s => s.id).join(', ');
-
-            order.totals.food = order.food.reduce((sum, item) => sum + (item.price * item.quantity), 0);
-            document.getElementById('foodTotal').textContent = formatCurrency(order.totals.food);
-
-            let preDiscountTotal = order.totals.tickets + order.totals.food;
-            order.totals.discount = order.voucher ? preDiscountTotal * (order.voucher.discountPercent / 100) : 0;
-            document.getElementById('discountAmount').textContent = `-${formatCurrency(order.totals.discount)}`;
-
-            order.totals.grandTotal = preDiscountTotal - order.totals.discount;
-            document.getElementById('grandTotal').textContent = formatCurrency(order.totals.grandTotal);
-
-            document.getElementById('continueToInfoBtn').disabled = order.seats.length === 0;
-            document.getElementById('checkoutButton').disabled = order.seats.length === 0;
-        };
-
-        window.logout = resetSystem;
-        document.getElementById('currentDate').textContent = new Date().toLocaleDateString('vi-VN', { day: 'numeric', month: 'long', year: 'numeric' });
-        document.getElementById('foodModal').addEventListener('show.bs.modal', loadFoodModal);
-        updateSelectedFoodList();
-        updateTotals();
     });
-</script>
 
-</body>
+    function increaseQuantity(button) {
+        const input = button.previousElementSibling;
+        input.value = parseInt(input.value) + 1;
+    }
+
+    function decreaseQuantity(button) {
+        const input = button.nextElementSibling;
+        if (parseInt(input.value) > 0) {
+            input.value = parseInt(input.value) - 1;
+        }
+    }
+
+    function validateSeatSelection() {
+        const selectedSeats = document.querySelectorAll('input[name="selectedSeats"]:checked');
+        if (selectedSeats.length === 0) {
+            alert('Vui lòng chọn ít nhất một ghế!');
+            return false;
+        }
+        return true;
+    }
+</script>
 </html>

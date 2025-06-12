@@ -1,6 +1,5 @@
 package com.bluebear.cinemax.dto.cashier;
 
-import com.bluebear.cinemax.entity.Movie;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -25,14 +24,10 @@ public class MovieDTO {
     private String actor;
     private LocalDate startDate;
     private LocalDate endDate;
-    private MovieStatus status;
-    private List<Integer> genreIds;        // Chỉ truyền ID hoặc tên genre
-    private List<Integer> scheduleIds;     // Tùy frontend cần gì
-    private List<Integer> feedbackIds;     // Hoặc có thể tạo thêm DTO khác
-
-    public void setStatus(Movie.MovieStatus status) {
-        this.status = MovieStatus.valueOf(status.name());
-    }
+    private String status;
+    private List<Integer> genreIds;
+    private List<Integer> scheduleIds;
+    private List<Integer> feedbackIds;
 
     public enum MovieStatus {
         Active, Removed

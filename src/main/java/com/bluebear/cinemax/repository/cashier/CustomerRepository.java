@@ -21,4 +21,6 @@ public interface CustomerRepository extends JpaRepository<Customer, Integer> {
 
     // Tìm khách hàng có tài khoản active
     List<Customer> findByAccount_Status(Account.AccountStatus status);
+
+    List<Customer> findByFullNameContainingOrPhoneContaining(String term, String term1);
 }
