@@ -1,0 +1,53 @@
+package com.bluebear.cinemax.service.staff;
+
+import com.bluebear.cinemax.repository.staff.Detail_FDRepository;
+import com.bluebear.cinemax.repository.staff.TheaterStockRepository;
+import com.bluebear.cinemax.entity.TheaterStock;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.stereotype.Service;
+
+import java.util.List;
+
+@Service
+public class TheaterStockServiceImpl implements TheaterStockService {
+    @Autowired
+    TheaterStockRepository theaterStockRepository;
+    @Autowired
+    private Detail_FDRepository detail_FDRepository;
+
+    public List<TheaterStock> findByTheaterId(Integer theaterId) {
+        return theaterStockRepository.findByTheater_TheaterId(theaterId);
+    }
+
+    public TheaterStock getTheaterStockById(Integer id) {
+        return theaterStockRepository.findById(id).orElse(null);
+    }
+
+    public void saveTheaterStock(TheaterStock theaterStock) {
+        theaterStockRepository.save(theaterStock);
+    }
+
+    public List<TheaterStock> findAllTheaterStock() {
+        return theaterStockRepository.findAll();
+    }
+
+    public List<TheaterStock> findByItemName(String itemName, Integer theaterId){
+        return theaterStockRepository.findByItemNameContainingIgnoreCase(itemName, theaterId);
+    }
+
+    @Override
+    public TheaterStock findById(Integer id) {
+        return theaterStockRepository.findById(id).orElse(null);
+    }
+
+    public boolean isDeleted(Integer id){
+        try{
+            theaterStockRepository.deleteById(id);
+            return true;
+        } catch (DataIntegrityViolationException e) {
+            return false;
+        }
+    }
+}
+
