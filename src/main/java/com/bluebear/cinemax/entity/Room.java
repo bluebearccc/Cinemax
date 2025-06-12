@@ -5,6 +5,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,4 +35,6 @@ public class Room {
     @Column(name = "TypeOfRoom", length = 20, nullable = false)
     private String typeOfRoom;
 
+    @OneToMany(mappedBy = "room")
+    private Set<Schedule> schedule;
 }

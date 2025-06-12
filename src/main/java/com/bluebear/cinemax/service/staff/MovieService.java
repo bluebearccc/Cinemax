@@ -9,4 +9,6 @@ public interface MovieService {
     public List<Movie> findAllShowingMovies();
 
     public List<Movie> searchMovieByName(String name);
+
+    public Movie getMovieById(Integer id);
 }

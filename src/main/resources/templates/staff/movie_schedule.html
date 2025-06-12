@@ -43,8 +43,10 @@
 
         <div th:each="x : ${movies}" class="movie-column">
             <div class="movie-card">
-                <div class="movie-poster"><img th:src="${x.image}" alt="Movie Poster"></div>
-                <div class="movie-title" th:text="${x.movieName}"></div>
+                <a th:href="@{/movie_schedule/show_schedule(movieId=${x.movieId})}">
+                    <div class="movie-poster"><img th:src="${x.image}" alt="Movie Poster"></div>
+                    <div class="movie-title" th:text="${x.movieName}"></div>
+                </a>
             </div>
         </div>
     </div>

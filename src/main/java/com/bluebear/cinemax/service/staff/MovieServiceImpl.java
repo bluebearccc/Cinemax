@@ -20,4 +20,9 @@ public class MovieServiceImpl implements MovieService{
     public List<Movie> searchMovieByName(String name) {
         return movieRepository.findAllByMovieName(name);
     }
+
+    @Override
+    public Movie getMovieById(Integer id) {
+        return movieRepository.findById(id).orElse(null);
+    }
 }

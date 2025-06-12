@@ -66,4 +66,7 @@ public class Movie {
 
     @OneToMany(mappedBy = "movie")
     private Set<Movie_Genre> movie_Genre;
+
+    @OneToMany(mappedBy = "movie")
+    private Set<Schedule> schedule;
 }

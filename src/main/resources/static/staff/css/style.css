@@ -311,7 +311,10 @@ a.navbar-brand u, .add-new-item {
     overflow: hidden;
     width: 100%; /* Card sẽ lấp đầy cột chứa nó */
 }
-
+.movie-card a {
+    text-decoration: none;
+    color: inherit; /* Giữ lại màu chữ được định nghĩa cho movie-title */
+}
 .movie-card:hover {
     transform: translateY(-5px);
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
