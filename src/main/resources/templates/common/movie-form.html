@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+  <title>Add/Edit Movie</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-4">
+  <h2 th:text="${movie.id != null} ? 'Edit Movie' : 'Add New Movie'"></h2>
+
+  <form th:action="@{/Movie/save}" th:object="${movie}" method="post">
+    <input type="hidden" th:field="*{id}"/>
+
+    <div class="mb-3">
+      <label class="form-label">Title</label>
+      <input type="text" class="form-control" th:field="*{movieName}" required>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Description</label>
+      <textarea class="form-control" th:field="*{description}" rows="3"></textarea>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Image URL</label>
+      <input type="text" class="form-control" th:field="*{imageUrl}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Studio</label>
+      <input type="text" class="form-control" th:field="*{studio}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Genre</label>
+      <input type="text" class="form-control" th:field="*{genre}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Duration (minutes)</label>
+      <input type="number" class="form-control" th:field="*{duration}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Trailer URL</label>
+      <input type="text" class="form-control" th:field="*{trailerUrl}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Rating</label>
+      <input type="number" min="1" max="10" class="form-control" th:field="*{movieRate}">
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label">Actors</label>
+      <input type="text" class="form-control" th:field="*{actor}">
+    </div>
+
+    <button type="submit" class="btn btn-primary">Save</button>
+    <a th:href="@{/Movie/index}" class="btn btn-secondary">Back</a>
+  </form>
+</div>
+</body>
+</html>
