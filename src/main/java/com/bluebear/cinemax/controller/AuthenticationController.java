@@ -3,22 +3,23 @@ package com.bluebear.cinemax.controller;
 import com.bluebear.cinemax.dto.AccountDTO;
 import com.bluebear.cinemax.dto.CustomerDTO;
 import com.bluebear.cinemax.dto.ForgotPasswordDTO;
+import com.bluebear.cinemax.dto.VerifyTokenDTO;
 import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
-import com.bluebear.cinemax.repository.ForgotPasswordRepository;
-import com.bluebear.cinemax.service.*;
+import com.bluebear.cinemax.service.account.AccountService;
+import com.bluebear.cinemax.service.customer.CustomerService;
+import com.bluebear.cinemax.service.email.EmailService;
+import com.bluebear.cinemax.service.employee.EmployeeService;
+import com.bluebear.cinemax.service.forgotpassword.ForgotPasswordService;
+import com.bluebear.cinemax.service.verifytoken.VerifyTokenService;
 import jakarta.servlet.http.HttpSession;
-import lombok.Builder;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Random;
+import java.util.*;
 
 @Controller
 @RequestMapping
@@ -34,6 +35,9 @@ public class AuthenticationController {
     private ForgotPasswordService forgotPasswordService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private VerifyTokenService verifyTokenService;
+
 
     @GetMapping("/login")
     public String login() {
@@ -79,17 +83,42 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public String register(@RequestParam("email") String email, @RequestParam("password") String password, @RequestParam("fullName") String fullName, Model model, HttpSession session) {
-        AccountDTO account = accountService.findAccountByEmail(email);
+        AccountDTO account = accountService.findAccountByEmail(email.trim());
         if (account != null) {
             model.addAttribute("error", "Existed User");
             return "common/register";
         } else {
-            AccountDTO accountDTO = AccountDTO.builder().email(email.trim()).password(password.trim()).role(Role.Customer).status(Account_Status.Active).build();
+            String token = UUID.randomUUID().toString();
+            VerifyTokenDTO verifyTokenDTO = VerifyTokenDTO.builder().email(email.trim()).token(token).expiresAt(new Date(System.currentTimeMillis() + 5 * 60 * 1000)).fullName(fullName.trim()).password(password.trim()).build();
+            verifyTokenService.create(verifyTokenDTO);
+            String verifyLink = "http://localhost:8080/verifytoken?token=" + token;
+            String subject = "Email Verification";
+            String content = "Hi, please verify your email by clicking this link: " + verifyLink;
+            emailService.sendMailTime(email, subject, content);
+            model.addAttribute("inform", "Verification email sent. Please check your inbox.");
+            return "common/register";
+        }
+    }
+
+    @GetMapping("/verifytoken")
+    public String verifyToken(@RequestParam("token") String token, HttpSession session, Model model) {
+        VerifyTokenDTO verifyTokenDTO = verifyTokenService.findByToken(token);
+        if (verifyTokenDTO == null) {
+            model.addAttribute("error", "Invalid token");
+            return "common/register";
+        } else if (verifyTokenDTO.getExpiresAt().before(new Date(System.currentTimeMillis()))) {
+            verifyTokenService.deleteTokenByEmail(verifyTokenDTO.getEmail());
+            model.addAttribute("error", "Expired token");
+            return "common/register";
+        }
+        else {
+            AccountDTO accountDTO = new AccountDTO(verifyTokenDTO.getEmail(), verifyTokenDTO.getPassword(), Role.Customer, Account_Status.Active);
             AccountDTO accountDTO1 = accountService.save(accountDTO);
-            session.setAttribute("account", accountDTO);
-            CustomerDTO customerDTO = CustomerDTO.builder().fullName(fullName.trim()).accountID(accountDTO1.getId()).build();
+            session.setAttribute("account", accountDTO1);
+            CustomerDTO customerDTO = CustomerDTO.builder().accountID(accountDTO1.getId()).fullName(verifyTokenDTO.getFullName()).build();
             CustomerDTO customerDTO1 = customerService.save(customerDTO);
             session.setAttribute("customer", customerDTO1);
+            verifyTokenService.deleteTokenByEmail(verifyTokenDTO.getEmail());
             return "redirect:/home";
         }
     }

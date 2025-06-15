@@ -20,7 +20,7 @@ public class Account {
     @Column(unique = true, name = "Email")
     private String email;
 
-    @Column(nullable = true, name = "[Password]")
+    @Column(nullable = false, name = "[Password]")
     private String password;
 
     @Enumerated(EnumType.STRING)

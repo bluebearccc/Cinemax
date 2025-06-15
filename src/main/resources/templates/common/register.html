@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register</title>
-    <link th:href="@{/css/common/register-stylesheet.css}" rel="stylesheet">
+    <link th:href="@{/common-static/css/register-stylesheet.css}" rel="stylesheet">
 </head>
 <body>
 <div class="header">
@@ -53,6 +53,7 @@
                     required
             >
             <p th:text="${error}" style="color: red; font-size: 14px"></p>
+            <p th:text="${inform}" style="color: green; font-size: 14px"></p>
         </div>
 
         <div class="form-group">
@@ -87,10 +88,10 @@
 
     <div class="social-buttons">
         <a th:href="@{oauth/google/login}" class="social-btn google" id="googleRegister" title="Sign up with Google">
-            <img th:src="@{/images/google.jpg}" alt="Google"/>
+            <img th:src="@{/common-static/images/google.jpg}" alt="Google"/>
         </a>
         <a th:href="@{oauth/github/login}" class="social-btn github" id="githubRegister" title="Sign up with GitHub">
-            <img th:src="@{/images/github.png}" alt="GitHub"/>
+            <img th:src="@{/common-static/images/github.png}" alt="GitHub"/>
         </a>
     </div>
 
