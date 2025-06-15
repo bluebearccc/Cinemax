@@ -4,11 +4,14 @@ import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
+@Builder
 @Data
+@AllArgsConstructor
 @NoArgsConstructor
 public class Account {
 
@@ -20,7 +23,7 @@ public class Account {
     @Column(unique = true, name = "Email")
     private String email;
 
-    @Column(nullable = false, name = "[Password]")
+    @Column(nullable = true, name = "[Password]")
     private String password;
 
     @Enumerated(EnumType.STRING)

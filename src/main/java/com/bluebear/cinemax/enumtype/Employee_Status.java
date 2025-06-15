@@ -1,5 +1,5 @@
 package com.bluebear.cinemax.enumtype;
 
 public enum Employee_Status {
-    Active, InActive
+    Active, In_Active
 }

@@ -5,6 +5,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -19,10 +21,6 @@ public class CustomerDTO {
 
     private String phone;
 
-    public CustomerDTO(Integer accountID, String fullName, String phone) {
-        this.accountID = accountID;
-        this.fullName = fullName;
-        this.phone = phone;
-    }
+    private List<MovieFeedbackDTO> movieFeedback;
 }
 

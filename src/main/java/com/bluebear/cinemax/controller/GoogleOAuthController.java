@@ -4,8 +4,8 @@ import com.bluebear.cinemax.dto.AccountDTO;
 import com.bluebear.cinemax.dto.CustomerDTO;
 import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
-import com.bluebear.cinemax.service.account.AccountService;
-import com.bluebear.cinemax.service.customer.CustomerService;
+import com.bluebear.cinemax.service.account.AccountServiceImpl;
+import com.bluebear.cinemax.service.customer.CustomerServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,10 +39,10 @@ public class GoogleOAuthController {
     private String redirectUri;
 
     private final RestTemplate restTemplate = new RestTemplate();
-    private final AccountService accountService;
-    private final CustomerService customerService;
+    private final AccountServiceImpl accountService;
+    private final CustomerServiceImpl customerService;
 
-    public GoogleOAuthController(AccountService accountService, CustomerService customerService) {
+    public GoogleOAuthController(AccountServiceImpl accountService, CustomerServiceImpl customerService) {
         this.accountService = accountService;
         this.customerService = customerService;
     }
@@ -100,7 +100,7 @@ public class GoogleOAuthController {
 
             account = accountService.findAccountByEmail(email);
 
-            CustomerDTO customer = new CustomerDTO(account.getId(), fullName, "");
+            CustomerDTO customer = CustomerDTO.builder().accountID(account.getId()).fullName(fullName).phone("").build();
             customerService.save(customer);
 
             session.setAttribute("customer", customer);

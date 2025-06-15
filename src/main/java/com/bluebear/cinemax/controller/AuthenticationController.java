@@ -6,12 +6,12 @@ import com.bluebear.cinemax.dto.ForgotPasswordDTO;
 import com.bluebear.cinemax.dto.VerifyTokenDTO;
 import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
-import com.bluebear.cinemax.service.account.AccountService;
-import com.bluebear.cinemax.service.customer.CustomerService;
-import com.bluebear.cinemax.service.email.EmailService;
-import com.bluebear.cinemax.service.employee.EmployeeService;
-import com.bluebear.cinemax.service.forgotpassword.ForgotPasswordService;
-import com.bluebear.cinemax.service.verifytoken.VerifyTokenService;
+import com.bluebear.cinemax.service.account.AccountServiceImpl;
+import com.bluebear.cinemax.service.customer.CustomerServiceImpl;
+import com.bluebear.cinemax.service.email.EmailServiceImpl;
+import com.bluebear.cinemax.service.employee.EmployeeServiceImpl;
+import com.bluebear.cinemax.service.forgotpassword.ForgotPasswordServiceImpl;
+import com.bluebear.cinemax.service.verifytoken.VerifyTokenServiceImpl;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -26,17 +26,17 @@ import java.util.*;
 public class AuthenticationController {
 
     @Autowired
-    private AccountService accountService;
+    private AccountServiceImpl accountService;
     @Autowired
-    private CustomerService customerService;
+    private CustomerServiceImpl customerService;
     @Autowired
-    private EmployeeService employeeService;
+    private EmployeeServiceImpl employeeService;
     @Autowired
-    private ForgotPasswordService forgotPasswordService;
+    private ForgotPasswordServiceImpl forgotPasswordService;
     @Autowired
-    private EmailService emailService;
+    private EmailServiceImpl emailService;
     @Autowired
-    private VerifyTokenService verifyTokenService;
+    private VerifyTokenServiceImpl verifyTokenService;
 
 
     @GetMapping("/login")

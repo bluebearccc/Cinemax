@@ -4,8 +4,8 @@ import com.bluebear.cinemax.dto.AccountDTO;
 import com.bluebear.cinemax.dto.CustomerDTO;
 import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
-import com.bluebear.cinemax.service.account.AccountService;
-import com.bluebear.cinemax.service.customer.CustomerService;
+import com.bluebear.cinemax.service.account.AccountServiceImpl;
+import com.bluebear.cinemax.service.customer.CustomerServiceImpl;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,11 +41,11 @@ public class GitHubOAuthController {
     private String redirectUri;
 
     private RestTemplate restTemplate = new RestTemplate();
-    private AccountService accountService;
-    private CustomerService customerService;
+    private AccountServiceImpl accountService;
+    private CustomerServiceImpl customerService;
 
     @Autowired
-    public GitHubOAuthController(AccountService accountService, CustomerService customerService) {
+    public GitHubOAuthController(AccountServiceImpl accountService, CustomerServiceImpl customerService) {
         this.accountService = accountService;
         this.customerService = customerService;
     }
@@ -115,7 +115,7 @@ public class GitHubOAuthController {
 
             account = accountService.findAccountByEmail(email);
 
-            CustomerDTO customer = new CustomerDTO(account.getId(), fullName, "");
+            CustomerDTO customer = CustomerDTO.builder().accountID(account.getId()).fullName(fullName).phone("").build();
             customerService.save(customer);
 
             session.setAttribute("customer", customer);

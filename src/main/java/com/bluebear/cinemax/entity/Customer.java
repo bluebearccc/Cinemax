@@ -1,12 +1,18 @@
 package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.util.List;
 
 @Entity
 @Data
 @NoArgsConstructor
+@Builder
+@AllArgsConstructor
 public class Customer {
 
     @Id
@@ -23,6 +29,9 @@ public class Customer {
 
     @Column(name = "Phone")
     private String phone;
+
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<MovieFeedback> feedbackList;
 
     public Customer(Account account, String fullName, String phone) {
         this.account = account;

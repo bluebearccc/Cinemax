@@ -1,19 +1,23 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Theater_Status;
 import jakarta.persistence.*;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
+@Table(name = "Theater")
 @Data
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Theater {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "TheaterID")
-    private Integer id;
+    private Integer theaterID;
 
     @Column(name = "TheaterName", nullable = false, length = 100)
     private String theaterName;
@@ -24,18 +28,13 @@ public class Theater {
     @Column(name = "Image", nullable = false, length = 255)
     private String image;
 
-    @Column (name = "RoomQuantity", nullable = false)
-    private Integer roomQuantity;
+    @Column(name = "RoomQuantity", nullable = false)
+    private int roomQuantity;
 
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL)
-    private List<Employee> employees;
+    @Column(name = "Status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private Theater_Status status;
 
-    public Theater(String theaterName, String address, String image, Integer roomQuantity) {
-        this.theaterName = theaterName;
-        this.address = address;
-        this.image = image;
-        this.roomQuantity = roomQuantity;
-    }
-
-
+    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Room> rooms;
 }
