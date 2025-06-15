@@ -25,11 +25,9 @@ public class MovieDTO {
     private LocalDate startDate;
     private LocalDate endDate;
     private String status;
-    private List<Integer> genreIds;
-    private List<Integer> scheduleIds;
-    private List<Integer> feedbackIds;
 
-    public enum MovieStatus {
-        Active, Removed
-    }
+    private List<GenreDTO> genres;
+
+    private List<MovieFeedbackDTO> feedbacks;
+
 }

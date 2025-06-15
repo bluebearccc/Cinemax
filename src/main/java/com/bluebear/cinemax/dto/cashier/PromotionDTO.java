@@ -16,5 +16,5 @@ public class PromotionDTO {
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer quantity;
-    private String status; // Dùng String để dễ dàng hiển thị hoặc map từ Enum
+    private String status;
 }

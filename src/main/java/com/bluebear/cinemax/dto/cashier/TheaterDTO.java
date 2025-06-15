@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class TheaterDTO {
-    private Integer theaterId;
+    private Integer theater;
     private String theaterName;
     private String address;
     private String image;

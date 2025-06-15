@@ -1,6 +1,7 @@
 package com.bluebear.cinemax.repository.cashier;
 
 import com.bluebear.cinemax.entity.DetailFD;
+import com.bluebear.cinemax.entity.DetailSeat;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -9,17 +10,28 @@ import org.springframework.stereotype.Repository;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface DetailFDRepository extends JpaRepository<DetailFD, Integer> {
-    // Tìm chi tiết đồ ăn theo hóa đơn
-    List<DetailFD> findByInvoice_InvoiceId(Integer invoiceId);
+    // Method để lấy danh sách seat ID đã được book theo schedule
+    @Query("SELECT ds.seat.seatId FROM DetailSeat ds WHERE ds.schedule.scheduleId = :scheduleId")
+    List<Integer> findBookedSeatIdsByScheduleId(@Param("scheduleId") Integer scheduleId);
 
-    // Thống kê doanh thu đồ ăn theo rạp và ngày
-    @Query("SELECT SUM(df.totalPrice) FROM DetailFD df WHERE df.theaterStock.theater.theaterId = :theaterId AND DATE(df.invoice.bookingDate) = :date")
-    BigDecimal getTotalFoodRevenueByTheaterAndDate(@Param("theaterId") Integer theaterId, @Param("date") LocalDate date);
+    // Method để lấy tất cả DetailSeat theo schedule
+    @Query("SELECT ds FROM DetailSeat ds " +
+            "JOIN FETCH ds.seat " +
+            "JOIN FETCH ds.invoice " +
+            "WHERE ds.schedule.scheduleId = :scheduleId")
+    List<DetailSeat> findByScheduleId(@Param("scheduleId") Integer scheduleId);
 
-    // Thống kê món bán chạy
-    @Query("SELECT df.theaterStock.foodName, SUM(df.quantity) FROM DetailFD df WHERE df.theaterStock.theater.theaterId = :theaterId GROUP BY df.theaterStock.theaterStockId ORDER BY SUM(df.quantity) DESC")
-    List<Object[]> getTopSellingFoodByTheater(@Param("theaterId") Integer theaterId);
+    // Method để tìm DetailSeat theo schedule và seat
+    @Query("SELECT ds FROM DetailSeat ds " +
+            "JOIN FETCH ds.seat " +
+            "JOIN FETCH ds.invoice " +
+            "WHERE ds.schedule.scheduleId = :scheduleId AND ds.seat.seatId = :seatId")
+    Optional<DetailSeat> findByScheduleIdAndSeatId(
+            @Param("scheduleId") Integer scheduleId,
+            @Param("seatId") Integer seatId
+    );
 }

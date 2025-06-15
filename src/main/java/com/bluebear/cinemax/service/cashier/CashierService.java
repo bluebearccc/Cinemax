@@ -1,44 +1,43 @@
 package com.bluebear.cinemax.service.cashier;
 
 import com.bluebear.cinemax.dto.cashier.*;
-import com.bluebear.cinemax.entity.Movie;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
 
 public interface CashierService {
 
-    // Movie methods
-    List<MovieDTO> getMovieAvailable(Movie.MovieStatus status, LocalDate currentDate);
-    MovieDTO getMovieById(Integer movieId);
+    // ====== MOVIE ======
+    // 1. Phim theo rạp + ngày
+    Page<MovieDTO> getPagedMovieByTheater(Integer theaterId, LocalDate date, Pageable pageable);
 
-    // Schedule methods
-    List<ScheduleDTO> getAllSchedulesByMovieIdAndDate(Integer movieId, LocalDate date);
+    // 2. Phim theo rạp + keyword + ngày
+    Page<MovieDTO> searchPagedMoviesByTheaterAndKeyword(Integer theaterId, String keyword, LocalDate date, Pageable pageable);
 
-    // Seat methods
-    List<SeatDTO> getAvailableSeatsByScheduleId(Integer scheduleId);
+    // 3. Phim theo rạp + thể loại + ngày
+    Page<MovieDTO> getPagedMoviesByTheaterAndGenre(Integer theaterId, Integer genreId, LocalDate date, Pageable pageable);
 
-    // Customer methods
-//    List<CustomerDTO> searchCustomers(String term);
-//    CustomerDTO getCustomerByPhone(String phone);
-//    CustomerDTO createCustomer(CustomerDTO customerDTO);
+    // 4. Phim theo rạp + thể loại + keyword + ngày
+    Page<MovieDTO> searchPagedMoviesByTheaterAndGenreAndKeyword(Integer theaterId, Integer genreId, String keyword, LocalDate date, Pageable pageable);
 
-    // Food & Drink methods
-//    List<TheaterStockDTO> getFoodMenuByTheaterId(Integer theaterId);
-//    TheaterStockDTO getFoodById(Integer foodId);
-//
-//    // Promotion methods
-//    PromotionDTO getPromotionByCode(String promotionCode);
-//    Float calculateDiscount(String promotionCode, Float totalAmount);
-//
-//    // Booking methods
-//    Integer createBooking(MovieDTO movie, Map<String, Object> schedule,
-//                          String[] seats, Map<String, Object> customerInfo,
-//                          Map<String, Object> priceBreakdown);
-//
-//    // Invoice methods
-//    InvoiceDTO getInvoiceById(Integer invoiceId);
-//
-//    // Theater methods
-//    List<TheaterDTO> getAllTheaters();
+    // ====== SCHEDULE ======
+    List<ScheduleDTO> getSchedulesByMovieAndDate(Integer theaterId, Integer movieId, LocalDate date);
+
+    // ====== ROOM ======
+    List<RoomDTO> getRoomsByTheater(Integer theaterId);
+
+    // ====== SEAT ======
+    List<SeatDTO> getSeatsBySchedule(Integer scheduleId);
+
+    List<SeatDTO> getAvailableSeatsBySchedule(Integer scheduleId);
+
+    // Method mới: lấy ghế với thông tin booking chi tiết
+    List<SeatDTO> getSeatsWithBookingDetails(Integer scheduleId);
+
+    // ====== THEATER STOCK ======
+    List<TheaterStockDTO> getAvailableTheaterStockByTheater(Integer theaterId);
+
 }
