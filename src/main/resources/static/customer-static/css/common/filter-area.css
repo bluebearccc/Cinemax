@@ -1,0 +1,200 @@
+
+.filter-container {
+    background: linear-gradient(135deg, #1a2850 0%, #0f1a35 100%);
+    border-radius: 12px;
+    padding: 20px 30px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 30px;
+}
+
+input, select {
+    height: 45px;
+
+}
+
+.filter-row {
+    display: flex;
+    align-items: center;
+    gap: 40px;
+    flex-wrap: nowrap;
+    width: 100%;
+}
+
+.filter-group {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+}
+
+.filter-label {
+    color: #e2e8f0;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+}
+
+.filter-select {
+    background: rgba(15, 26, 53, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #e2e8f0;
+    padding: 10px 16px;
+    font-size: 14px;
+    min-width: 140px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%23e2e8f0' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 12px center;
+    background-repeat: no-repeat;
+    background-size: 16px;
+    padding-right: 40px;
+}
+
+.filter-select:hover {
+    background: rgba(26, 40, 80, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+    transform: translateY(-1px);
+}
+
+.filter-select:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.search-container {
+    margin-left: auto;
+    position: relative;
+    flex-shrink: 0;
+}
+
+.search-input {
+    background: rgba(15, 26, 53, 0.8);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: #e2e8f0;
+    padding: 10px 16px 10px 45px;
+    font-size: 14px;
+    width: 280px;
+    transition: all 0.3s ease;
+}
+
+.search-input::placeholder {
+    color: #64748b;
+}
+
+.search-input:hover {
+    background: rgba(26, 40, 80, 0.9);
+    border-color: rgba(255, 255, 255, 0.3);
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    width: 320px;
+}
+
+.search-icon {
+    position: absolute;
+    left: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #64748b;
+    pointer-events: none;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.search-icon img {
+    width: 16px;
+    height: 16px;
+    opacity: 0.7;
+    transition: opacity 0.3s ease;
+}
+
+.search-input:focus + .search-icon img,
+.search-input:hover + .search-icon img {
+    opacity: 1;
+}
+
+/* Responsive - chỉ xuống dòng khi màn hình rất nhỏ */
+@media (max-width: 1024px) {
+    .filter-row {
+        gap: 20px;
+    }
+
+    .filter-select {
+        min-width: 120px;
+    }
+
+    .search-input {
+        width: 220px;
+    }
+}
+
+@media (max-width: 768px) {
+    .filter-row {
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+
+    .filter-group {
+        flex: 1;
+        min-width: 200px;
+    }
+
+    .search-container {
+        margin-left: 0;
+        width: 100%;
+        order: 1;
+    }
+
+    .search-input {
+        width: 100%;
+    }
+}
+
+/* Animation cho dropdown options */
+.filter-select option {
+    background: #1a2850;
+    color: #e2e8f0;
+    padding: 8px;
+}
+
+/* Hiệu ứng loading */
+.filter-select.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.filter-select.loading::after {
+    content: '';
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid #3b82f6;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: translateY(-50%) rotate(0deg); }
+    100% { transform: translateY(-50%) rotate(360deg); }
+}
+
+/* Hover effects */
+.filter-container:hover {
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+}

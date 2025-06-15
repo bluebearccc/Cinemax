@@ -1,0 +1,38 @@
+<header class="header-section" th:fragment="header-section">
+    <div class="container">
+        <div class="header-wrapper">
+            <div class="logo">
+                <a href="index.html">
+                    <img th:src="@{/customer-static/images/logo/logo.png}" style="height: 80px; width: 80px;" alt="logo">
+                </a>
+            </div>
+            <ul class="menu">
+                <li>
+                    <a href="#0">Home</a>
+                </li>
+                <li>
+                    <a href="#0" class="active">movies</a>
+                </li>
+                <li>
+                    <a href="#0">Theaters</a>
+                    <ul class="submenu">
+                        <li th:each="theater : ${theaters}">
+                            <a href="#" th:text="${theater.theaterName}"></a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a href="#0">Blog</a>
+                </li>
+                <li>
+                    <a href="contact.html">contact</a>
+                </li>
+            </ul>
+            <div class="header-bar d-lg-none">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+</header>

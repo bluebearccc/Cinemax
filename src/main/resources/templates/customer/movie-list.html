@@ -5,113 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
 
-    <link rel="stylesheet" th:href="@{/common-static/css/bootstrap.min.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/all.min.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/animate.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/flaticon.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/magnific-popup.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/odometer.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/owl.carousel.min.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/owl.theme.default.min.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/nice-select.css}">
-    <link rel="stylesheet" th:href="@{/common-static/css/main.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/odometer.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/filter-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
 
-    <link rel="shortcut icon" sizes="64x64" th:href="@{/common-static/images/logo/logo.png}" type="image/x-icon">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
 
     <title>Movies</title>
 </head>
-
 <body>
 <!-- ==========Preloader========== -->
-<div class="preloader">
-    <div class="preloader-inner">
-        <div class="preloader-icon">
-            <span></span>
-            <span></span>
-        </div>
-    </div>
+<div th:replace="common/fragments/preloader :: preloader">
 </div>
 <!-- ==========Preloader========== -->
 <!-- ==========Overlay========== -->
-<div class="overlay"></div>
 <a href="#0" class="scrollToTop">
     <i class="fas fa-angle-up"></i>
 </a>
 <!-- ==========Overlay========== -->
-
 <!-- ==========Header-Section========== -->
-<header class="header-section">
-    <div class="container">
-        <div class="header-wrapper">
-            <div class="logo">
-                <a href="index.html">
-                    <img th:src="@{/common-static/images/logo/logo.png}" style="height: 80px; width: 80px;" alt="logo">
-                </a>
-            </div>
-            <ul class="menu">
-                <li>
-                    <a href="#0">Home</a>
-                </li>
-                <li>
-                    <a href="#0" class="active">movies</a>
-                </li>
-                <li>
-                    <a href="#0">Theaters</a>
-                    <ul class="submenu">
-                        <li>
-                            <a href="events.html">Events</a>
-                        </li>
-                        <li>
-                            <a href="event-details.html">Event Details</a>
-                        </li>
-                        <li>
-                            <a href="event-speaker.html">Event Speaker</a>
-                        </li>
-                        <li>
-                            <a href="event-ticket.html">Event Ticket</a>
-                        </li>
-                        <li>
-                            <a href="event-checkout.html">Event Checkout</a>
-                        </li>
-                    </ul>
-                </li>
-                <li>
-                    <a href="#0">Blog</a>
-                </li>
-                <li>
-                    <a href="contact.html">contact</a>
-                </li>
-            </ul>
-            <div class="header-bar d-lg-none">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </div>
+<header th:replace="common/fragments/header :: header-section">
 </header>
 <!-- ==========Header-Section========== -->
 
 <!-- ==========Banner-Section========== -->
-<section class="details-banner bg_img"  th:style="'background-image:url(' + @{/common-static/images/banner/banner03.jpg} + ');'">
+<section class="details-banner bg_img" th:style="'background-image:url(' + @{${HighestRateMovie.banner}} + ');'">
     <div class="container">
         <div class="details-banner-wrapper">
             <div class="details-banner-content offset-lg-3" style="margin-left: 0%;">
-                <h3 class="title">Venus</h3>
-                <i class="far fa-clock"></i><span>2 hrs 50 mins</span>
-                <p style="max-width: 300px">Lorem ipsum dolor, sit amet consectetur adipisicing elit. Veritatis
-                    similique, accusamus maxime,
-                    dolor unde repellendus distinctio dignissimos et aliquam eveniet porro commodi? Excepturi sed
-                    temporibus accusamus, praesentium autem quidem odio!</p>
-                <a href="#0" class="button">horror</a>
+                <h3 class="title" th:text="${HighestRateMovie.movieName}"></h3>
+                <i class="far fa-clock"></i><span th:text="${HighestRateMovie.duration} + minutes" style="padding-left: 5px"></span>
+                <p style="max-width: 300px" th:text="${HighestRateMovie.description}"></p>
+                <a href="#0" class="button" th:each="movieGenre : ${HighestRateMovie.genres}" th:text="${movieGenre.genreName}"></a>
                 <div class="item">
-                    <div class="item-header">
-                        <h5 class="title">4.5</h5>
+                    <div class="item-header" style="display: flex; gap: 3px">
+                        <i class="fas fa-star"></i><h5 class="title" th:text="${HighestRateMovie.movieRate}"></h5>
                     </div>
                 </div>
             </div>
             <div class="book-wrapper offset-lg-3">
-
                 <a href="#0" class="custom-button">book tickets</a>
             </div>
         </div>
@@ -121,220 +62,28 @@
 <!-- ==========Banner-Section========== -->
 
 <!-- ==========Movie-Section========== -->
-<section class="movie-section padding-top padding-bottom">
-    <div class="container">
-        <div class="row flex-wrap-reverse justify-content-center">
-            <div class="col-lg-12 mb-50 mb-lg-0">
-                <div class="filter-tab tab">
-                    <div class="filter-area">
-                        <div class="filter-main">
-                            <div class="left">
-                                <div class="item">
-                                    <span class="show">Theater :</span>
-                                    <select class="select-bar">
-                                        <option value="12">CGV</option>
-                                        <option value="15">Lotte</option>
-                                        <option value="18">Beta</option>
-                                    </select>
-                                </div>
-                                <div class="item">
-                                    <span class="show">Sort By :</span>
-                                    <select class="select-bar">
-                                        <option value="high-rate">high rate</option>
-                                        <option value="most-view">most view</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <form class="ticket-search-form">
-                                <div class="form-group large" style="margin-bottom: 35px">
-                                    <input type="text" placeholder="Search for Movies">
-                                    <button type="submit"><i class="fas fa-search"></i></button>
-                                </div>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="tab-area">
-                        <div class="tab-item active">
-                            <div class="row mb-10 justify-content-center">
-                                <div class="col-sm-6 col-lg-3">
-                                    <div class="movie-grid">
-                                        <div class="movie-thumb c-thumb">
-                                            <a href="movie-details.html">
-                                                <img th:src="@{/common-static/images/movie/movie06.jpg}" alt="movie">
-                                            </a>
-                                        </div>
-                                        <div class="movie-content bg-one">
-                                            <h5 class="title m-0">
-                                                <a href="movie-details.html">trooper</a>
-                                            </h5>
-                                            <ul class="movie-rating-percent">
-                                                <li>
-                                                    <div class="thumb">
-                                                        <img th:src="@{/common-static/images/movie/tomato.png}" alt="movie">
-                                                    </div>
-                                                    <span class="content">88%</span>
-                                                </li>
-                                                <li>
-                                                    <div class="thumb">
-                                                        <img th:src="@{/common-static/images/movie/cake.png}" alt="movie">
-                                                    </div>
-                                                    <span class="content">88%</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-3">
-                                    <div class="movie-grid">
-                                        <div class="movie-thumb c-thumb">
-                                            <a href="movie-details.html">
-                                                <img th:src="@{/common-static/images/movie/movie07.jpg}" alt="movie">
-                                            </a>
-                                        </div>
-                                        <div class="movie-content bg-one">
-                                            <h5 class="title m-0">
-                                                <a href="movie-details.html">horror night</a>
-                                            </h5>
-                                            <ul class="movie-rating-percent">
-                                                <li>
-                                                    <div class="thumb">
-                                                        <img th:src="@{/common-static/images/movie/tomato.png}" alt="movie">
-                                                    </div>
-                                                    <span class="content">88%</span>
-                                                </li>
-                                                <li>
-                                                    <div class="thumb">
-                                                        <img th:src="@{/common-static/images/movie/cake.png}" alt="movie">
-                                                    </div>
-                                                    <span class="content">88%</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-3">
-                                    <div class="movie-grid">
-                                        <div class="movie-thumb c-thumb">
-                                            <a href="movie-details.html">
-                                                <img th:src="@{/common-static/images/movie/movie08.jpg}" alt="movie">
-                                            </a>
-                                        </div>
-                                        <div class="movie-content bg-one">
-                                            <h5 class="title m-0">
-                                                <a href="movie-details.html">the lost name</a>
-                                            </h5>
-                                            <ul class="movie-rating-percent">
-                                                <li>
-                                                    <div class="thumb">
-                                                        <img th:src="@{/common-static/images/movie/tomato.png}" alt="movie">
-                                                    </div>
-                                                    <span class="content">88%</span>
-                                                </li>
-                                                <li>
-                                                    <div class="thumb">
-                                                        <img th:src="@{/common-static/images/movie/cake.png}" alt="movie">
-                                                    </div>
-                                                    <span class="content">88%</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="col-sm-6 col-lg-3">
-                                    <div class="movie-grid">
-                                        <div class="movie-thumb c-thumb">
-                                            <a href="movie-details.html">
-                                                <img th:src="@{/common-static/images/movie/movie08.jpg}" alt="movie">
-                                            </a>
-                                        </div>
-                                        <div class="movie-content bg-one">
-                                            <h5 class="title m-0">
-                                                <a href="movie-details.html">the lost name</a>
-                                            </h5>
-                                            <ul class="movie-rating-percent">
-                                                <li>
-                                                    <div class="thumb">
-                                                        <img th:src="@{/common-static/images/movie/tomato.png}" alt="movie">
-                                                    </div>
-                                                    <span class="content">88%</span>
-                                                </li>
-                                                <li>
-                                                    <div class="thumb">
-                                                        <img th:src="@{/common-static/images/movie/cake.png}" alt="movie">
-                                                    </div>
-                                                    <span class="content">88%</span>
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="pagination-area text-center">
-                        <a href="#0"><i class="fas fa-angle-double-left"></i><span>Prev</span></a>
-                        <a href="#0">1</a>
-                        <a href="#0">2</a>
-                        <a href="#0" class="active">3</a>
-                        <a href="#0">4</a>
-                        <a href="#0">5</a>
-                        <a href="#0"><span>Next</span><i class="fas fa-angle-double-right"></i></a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+<section class="movie-section padding-top padding-bottom" th:insert="customer/fragments/movie-list/list-movie :: list-movie">
 </section>
 <!-- ==========Movie-Section========== -->
 
-<!-- ==========Newslater-Section========== -->
-<footer class="footer-section">
-    <div class="container">
-        <div class="footer-bottom">
-            <div class="footer-bottom-area">
-                <div class="left" style="display: flex; flex-direction: row;">
-                    <a href="index-1.html">
-                        <img th:src="@{/common-static/images/logo/logo.png}" alt="footer" style="height: 80px;">
-                    </a>
-                    <p style="margin-top: 30px;">Copyright © 2020.All Rights Reserved By <a href="#0">BlueBear </a></p>
-                </div>
-                <ul class="links" style="margin-top: 30px;">
-                    <li>
-                        <a href="#0">About</a>
-                    </li>
-                    <li>
-                        <a href="#0">Terms Of Use</a>
-                    </li>
-                    <li>
-                        <a href="#0">Privacy Policy</a>
-                    </li>
-                    <li>
-                        <a href="#0">FAQ</a>
-                    </li>
-                    <li>
-                        <a href="#0">Feedback</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
+<!-- ==========Footer-Section========== -->
+<footer class="footer-section" th:replace="common/fragments/footer :: footer">
 </footer>
-<!-- ==========Newslater-Section========== -->
-
-
-<script th:src="@{/common-static/js/jquery-3.3.1.min.js}"></script>
-<script th:src="@{/common-static/js/modernizr-3.6.0.min.js}"></script>
-<script th:src="@{/common-static/js/plugins.js}"></script>
-<script th:src="@{/common-static/js/bootstrap.min.js}"></script>
-<script th:src="@{/common-static/js/isotope.pkgd.min.js}"></script>
-<script th:src="@{/common-static/js/magnific-popup.min.js}"></script>
-<script th:src="@{/common-static/js/owl.carousel.min.js}"></script>
-<script th:src="@{/common-static/js/wow.min.js}"></script>
-<script th:src="@{/common-static/js/countdown.min.js}"></script>
-<script th:src="@{/common-static/js/odometer.min.js}"></script>
-<script th:src="@{/common-static/js/viewport.jquery.js}"></script>
-<script th:src="@{/common-static/js/nice-select.js}"></script>
-<script th:src="@{/common-static/js/main.js}"></script>
+<!-- ==========Footer-Section========== -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/customer-static/js/movie-listajax.js}"></script>
+<script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
+<script th:src="@{/customer-static/js/plugins.js}"></script>
+<script th:src="@{/customer-static/js/bootstrap.min.js}"></script>
+<script th:src="@{/customer-static/js/isotope.pkgd.min.js}"></script>
+<script th:src="@{/customer-static/js/magnific-popup.min.js}"></script>
+<script th:src="@{/customer-static/js/owl.carousel.min.js}"></script>
+<script th:src="@{/customer-static/js/wow.min.js}"></script>
+<script th:src="@{/customer-static/js/countdown.min.js}"></script>
+<script th:src="@{/customer-static/js/odometer.min.js}"></script>
+<script th:src="@{/customer-static/js/viewport.jquery.js}"></script>
+<script th:src="@{/customer-static/js/main.js}"></script>
 
 </body>
 </html>
