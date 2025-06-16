@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -30,6 +31,7 @@ public class Schedule {
 
     @ManyToOne
     @JoinColumn(name = "MovieID", nullable = false)
+    @JsonBackReference
     private Movie movie;
 
     @ManyToOne

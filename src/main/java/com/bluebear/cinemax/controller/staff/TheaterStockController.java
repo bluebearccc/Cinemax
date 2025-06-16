@@ -79,7 +79,7 @@ public class TheaterStockController {
     public String delete(@RequestParam("stockId") Integer stockId, Model theModel,
                          RedirectAttributes redirectAttributes) {
         TheaterStock theaterStock = theaterStockServiceImpl.findById(stockId);
-        String message = "Canot delete because this item is sold";
+        String message = "Cannot delete because this item is sold";
         if(theaterStockServiceImpl.isDeleted(stockId)) {
             if (theaterStock.getImage() != null && !theaterStock.getImage().isEmpty()) {
                 try {
