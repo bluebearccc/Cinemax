@@ -1,18 +1,22 @@
 package com.bluebear.cinemax.dto;
 
-import com.bluebear.cinemax.enums.Theater_Status;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.bluebear.cinemax.enumtype.Theater_Status;
+import lombok.*;
+
+import java.util.List;
 
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class TheaterDTO {
-    private int id;
-    private String name;
+    private Integer theaterID;
+    private String theaterName;
     private String address;
     private String image;
-    private int roomQuantity;
+    private Integer roomQuantity;
     private Theater_Status status;
+
+    private List<RoomDTO> rooms;
+    private List<TheaterStockDTO> theaterStockS;
 }

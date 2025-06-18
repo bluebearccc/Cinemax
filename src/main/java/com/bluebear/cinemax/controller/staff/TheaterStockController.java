@@ -1,13 +1,11 @@
 package com.bluebear.cinemax.controller.staff;
 
+import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.Detail_FD;
 import com.bluebear.cinemax.entity.Employee;
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.entity.TheaterStock;
-import com.bluebear.cinemax.service.staff.DetailFD_ServiceImpl;
-import com.bluebear.cinemax.service.staff.EmployeeServiceImpl;
-import com.bluebear.cinemax.service.staff.TheaterServiceImpl;
-import com.bluebear.cinemax.service.staff.TheaterStockServiceImpl;
+import com.bluebear.cinemax.service.staff.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -23,6 +21,7 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.bluebear.cinemax.config.ExcelGeneratoForDetailItemSold;
@@ -40,26 +39,29 @@ public class TheaterStockController {
     private EmployeeServiceImpl employeeService;
 
     @Autowired
-    private DetailFD_ServiceImpl detailFDService;
+    private DetailFD_ServiceImpl detailFDServiceImpl;
+    @Autowired
+    private InvoiceServiceImpl invoiceServiceImpl;
+    @Autowired
+    private DetailFD_ServiceImpl detailFD_ServiceImpl;
 
     @GetMapping("/search")
     public String searchTheaterStock(@RequestParam("itemName") String itemName, Model model) {
-        Employee e = employeeService.getEmployeeById(2);
-        List<TheaterStock> searchResults = theaterStockServiceImpl.findByItemName(itemName, e.getTheater().getTheaterId() );
+        EmployeeDTO e = employeeService.getEmployeeById(2);
+        List<TheaterStockDTO> searchResults = theaterStockServiceImpl.findByItemName(itemName, e.getTheaterId() );
         model.addAttribute("employee", e);
         model.addAttribute("theaterStocks", searchResults);
         model.addAttribute("size", searchResults.size());
-        model.addAttribute("theaterName", e.getTheater().getTheaterName());
         return "staff/list";
     }
 
     @PostMapping("/showFormForUpdate")
-    public String showFormForUpdate(@RequestParam("stockId") Integer stockId, Model model) {
-        TheaterStock theaterStock = theaterStockServiceImpl.findById(stockId);
-        if (theaterStock != null) {
-            Employee e = employeeService.getEmployeeById(2);
+    public String showFormForUpdate(@RequestParam("id") Integer stockId, Model model) {
+        TheaterStockDTO theaterStockDTO = theaterStockServiceImpl.findById(stockId);
+        if (theaterStockDTO != null) {
+            EmployeeDTO e = employeeService.getEmployeeById(2);
             model.addAttribute("employee", e);
-            model.addAttribute("theaterStock", theaterStock);
+            model.addAttribute("theaterStock", theaterStockDTO);
             return "staff/add_edit";
         }
         return "redirect:/theater_stock";
@@ -68,23 +70,23 @@ public class TheaterStockController {
     @GetMapping("/add_stock")
     public String showForm(Model theModel) {
         boolean isAdd = true;
-        Employee e = employeeService.getEmployeeById(2);
+        EmployeeDTO e = employeeService.getEmployeeById(2);
         theModel.addAttribute("employee", e);
-        theModel.addAttribute("theaterStock", new TheaterStock());
+        theModel.addAttribute("theaterStock", new TheaterStockDTO());
         theModel.addAttribute("add", isAdd);
         return "staff/add_edit";
     }
 
     @PostMapping("/delete")
-    public String delete(@RequestParam("stockId") Integer stockId, Model theModel,
+    public String delete(@RequestParam("id") Integer stockId, Model theModel,
                          RedirectAttributes redirectAttributes) {
-        TheaterStock theaterStock = theaterStockServiceImpl.findById(stockId);
+        TheaterStockDTO theaterStockDTO = theaterStockServiceImpl.findById(stockId);
         String message = "Cannot delete because this item is sold";
         if(theaterStockServiceImpl.isDeleted(stockId)) {
-            if (theaterStock.getImage() != null && !theaterStock.getImage().isEmpty()) {
+            if (theaterStockDTO.getImage() != null && !theaterStockDTO.getImage().isEmpty()) {
                 try {
                     Path imagePath = Paths.get("uploads/images")
-                            .resolve(theaterStock.getImage().substring(theaterStock.getImage().lastIndexOf("/") + 1));
+                            .resolve(theaterStockDTO.getImage().substring(theaterStockDTO.getImage().lastIndexOf("/") + 1));
                     Files.deleteIfExists(imagePath);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -97,13 +99,12 @@ public class TheaterStockController {
     }
 
     @PostMapping("/process_stock")
-    public String showForm(Model theModel, @ModelAttribute("theaterStock") TheaterStock theaterStock,
+    public String showForm(Model theModel, @ModelAttribute("theaterStock") TheaterStockDTO theaterStockDTO,
                            @RequestParam(value = "imageInput", required = false) MultipartFile img,
                            @RequestParam("theaterID") Integer theaterID) {
 
-        if(theaterStock.getTheater() == null) {
-            Theater theater = theaterServiceImpl.getTheaterById(theaterID);
-            theaterStock.setTheater(theater);
+        if(theaterStockDTO.getTheaterId() == null) {
+            theaterStockDTO.setTheaterId(theaterID);
         }
         if(img != null && !img.isEmpty()) {
             try {
@@ -126,44 +127,46 @@ public class TheaterStockController {
                 }
 
                 Files.copy(img.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-                theaterStock.setImage("/uploads/images/" + filename);
+                theaterStockDTO.setImage("/uploads/images/" + filename);
 
             } catch (IOException e) {
                 throw new RuntimeException("Could not store file. Please try again!", e);
             }
         }
-        theaterStockServiceImpl.saveTheaterStock(theaterStock);
+        theaterStockServiceImpl.saveTheaterStock(theaterStockDTO);
         return "redirect:/theater_stock";
     }
 
     @GetMapping
     public String listTheaterStock(Model theModel) {
-        Employee e = employeeService.getEmployeeById(2);
-        List<TheaterStock> theaterStocks = theaterStockServiceImpl.findByTheaterId(e.getTheater().getTheaterId());
+        EmployeeDTO e = employeeService.getEmployeeById(2);
+        List<TheaterStockDTO> theaterStocks = theaterStockServiceImpl.findByTheaterId(e.getTheaterId());
         theModel.addAttribute("employee", e);
         theModel.addAttribute("theaterStocks", theaterStocks);
         theModel.addAttribute("size", theaterStocks.size());
-        theModel.addAttribute("theaterName", e.getTheater().getTheaterName());
         return "staff/list";
     }
 
     @GetMapping("/item_sold_details")
-    public String listFD(Model theModel, @RequestParam("stockId") Integer stockId) {
-        Employee e = employeeService.getEmployeeById(2);
+    public String listFD(Model theModel, @RequestParam("id") Integer stockId) {
+
+        EmployeeDTO e = employeeService.getEmployeeById(4);
+        List<Detail_FDDTO> detail_FDs = detailFDServiceImpl.findByTheaterStockID(stockId);
         theModel.addAttribute("employee", e);
-        List<Detail_FD> detail_FDs = detailFDService.findByTheaterStockID(stockId);
         theModel.addAttribute("detail_FDs", detail_FDs);
+        theModel.addAttribute("itemName", theaterStockServiceImpl.findById(stockId).getItemName() );
+
         return "staff/item-sold";
     }
 
     @GetMapping("/getItemData")
     @ResponseBody
-    public TheaterStock getItemData(@RequestParam("stockId") Integer stockId) {
+    public TheaterStockDTO getItemData(@RequestParam("id") Integer stockId) {
         return theaterStockServiceImpl.findById(stockId);
     }
 
     @GetMapping("/export_to_excel")
-    public void exportIntoExcelFile(@RequestParam("stockId") Integer stockId, HttpServletResponse response) throws IOException {
+    public void exportIntoExcelFile(@RequestParam("id") Integer stockId, HttpServletResponse response) throws IOException {
         response.setContentType("application/octet-stream");
         DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
         String currentDateTime = dateFormatter.format(new Date());
@@ -172,7 +175,7 @@ public class TheaterStockController {
         String headerValue = "attachment; filename=item_sold_details_" + currentDateTime + ".xlsx";
         response.setHeader(headerKey, headerValue);
 
-        List <Detail_FD> listFDs = detailFDService.findByTheaterStockID(stockId);
+        List <Detail_FDDTO> listFDs = detailFD_ServiceImpl.findByTheaterStockID(stockId);
         ExcelGeneratoForDetailItemSold generator = new ExcelGeneratoForDetailItemSold(listFDs);
         generator.generateExcelFile(response);
     }

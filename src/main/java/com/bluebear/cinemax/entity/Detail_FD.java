@@ -2,9 +2,10 @@ package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
+@Builder
 @Entity
 @Data
 @AllArgsConstructor
@@ -13,13 +14,13 @@ public class Detail_FD {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
-    private long id;
+    private Integer id;
 
     @Column(name = "Quantity")
     private int quantity;
 
     @Column(name = "TotalPrice")
-    private float totalPrice;
+    private Double totalPrice;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "InvoiceID", referencedColumnName = "InvoiceID")

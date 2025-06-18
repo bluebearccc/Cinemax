@@ -31,7 +31,7 @@
 <div class="main-content">
     <div class="header">
         <div class="header-left">
-            <h1>List of food and drinks of: <span th:text="${employee.theater.theaterName}"></span></h1>
+            <h1>List of food and drinks</h1>
         </div>
     </div>
 
@@ -74,17 +74,17 @@
                 <td>
                     <div class="action-buttons">
                         <form class="edit-form" method="POST" th:action="@{/theater_stock/showFormForUpdate}">
-                            <input type="hidden" name="stockId" th:value="${stock.stockId}" />
+                            <input type="hidden" name="id" th:value="${stock.id}" />
                             <button type="submit" class="action-btn btn-edit">Edit</button>
                         </form>
 
-                        <form th:action="@{/theater_stock/delete}" method="POST" onsubmit="return confirmDelete(this, event)">
-                            <input type="hidden" name="stockId" th:value="${stock.stockId}" />
+                        <form th:action="@{/theater_stock/delete}" method="POST" onsubmit="return confirmDelete()">
+                            <input type="hidden" name="id" th:value="${stock.id}" />
                             <button type="submit" class="action-btn btn-delete">Delete</button>
                         </form>
 
                         <form th:action="@{/theater_stock/item_sold_details}" method="GET">
-                            <input type="hidden" name="stockId" th:value="${stock.stockId}" />
+                            <input type="hidden" name="id" th:value="${stock.id}" />
                             <button type="submit" class="action-btn btn-itemsold">ItemSold</button>
                         </form>
                     </div>
@@ -99,7 +99,11 @@
 </div>
 
 <script>
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this item?');
+    }
 </script>
+
 </body>
 
 </html>

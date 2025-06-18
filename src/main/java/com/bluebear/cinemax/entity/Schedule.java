@@ -1,16 +1,15 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.bluebear.cinemax.enumtype.Schedule_Status;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-
+@Builder
 @Entity
 @Data
 @AllArgsConstructor
@@ -21,7 +20,7 @@ public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ScheduleID")
-    private Integer scheduleId;
+    private Integer scheduleID;
 
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;
@@ -29,33 +28,16 @@ public class Schedule {
     @Column(name = "EndTime", nullable = false)
     private LocalDateTime endTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MovieID", nullable = false)
-    @JsonBackReference
     private Movie movie;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RoomID", nullable = false)
     private Room room;
 
     @Column(name = "Status", length = 20, nullable = false)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Schedule_Status status;
 
-    public String getFormattedMovieDate() {
-        return startTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
-    }
-
-    public String getFormattedStartTime() {
-        return startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-    }
-
-
-    public String getFormattedEndTime() {
-        return endTime.format(DateTimeFormatter.ofPattern("HH:mm"));
-    }
-
-
-    public String getShowDateKey() {
-        return startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-    }
 }

@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.config;
 
+import com.bluebear.cinemax.dto.Detail_FDDTO;
 import com.bluebear.cinemax.entity.Detail_FD;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
@@ -16,12 +17,12 @@ import java.util.List;
 
 public class ExcelGeneratoForDetailItemSold {
 
-    private List <Detail_FD> listFD;
+    private List <Detail_FDDTO> listFD;
     private XSSFWorkbook workbook;
     private XSSFSheet sheet;
     private CellStyle dateCellStyle;
 
-    public ExcelGeneratoForDetailItemSold(List < Detail_FD > listFD) {
+    public ExcelGeneratoForDetailItemSold(List <Detail_FDDTO> listFD) {
         this.listFD = listFD;
         workbook = new XSSFWorkbook();
 
@@ -80,13 +81,13 @@ public class ExcelGeneratoForDetailItemSold {
         XSSFFont font = workbook.createFont();
         font.setFontHeight(14);
         style.setFont(font);
-        for (Detail_FD record: listFD) {
+        for (Detail_FDDTO record: listFD) {
             Row row = sheet.createRow(rowCount++);
             int columnCount = 0;
-            createCell(row, columnCount++, record.getInvoice().getInvoiceID(), style);
-            createCell(row, columnCount++, record.getTheaterStock().getItemName(), style);
+            createCell(row, columnCount++, record.getInvoiceId(), style);
+            createCell(row, columnCount++, record.getItemName(), style);
             createCell(row, columnCount++, record.getQuantity(), style);
-            createCell(row, columnCount++, record.getInvoice().getBookingDate(), style);
+            createCell(row, columnCount++, record.getBookingDate(), style);
             createCell(row, columnCount++, record.getTotalPrice(), style);
         }
     }

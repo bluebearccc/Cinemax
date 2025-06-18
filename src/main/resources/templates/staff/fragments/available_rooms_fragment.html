@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="availablerRooms">
+    <div th:if="${not #lists.isEmpty(availableRooms)}">
+        <label class="form-label">Available Rooms:</label>
+        <div class="room-cards-wrapper">
+            <div th:each="room : ${availableRooms}" class="room-card">
+                <input type="checkbox"
+                       name="selectedRoomIds"
+                       class="room-checkbox"
+                       th:id="|room_${room.roomId}|"
+                       th:value="${room.roomId}">
+                <label th:for="|room_${room.roomId}|" class="room-label">
+                    <span th:text="${room.name}">Room Name</span>
+                </label>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${#lists.isEmpty(availableRooms)}">
+        <p class="no-rooms-message">No available rooms for the selected time and theater.</p>
+    </div>
+
+</div>
+</body>
+</html>
+

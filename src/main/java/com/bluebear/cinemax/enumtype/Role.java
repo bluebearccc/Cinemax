@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.enums;
+package com.bluebear.cinemax.enumtype;
 
 public enum Role {
     Admin,

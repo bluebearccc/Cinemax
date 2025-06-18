@@ -2,12 +2,15 @@ package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
-
+@Builder
 @Entity
 @Data
 @AllArgsConstructor
@@ -17,23 +20,28 @@ public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "InvoiceID")
-    private long invoiceID;
+    private Integer invoiceID;
 
-    @Column(name = "CustomerID")
-    private String customerID;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CustomerID" , nullable = false, referencedColumnName = "CustomerID")
+    private Customer customer;
 
-    @Column(name = "EmployeeID")
-    private String EmployeeID;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "EmployeeID" , nullable = false, referencedColumnName = "EmployeeID")
+    private Employee employee;
 
-    @Column(name = "PromotionID")
-    private String promotionID;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PromotionID" , nullable = false, referencedColumnName = "PromotionID")
+    private Promotion promotion;
 
     @Column(name = "BookingDate")
-    private Date bookingDate;
+    private LocalDateTime bookingDate;
 
     @Column(name = "TotalPrice")
-    private float totalPrice;
+    private Double totalPrice;
 
     @OneToMany(mappedBy = "invoice")
-    private Set<Detail_FD> detail_FD;
+    private List<Detail_FD> detail_FD;
+
+
 }

@@ -1,29 +1,36 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Account_Status;
+import com.bluebear.cinemax.enumtype.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 @Entity
-@Table(name = "Account")
+@Builder
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Account {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "AccountID")
-    private Integer accountId;
+    private Integer id;
 
-    @Column(name = "Email", length = 50, nullable = false, unique = true)
+    @Column(unique = true, name = "Email")
     private String email;
 
-    @Column(name = "Password", length = 50, nullable = false)
+    @Column(nullable = true, name = "Password")
     private String password;
 
-    @Column(name = "Role", length = 50, nullable = false)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Role", nullable = false)
+    private Role role;
 
+    @Column(name = "Status")
+    @Enumerated(EnumType.STRING)
+    private Account_Status status;
 }

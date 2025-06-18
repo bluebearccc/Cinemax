@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.repository.staff;
+package com.bluebear.cinemax.repository;
 
 import com.bluebear.cinemax.entity.Detail_FD;
 import org.springframework.data.jpa.repository.JpaRepository;

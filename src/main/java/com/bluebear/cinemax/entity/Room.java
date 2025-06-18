@@ -1,12 +1,16 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Room_Status;
+import com.bluebear.cinemax.enumtype.TypeOfRoom;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Set;
-
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,9 +21,9 @@ public class Room {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RoomID")
-    private Integer roomId;
+    private Integer roomID;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
@@ -33,8 +37,16 @@ public class Room {
     private Integer row;
 
     @Column(name = "TypeOfRoom", length = 20, nullable = false)
-    private String typeOfRoom;
+    @Enumerated(EnumType.STRING)
+    private TypeOfRoom typeOfRoom;
 
-    @OneToMany(mappedBy = "room")
-    private Set<Schedule> schedule;
+    @Column(name = "Status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private Room_Status status;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Seat> seats;
+
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Schedule> schedules;
 }

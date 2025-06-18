@@ -39,7 +39,7 @@
             <h1>Sale Report</h1>
         </div>
         <div class="header-actions">
-            <a th:href="@{/theater_stock/export_to_excel(stockId=${param.stockId})}" class="btn btn-secondary">
+            <a th:href="@{/theater_stock/export_to_excel(id=${param.id})}" class="btn btn-secondary">
                 📤 Dowload Excel File
             </a>
         </div>
@@ -68,10 +68,10 @@
             </thead>
             <tbody>
             <tr th:each="detail : ${detail_FDs}">
-                <td th:text="${detail.invoice.invoiceID}"></td>
-                <td th:text="${detail.theaterStock.itemName}"></td>
+                <td th:text="${detail.invoiceId}"></td>
+                <td th:text="${itemName}"></td>
                 <td th:text="${detail.quantity}"></td>
-                <td th:text="${#dates.format(detail.invoice.getBookingDate(), 'dd/MM/yyyy')}"></td>
+                <td th:text="${detail.getFormattedBookingDate()}"></td>
                 <td th:text="${#numbers.formatCurrency(detail.totalPrice)}"></td>
             </tr>
             <!-- Hiển thị thông báo khi không có dữ liệu -->
@@ -96,7 +96,7 @@
                           method="POST"
                           enctype="multipart/form-data">
                         <input type="hidden" id="stockId" name="stockId">
-                        <input type="hidden" id="theaterID" th:value="${employee.theater.theaterId}" name="theaterID">
+                        <input type="hidden" id="theaterID" th:value="${employee.theaterId}" name="theaterID">
                         <input type="hidden" id="currentImagePath" name="image">
 
                         <div class="form-row">
@@ -105,7 +105,6 @@
                                 <!-- Theater -->
                                 <div class="form-group">
                                     <label class="form-label">Theater</label>
-                                    <input type="text" class="form-input" th:value="${employee.theater.theaterName}" disabled>
                                 </div>
 
                                 <!-- Name -->

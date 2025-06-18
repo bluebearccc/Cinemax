@@ -1,19 +1,21 @@
-package com.bluebear.cinemax.dto;
+    package com.bluebear.cinemax.dto;
 
-import com.bluebear.cinemax.enums.TheaterStock_Status;
-import com.bluebear.cinemax.enums.Theater_Status;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+    import com.bluebear.cinemax.enumtype.TheaterStock_Status;
+    import lombok.AllArgsConstructor;
+    import lombok.Builder;
+    import lombok.Data;
+    import lombok.NoArgsConstructor;
 
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
-public class TheaterStockDTO {
-    private int id;
-    private String itemName;
-    private String image;
-    private int quantity;
-    private double price;
-    private TheaterStock_Status status;
-}
+    @Data
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Builder
+    public class TheaterStockDTO {
+        private Integer id;
+        private Integer theaterId;
+        private String itemName;
+        private String image;
+        private Integer quantity;
+        private Double price;
+        private TheaterStock_Status status;
+    }

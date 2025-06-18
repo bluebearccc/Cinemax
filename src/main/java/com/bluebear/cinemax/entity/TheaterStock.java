@@ -1,11 +1,12 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.TheaterStock_Status;
+import com.bluebear.cinemax.enumtype.TheaterStock_Status;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
-
+@Builder
 @Data
 @Getter
 @Setter
@@ -18,7 +19,7 @@ public class TheaterStock {
     @Id
     @Column(name = "Theater_StockID")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer stockId;
+    private Integer stockID;
 
     @Column(name = "FoodName", length = 20, nullable = false)
     private String itemName;
@@ -37,7 +38,7 @@ public class TheaterStock {
     private TheaterStock_Status status;
 
     @OneToMany(mappedBy = "theaterStock")
-    private Set<Detail_FD> detail_FD;
+    private List<Detail_FD> detail_FD;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TheaterID", nullable = false, referencedColumnName = "TheaterID")

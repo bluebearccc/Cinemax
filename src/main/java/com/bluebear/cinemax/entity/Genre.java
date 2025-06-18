@@ -1,26 +1,28 @@
 package com.bluebear.cinemax.entity;
 
-import jakarta.annotation.Generated;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-import java.util.Set;
+import java.util.List;
 
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "Genre")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Genre {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "GenreID")
     private Integer genreID;
-    @Column(name = "GenreName", length = 255, nullable = false)
-    private String genreName;
-    @OneToMany(mappedBy = "genre")
-    private Set<Movie_Genre> movie_Genre;
 
+    @Column(name = "GenreName", nullable = false, length = 255)
+    private String genreName;
+
+    @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<Movie> movies;
 }

@@ -6,6 +6,71 @@
     <title>Movie Schedule</title>
     <link rel="stylesheet" th:href="@{/staff/css/style.css}">
     <link rel="stylesheet" th:href="@{/staff/css/movie_schedule.css}">
+    <style>
+        .schedule-detail-item {
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        .schedule-detail-item strong {
+            display: inline-block;
+            width: 100px;
+            color: #555;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+
+        .room-cards-wrapper {
+            display: flex;
+            flex-wrap: wrap; /* Cho phép các card tự xuống dòng nếu không đủ chỗ */
+            gap: 12px; /* Khoảng cách giữa các card */
+            margin-top: 8px;
+        }
+
+        .room-card {
+            display: flex; /* Sắp xếp checkbox và label trên cùng một hàng */
+            align-items: center;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 10px 15px;
+            background-color: #f9f9f9;
+            transition: all 0.2s ease-in-out;
+        }
+
+        .room-card:hover {
+            border-color: #007bff;
+            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
+        }
+
+        .room-checkbox {
+            margin-right: 10px;
+            /* Tăng kích thước checkbox cho dễ bấm */
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .room-label {
+            font-weight: 500;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .no-rooms-message {
+            color: #888;
+            font-style: italic;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border: 1px dashed #ccc;
+            border-radius: 5px;
+            text-align: center;
+        }
+    </style>
+
 </head>
 <body>
 <div class="sidebar">
@@ -103,9 +168,7 @@
             </div>
 
             <form th:action="@{/movie_schedule/add_schedule}"  id="scheduleForm" method="POST" class="modal-body">
-
-                <input type="hidden" name="movieId" th:value="${movie.getMovieId()}">
-
+                <input type="hidden" name="movieId" id="movieId" th:value="${movie.getMovieId()}">
                 <div class="form-group">
                     <label class="form-label">Select Date</label>
                     <div class="calendar-nav-mini">
@@ -144,24 +207,23 @@
                                readonly>
                     </div> -->
                 </div>
-
                 <div class="form-row">
                     <div class="form-group">
-                        <label class="form-label" for="room">Room</label>
-                        <select class="form-select" id="room" name="room" required>
-                            <option value="">Select Room</option>
-                            <option  th:each="x : ${rooms}" th:text="${x.name}"
-                                     th:value="${x.getRoomId()}"
-                                     th:selected="${x.getRoomId() == receivedRoomId}">
+                        <label class="form-label" for="theater">Theater</label>
+                        <select class="form-select" id="theater" name="theater" required disabled>
+                            <option value="">Select Theater</option>
+                            <option  th:each="x : ${theatersCbBox}" th:text="${x.theaterName}"
+                                     th:value="${x.theaterId}">
                             </option>
                         </select>
                     </div>
                 </div>
-
-                <div id="schedule-list-container" class="form-row">
-
+                <div class="form-row">
+                    <div class="form-group">
+                        <div class="room-list-container" id="room-list-container">
+                        </div>
+                    </div>
                 </div>
-
                 <div class="modal-actions">
                     <button type="button" class="btn btn-cancel" onclick="closeModal()">Cancel</button>
                     <button type="submit" class="btn btn-save">Save</button>
@@ -170,46 +232,111 @@
         </div>
     </div>
 
+<div id="editScheduleModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title">Edit Schedule</h3>
+            <button class="close-btn" onclick="closeEditModal()">&times;</button>
+        </div>
+        <form id="editScheduleForm" method="POST" action="/movie_schedule/update_schedule">
+            <div class="modal-body">
+                <input type="hidden" id="editScheduleId" name="scheduleId">
+                <input type="hidden" name="movieId" th:value="${movie.getMovieId()}">
 
-    <script th:inline="javascript">
+                <div class="form-group">
+                    <label class="form-label">Date</label>
+                    <input type="date" id="editDate" name="date" class="form-input" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Start Time</label>
+                    <input type="text" id="editStartTime" name="startTime" class="form-input" placeholder="HH:mm" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label" for="editTheater">Theater</label>
+                    <select class="form-select" id="editTheater" name="theater" required>
+                        <option value="">Select Theater</option>
+                        <option th:each="x : ${theatersCbBox}" th:text="${x.theaterName}" th:value="${x.theaterId}"></option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Room</label>
+                    <div class="room-list-container" id="edit-room-list-container">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
+                <button type="submit" class="btn btn-save">Save Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+
+<script th:inline="javascript">
         const serverData = {
             schedules: [(${schedules})],
             startTime: [[${startTime}]],
             endTime: [[${endTime}]]
         }
     </script>
-
     <script th:src="@{/staff/js/schedule.js}"></script>
-
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script th:inline="javascript">
         $(function(){
-            $('#room').on('change', function(){
-                var roomId = $(this).val();
-                var movieId = $('input[name="movieId"]').val();
+            const dateInput = $('#selectedDateInput');
+            const timeInput = $('#startTime');
+            const theaterSelect = $('#theater');
+
+            function updateTheaterState() {
+                const selectedDate = dateInput.val();
+                const startTime = timeInput.val();
+
+                const timeRegex = /^([01][0-9]|2[0-3]):[0-5][0-9]$/;
+                const isTimeValid = timeRegex.test(startTime);
+
+                if (selectedDate && isTimeValid) {
+                    theaterSelect.prop('disabled', false);
+                } else {
+                    theaterSelect.prop('disabled', true);
+                    theaterSelect.val('');
+                    theaterSelect.trigger('change');
+                }
+            }
+
+            timeInput.on('input', updateTheaterState);
+            dateInput.on('change', updateTheaterState);
+            $('#theater').on('change', function(){
+                var theater = $(this).val();
+                var movieId = $('#movieId').val();
                 var selectedDate = $('#selectedDateInput').val();
-                if (roomId) {
+                var startTime = $('#startTime').val();
+                if (theater) {
                     // Gửi yêu cầu AJAX
                     $.ajax({
                         type: 'GET',
-                        url: '/movie_schedule/schedule_fragment',
+                        url: '/movie_schedule/available_rooms_fragment',
                         data: {
-                            roomId: roomId,
+                            theaterId: theater,
                             movieId: movieId,
-                            date: selectedDate
+                            date: selectedDate,
+                            startTime: startTime
                         },
                         success: function(fragment) {
-                            $('#schedule-list-container').html(fragment);
+                            $('#room-list-container').html(fragment);
                         },
                         error: function() {
-                            alert('Error loading schedules.');
-                            $('#schedule-list-container').html('');
+                            alert('Cannot get available rooms.');
+                            $('#room-list-container').html('');
                         }
                     });
                 } else {
-                    $('#schedule-list-container').html('');
+                    $('#room-list-container').html('');
                 }
-            })
+            });
         });
     </script>
 </body>

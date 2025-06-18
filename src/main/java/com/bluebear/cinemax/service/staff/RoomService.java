@@ -1,10 +1,11 @@
 package com.bluebear.cinemax.service.staff;
 
+import com.bluebear.cinemax.dto.RoomDTO;
 import com.bluebear.cinemax.entity.Room;
 
 import java.util.List;
 
 public interface RoomService {
-    public List<Room> findAllRoomsByTheaterId(Integer theaterId);
-    public Room getRoomById(Integer id);
+    public List<RoomDTO> findAllRoomsByTheaterId(Integer theaterId);
+    public RoomDTO getRoomById(Integer id);
 }

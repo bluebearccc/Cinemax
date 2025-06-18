@@ -1,47 +1,49 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enums.Employee_Status;
+import com.bluebear.cinemax.enumtype.Employee_Status;
+import com.bluebear.cinemax.enumtype.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.annotations.Nationalized;
+
+import java.util.List;
+
+@Entity
 @Data
 @NoArgsConstructor
+@Builder
 @AllArgsConstructor
-@Entity
-@Table(name = "Employee")
 public class Employee {
-
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "EmployeeID")
-    private Integer employeeId;
+    private Integer id;
 
-    @Column(name = "Position", length = 255, nullable = false)
-    private String position;
+    @Column(name = "Position")
+    @Enumerated(EnumType.STRING)
+    private Role position;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 50, nullable = false)
+    @Column(name = "Status")
     private Employee_Status status;
 
-    @OneToOne
-    @JoinColumn(name = "AccountID", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "AccountID")
     private Account account;
 
-    //    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "TheaterID", nullable = false)
-//    private Theater theater;
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TheaterID" , nullable = false, referencedColumnName = "TheaterID")
+    @ManyToOne
+    @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "AdminID")
     private Employee admin;
 
-    @Nationalized
-    @Column(name = "FullName", length = 100, nullable = false)
+    @Column(name = "FullName", nullable = false, length = 100)
     private String fullName;
 
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Invoice> invoiceList;
 }

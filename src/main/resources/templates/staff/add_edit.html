@@ -57,8 +57,8 @@
               id="stockForm"
               onsubmit="return validateForm()">
 
-            <input type="hidden" th:field="*{stockId}">
-            <input type="hidden" name="theaterID" th:value="${employee.theater.theaterId}">
+            <input type="hidden" th:field="*{id}">
+            <input type="hidden" name="theaterID" th:value="${employee.theaterId}">
 
             <div class="form-row">
                 <!-- Left Column - General Information -->
@@ -66,7 +66,7 @@
                     <!-- Theater -->
                     <div class="form-group">
                         <label class="form-label">Theater</label>
-                        <input type="text" class="form-input" th:value="${employee.theater.getTheaterName()}" disabled>
+                        <input type="text" class="form-input" th:value="${employee.theaterId}" disabled>
                     </div>
 
                     <!-- Name -->
