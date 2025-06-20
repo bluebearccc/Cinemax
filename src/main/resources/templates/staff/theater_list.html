@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theater Management</title>
+    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <style>
+        /* Additional styles specific for theater list */
+        .theater-image {
+            width: 100px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .theater-name {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .theater-address {
+            color: #6c757d;
+            font-size: 13px;
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .room-count {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-inactive {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .table tbody tr:hover {
+            background-color: #e3f2fd;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .btn-view {
+            background-color: #e3f2fd;
+            color: #1976d2;
+        }
+
+        .btn-view:hover {
+            background-color: #1976d2;
+            color: white;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 12px 12px 0 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-header h5 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background-color 0.3s;
+        }
+
+        .modal-close:hover {
+            background-color: rgba(255,255,255,0.2);
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .detail-item {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .detail-value {
+            color: #6c757d;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .theater-detail-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+<div class="sidebar">
+    <div class="user-info">
+        <div class="user-avatar">M</div>
+        <div class="user-name">Mary Johnson</div>
+    </div>
+
+    <a href="#" class="sidebar-item">
+        <div class="sidebar-icon">🏠</div>
+        <div class="sidebar-text">Home</div>
+    </a>
+    <a th:href="@{/theater_stock}" class="sidebar-item">
+        <div class="sidebar-icon">🍿</div>
+        <div class="sidebar-text">Food and Drinks</div>
+    </a>
+    <a th:href="@{/movie_schedule}" class="sidebar-item ">
+        <div class="sidebar-icon">📅</div>
+        <div class="sidebar-text">Set Schedule</div>
+    </a>
+    <a th:href="@{/theaer}" class="sidebar-item  active">
+        <div class="sidebar-icon">🎬</div>
+        <div class="sidebar-text">Manage Theater</div>
+    </a>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <div class="header-left">
+            <h1>Theater Management</h1>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'success' : (${messageType == 'error'} ? 'error' : 'warning')">
+        <span th:text="${message}"></span>
+    </div>
+
+    <div class="controls">
+        <div class="search-box">
+            <form th:action="@{/theater_list/search}" method="get">
+                <input type="hidden" />
+                <input type="text" name="theaterName" class="search-input" placeholder="Search for theater's name or address">
+            </form>
+        </div>
+        <a class="navbar-brand" th:href="@{/theater_list/add_theater}"><u>Add new theater</u></a>
+    </div>
+
+    <div class="table-container">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>THEATER NAME</th>
+                <th>ADDRESS</th>
+                <th>IMAGE</th>
+                <th>ROOM QUANTITY</th>
+                <th>STATUS</th>
+                <th>ACTION</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="theater : ${theaters}">
+            <td>
+                    <div class="theater-name" th:text="${theater.theaterName}">CGV Vincom Center</div>
+                    <div class="theater-address" style="font-size: 12px; color: #999;">
+                    </div>
+                </td>
+                <td>
+                    <div class="theater-address" th:text="${theater.address}" title="Full address">
+                    </div>
+                </td>
+                <td>
+                    <img th:src="${theater.image}" class="theater-image" alt="Theater Image"
+                </td>
+                <td>
+                    <span class=" ">
+                         <span th:text="${theater.roomQuantity}">8</span> rooms
+                    </span>
+                </td>
+                <td>
+                    <span class="status-badge"
+                          th:classappend="${theater.status == 'Active'} ? 'status-active' : 'status-inactive'"
+                          th:text="${theater.status == 'Active'} ? 'Active' : 'Inactive'">
+                        Active
+                    </span>
+                </td>
+                <td>
+                    <div class="action-buttons">
+                        <form method="GET" th:action="@{/theater/theater_detail}" style="display: inline;">
+                            <input type="hidden" name="id" th:value="${theater.theaterID}" />
+                            <button type="submit" class="action-btn btn-edit" title="Theater Detail">👁️ View Detail</button>
+                        </form>
+
+                        <form class="edit-form" method="POST" th:action="@{/theater/showFormForUpdate}" style="display: inline;">
+                            <input type="hidden" name="id" th:value="${theater.theaterID}" />
+                            <button type="submit" class="action-btn btn-edit" title="Edit Theater">✏️ Edit</button>
+                        </form>
+
+                        <form th:action="@{/theater/delete}" method="POST" onsubmit="return confirmDelete()" style="display: inline;">
+                            <input type="hidden" name="id" th:value="${theater.theaterID}" />
+                            <button type="submit" class="action-btn btn-delete" title="Delete Theater">🗑️ Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+</body>
+</html>
