@@ -13,7 +13,7 @@
 <!-- Sidebar -->
 <div class="sidebar">
     <div class="user-info">
-        <div class="user-avatar">M</div>
+        <div class="user-avatar" >M</div>
         <div class="user-name" >Mary Johnson</div>
     </div>
 
@@ -21,13 +21,17 @@
         <div class="sidebar-icon">🏠</div>
         <div class="sidebar-text">Home</div>
     </a>
-    <a th:href="@{/theater_stock}" class="sidebar-item ">
+    <a th:href="@{/theater_stock}" class="sidebar-item active">
         <div class="sidebar-icon">🍿</div>
         <div class="sidebar-text">Food and Drinks</div>
     </a>
-    <a th:href="@{/movie_schedule}" class="sidebar-item active ">
-        <div class="sidebar-icon">🎬</div>
+    <a th:href="@{/movie_schedule}" class="sidebar-item ">
+        <div class="sidebar-icon">📅</div>
         <div class="sidebar-text">Set Schedule</div>
+    </a>
+    <a th:href="@{/theater}" class="sidebar-item ">
+        <div class="sidebar-icon">🎬</div>
+        <div class="sidebar-text">Manage Theater</div>
     </a>
 </div>
 

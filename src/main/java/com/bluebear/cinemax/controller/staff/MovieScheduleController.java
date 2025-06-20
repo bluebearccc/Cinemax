@@ -9,20 +9,14 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Controller
 @RequestMapping("/movie_schedule")
@@ -83,6 +77,12 @@ public class MovieScheduleController {
         model.addAttribute("newSchedule", new Schedule());
         model.addAttribute("theatersCbBox", theaters);
 
+        // Thêm tin nhắn từ redirectAttributes (nếu có)
+        if (model.asMap().containsKey("message")) {
+            model.addAttribute("message", model.asMap().get("message"));
+        }
+
+
         return "staff/movie_schedule_detail";
     }
 
@@ -94,8 +94,8 @@ public class MovieScheduleController {
             if (schedulesGroupedByDate.containsKey(dateKey)) {
                 schedulesForDay = schedulesGroupedByDate.get(dateKey);
             } else {
-                 schedulesForDay = new java.util.ArrayList<>();
-                 schedulesGroupedByDate.put(dateKey, schedulesForDay);
+                schedulesForDay = new java.util.ArrayList<>();
+                schedulesGroupedByDate.put(dateKey, schedulesForDay);
             }
             RoomDTO r = roomServiceImpl.getRoomById(schedule.getRoomID());
             TheaterDTO t = theaterServiceImpl.getTheaterById(r.getTheaterID());
@@ -122,7 +122,13 @@ public class MovieScheduleController {
                                              @RequestParam("startTime") String startTime_raw,
                                              @RequestParam("date") String date_raw,
                                              @RequestParam("movieId") Integer movieId,
+                                             @RequestParam(value = "selectedRoomId", required = false) Integer selectedRoomId, // Thêm tham số này
                                              Model model) {
+
+        List<String> availableRoomsId = new ArrayList<>();
+
+        MovieDTO mo = movieServiceImpl.getMovieById(movieId);
+
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
@@ -132,16 +138,28 @@ public class MovieScheduleController {
         LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
         LocalDateTime actualEndTime = actualStartTime.plusMinutes(movieServiceImpl.getMovieById(movieId).getDuration());
 
+        if(actualEndTime.isAfter(mo.getEndDate())) {
+            String message = "Cannot add schedule because this movie is out of valid date range";
+            model.addAttribute("message", message);
+            return "staff/fragments/available_rooms_fragment :: availablerRooms";
+        }
+
         LocalDateTime bufferStartTime = actualStartTime.minusMinutes(15);
         LocalDateTime bufferEndTime = actualEndTime.plusMinutes(15);
 
-        List<String> availableRoomsId = scheduleServiceImpl.findAvailableRooms(theaterId, bufferStartTime, bufferEndTime);
+        availableRoomsId = scheduleServiceImpl.findAvailableRooms(theaterId, bufferStartTime, bufferEndTime);
         List<RoomDTO> availableRooms = new ArrayList();
 
         for(String roomId : availableRoomsId) {
             availableRooms.add(roomServiceImpl.getRoomById(Integer.parseInt(roomId)));
         }
+        if(availableRooms.isEmpty()) {
+            String message = "No available rooms for the selected time and theater";
+            model.addAttribute("message", message);
+            return "staff/fragments/available_rooms_fragment :: availablerRooms";
+        }
         model.addAttribute("availableRooms", availableRooms);
+        model.addAttribute("selectedRoomId", selectedRoomId); // Truyền selectedRoomId vào model
         return "staff/fragments/available_rooms_fragment :: availablerRooms";
     }
     @PostMapping("/add_schedule")
@@ -175,14 +193,124 @@ public class MovieScheduleController {
         return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
     }
 
-    @GetMapping("/remove_schedule")
-    public String removeSchedule(@RequestParam(value ="scheduleId") Integer scheduleId,
-                                 RedirectAttributes redirectAttributes){
-        String message = "Cannot delete because this schedule";
-        if(scheduleServiceImpl.deleteSchedule(scheduleId)) {
-            message = "Schedule deleted successfully!";
+    @PostMapping("/delete_schedule") // Đổi từ GET sang POST
+    @ResponseBody // Trả về JSON cho AJAX
+    public Map<String, Object> deleteSchedule(@RequestParam(value ="scheduleId") Integer scheduleId){
+        Map<String, Object> response = new HashMap<>();
+
+        // Kiểm tra xem lịch trình có tồn tại trong detailseat không
+        if (scheduleServiceImpl.isExisted(scheduleId)) {
+            response.put("success", false);
+            response.put("message", "Cannot delete schedule. It has associated bookings.");
+            return response;
         }
-        redirectAttributes.addFlashAttribute("message", message);
-        return "redirect:/movie_schedule";
+
+        // Nếu không có trong detailseat, tiến hành xóa
+        if (scheduleServiceImpl.deleteSchedule(scheduleId)) {
+            response.put("success", true);
+            response.put("message", "Schedule deleted successfully!");
+        } else {
+            response.put("success", false);
+            response.put("message", "Failed to delete schedule due to a server error.");
+        }
+        return response;
+    }
+
+    @GetMapping("/get_schedule_details")
+    @ResponseBody // Đảm bảo trả về JSON
+    public Map<String, Object> getScheduleDetails(@RequestParam("scheduleID") Integer scheduleId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            ScheduleDTO schedule = scheduleServiceImpl.getScheduleById(scheduleId);
+            if (schedule != null) {
+                // Thêm kiểm tra isExisted vào đây để disable button Edit/Delete trên frontend
+                boolean isExistedInDetailSeat = scheduleServiceImpl.isExisted(scheduleId);
+                response.put("isExisted", isExistedInDetailSeat); // Thêm trạng thái tồn tại
+
+                RoomDTO room = roomServiceImpl.getRoomById(schedule.getRoomID());
+                TheaterDTO theater = null;
+                if (room != null) {
+                    theater = theaterServiceImpl.getTheaterById(room.getTheaterID());
+                }
+
+                response.put("scheduleId", schedule.getScheduleID());
+                response.put("movieId", schedule.getMovieID());
+                response.put("date", schedule.getShowDateKey()); //yyyy-MM-dd
+                response.put("startTime", schedule.getFormattedStartTime()); // HH:mm
+                response.put("endTime", schedule.getFormattedEndTime());
+                response.put("roomId", schedule.getRoomID());
+                response.put("roomName", room != null ? room.getName() : ""); // Thêm roomName vào response
+                response.put("theaterId", theater != null ? theater.getTheaterID() : "");
+                response.put("theaterName", theater != null ? theater.getTheaterName() : "");
+                response.put("status", schedule.getStatus().name()); // Thêm status vào response
+
+                response.put("success", true);
+            } else {
+                response.put("success", false);
+                response.put("message", "Schedule not found.");
+            }
+        } catch (Exception e) {
+            response.put("success", false);
+            response.put("message", "Error fetching schedule details: " + e.getMessage());
+            // Log lỗi e.printStackTrace();
+        }
+        return response;
+    }
+
+    @PostMapping("/update_schedule")
+    public String updateSchedule(@RequestParam(value = "scheduleID") Integer scheduleId,
+                                 @RequestParam(value = "movieID") Integer movieId,
+                                 @RequestParam(value = "selectedRoomIds", required = false) Integer roomId,
+                                 @RequestParam(value = "startTimeUpdate") String startTime_raw,
+                                 @RequestParam(value = "dateUpdate") String date_raw,
+                                 @RequestParam(value = "theaterUpdate") Integer theaterId,
+                                 @RequestParam(value = "statusUpdate") String status, // Thêm tham số status
+                                 RedirectAttributes redirectAttributes) {
+
+        // --- Bắt đầu kiểm tra isExisted ---
+        if (scheduleServiceImpl.isExisted(scheduleId)) {
+            redirectAttributes.addFlashAttribute("message", "Cannot edit this schedule. It has associated bookings.");
+            return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
+        }
+        // --- Kết thúc kiểm tra isExisted ---
+
+        ScheduleDTO existingSchedule = scheduleServiceImpl.getScheduleById(scheduleId);
+        if (existingSchedule == null) {
+            redirectAttributes.addFlashAttribute("message", "Schedule not found for update!");
+            return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
+        }
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+
+        LocalDate date = LocalDate.parse(date_raw, dateFormatter);
+        LocalTime startTime = LocalTime.parse(startTime_raw, timeFormatter);
+
+        MovieDTO movie = movieServiceImpl.getMovieById(movieId);
+        LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
+        LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
+
+        existingSchedule.setStartTime(actualStartTime);
+        existingSchedule.setEndTime(actualEndTime);
+        existingSchedule.setMovieID(movieId);
+
+        if (roomId != null) {
+            existingSchedule.setRoomID(roomId);
+        } else {
+            redirectAttributes.addFlashAttribute("message", "Please select a room!");
+            return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
+        }
+
+        try {
+            existingSchedule.setStatus(Schedule_Status.valueOf(status));
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("message", "Invalid status value: " + status);
+            return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
+        }
+
+        scheduleServiceImpl.saveSchedule(existingSchedule);
+
+        redirectAttributes.addFlashAttribute("message", "Schedule updated successfully!");
+        return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
     }
 }

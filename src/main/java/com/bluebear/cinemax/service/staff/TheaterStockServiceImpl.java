@@ -23,13 +23,7 @@ public class TheaterStockServiceImpl implements TheaterStockService {
     @Autowired
     private TheaterRepository theaterRepository; // Injected to handle the Theater relationship
 
-    /**
-     * Converts a TheaterStockDTO to a TheaterStock entity.
-     * Handles setting the associated Theater entity based on theaterId in DTO.
-     *
-     * @param theaterStockDTO The DTO to convert.
-     * @return The converted TheaterStock entity.
-     */
+
     private TheaterStock convertToEntity(TheaterStockDTO theaterStockDTO) {
         if (theaterStockDTO == null) {
             return null;

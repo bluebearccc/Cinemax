@@ -36,4 +36,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
     @Query("SELECT s FROM Movie m JOIN m.scheduleList s WHERE m.movieID = :movieId AND CAST(s.startTime AS DATE) = CAST(:day AS DATE) AND s.status = :status")
     List<Schedule> findSchedulesByMovie_MovieIDInTodayAndStatus(int movieId, LocalDateTime day, Schedule_Status status);
 
+    @Query(value = "SELECT s.* " +
+            "FROM Schedule s JOIN Detail_Seat d ON d.ScheduleID = s.ScheduleID " +
+            "WHERE s.ScheduleID = :id", nativeQuery = true)
+    List<Schedule> findSchedulesByDetailSeat(@Param("id") Integer id);
 }

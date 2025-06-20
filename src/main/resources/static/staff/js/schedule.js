@@ -266,7 +266,53 @@ document.getElementById('scheduleModal').addEventListener('click', function(e) {
 });
 
 function editSchedule(id) {
-    alert(`Hiện ra edit form cho schedule có id: ${id}?`);
+    // 1. Mở modal chỉnh sửa
+    addNewUpdateSchedule(); // Hàm này đã có sẵn trong miniupdate_schedule.js để mở modal edit
+
+    // 2. Điền ID lịch trình vào input hidden
+    $('#scheduleIDUpdate').val(id); // Điền ID của lịch trình vào trường hidden
+
+    $.ajax({
+        type: 'GET',
+        url: '/movie_schedule/get_schedule_details',
+        data: {
+            scheduleID: id
+        },
+        success: function(response) {
+            if (response.success) {
+                // Điền các thông tin vào form chỉnh sửa
+                $('#startTimeUpdate').val(response.startTime);
+                $('#selectedDateInputUpdate').val(response.date); //yyyy-MM-dd
+
+                // Điền tên rạp vào input text và ID rạp vào hidden input
+                $('#theaterNameUpdate').val(response.theaterName); //
+                $('#theaterIdUpdate').val(response.theaterId); //
+
+                $('#roomNameUpdate').val(response.roomName); // Điền tên phòng
+                $('#roomIdUpdate').val(response.roomId); // Điền ID phòng vào hidden input
+
+                // Cập nhật trạng thái radio button
+                if (response.status === "Active") {
+                    $('#statusActive').prop('checked', true);
+                } else if (response.status === "Inactive") {
+                    $('#statusInactive').prop('checked', true);
+                }
+
+                // Cập nhật modalCurrentDate và modalSelectedDate để lịch mini hiển thị đúng ngày
+                const dateParts = response.date.split('-');
+                originalScheduleDate = new Date(parseInt(dateParts[0]), parseInt(dateParts[1]) - 1, parseInt(dateParts[2])); // Gán ngày của lịch trình cũ vào biến mới
+                modalCurrentDateUpdate = new Date(originalScheduleDate); // Đặt lịch mini hiển thị tháng của ngày cũ
+                modalSelectedDateUpdate = new Date(originalScheduleDate); // Đánh dấu ngày cũ là selected
+                generateMiniCalendarUpdate();
+
+            } else {
+                alert('Failed to load schedule details: ' + response.message);
+            }
+        },
+        error: function() {
+            alert('Error fetching schedule details.');
+        }
+    });
 }
 // Initialize calendar
 generateCalendar();

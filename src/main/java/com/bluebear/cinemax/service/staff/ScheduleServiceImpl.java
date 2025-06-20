@@ -140,4 +140,15 @@ public class ScheduleServiceImpl implements ScheduleService {
             return false;
         }
     }
+
+    //nếu có tồn tại ở trong detailseat thi return true
+    // nếu không thì  false
+    @Override
+    public boolean isExisted(Integer scheduleId) {
+        List<Schedule> schedules = scheduleRepository.findSchedulesByDetailSeat(scheduleId);
+        if(schedules.size() > 0){
+            return true;
+        }
+        return false;
+    }
 }

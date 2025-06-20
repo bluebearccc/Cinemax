@@ -13,4 +13,5 @@ public interface ScheduleService {
     public void saveSchedule(ScheduleDTO scheduleDTO);
     public List<String> findAvailableRooms(Integer theaterId, LocalDateTime startTime, LocalDateTime endTime);
     public boolean deleteSchedule(Integer id);
+    public boolean isExisted(Integer scheduleId);
 }
