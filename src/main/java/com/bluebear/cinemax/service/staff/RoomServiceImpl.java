@@ -135,5 +135,10 @@ public class RoomServiceImpl implements RoomService {
         return roomOptional.map(this::convertToDTO).orElse(null);
     }
 
+    @Override
+    public List<RoomDTO> findAllRooms() {
+        return List.of();
+    }
+
 
 }

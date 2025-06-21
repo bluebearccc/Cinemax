@@ -40,4 +40,5 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
             "FROM Schedule s JOIN Detail_Seat d ON d.ScheduleID = s.ScheduleID " +
             "WHERE s.ScheduleID = :id", nativeQuery = true)
     List<Schedule> findSchedulesByDetailSeat(@Param("id") Integer id);
+
 }

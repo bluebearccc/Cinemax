@@ -1,8 +1,10 @@
 package com.bluebear.cinemax.controller.staff;
 
 import com.bluebear.cinemax.dto.RoomDTO;
+import com.bluebear.cinemax.dto.SeatDTO;
 import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.service.staff.RoomServiceImpl;
+import com.bluebear.cinemax.service.staff.SeatService;
 import com.bluebear.cinemax.service.staff.TheaterService;
 import com.bluebear.cinemax.service.staff.TheaterServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +26,9 @@ public class TheaterController {
     @Autowired
     private RoomServiceImpl roomServiceImpl;
 
+    @Autowired
+    private SeatService seatServiceImpl;
+
     @GetMapping
     public String theaterList(Model theModel) {
         List<TheaterDTO> theaters = theaterServiceImpl.findAllTheaters();
@@ -37,5 +42,14 @@ public class TheaterController {
         theater.setRooms(rooms);
         theModel.addAttribute("theater", theater);
         return "staff/theater_detail";
+    }
+    @GetMapping("/room_detail")
+    public String roomDetail(@RequestParam("roomID") Integer roomID, Model theModel) {
+        RoomDTO room = roomServiceImpl.getRoomById(roomID);
+        List<SeatDTO> seats = seatServiceImpl.findAllByRoomId(roomID);
+        room.setSeats(seats);
+        theModel.addAttribute("room", room);
+        theModel.addAttribute("theater", theaterServiceImpl.getTheaterById(room.getTheaterID()));
+        return "staff/room_detail";
     }
 }

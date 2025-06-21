@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Room Detail</title>
+    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <style>
+        /* Theater Detail Styles */
+        .room-detail-container {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .room-info-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .room-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .room-info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .info-item {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 15px;
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .info-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-value {
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            display: inline-block;
+        }
+
+        .status-Active {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+
+        .status-Inactive {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border: 1px solid #dc3545;
+        }
+
+        /* Seat Grid Styles */
+        .seats-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .seats-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+            border-bottom: 2px solid #f8f9fa;
+            padding-bottom: 15px;
+        }
+
+        .seats-title {
+            font-size: 24px;
+            font-weight: 600;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .seats-legend {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+
+        .screen-area {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .screen {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 15px 40px;
+            border-radius: 20px 20px 5px 5px;
+            display: inline-block;
+            font-weight: 600;
+            font-size: 16px;
+            position: relative;
+            box-shadow: 0 4px 15px rgba(44, 62, 80, 0.3);
+        }
+
+        .screen::after {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 8px solid #2c3e50;
+        }
+
+        .seats-container {
+            max-width: 100%;
+            overflow-x: auto;
+            padding: 20px 0;
+        }
+
+        .seats-grid {
+            display: grid;
+            gap: 8px;
+            justify-content: center;
+            min-width: fit-content;
+            padding: 0 20px;
+        }
+
+        .row-label {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 14px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 0 8px;
+            min-width: 30px;
+        }
+
+        .seat {
+            width: 35px;
+            height: 35px;
+            border-radius: 8px;
+            border: 2px solid #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            color: #333;
+        }
+
+        .seat:hover {
+            transform: scale(1.1);
+            z-index: 10;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+        }
+
+        /* Seat Types - Updated based on actual data */
+        .seat-Single {
+            background: #e8f4f8;
+            border-color: #17a2b8;
+        }
+
+        .seat-Couple {
+            background: #f8d7da;
+            border-color: #dc3545;
+            width: 45px;
+        }
+
+        /* VIP Seats - Special styling for VIP seats */
+        .seat-vip {
+            background: #fff3cd !important;
+            border-color: #ffc107 !important;
+            box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+        }
+
+        .seat-vip::before {
+            content: '⭐';
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            font-size: 8px;
+            color: #ffc107;
+        }
+
+        /* Seat Status */
+        .seat-Active {
+            opacity: 1;
+        }
+
+        .seat-Inactive {
+            background: #6c757d !important;
+            border-color: #495057 !important;
+            color: white;
+            cursor: not-allowed;
+        }
+
+        /* Empty Seat Styling */
+        .seat-empty {
+            background: transparent !important;
+            border: 1px dashed #ccc !important;
+            cursor: default !important;
+            color: #ccc;
+            font-size: 10px;
+        }
+
+        .seat-empty:hover {
+            transform: none !important;
+            box-shadow: none !important;
+        }
+
+        .seat-empty .seat-tooltip {
+            display: none !important;
+        }
+
+        .seat-tooltip {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #333;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            white-space: nowrap;
+            z-index: 1000;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            margin-bottom: 5px;
+        }
+
+        .seat-tooltip::after {
+            content: '';
+            position: absolute;
+            top: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 5px solid transparent;
+            border-right: 5px solid transparent;
+            border-top: 5px solid #333;
+        }
+
+        .seat:hover .seat-tooltip {
+            opacity: 1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #f8f9fa;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Controls styling */
+        .controls {
+            justify-content: flex-start;
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .controls a {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .controls a:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            color: white;
+        }
+
+        .back-link {
+            background: #6c757d !important;
+        }
+
+        .back-link:hover {
+            background: #5a6268 !important;
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4) !important;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .room-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .controls a {
+                text-align: center;
+            }
+
+            .seats-legend {
+                justify-content: center;
+            }
+
+            .seat {
+                width: 30px;
+                height: 30px;
+                font-size: 9px;
+            }
+
+            .seat-Couple {
+                width: 38px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="sidebar">
+    <div class="user-info">
+        <div class="user-avatar">M</div>
+        <div class="user-name">Mary Johnson</div>
+    </div>
+
+    <a href="#" class="sidebar-item">
+        <div class="sidebar-icon">🏠</div>
+        <div class="sidebar-text">Home</div>
+    </a>
+    <a th:href="@{/theater_stock}" class="sidebar-item">
+        <div class="sidebar-icon">🍿</div>
+        <div class="sidebar-text">Food and Drinks</div>
+    </a>
+    <a th:href="@{/movie_schedule}" class="sidebar-item">
+        <div class="sidebar-icon">📅</div>
+        <div class="sidebar-text">Set Schedule</div>
+    </a>
+    <a th:href="@{/theater}" class="sidebar-item active">
+        <div class="sidebar-icon">🎬</div>
+        <div class="sidebar-text">Manage Theater</div>
+    </a>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <div class="header-left">
+            <h1>Room Detail</h1>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'success' : (${messageType == 'error'} ? 'error' : 'warning')">
+        <span th:text="${message}"></span>
+    </div>
+
+    <div class="controls">
+        <a th:href="@{/theater/theater_detail(id=${room.theaterID})}" class="back-link">← Back to Theater Detail</a>
+        <a th:href="@{/theater/add_room(theaterID=${room.theaterID})}">➕ Add New Room</a>
+        <a th:href="@{/theater/edit_room(roomID=${room.roomID})}">✏️ Edit Room</a>
+    </div>
+
+    <!-- Room Information -->
+    <div class="room-detail-container">
+        <div class="room-info-header">
+            <div class="room-title">
+                🎬 <span th:text="${room.name}">Room A1</span>
+            </div>
+            <div class="room-info-grid">
+                <div class="info-item">
+                    <div class="info-label">Theater Name</div>
+                    <div class="info-value" th:text="${theater.theaterName}">001</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Room Type</div>
+                    <div class="info-value" th:text="${room.typeOfRoom}">STANDARD</div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Status</div>
+                    <div>
+                        <span th:text="${room.status}">ACTIVE</span>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <div class="info-label">Dimensions</div>
+                    <div class="info-value">
+                        <span th:text="${room.row}">10</span> x <span th:text="${room.column}">15</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Seats Section -->
+    <div class="seats-section">
+        <div class="seats-header">
+            <div class="seats-title">
+                🪑 Seat Layout
+            </div>
+            <div class="seats-legend">
+                <div class="legend-item">
+                    <div class="legend-color seat-Single"></div>
+                    <span>Single</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color seat-Couple"></div>
+                    <span>Couple</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color seat-vip"></div>
+                    <span>VIP</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color seat-Active"></div>
+                    <span>Active</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color seat-Inactive"></div>
+                    <span>Inactive</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Screen -->
+        <div class="screen-area">
+            <div class="screen">🎬 SCREEN</div>
+        </div>
+
+        <!-- Seats Grid -->
+        <div class="seats-container">
+            <div class="seats-grid" th:style="'grid-template-columns: 40px repeat(' + ${room.column} + ', 1fr);'">
+                <div></div> <div th:each="col : ${#numbers.sequence(1, room.column)}" class="row-label" th:text="${col}"></div>
+
+                <th:block th:each="row : ${#numbers.sequence(1, room.row)}">
+                    <div class="row-label" th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row)}"></div>
+
+                    <th:block th:each="col : ${#numbers.sequence(1, room.column)}">
+                        <th:block th:with="seatPosition=${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row) + col}">
+
+                            <th:block th:with="currentSeats=${room.seats.?[position == #vars.seatPosition]}">
+
+                                <th:block th:if="${not #lists.isEmpty(currentSeats)}">
+                                    <div th:with="seat=${currentSeats[0]}">
+                                        <div class="seat"
+                                             th:classappend="'seat-' + ${seat.seatType} + ' seat-' + ${seat.status} + (${seat.isVIP} ? ' seat-vip' : '')"
+                                             th:attr="data-seat-id=${seat.seatID}">
+                                            <span th:text="${seat.position}"></span>
+                                            <div class="seat-tooltip">
+                                                <div>Vị trí: <span th:text="${seat.position}"></span></div>
+                                                <div>Loại: <span th:text="${seat.seatType}"></span></div>
+                                                <div>Giá: $<span th:text="${#numbers.formatDecimal(seat.unitPrice, 1, 'COMMA', 2, 'POINT')}"></span></div>
+                                                <div>Trạng thái: <span th:text="${seat.status}"></span></div>
+                                                <div th:if="${seat.isVIP}">⭐ Ghế VIP</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </th:block>
+
+                                <div th:if="${#lists.isEmpty(currentSeats)}" class="seat seat-empty">
+                                    <span></span>
+                                </div>
+                            </th:block>
+                        </th:block>
+                    </th:block>
+                </th:block>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Add interactive functionality
+    document.addEventListener('DOMContentLoaded', function() {
+        // Seat click functionality
+        document.querySelectorAll('.seat[data-seat-id]').forEach(seat => {
+            seat.addEventListener('click', function() {
+                const seatId = this.getAttribute('data-seat-id');
+                const position = this.textContent.trim();
+
+                if (!this.classList.contains('seat-Inactive')) {
+                    console.log(`Clicked seat: ${position} (ID: ${seatId})`);
+                    // Add your seat selection logic here
+
+                    // Visual feedback
+                    this.style.transform = 'scale(1.2)';
+                    setTimeout(() => {
+                        this.style.transform = '';
+                    }, 200);
+                }
+            });
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                // Clear any selections
+                document.querySelectorAll('.seat.selected').forEach(seat => {
+                    seat.classList.remove('selected');
+                });
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
