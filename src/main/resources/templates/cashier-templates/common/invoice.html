@@ -1,0 +1,50 @@
+<div class="col-lg-4" th:fragment="invoice">
+    <div class="card card-custom sticky-top">
+        <div class="card-header">
+            <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Chi tiết giá</h5>
+        </div>
+        <div class="card-body">
+            <div th:if="${priceBreakdown != null}">
+                <div th:if="${priceBreakdown.ticketItems != null and !priceBreakdown.ticketItems.isEmpty()}">
+                    <h6 class="text-muted mb-2">Vé xem phim:</h6>
+                    <div class="d-flex justify-content-between mb-1"
+                         th:each="item : ${priceBreakdown.ticketItems}">
+                        <span th:text="${item.description}"></span>
+                        <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 border-top pt-2">
+                        <strong>Tổng vé:</strong>
+                        <strong th:text="${#numbers.formatDecimal(priceBreakdown.totalTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
+                    </div>
+                </div>
+
+                <div th:if="${priceBreakdown.foodItems != null and !priceBreakdown.foodItems.isEmpty()}"
+                     class="mt-3">
+                    <h6 class="text-muted mb-2">Bắp nước:</h6>
+                    <div class="d-flex justify-content-between mb-1"
+                         th:each="item : ${priceBreakdown.foodItems}">
+                        <span th:text="${item.name + ' x' + item.quantity}"></span>
+                        <span th:text="${#numbers.formatDecimal(item.total, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2 border-top pt-2">
+                        <strong>Tổng bắp nước:</strong>
+                        <strong th:text="${#numbers.formatDecimal(priceBreakdown.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
+                    </div>
+                </div>
+
+                <hr class="my-3">
+                <div class="d-flex justify-content-between">
+                    <strong class="fs-5">Tổng cộng:</strong>
+                    <strong class="text-warning fs-4"
+                            th:text="${#numbers.formatDecimal(priceBreakdown.total, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
+                </div>
+            </div>
+
+            <div th:unless="${priceBreakdown != null}" class="text-center text-muted py-4">
+                <i class="fas fa-calculator fa-2x mb-3"></i>
+                <p>Chưa có thông tin giá</p>
+                <small>Vui lòng chọn ghế để xem chi tiết</small>
+            </div>
+        </div>
+    </div>
+</div>

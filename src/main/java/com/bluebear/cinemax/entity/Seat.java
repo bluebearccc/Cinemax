@@ -33,8 +33,8 @@ public class Seat {
     @Column(name = "IsVIP", nullable = false)
     private Boolean isVIP;
 
-    @Column(name = "UnitPrice", nullable = false, precision = 10, scale = 2)
-    private BigDecimal unitPrice;
+    @Column(name = "UnitPrice", nullable = false)
+    private Double unitPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)

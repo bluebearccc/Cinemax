@@ -7,25 +7,20 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface DetailFDRepository extends JpaRepository<DetailFD, Integer> {
-    // Method để lấy danh sách seat ID đã được book theo schedule
     @Query("SELECT ds.seat.seatId FROM DetailSeat ds WHERE ds.schedule.scheduleId = :scheduleId")
     List<Integer> findBookedSeatIdsByScheduleId(@Param("scheduleId") Integer scheduleId);
 
-    // Method để lấy tất cả DetailSeat theo schedule
     @Query("SELECT ds FROM DetailSeat ds " +
             "JOIN FETCH ds.seat " +
             "JOIN FETCH ds.invoice " +
             "WHERE ds.schedule.scheduleId = :scheduleId")
     List<DetailSeat> findByScheduleId(@Param("scheduleId") Integer scheduleId);
 
-    // Method để tìm DetailSeat theo schedule và seat
     @Query("SELECT ds FROM DetailSeat ds " +
             "JOIN FETCH ds.seat " +
             "JOIN FETCH ds.invoice " +

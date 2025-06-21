@@ -9,32 +9,33 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.time.LocalDate;
-
+import java.time.LocalDateTime;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     // 1. Lấy theo theaterId + status + theaterStatus + ngày
     @Query("""
-        SELECT DISTINCT m FROM Movie m 
-        JOIN Schedule s ON m.movieId = s.movie.movieId 
-        JOIN Room r ON r.roomId = s.room.roomId 
-        JOIN Theater t ON r.theater.theaterId = t.theaterId
-        WHERE t.theaterId = :theaterId 
-        AND m.status = :status 
-        AND t.status = :theaterStatus
-        AND CAST(s.startTime AS date) = :date
+    SELECT DISTINCT m FROM Movie m 
+    JOIN m.schedules s 
+    JOIN s.room r 
+    JOIN r.theater t
+    WHERE t.theaterId = :theaterId 
+    AND m.status = :status 
+    AND t.status = :theaterStatus
+    AND s.startTime >= :startOfDay
+    AND s.startTime < :startOfNextDay
     """)
     Page<Movie> findByTheaterIdAndDate(
             @Param("theaterId") Integer theaterId,
             @Param("status") Movie.MovieStatus status,
             @Param("theaterStatus") Theater.TheaterStatus theaterStatus,
-            @Param("date") LocalDate date,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("startOfNextDay") LocalDateTime startOfNextDay,
             Pageable pageable
     );
 
-    // 2. Lọc theo genre + theater + ngày
+    // 2. Lọc theo genre + theater + ngày - FIXED
     @Query("""
         SELECT DISTINCT m FROM Movie m 
         JOIN MovieGenre mg ON mg.movie.movieId = m.movieId 
@@ -46,18 +47,20 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
         AND t.theaterId = :theaterId 
         AND m.status = :status 
         AND t.status = :theaterStatus
-        AND CAST(s.startTime AS date) = :date
+        AND s.startTime >= :startOfDay
+        AND s.startTime < :startOfNextDay
     """)
     Page<Movie> findByTheaterIdAndGenreIdAndDate(
             @Param("theaterId") Integer theaterId,
             @Param("genreId") Integer genreId,
             @Param("status") Movie.MovieStatus status,
             @Param("theaterStatus") Theater.TheaterStatus theaterStatus,
-            @Param("date") LocalDate date,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("startOfNextDay") LocalDateTime startOfNextDay,
             Pageable pageable
     );
 
-    // 3. Lọc theo keyword + theater + ngày
+    // 3. Lọc theo keyword + theater + ngày - FIXED
     @Query("""
         SELECT DISTINCT m FROM Movie m 
         JOIN Schedule s ON s.movie.movieId = m.movieId 
@@ -67,18 +70,20 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
         AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :keyword, '%')) 
         AND m.status = :status 
         AND t.status = :theaterStatus
-        AND CAST(s.startTime AS date) = :date
+        AND s.startTime >= :startOfDay
+        AND s.startTime < :startOfNextDay
     """)
     Page<Movie> findByTheaterIdAndKeywordAndDate(
             @Param("theaterId") Integer theaterId,
             @Param("keyword") String keyword,
             @Param("status") Movie.MovieStatus status,
             @Param("theaterStatus") Theater.TheaterStatus theaterStatus,
-            @Param("date") LocalDate date,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("startOfNextDay") LocalDateTime startOfNextDay,
             Pageable pageable
     );
 
-    // 4. Lọc theo genre + keyword + theater + ngày
+    // 4. Lọc theo genre + keyword + theater + ngày - FIXED
     @Query("""
         SELECT DISTINCT m FROM Movie m 
         JOIN MovieGenre mg ON mg.movie.movieId = m.movieId 
@@ -91,7 +96,8 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
         AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :keyword, '%')) 
         AND m.status = :status 
         AND t.status = :theaterStatus
-        AND CAST(s.startTime AS date) = :date
+        AND s.startTime >= :startOfDay
+        AND s.startTime < :startOfNextDay
     """)
     Page<Movie> findByTheaterIdAndGenreIdAndKeywordAndDate(
             @Param("theaterId") Integer theaterId,
@@ -99,8 +105,8 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("keyword") String keyword,
             @Param("status") Movie.MovieStatus status,
             @Param("theaterStatus") Theater.TheaterStatus theaterStatus,
-            @Param("date") LocalDate date,
+            @Param("startOfDay") LocalDateTime startOfDay,
+            @Param("startOfNextDay") LocalDateTime startOfNextDay,
             Pageable pageable
     );
 }
-

@@ -1,59 +1,53 @@
 package com.bluebear.cinemax.controller;
 
 import com.bluebear.cinemax.dto.cashier.*;
+import com.bluebear.cinemax.helper.Helper;
+import com.bluebear.cinemax.repository.cashier.SeatRepository;
 import com.bluebear.cinemax.service.cashier.CashierService;
+import com.bluebear.cinemax.service.cashier.PdfGenerationService;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.bluebear.cinemax.helper.Helper.*;
+
 @Controller
-@RequestMapping(CashierController.CASHIER_PATH)
+@RequestMapping("/cashier")
 public class CashierController {
-    private final LocalDate currentDate = LocalDate.now();
+    //Xét Date cho ngày hôm này và 7 ngày tới
+    private final LocalDateTime currentDate = LocalDateTime.now();
+    private final LocalDateTime sevenDaysFromToday = currentDate.plusDays(7);
+
+    private final Integer CASHIER_THEATER_ID = 1;
+
     private final CashierService cashierService;
-
-    // CONFIGURE THIS: Set the specific theater ID for this cashier
-    private static final Integer CASHIER_THEATER_ID = 1; // Change this to your desired theater ID
-
-    // Path and template constants
-    public static final String CASHIER_PATH = "/cashier";
-    private static final String CASHIER_BOOKING_VIEW = "cashier-templates/cashier-booking";
-    private static final String REDIRECT_CASHIER = "redirect:/cashier/movie/";
-
-    // Session attribute keys
-    private static final String ATTR_SELECTED_MOVIE = "selectedMovie";
-    private static final String ATTR_SELECTED_SCHEDULE = "selectedSchedule";
-    private static final String ATTR_SELECTED_SEATS = "selectedSeats";
-    private static final String ATTR_CUSTOMER_INFO = "customerInfo";
-    private static final String ATTR_PRICE_BREAKDOWN = "priceBreakdown";
-    private static final String ATTR_CURRENT_STEP = "currentStep";
-    private static final String ATTR_THEATER_ID = "theaterId";
-
-    // Room type
-    private static final String ROOM_TYPE_COUPLE = "Couple";
-
-    // Prices
-    private static final int COUPLE_SEAT_PRICE = 190000;
-    private static final int VIP_SEAT_PRICE = 95000;
-    private static final int NORMAL_SEAT_PRICE = 75000;
+    private SeatRepository seatRepository;
+    private PdfGenerationService pdfGenerationService;
 
     @Autowired
-    public CashierController(CashierService cashierService) {
+    public CashierController(CashierService cashierService, SeatRepository seatRepository, PdfGenerationService pdfGenerationService) {
+        this.pdfGenerationService = pdfGenerationService;
+        this.seatRepository = seatRepository;
         this.cashierService = cashierService;
     }
 
-    @GetMapping("/")
     public String redirectToMovieSelection() {
         return "redirect:/cashier/movie/";
     }
@@ -67,14 +61,13 @@ public class CashierController {
                               @RequestParam(required = false) String keyword,
                               @RequestParam(required = false) Integer genreId
     ) {
-        // Clear all previous session data
         clearSessionData(session);
         session.setAttribute(ATTR_THEATER_ID, CASHIER_THEATER_ID);
 
         try {
             String normalizedKeyword = normalizeSearchParam(keyword);
 
-            Pageable pageable = PageRequest.of(page, size);
+            Pageable pageable = PageRequest.of(page, 3);
 
             Page<MovieDTO> moviesPage;
 
@@ -93,8 +86,8 @@ public class CashierController {
             }
 
             List<String> availableGenres = getAvailableGenresForTheater(CASHIER_THEATER_ID);
-
             model.addAttribute("movies", moviesPage.getContent());
+            model.addAttribute("availableGenres", availableGenres);
             model.addAttribute("moviesPage", moviesPage);
             model.addAttribute("availableGenres", availableGenres != null ? availableGenres : new ArrayList<>());
             model.addAttribute("selectedGenreId", genreId);
@@ -108,7 +101,6 @@ public class CashierController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            // If error occurs, show empty list
             model.addAttribute("movies", new ArrayList<>());
             model.addAttribute("moviesPage", Page.empty());
             model.addAttribute("availableGenres", new ArrayList<>());
@@ -121,18 +113,7 @@ public class CashierController {
             model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách phim. Vui lòng thử lại.");
         }
 
-        return CASHIER_BOOKING_VIEW;
-    }
-
-    @GetMapping("/search/movie")
-    public String searchMovie(@RequestParam(required = false) String keyword,
-                              @RequestParam(required = false) Integer genreId,
-                              @RequestParam(defaultValue = "0") Integer page,
-                              @RequestParam(defaultValue = "10") Integer size,
-                              Model model,
-                              HttpSession session) {
-        // Redirect to main movie selection with parameters
-        return selectMovie(model, session, page, size, null, keyword, genreId);
+        return "cashier-templates/cashier-booking";
     }
 
     @GetMapping("/movie/clear-filters")
@@ -145,10 +126,8 @@ public class CashierController {
         try {
             Integer sessionTheaterId = (Integer) session.getAttribute(ATTR_THEATER_ID);
             if (sessionTheaterId == null || !sessionTheaterId.equals(CASHIER_THEATER_ID)) {
-                return REDIRECT_CASHIER;
+                return redirectToMovieSelection();
             }
-
-            // Get movie from the paged results to verify it exists
             Page<MovieDTO> moviesPage = cashierService.getPagedMovieByTheater(
                     CASHIER_THEATER_ID, currentDate, Pageable.unpaged());
 
@@ -157,7 +136,7 @@ public class CashierController {
                     .findFirst();
 
             if (movieOpt.isEmpty()) {
-                return REDIRECT_CASHIER;
+                return redirectToMovieSelection();
             }
 
             MovieDTO movie = movieOpt.get();
@@ -170,633 +149,300 @@ public class CashierController {
             session.setAttribute(ATTR_SELECTED_MOVIE, movie);
             session.setAttribute(ATTR_CURRENT_STEP, 2);
 
+
             List<ScheduleDTO> schedules = cashierService.getSchedulesByMovieAndDate(
-                    CASHIER_THEATER_ID, id, currentDate);
+                    CASHIER_THEATER_ID, id, currentDate, sevenDaysFromToday);
 
             model.addAttribute(ATTR_SELECTED_MOVIE, movie);
             model.addAttribute(ATTR_CURRENT_STEP, 2);
             model.addAttribute("schedules", schedules);
             model.addAttribute("theaterId", CASHIER_THEATER_ID);
-            model.addAttribute("currentDate", LocalDate.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
+            model.addAttribute("currentDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
 
-            return CASHIER_BOOKING_VIEW;
+            return "cashier-templates/cashier-booking";
         } catch (Exception e) {
             e.printStackTrace();
-            return REDIRECT_CASHIER;
+            return "redirect:/cashier/movie/";
         }
     }
 
+    //================SEAT==========================================================
     @PostMapping("/select-seats")
-    public String selectSchedule(@RequestParam String time,
-                                 @RequestParam String roomName,
-                                 @RequestParam String roomType,
-                                 @RequestParam Integer scheduleId,
-                                 Model model, HttpSession session) {
+    public String selectSeats(@RequestParam String time,
+                              @RequestParam String roomName,
+                              @RequestParam String roomType,
+                              @RequestParam Integer scheduleId,
+                              Model model,
+                              HttpSession session) {
         try {
-            Integer sessionTheaterId = (Integer) session.getAttribute(ATTR_THEATER_ID);
-            if (sessionTheaterId == null || !sessionTheaterId.equals(CASHIER_THEATER_ID)) {
-                return REDIRECT_CASHIER;
+            if (!isValidSession(session)) {
+                return "redirect:/cashier/movie/";
             }
 
-            MovieDTO selectedMovie = (MovieDTO) session.getAttribute(ATTR_SELECTED_MOVIE);
-            if (selectedMovie == null) {
-                return REDIRECT_CASHIER;
-            }
+            clearSeatSelections(session);
 
-            session.removeAttribute(ATTR_SELECTED_SEATS);
-            session.removeAttribute(ATTR_CUSTOMER_INFO);
-            session.removeAttribute(ATTR_PRICE_BREAKDOWN);
-
-            Map<String, Object> scheduleInfo = new HashMap<>();
-            scheduleInfo.put("time", time);
-            scheduleInfo.put("roomName", roomName);
-            scheduleInfo.put("roomType", roomType);
-            scheduleInfo.put("scheduleId", scheduleId);
-
+            Map<String, Object> scheduleInfo = createScheduleInfo(time, roomName, roomType, scheduleId);
             session.setAttribute(ATTR_SELECTED_SCHEDULE, scheduleInfo);
             session.setAttribute(ATTR_CURRENT_STEP, 3);
 
-            List<SeatDTO> rawSeats = cashierService.getSeatsWithBookingDetails(scheduleId);
-            System.out.println("Raw seats loaded: " + rawSeats.size());
+            List<SeatDTO> seats = cashierService.getSeatsWithBookingDetails(scheduleId);
 
-            List<SeatDTO> seats = removeDuplicateSeats(rawSeats);
-            System.out.println("Seats after cleanup: " + seats.size());
+            Map<String, Object> seatGrid = createSimpleSeatGrid(seats, roomType);
 
-            // Create seat grid structure with error handling
-            Map<String, Object> seatGridData;
-            try {
-                System.out.println("Creating seat grid for room type: " + roomType);
-                seatGridData = createSeatGridStructure(seats, roomType);
+            Page<TheaterStockDTO> foodMenu = cashierService.getAvailableTheaterStockByTheater(CASHIER_THEATER_ID, PageRequest.of(0, 4));
 
-                if (seatGridData != null) {
-                    Object rows = seatGridData.get("rows");
-                    System.out.println("Grid data created:");
-                    System.out.println("- Rows: " + (rows != null ? ((List<?>)rows).size() : "null"));
-                    System.out.println("- Max columns: " + seatGridData.get("maxColumns"));
-                    System.out.println("- Room type: " + seatGridData.get("roomType"));
-                } else {
-                    System.out.println("Grid data is null!");
-                }
-
-            } catch (Exception e) {
-                System.err.println("Error creating seat grid structure: " + e.getMessage());
-                e.printStackTrace();
-
-                // Fallback: create empty grid
-                seatGridData = new HashMap<>();
-                seatGridData.put("rows", new ArrayList<>());
-                seatGridData.put("maxColumns", 0);
-                seatGridData.put("roomType", roomType);
-                seatGridData.put("totalRows", 0);
-
-                model.addAttribute("seatError", "Có lỗi khi tải danh sách ghế. Vui lòng thử lại.");
-            }
-
-            model.addAttribute(ATTR_SELECTED_MOVIE, selectedMovie);
+            model.addAttribute("theaterStock", foodMenu);
+            model.addAttribute(ATTR_SELECTED_MOVIE, session.getAttribute(ATTR_SELECTED_MOVIE));
             model.addAttribute(ATTR_SELECTED_SCHEDULE, scheduleInfo);
             model.addAttribute(ATTR_CURRENT_STEP, 3);
+            model.addAttribute("seatGridData", seatGrid);
             model.addAttribute("seats", seats);
-            model.addAttribute("seatGridData", seatGridData);
             model.addAttribute("theaterId", CASHIER_THEATER_ID);
 
-            return CASHIER_BOOKING_VIEW;
+            return "cashier-templates/cashier-booking";
 
         } catch (Exception e) {
-            System.err.println("Error in selectSchedule: " + e.getMessage());
+            System.err.println("Error in selectSeats: " + e.getMessage());
             e.printStackTrace();
-            session.setAttribute("errorMessage", "Có lỗi xảy ra khi tải thông tin ghế. Vui lòng thử lại.");
-            MovieDTO movie = (MovieDTO) session.getAttribute(ATTR_SELECTED_MOVIE);
-            if (movie != null) {
-                return "redirect:/cashier/" + movie.getMovieId() + "/select-schedule";
-            }
-            return REDIRECT_CASHIER;
+            return "redirect:/cashier/movie/";
         }
     }
 
-    @GetMapping("/back-to-seats")
-    public String backToSeats(Model model, HttpSession session) {
-        // Verify theater ID in session
-        Integer sessionTheaterId = (Integer) session.getAttribute(ATTR_THEATER_ID);
-        if (sessionTheaterId == null || !sessionTheaterId.equals(CASHIER_THEATER_ID)) {
-            return REDIRECT_CASHIER;
+    private List<Integer> parseSelectedSeats(String selectedSeatsRaw) {
+        if (selectedSeatsRaw == null || selectedSeatsRaw.trim().isEmpty()) {
+            return new ArrayList<>();
         }
+        try {
 
-        MovieDTO selectedMovie = (MovieDTO) session.getAttribute(ATTR_SELECTED_MOVIE);
-        @SuppressWarnings("unchecked")
-        Map<String, Object> selectedSchedule = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
+            List<Integer> seatIds = Arrays.stream(selectedSeatsRaw.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .map(s -> {
+                        try {
+                            return Integer.parseInt(s);
+                        } catch (NumberFormatException e) {
+                            System.err.println("Invalid seat ID: " + s);
+                            return null;
+                        }
+                    })
+                    .filter(Objects::nonNull) // Remove null values
+                    .collect(Collectors.toList());
 
-        if (selectedMovie == null || selectedSchedule == null) {
-            return REDIRECT_CASHIER;
+            System.out.println("DEBUG - Parsed seat IDs: " + seatIds);
+            return seatIds;
+
+        } catch (Exception e) {
+            System.err.println("Error parsing selected seats: " + selectedSeatsRaw + " - " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
         }
-
-        session.removeAttribute(ATTR_SELECTED_SEATS);
-        session.removeAttribute(ATTR_CUSTOMER_INFO);
-        session.removeAttribute(ATTR_PRICE_BREAKDOWN);
-        session.setAttribute(ATTR_CURRENT_STEP, 3);
-
-        Integer scheduleId = (Integer) selectedSchedule.get("scheduleId");
-        String roomType = (String) selectedSchedule.get("roomType");
-
-        List<SeatDTO> rawSeats = cashierService.getSeatsWithBookingDetails(scheduleId);
-        List<SeatDTO> seats = removeDuplicateSeats(rawSeats);
-
-        // Create seat grid structure
-        Map<String, Object> seatGridData = createSeatGridStructure(seats, roomType);
-
-        model.addAttribute(ATTR_SELECTED_MOVIE, selectedMovie);
-        model.addAttribute(ATTR_SELECTED_SCHEDULE, selectedSchedule);
-        model.addAttribute(ATTR_CURRENT_STEP, 3);
-        model.addAttribute("seats", seats);
-        model.addAttribute("seatGridData", seatGridData);
-        model.addAttribute("theaterId", CASHIER_THEATER_ID);
-
-        return CASHIER_BOOKING_VIEW;
     }
 
     @PostMapping("/customer-info")
-    public String customerInfo(@RequestParam String selectedSeats,
+    public String customerInfo(@RequestParam("selectedSeats") String selectedSeatsRaw,
+                               @RequestParam(value = "foodPage", defaultValue = "0") int foodPage,
+                               @RequestParam(value = "foodSize", defaultValue = "4") int foodSize,
                                Model model, HttpSession session) {
         try {
-            System.out.println("=== DEBUG: Customer Info ===");
-            System.out.println("Selected Seats Raw: " + selectedSeats);
-
-            // Verify theater ID in session
-            Integer sessionTheaterId = (Integer) session.getAttribute(ATTR_THEATER_ID);
-            if (sessionTheaterId == null || !sessionTheaterId.equals(CASHIER_THEATER_ID)) {
-                return REDIRECT_CASHIER;
+            // Validate session
+            if (!isValidSession(session)) {
+                System.err.println("Invalid session");
+                return "redirect:/cashier/movie/";
             }
 
-            MovieDTO selectedMovie = (MovieDTO) session.getAttribute(ATTR_SELECTED_MOVIE);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> selectedSchedule = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
+            // Parse selected seats
+            List<Integer> seatIds = parseSelectedSeats(selectedSeatsRaw);
+            System.out.println("DEBUG - Parsed seat IDs count: " + seatIds.size());
 
-            if (selectedMovie == null || selectedSchedule == null) {
-                return REDIRECT_CASHIER;
-            }
-
-            // Parse selected seats from comma-separated string
-            List<String> seatList = new ArrayList<>();
-            if (selectedSeats != null && !selectedSeats.trim().isEmpty()) {
-                String[] seatArray = selectedSeats.split(",");
-                for (String seat : seatArray) {
-                    String trimmedSeat = seat.trim();
-                    if (!trimmedSeat.isEmpty()) {
-                        seatList.add(trimmedSeat);
-                    }
-                }
-            }
-
-            System.out.println("Parsed Seats: " + seatList);
-
-            if (seatList.isEmpty()) {
-                session.setAttribute("seatError", "Vui lòng chọn ít nhất một ghế!");
+            if (seatIds.isEmpty()) {
+                System.err.println("No valid seat IDs found");
+                session.setAttribute("seatError", "Vui lòng chọn ít nhất một ghế.");
                 return "redirect:/cashier/back-to-seats";
             }
 
-            // Save selected seats to session
-            session.setAttribute(ATTR_SELECTED_SEATS, seatList);
+
+            List<SeatDTO> selectedSeats = Helper.getSeatsByIds(seatIds, seatRepository, cashierService);
+            System.out.println("DEBUG - Found seats count: " + selectedSeats.size());
+
+            if (selectedSeats.size() != seatIds.size()) {
+                System.err.println("Seat count mismatch. Expected: " + seatIds.size() + ", Found: " + selectedSeats.size());
+                session.setAttribute("seatError", "Một số ghế không còn khả dụng.");
+                return "redirect:/cashier/back-to-seats";
+            }
+
+            // Check if any selected seats are booked
+            Map<String, Object> scheduleInfo = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
+            Integer scheduleId = (Integer) scheduleInfo.get("scheduleId");
+
+            List<SeatDTO> currentSeats = cashierService.getSeatsWithBookingDetails(scheduleId);
+            Map<Integer, Boolean> seatBookingStatus = currentSeats.stream()
+                    .collect(Collectors.toMap(SeatDTO::getSeatId, SeatDTO::getIsBooked));
+
+            List<String> seatPositions = selectedSeats.stream()
+                    .map(SeatDTO::getPosition)
+                    .collect(Collectors.toList());
+
+            session.setAttribute(ATTR_SELECTED_SEATS, seatPositions);
+            session.setAttribute("selectedSeatIds", seatIds);
             session.setAttribute(ATTR_CURRENT_STEP, 4);
 
-            // Get food menu
-            List<TheaterStockDTO> foodMenu = cashierService.getAvailableTheaterStockByTheater(CASHIER_THEATER_ID);
-            System.out.println("Food menu items: " + (foodMenu != null ? foodMenu.size() : 0));
+            Page<TheaterStockDTO> foodMenu = cashierService.getAvailableTheaterStockByTheater(CASHIER_THEATER_ID, PageRequest.of(foodPage, foodSize));
 
-            // Calculate price breakdown - FIXED: Create proper PriceBreakdownDTO
-            PriceBreakdownDTO priceBreakdown = new PriceBreakdownDTO(selectedMovie, seatList, selectedSchedule, new HashMap<>());
-            session.setAttribute(ATTR_PRICE_BREAKDOWN, priceBreakdown);
-
-            model.addAttribute(ATTR_SELECTED_MOVIE, selectedMovie);
-            model.addAttribute(ATTR_SELECTED_SCHEDULE, selectedSchedule);
-            model.addAttribute(ATTR_SELECTED_SEATS, seatList);
+            model.addAttribute("theaterStock", foodMenu);
+            model.addAttribute("currentFoodPage", foodPage);
+            model.addAttribute("totalFoodPages", foodMenu.getTotalPages());
+            model.addAttribute("hasPreviousFoodPage", foodMenu.hasPrevious());
+            model.addAttribute("hasNextFoodPage", foodMenu.hasNext());
+            model.addAttribute(ATTR_SELECTED_MOVIE, session.getAttribute(ATTR_SELECTED_MOVIE));
+            model.addAttribute(ATTR_SELECTED_SCHEDULE, session.getAttribute(ATTR_SELECTED_SCHEDULE));
+            model.addAttribute(ATTR_SELECTED_SEATS, seatPositions);
             model.addAttribute(ATTR_CURRENT_STEP, 4);
-            model.addAttribute("foodMenu", foodMenu);
-            model.addAttribute(ATTR_PRICE_BREAKDOWN, priceBreakdown);
             model.addAttribute("theaterId", CASHIER_THEATER_ID);
 
-            return CASHIER_BOOKING_VIEW;
+            return "cashier-templates/cashier-booking";
 
         } catch (Exception e) {
             System.err.println("Error in customerInfo: " + e.getMessage());
             e.printStackTrace();
-
-            session.setAttribute("seatError", "Có lỗi xảy ra khi xử lý ghế đã chọn. Vui lòng thử lại.");
+            session.setAttribute("seatError", "Có lỗi hệ thống, vui lòng thử lại.");
             return "redirect:/cashier/back-to-seats";
         }
     }
 
     @PostMapping("/confirm-booking")
-    public String confirmBooking(@RequestParam(required = false) String customerName,
-                                 @RequestParam(required = false) String customerPhone,
-                                 @RequestParam(required = false) String customerEmail,
-                                 @RequestParam(required = false) Map<String, String> foodItems,
+    public String confirmBooking(@RequestParam() Map<String, String> allRequestParams,
                                  Model model, HttpSession session) {
         try {
-            Integer sessionTheaterId = (Integer) session.getAttribute(ATTR_THEATER_ID);
-            if (sessionTheaterId == null || !sessionTheaterId.equals(CASHIER_THEATER_ID)) {
-                return REDIRECT_CASHIER;
+            Map<Integer, Integer> foodQuantities = new HashMap<>();
+
+            for (Map.Entry<String, String> entry : allRequestParams.entrySet()) {
+                String key = entry.getKey();
+                String value = entry.getValue();
+
+                if (key.startsWith("foodQuantities[")) {
+                    String idStr = key.substring(15, key.length() - 1);
+                    int id = Integer.parseInt(idStr);
+                    int quantity = Integer.parseInt(value);
+                    foodQuantities.put(id, quantity);
+                }
             }
 
-            MovieDTO selectedMovie = (MovieDTO) session.getAttribute(ATTR_SELECTED_MOVIE);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> selectedSchedule = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
-            @SuppressWarnings("unchecked")
-            List<String> selectedSeats = (List<String>) session.getAttribute(ATTR_SELECTED_SEATS);
-
-            if (selectedMovie == null || selectedSchedule == null || selectedSeats == null) {
-                return REDIRECT_CASHIER;
+            Map<Integer, Integer> selectedFood = new HashMap<>();
+            for (Map.Entry<Integer, Integer> entry : foodQuantities.entrySet()) {
+                if (entry.getValue() > 0) {
+                    selectedFood.put(entry.getKey(), entry.getValue());
+                }
             }
 
-            // Save customer info
-            Map<String, String> customerInfo = new HashMap<>();
-            customerInfo.put("name", customerName);
-            customerInfo.put("phone", customerPhone);
-            customerInfo.put("email", customerEmail);
-            session.setAttribute(ATTR_CUSTOMER_INFO, customerInfo);
+            MovieDTO movie = (MovieDTO) session.getAttribute(ATTR_SELECTED_MOVIE);
 
-            // Get price breakdown from session and update with food
-            PriceBreakdownDTO priceBreakdown = (PriceBreakdownDTO) session.getAttribute(ATTR_PRICE_BREAKDOWN);
-            if (priceBreakdown == null) {
-                // Recreate if missing
-                priceBreakdown = new PriceBreakdownDTO(selectedMovie, selectedSeats, selectedSchedule, new HashMap<>());
+            Map<String, Object> scheduleInfo = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
+
+            List<String> seatPositions = (List<String>) session.getAttribute(ATTR_SELECTED_SEATS);
+            List<Integer> selectedSeatIds = (List<Integer>) session.getAttribute("selectedSeatIds");
+            String customerName = allRequestParams.get("customerName");
+            String customerPhone = allRequestParams.get("customerPhone");
+            String customerEmail = allRequestParams.get("customerEmail");
+
+            Integer scheduleId = (Integer) scheduleInfo.get("scheduleId");
+
+            String paymentMethod = allRequestParams.get("paymentMethod");
+
+            BookingRequestDTO bookingRequest = BookingRequestDTO.builder()
+                    .customerName(customerName)
+                    .customerPhone(customerPhone)
+                    .customerEmail(customerEmail)
+                    .scheduleId(scheduleId)
+                    .selectedSeatIds(selectedSeatIds)
+                    .foodQuantities(foodQuantities)
+                    //.promotionCode()
+                    // .employeeId(employeeId)
+                    .build();
+
+            BookingResponseDTO bookingResponse = cashierService.createBooking(bookingRequest);
+
+            if (paymentMethod.equalsIgnoreCase("bank")) {
+                model.addAttribute("bookingResponse", bookingResponse);
+                return "cashier-templates/cashier-payment-bank";
             }
 
-            // Update with food items
-            if (foodItems != null && !foodItems.isEmpty()) {
-                updatePriceBreakdownWithFood(priceBreakdown, foodItems);
-            }
-
-            session.setAttribute(ATTR_PRICE_BREAKDOWN, priceBreakdown);
-            session.setAttribute(ATTR_CURRENT_STEP, 5);
-
-            model.addAttribute(ATTR_SELECTED_MOVIE, selectedMovie);
-            model.addAttribute(ATTR_SELECTED_SCHEDULE, selectedSchedule);
-            model.addAttribute(ATTR_SELECTED_SEATS, selectedSeats);
-            model.addAttribute(ATTR_CUSTOMER_INFO, customerInfo);
-            model.addAttribute(ATTR_PRICE_BREAKDOWN, priceBreakdown);
+            model.addAttribute("bookingResult", bookingResponse);
+            session.setAttribute("bookingResult", bookingResponse);
             model.addAttribute(ATTR_CURRENT_STEP, 5);
-            model.addAttribute("theaterId", CASHIER_THEATER_ID);
 
-            return CASHIER_BOOKING_VIEW;
+            clearSessionData(session);
+
+            return "cashier-templates/cashier-booking";
 
         } catch (Exception e) {
             System.err.println("Error in confirmBooking: " + e.getMessage());
             e.printStackTrace();
-            return REDIRECT_CASHIER;
+            return "redirect:/cashier/movie/";
         }
     }
 
-    private void clearSessionData(HttpSession session) {
-        session.removeAttribute(ATTR_SELECTED_MOVIE);
-        session.removeAttribute(ATTR_SELECTED_SCHEDULE);
-        session.removeAttribute(ATTR_SELECTED_SEATS);
-        session.removeAttribute(ATTR_CUSTOMER_INFO);
-        session.removeAttribute(ATTR_PRICE_BREAKDOWN);
-        session.removeAttribute(ATTR_CURRENT_STEP);
+    @GetMapping("/back-to-seats")
+    public String backToSeats(HttpSession session, Model model) {
+        if (!isValidSession(session)) {
+            return "redirect:/cashier/movie/";
+        }
+
+        Map<String, Object> scheduleInfo = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
+        if (scheduleInfo == null) {
+            return "redirect:/cashier/movie/";
+        }
+
+        String seatError = (String) session.getAttribute("seatError");
+        session.removeAttribute("seatError");
+
+        Integer scheduleId = (Integer) scheduleInfo.get("scheduleId");
+        String roomType = (String) scheduleInfo.get("roomType");
+
+        List<SeatDTO> seats = cashierService.getSeatsWithBookingDetails(scheduleId);
+        Map<String, Object> seatGrid = createSimpleSeatGrid(seats, roomType);
+
+        model.addAttribute(ATTR_SELECTED_MOVIE, session.getAttribute(ATTR_SELECTED_MOVIE));
+        model.addAttribute(ATTR_SELECTED_SCHEDULE, scheduleInfo);
+        model.addAttribute(ATTR_CURRENT_STEP, 3);
+        model.addAttribute("seatGridData", seatGrid);
+        model.addAttribute("seats", seats);
+        model.addAttribute("seatError", seatError);
+        model.addAttribute("theaterId", CASHIER_THEATER_ID);
+
+        return "cashier-templates/cashier-booking";
     }
 
-    private String normalizeSearchParam(String param) {
-        if (param == null) return null;
-        param = param.trim();
-        return param.isEmpty() ? null : param;
-    }
+    @GetMapping("/invoice/download")
+    public String downloadInvoice(HttpServletResponse response, HttpSession session) {
+        try {
 
-    /**
-     * Remove duplicate seats based on priority rules
-     */
-    private List<SeatDTO> removeDuplicateSeats(List<SeatDTO> seats) {
-        if (seats == null || seats.isEmpty()) {
-            return seats;
-        }
+            BookingResponseDTO bookingResult = (BookingResponseDTO) session.getAttribute("bookingResult");
 
-        // Group seats by position
-        Map<String, List<SeatDTO>> seatsByPosition = seats.stream()
-                .collect(Collectors.groupingBy(SeatDTO::getPosition));
-
-        List<SeatDTO> uniqueSeats = new ArrayList<>();
-
-        for (Map.Entry<String, List<SeatDTO>> entry : seatsByPosition.entrySet()) {
-            List<SeatDTO> seatsAtPosition = entry.getValue();
-
-            if (seatsAtPosition.size() == 1) {
-                uniqueSeats.add(seatsAtPosition.get(0));
-            } else {
-                // Có duplicate, chọn ghế theo priority
-                SeatDTO selectedSeat = seatsAtPosition.stream()
-                        .sorted((s1, s2) -> {
-                            // Ưu tiên ghế đã book
-                            if (s1.getIsBooked() && !s2.getIsBooked()) return -1;
-                            if (!s1.getIsBooked() && s2.getIsBooked()) return 1;
-
-                            // Ưu tiên ghế VIP
-                            if (s1.getIsVIP() && !s2.getIsVIP()) return -1;
-                            if (!s1.getIsVIP() && s2.getIsVIP()) return 1;
-
-                            // Ưu tiên ghế có giá cao hơn
-                            if (s1.getUnitPrice() != null && s2.getUnitPrice() != null) {
-                                int priceComparison = s2.getUnitPrice().compareTo(s1.getUnitPrice());
-                                if (priceComparison != 0) return priceComparison;
-                            }
-
-                            // Ưu tiên ghế có ID nhỏ hơn
-                            return s1.getSeatId().compareTo(s2.getSeatId());
-                        })
-                        .findFirst()
-                        .orElse(seatsAtPosition.get(0));
-
-                uniqueSeats.add(selectedSeat);
-
-                System.err.println("Removed duplicate seats at position " + entry.getKey() +
-                        ". Selected seat ID: " + selectedSeat.getSeatId());
-            }
-        }
-
-        return uniqueSeats;
-    }
-
-    private void updatePriceBreakdownWithFood(PriceBreakdownDTO priceBreakdown, Map<String, String> foodItems) {
-        if (priceBreakdown == null || foodItems == null || foodItems.isEmpty()) {
-            return;
-        }
-
-        List<TheaterStockDTO> availableFood = cashierService.getAvailableTheaterStockByTheater(CASHIER_THEATER_ID);
-        Map<Integer, TheaterStockDTO> foodMap = availableFood.stream()
-                .collect(Collectors.toMap(TheaterStockDTO::getTheaterStockId, food -> food));
-
-        // Clear existing food items
-        priceBreakdown.getFoodItems().clear();
-
-        for (Map.Entry<String, String> entry : foodItems.entrySet()) {
-            if (entry.getKey().startsWith("food_")) {
-                try {
-                    Integer foodId = Integer.parseInt(entry.getKey().replace("food_", ""));
-                    Integer quantity = Integer.parseInt(entry.getValue());
-
-                    if (quantity > 0 && foodMap.containsKey(foodId)) {
-                        TheaterStockDTO food = foodMap.get(foodId);
-
-                        // Create food item using the inner class
-                        PriceBreakdownDTO.FoodItem foodItem = new PriceBreakdownDTO.FoodItem(
-                                food.getFoodName(),
-                                quantity,
-                                food.getUnitPrice()
-                        );
-
-                        priceBreakdown.getFoodItems().add(foodItem);
-                    }
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid food item format: " + entry.getKey() + "=" + entry.getValue());
-                }
-            }
-        }
-
-        // Recalculate total
-        priceBreakdown.recalculateTotal();
-    }
-
-    private List<String> getAvailableGenresForTheater(Integer theaterId) {
-        // This is a placeholder - you would need to implement this in your service
-        return Arrays.asList("Hành động", "Hài", "Kinh dị", "Lãng mạn", "Khoa học viễn tưởng");
-    }
-
-    private Map<String, Object> createSeatGridStructure(List<SeatDTO> seats, String roomType) {
-        System.out.println("=== DEBUG: Creating seat grid for room type: " + roomType + " ===");
-
-        // Handle couple room type differently
-        if (ROOM_TYPE_COUPLE.equalsIgnoreCase(roomType)) {
-            System.out.println("Redirecting to couple seat grid creation");
-            return createCoupleSeatGridStructure(seats);
-        }
-
-        Map<String, Object> gridData = new HashMap<>();
-
-        if (seats == null || seats.isEmpty()) {
-            gridData.put("rows", new ArrayList<>());
-            gridData.put("maxColumns", 0);
-            gridData.put("roomType", roomType);
-            gridData.put("totalRows", 0);
-            return gridData;
-        }
-
-        // Create seat map by position
-        Map<String, SeatDTO> seatMap = seats.stream()
-                .collect(Collectors.toMap(SeatDTO::getPosition, seat -> seat));
-
-        // Analyze seat structure
-        Set<Character> rowChars = new TreeSet<>();
-        Set<Integer> columnNumbers = new TreeSet<>();
-
-        for (SeatDTO seat : seats) {
-            String position = seat.getPosition();
-            if (position != null && position.length() >= 2) {
-                char rowChar = position.charAt(0);
-                try {
-                    // Handle both A1 and A01 formats
-                    String colStr = position.substring(1);
-                    int colNum = Integer.parseInt(colStr);
-                    rowChars.add(rowChar);
-                    columnNumbers.add(colNum);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid seat position format: " + position);
-                }
-            }
-        }
-
-        // Create seat rows
-        List<Map<String, Object>> rows = new ArrayList<>();
-        int maxColumns = columnNumbers.isEmpty() ? 0 : Collections.max(columnNumbers);
-
-        for (Character rowChar : rowChars) {
-            Map<String, Object> rowData = new HashMap<>();
-            rowData.put("rowLabel", String.valueOf(rowChar));
-
-            List<Map<String, Object>> rowSeats = new ArrayList<>();
-
-            for (int col = 1; col <= maxColumns; col++) {
-                // Try both A1 and A01 formats
-                String seatPosition1 = rowChar + String.valueOf(col);
-                String seatPosition2 = rowChar + String.format("%02d", col);
-
-                SeatDTO seat = seatMap.get(seatPosition1);
-                if (seat == null) {
-                    seat = seatMap.get(seatPosition2);
-                }
-
-                Map<String, Object> seatData = new HashMap<>();
-
-                if (seat != null) {
-                    seatData.put("position", seat.getPosition());
-                    seatData.put("seatId", seat.getSeatId());
-                    seatData.put("isBooked", seat.getIsBooked());
-                    seatData.put("isVIP", seat.getIsVIP());
-                    seatData.put("seatType", seat.getSeatType());
-                    seatData.put("unitPrice", seat.getUnitPrice());
-                    seatData.put("exists", true);
-
-                    // Determine seat status
-                    if (seat.getIsBooked()) {
-                        seatData.put("status", "occupied");
-                    } else {
-                        seatData.put("status", "available");
-                    }
-
-                    // Determine CSS class
-                    String cssClass = "seat ";
-                    if (seat.getIsBooked()) {
-                        cssClass += "occupied";
-                    } else {
-                        cssClass += "available";
-                    }
-
-                    if (seat.getIsVIP()) {
-                        cssClass += " vip";
-                    }
-
-                    seatData.put("cssClass", cssClass);
-
-                } else {
-                    // Placeholder for non-existing seat
-                    seatData.put("position", "");
-                    seatData.put("exists", false);
-                    seatData.put("cssClass", "seat-placeholder");
-                }
-
-                rowSeats.add(seatData);
+            if (bookingResult == null) {
+                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy hóa đơn.");
+                return "redirect:/cashier/movie/";
             }
 
-            rowData.put("seats", rowSeats);
-            rows.add(rowData);
+            byte[] pdfBytes = pdfGenerationService.generateInvoicePdf(bookingResult);
+
+            response.setContentType("application/pdf");
+            String headerKey = "Content-Disposition";
+            String headerValue = "attachment; filename=invoice_"+ bookingResult.getInvoiceId() + ".pdf";
+            response.setHeader(headerKey, headerValue);
+            response.setContentLength(pdfBytes.length);
+
+            OutputStream outputStream = response.getOutputStream();
+            outputStream.write(pdfBytes);
+            outputStream.flush();
+            outputStream.close();
+
+        } catch (Exception e) {
+            System.err.println("Lỗi khi tạo và tải file PDF: " + e.getMessage());
+            e.printStackTrace();
+            return "redirect:/cashier/movie/";
         }
-
-        gridData.put("rows", rows);
-        gridData.put("maxColumns", maxColumns);
-        gridData.put("roomType", roomType);
-        gridData.put("totalRows", rowChars.size());
-
-        System.out.println("Regular seat grid created: " + rowChars.size() + " rows, " + maxColumns + " columns");
-        return gridData;
+        return redirectToMovieSelection();
     }
 
-    /**
-     * Create couple seat grid structure for display - FIXED VERSION
-     */
-    private Map<String, Object> createCoupleSeatGridStructure(List<SeatDTO> seats) {
-        System.out.println("=== DEBUG: Creating COUPLE seat grid ===");
-        System.out.println("Input seats count: " + (seats != null ? seats.size() : "null"));
-
-        Map<String, Object> gridData = new HashMap<>();
-
-        if (seats == null || seats.isEmpty()) {
-            System.out.println("No seats provided for couple room");
-            gridData.put("rows", new ArrayList<>());
-            gridData.put("maxColumns", 0);
-            gridData.put("roomType", ROOM_TYPE_COUPLE);
-            gridData.put("totalRows", 0);
-            return gridData;
-        }
-
-        // Debug: Print all seats
-        for (SeatDTO seat : seats) {
-            System.out.println("Couple Seat: " + seat.getPosition() +
-                    " | Booked: " + seat.getIsBooked() +
-                    " | SeatType: " + seat.getSeatType() +
-                    " | ID: " + seat.getSeatId());
-        }
-
-        // Create seat map by position
-        Map<String, SeatDTO> seatMap = seats.stream()
-                .collect(Collectors.toMap(SeatDTO::getPosition, seat -> seat));
-
-        // Analyze couple seat structure
-        Set<Character> rowChars = new TreeSet<>();
-        Set<Integer> columnNumbers = new TreeSet<>();
-
-        for (SeatDTO seat : seats) {
-            String position = seat.getPosition();
-            if (position != null && position.length() >= 2) {
-                char rowChar = position.charAt(0);
-                try {
-                    // Handle both A1 and A01 formats
-                    String colStr = position.substring(1);
-                    int colNum = Integer.parseInt(colStr);
-                    rowChars.add(rowChar);
-                    columnNumbers.add(colNum);
-                    System.out.println("Parsed couple seat: Row=" + rowChar + ", Col=" + colNum);
-                } catch (NumberFormatException e) {
-                    System.err.println("Invalid couple seat position format: " + position);
-                }
-            }
-        }
-
-        System.out.println("Couple room rows: " + rowChars);
-        System.out.println("Couple room columns: " + columnNumbers);
-
-        // Create couple seat rows
-        List<Map<String, Object>> rows = new ArrayList<>();
-        int maxColumns = columnNumbers.isEmpty() ? 0 : Collections.max(columnNumbers);
-
-        for (Character rowChar : rowChars) {
-            Map<String, Object> rowData = new HashMap<>();
-            rowData.put("rowLabel", String.valueOf(rowChar));
-
-            List<Map<String, Object>> rowSeats = new ArrayList<>();
-
-            for (int col = 1; col <= maxColumns; col++) {
-                // Try both A1 and A01 formats
-                String seatPosition1 = rowChar + String.valueOf(col);
-                String seatPosition2 = rowChar + String.format("%02d", col);
-
-                SeatDTO seat = seatMap.get(seatPosition1);
-                if (seat == null) {
-                    seat = seatMap.get(seatPosition2);
-                }
-
-                Map<String, Object> seatData = new HashMap<>();
-
-                if (seat != null) {
-                    System.out.println("Creating couple seat data for: " + seat.getPosition());
-
-                    seatData.put("position", seat.getPosition());
-                    seatData.put("seatId", seat.getSeatId());
-                    seatData.put("isBooked", seat.getIsBooked());
-                    seatData.put("isVIP", false); // Couple seats are not VIP
-                    seatData.put("seatType", "COUPLE");
-                    seatData.put("unitPrice", seat.getUnitPrice());
-                    seatData.put("exists", true);
-
-                    // Determine couple seat status and CSS
-                    if (seat.getIsBooked()) {
-                        seatData.put("status", "occupied");
-                        seatData.put("cssClass", "seat couple occupied");
-                    } else {
-                        seatData.put("status", "available");
-                        seatData.put("cssClass", "seat couple available");
-                    }
-
-                    System.out.println("Couple seat " + seat.getPosition() + " - CSS: " + seatData.get("cssClass"));
-
-                } else {
-                    // Placeholder for non-existing couple seat
-                    System.out.println("Creating placeholder for position: " + rowChar + col);
-                    seatData.put("position", "");
-                    seatData.put("exists", false);
-                    seatData.put("cssClass", "seat-placeholder");
-                }
-
-                rowSeats.add(seatData);
-            }
-
-            rowData.put("seats", rowSeats);
-            rows.add(rowData);
-            System.out.println("Added couple row " + rowChar + " with " + rowSeats.size() + " seats");
-        }
-
-        gridData.put("rows", rows);
-        gridData.put("maxColumns", maxColumns);
-        gridData.put("roomType", ROOM_TYPE_COUPLE);
-        gridData.put("totalRows", rowChars.size());
-
-        System.out.println("Couple seat grid completed: " + rowChars.size() + " rows, " + maxColumns + " columns");
-        return gridData;
-    }
-    
 }
+

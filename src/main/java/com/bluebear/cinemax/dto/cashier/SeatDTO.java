@@ -15,9 +15,13 @@ public class SeatDTO {
     private String seatType;
     private String position;
     private Boolean isVIP;
-    private BigDecimal unitPrice;
+    private Double unitPrice;
     private String status;
     private Boolean isBooked = false;
     private String bookingStatus = "AVAILABLE"; // "AVAILABLE", "CONFIRMED", "PENDING", "CANCELLED"
     private Integer bookingId;
+
+    public SeatDTO(String pos) {
+        this.position = pos;
+    }
 }

@@ -1,6 +1,7 @@
 package com.bluebear.cinemax.entity;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
@@ -10,6 +11,7 @@ import jakarta.persistence.*;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class ServiceFeedback {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

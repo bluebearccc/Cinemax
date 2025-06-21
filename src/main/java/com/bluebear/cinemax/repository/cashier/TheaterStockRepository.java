@@ -1,6 +1,8 @@
 package com.bluebear.cinemax.repository.cashier;
 
 import com.bluebear.cinemax.entity.TheaterStock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -17,8 +19,9 @@ public interface TheaterStockRepository extends JpaRepository<TheaterStock, Inte
     AND ts.status = :status
     ORDER BY ts.foodName
     """)
-    List<TheaterStock> findByTheaterIdAndStatus(@Param("theaterId") Integer theaterId,
-                                                @Param("status") TheaterStock.StockStatus status);
+    Page<TheaterStock> findByTheaterIdAndStatus(@Param("theaterId") Integer theaterId,
+                                                @Param("status") TheaterStock.StockStatus status,
+                                                Pageable pageable);
 
     @Query("""
     SELECT ts FROM TheaterStock ts

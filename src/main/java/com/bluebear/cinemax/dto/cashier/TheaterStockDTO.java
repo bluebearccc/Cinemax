@@ -15,7 +15,7 @@ public class TheaterStockDTO {
     private TheaterDTO theater;
     private String foodName;
     private Integer quantity;
-    private BigDecimal unitPrice;
+    private Double unitPrice;
     private String image;
-    private String status; // Enum dạng String: "Active", "Inactive"
+    private String status;
 }

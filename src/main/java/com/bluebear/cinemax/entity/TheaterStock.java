@@ -29,8 +29,8 @@ public class TheaterStock {
     @Column(name = "Quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "UnitPrice", nullable = false, precision = 10, scale = 2)
-    private BigDecimal unitPrice;
+    @Column(name = "UnitPrice", nullable = false)
+    private Double unitPrice;
 
     @Column(name = "Image", nullable = false)
     private String image;

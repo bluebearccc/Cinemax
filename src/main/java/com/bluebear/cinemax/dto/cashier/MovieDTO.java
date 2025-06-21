@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -20,10 +21,10 @@ public class MovieDTO {
     private String studio;
     private Integer duration;
     private String trailer;
-    private BigDecimal movieRate;
+    private Double movieRate;
     private String actor;
-    private LocalDate startDate;
-    private LocalDate endDate;
+    private LocalDateTime startDate;
+    private LocalDateTime endDate;
     private String status;
 
     private List<GenreDTO> genres;

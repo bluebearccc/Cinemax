@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -41,17 +41,17 @@ public class Movie {
     @Column(name = "Trailer", nullable = false)
     private String trailer;
 
-    @Column(name = "MovieRate", nullable = false, precision = 3, scale = 1)
-    private BigDecimal movieRate;
+    @Column(name = "MovieRate")
+    private Double movieRate;
 
     @Column(name = "Actor", nullable = false, columnDefinition = "nvarchar(MAX)")
     private String actor;
 
     @Column(name = "StartDate", nullable = false)
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "EndDate", nullable = false)
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false)

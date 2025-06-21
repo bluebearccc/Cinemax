@@ -17,5 +17,5 @@ public class InvoiceDTO {
     private PromotionDTO promotionId;
     private Float discount;
     private LocalDateTime bookingDate;
-    private BigDecimal totalPrice;
+    private Double totalPrice;
 }

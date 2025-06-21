@@ -7,273 +7,833 @@
     <title>Cinemax - Cashier System</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        .navbar-custom {
-            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
-        }
+    <link rel="stylesheet" th:href="@{/cashier-static/css/style.css}">
+</head>
+<style>
+    /* Base Styling */
+    body {
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1b 100%);
+        color: #ffffff;
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        min-height: 100vh;
+    }
 
-        .card-custom {
-            border: none;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            border-radius: 15px;
-        }
+    .container-fluid {
+        background: transparent;
+    }
 
-        .movie-card {
-            transition: transform 0.3s ease;
-            cursor: pointer;
-        }
+    /* Card Styling */
+    .card-custom {
+        background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
+        border: 1px solid #444;
+        border-radius: 15px;
+        box-shadow: 0 8px 32px rgba(220, 53, 69, 0.1);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
 
-        .movie-card:hover {
-            transform: translateY(-5px);
-        }
+    .card-custom:hover {
+        box-shadow: 0 12px 40px rgba(220, 53, 69, 0.2);
+        transform: translateY(-2px);
+    }
 
-        .step-indicator {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-        }
+    .card-header {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        border-bottom: 1px solid #444;
+        color: #ffffff;
+        border-radius: 15px 15px 0 0 !important;
+        padding: 1.5rem;
+    }
 
-        .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 0 20px;
-        }
+    .card-body {
+        background: rgba(42, 42, 42, 0.9);
+        color: #ffffff;
+        padding: 2rem;
+    }
 
-        .step-circle {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: #e9ecef;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
+    /* Navigation */
+    .navbar {
+        background: linear-gradient(135deg, #000000, #1a1a1a) !important;
+        border-bottom: 2px solid #dc3545;
+        backdrop-filter: blur(10px);
+    }
 
-        .step.active .step-circle {
-            background: #ffc107;
-            color: #000;
+    .navbar-brand {
+        color: #dc3545 !important;
+        font-weight: bold;
+        font-size: 1.5rem;
+    }
+
+    .nav-link {
+        color: #ffffff !important;
+        transition: color 0.3s ease;
+    }
+
+    .nav-link:hover {
+        color: #dc3545 !important;
+    }
+
+    /* Step Indicator */
+    .step-indicator {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid #444;
+    }
+
+    .step {
+        display: flex;
+        align-items: center;
+        color: #666;
+        transition: all 0.3s ease;
+    }
+
+    .step.active {
+        color: #dc3545;
+        font-weight: bold;
+    }
+
+    .step.completed {
+        color: #28a745;
+    }
+
+    .step-number {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        background: #444;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 10px;
+        font-weight: bold;
+        transition: all 0.3s ease;
+    }
+
+    .step.active .step-number {
+        background: #dc3545;
+        box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+    }
+
+    .step.completed .step-number {
+        background: #28a745;
+    }
+
+    /* Movie Cards */
+    .movie-card {
+        background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
+        border: 1px solid #444;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+
+    .movie-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(220, 53, 69, 0.3);
+        border-color: #dc3545;
+    }
+
+    .movie-card .card-body {
+        background: rgba(42, 42, 42, 0.95);
+        padding: 1.5rem;
+    }
+
+    .movie-card .card-title {
+        color: #ffffff !important;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .movie-card .card-text {
+        color: #cccccc !important;
+    }
+
+    /* Form Controls */
+    .form-control {
+        background: rgba(42, 42, 42, 0.9);
+        border: 1px solid #555;
+        color: #ffffff;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .form-control:focus {
+        background: rgba(42, 42, 42, 1);
+        border-color: #dc3545;
+        color: #ffffff;
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+    }
+
+    .form-control::placeholder {
+        color: #888;
+    }
+
+    .form-select {
+        background: rgba(42, 42, 42, 0.9);
+        border: 1px solid #555;
+        color: #ffffff;
+        border-radius: 8px;
+    }
+
+    .form-select:focus {
+        border-color: #dc3545;
+        box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
+    }
+
+    .form-label {
+        color: #ffffff;
+        font-weight: 500;
+    }
+
+    /* Buttons */
+    .btn-warning {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        border: none;
+        color: #000;
+        font-weight: 600;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-warning:hover {
+        background: linear-gradient(135deg, #e0a800, #cc9900);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-outline-warning {
+        border: 2px solid #ffc107;
+        color: #ffc107;
+        background: transparent;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-warning:hover {
+        background: #ffc107;
+        color: #000;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-primary {
+        border: 2px solid #dc3545;
+        color: #dc3545;
+        background: transparent;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-primary:hover {
+        background: #dc3545;
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-secondary {
+        border: 2px solid #666;
+        color: #cccccc;
+        background: transparent;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-secondary:hover {
+        background: #666;
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .btn-outline-danger {
+        border: 2px solid #e91e63;
+        color: #e91e63;
+        background: transparent;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-outline-danger:hover {
+        background: #e91e63;
+        color: #ffffff;
+        transform: translateY(-2px);
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-primary:hover {
+        background: linear-gradient(135deg, #b02a37, #8e1e2a);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
+    }
+
+    .btn-success {
+        background: linear-gradient(135deg, #28a745, #1e7e34);
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-success:hover {
+        background: linear-gradient(135deg, #1e7e34, #155724);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
+    }
+
+    .btn-info {
+        background: linear-gradient(135deg, #17a2b8, #117a8b);
+        border: none;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+    }
+
+    .btn-info:hover {
+        background: linear-gradient(135deg, #117a8b, #0c5460);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(23, 162, 184, 0.3);
+    }
+
+    /* Seat Styling */
+    .seats-container {
+        background: rgba(0, 0, 0, 0.7);
+        border-radius: 15px;
+        padding: 2rem;
+        margin: 2rem 0;
+        border: 1px solid #444;
+    }
+
+    .seat {
+        background: #2a2a2a;
+        border: 2px solid #555;
+        color: #ffffff;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-weight: 600;
+        font-size: 11px;
+        position: relative;
+    }
+
+    .seat:hover:not(.occupied) {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
+    }
+
+    /* Available Seats */
+    .seat.available {
+        background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
+        border-color: #666;
+        color: #ffffff;
+    }
+
+    .seat.available:hover {
+        background: linear-gradient(135deg, #6a6a6a, #4a4a4a);
+        border-color: #888;
+    }
+
+    /* VIP Seats */
+    .seat.vip.available {
+        background: linear-gradient(135deg, #6f42c1, #5a2d91);
+        border-color: #8b5cf6;
+        color: #ffffff;
+        box-shadow: 0 0 8px rgba(111, 66, 193, 0.3);
+    }
+
+    .seat.vip.available:hover {
+        background: linear-gradient(135deg, #8b5cf6, #6f42c1);
+        box-shadow: 0 0 15px rgba(111, 66, 193, 0.5);
+    }
+
+    .seat.vip.selected {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        border-color: #ffeb3b;
+        color: #000;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+    }
+
+    .seat.vip.occupied {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        border-color: #ff6b6b;
+        color: #ffffff;
+        cursor: not-allowed;
+        box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Couple Seats */
+    .seat.couple.available {
+        background: linear-gradient(135deg, #e91e63, #c2185b);
+        border-color: #f06292;
+        color: #ffffff;
+        box-shadow: 0 0 8px rgba(233, 30, 99, 0.3);
+        width: 60px !important;
+    }
+
+    .seat.couple.available:hover {
+        background: linear-gradient(135deg, #f06292, #e91e63);
+        box-shadow: 0 0 15px rgba(233, 30, 99, 0.5);
+    }
+
+    .seat.couple.selected {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        border-color: #ffeb3b;
+        color: #000;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+    }
+
+    .seat.couple.occupied {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        border-color: #ff6b6b;
+        color: #ffffff;
+        cursor: not-allowed;
+        box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Selected Seats */
+    .seat.selected {
+        background: linear-gradient(135deg, #ffc107, #e0a800);
+        border-color: #ffeb3b;
+        color: #000;
+        box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+        transform: scale(1.1);
+    }
+
+    /* Occupied Seats */
+    .seat.occupied {
+        background: linear-gradient(135deg, #dc3545, #b02a37);
+        border-color: #ff6b6b;
+        color: #ffffff;
+        cursor: not-allowed;
+        box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
+    }
+
+    /* Row Labels */
+    .row-label {
+        color: #dc3545;
+        font-weight: bold;
+        font-size: 1.1rem;
+        text-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
+    }
+
+    /* Screen */
+    .screen {
+        background: linear-gradient(135deg, #333, #111);
+        border: 2px solid #dc3545;
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Seat Legend */
+    .seat-legend {
+        background: rgba(42, 42, 42, 0.9);
+        border-radius: 10px;
+        padding: 1rem;
+        border: 1px solid #444;
+    }
+
+    .legend-item {
+        color: #ffffff;
+    }
+
+    .legend-item small {
+        font-weight: 500;
+    }
+
+    /* Alerts */
+    .alert-danger {
+        background: rgba(220, 53, 69, 0.1);
+        border: 1px solid #dc3545;
+        color: #ffffff;
+        border-radius: 10px;
+    }
+
+    .alert-info {
+        background: rgba(23, 162, 184, 0.1);
+        border: 1px solid #17a2b8;
+        color: #ffffff;
+        border-radius: 10px;
+    }
+
+    .alert-success {
+        background: rgba(40, 167, 69, 0.1);
+        border: 1px solid #28a745;
+        color: #ffffff;
+        border-radius: 10px;
+    }
+
+    /* Badges */
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.8rem;
+        font-weight: 500;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, #ffc107, #e0a800) !important;
+        color: #000 !important;
+    }
+
+    .badge.bg-primary {
+        background: linear-gradient(135deg, #dc3545, #b02a37) !important;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, #e91e63, #c2185b) !important;
+    }
+
+    .badge.bg-info {
+        background: linear-gradient(135deg, #17a2b8, #117a8b) !important;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, #28a745, #1e7e34) !important;
+    }
+
+    /* Tables */
+    .table {
+        color: #ffffff;
+    }
+
+    .table-light {
+        background: rgba(66, 66, 66, 0.9) !important;
+        color: #ffffff !important;
+    }
+
+    .table th {
+        border-color: #555;
+        color: #ffffff;
+    }
+
+    .table td {
+        border-color: #444;
+        color: #ffffff;
+    }
+
+    /* Pagination */
+    .pagination .page-link {
+        background: rgba(42, 42, 42, 0.9);
+        border: 1px solid #555;
+        color: #ffffff;
+        border-radius: 5px;
+        margin: 0 2px;
+    }
+
+    .pagination .page-link:hover {
+        background: #dc3545;
+        border-color: #dc3545;
+        color: #ffffff;
+    }
+
+    .pagination .page-item.active .page-link {
+        background: #dc3545;
+        border-color: #dc3545;
+    }
+
+    .pagination .page-item.disabled .page-link {
+        background: rgba(42, 42, 42, 0.5);
+        border-color: #333;
+        color: #666;
+    }
+
+    /* Food Cards */
+    .card h-100 {
+        background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
+        border: 1px solid #444;
+        border-radius: 12px;
+        transition: all 0.3s ease;
+    }
+
+    .card h-100:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(220, 53, 69, 0.2);
+        border-color: #dc3545;
+    }
+
+    .card h-100 .card-body {
+        color: #ffffff;
+    }
+
+    .card h-100 h6 {
+        color: #ffffff;
+        font-weight: 600;
+    }
+
+    /* Input Groups */
+    .input-group .btn {
+        border-radius: 0;
+    }
+
+    .input-group .btn:first-child {
+        border-radius: 5px 0 0 5px;
+    }
+
+    .input-group .btn:last-child {
+        border-radius: 0 5px 5px 0;
+    }
+
+    /* Text Colors */
+    .text-muted {
+        color: #cccccc !important;
+    }
+
+    .text-success {
+        color: #28a745 !important;
+    }
+
+    .text-warning {
+        color: #ffc107 !important;
+    }
+
+    .text-danger {
+        color: #dc3545 !important;
+    }
+
+    .text-info {
+        color: #17a2b8 !important;
+    }
+
+    /* Success/Error States */
+    .success-icon i {
+        text-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
+    }
+
+    .error-icon i {
+        text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
+    }
+
+    /* Invoice Styling */
+    .invoice-header {
+        background: rgba(42, 42, 42, 0.7);
+        border-radius: 10px;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+    }
+
+    .total-summary .card {
+        background: rgba(42, 42, 42, 0.9) !important;
+        border: 1px solid #555;
+    }
+
+    .total-summary .card .card-body {
+        background: transparent;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        .card-body {
+            padding: 1rem;
         }
 
         .seat {
-            width: 40px;
-            height: 40px;
-            margin: 2px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            font-size: 12px;
-            font-weight: bold;
-            transition: all 0.2s ease;
-            user-select: none;
-        }
-
-        .seat.available {
-            background: #28a745;
-            color: white;
-            border-color: #28a745;
-        }
-
-        .seat.occupied {
-            background: #dc3545;
-            color: white;
-            cursor: not-allowed;
-            border-color: #dc3545;
-        }
-
-        .seat.selected {
-            background: #ffc107;
-            color: #000;
-            border-color: #ffc107;
-            transform: scale(1.1);
-        }
-
-        .seat.vip {
-            border-color: #ffc107 !important;
-            border-width: 3px !important;
-        }
-
-        .seat.vip.available {
-            background: #28a745;
-            box-shadow: 0 0 8px rgba(255, 193, 7, 0.5);
-        }
-
-        .seat.couple {
-            width: 80px !important;
-            background: #e91e63;
-            color: white;
-            font-weight: bold;
-            border-color: #e91e63;
+            width: 25px !important;
+            height: 25px !important;
+            font-size: 9px;
         }
 
         .seat.couple.available {
-            background: #e91e63;
-            border-color: #e91e63;
-        }
-
-        .seat.couple.occupied {
-            background: #dc3545;
-            border-color: #dc3545;
-            cursor: not-allowed;
-        }
-
-        .seat.couple.selected {
-            background: #ffc107;
-            color: #000;
-            border-color: #ffc107;
-            transform: scale(1.05);
-        }
-
-        .seat-placeholder {
-            width: 40px;
-            height: 40px;
-            margin: 2px;
-            display: inline-block;
-        }
-
-        .clickable-seat:hover:not(.occupied) {
-            transform: scale(1.1);
-            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
-        }
-
-        .food-item {
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-        }
-
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-        }
-
-        .quantity-btn {
-            width: 30px;
-            height: 30px;
-            border: 1px solid #ddd;
-            background: white;
-            cursor: pointer;
-        }
-
-        .quantity-input {
-            width: 50px;
-            text-align: center;
-            border: 1px solid #ddd;
-            margin: 0 5px;
+            width: 50px !important;
         }
 
         .seats-container {
-            text-align: center;
-            padding: 20px;
+            padding: 1rem;
+        }
+    }
+
+    /* Animation Effects */
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
         }
 
-        .seat-row {
-            margin-bottom: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        50% {
+            transform: scale(1.05);
         }
 
-        .row-label {
-            width: 30px;
-            display: inline-block;
-            font-weight: bold;
-            font-size: 16px;
-            text-align: center;
-            margin-right: 10px;
+        100% {
+            transform: scale(1);
         }
+    }
 
-        .screen {
-            background: linear-gradient(135deg, #333 0%, #666 100%);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 20px auto;
-            width: 70%;
-            text-align: center;
-            font-weight: bold;
-            font-size: 18px;
-        }
+    .btn:active {
+        animation: pulse 0.2s;
+    }
 
-        .seat-legend {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+    .seat.selected {
+        animation: pulse 1s infinite;
+    }
 
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 5px;
-        }
+    /* Scrollbar Styling */
+    ::-webkit-scrollbar {
+        width: 8px;
+    }
 
-        .debug-info {
-            background: #f8f9fa;
-            padding: 10px;
-            margin: 10px 0;
-            border-radius: 5px;
-            font-family: monospace;
-            font-size: 12px;
-            color: #666;
-        }
-    </style>
-</head>
+    ::-webkit-scrollbar-track {
+        background: #1a1a1a;
+    }
 
+    ::-webkit-scrollbar-thumb {
+        background: #dc3545;
+        border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #b02a37;
+    }
+
+    .food-info {
+        background: rgba(42, 42, 42, 0.9) !important;
+        border-radius: 15px;
+        padding: 1.5rem;
+        border: 1px solid #444;
+        box-shadow: 0 8px 32px rgba(220, 53, 69, 0.1);
+        transition: all 0.3s ease;
+        color: #ffffff !important;
+    }
+
+    .food-info:hover {
+        box-shadow: 0 12px 40px rgba(220, 53, 69, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .food-info h6 {
+        color: #ffffff;
+        font-weight: 600;
+        font-size: 1.1rem;
+        border-bottom: 2px solid #dc3545 !important;
+        padding-bottom: 0.75rem;
+        margin-bottom: 1rem;
+    }
+
+    .food-info h6 i {
+        color: #dc3545;
+        text-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
+    }
+
+    /* Food Table Styling */
+    .food-info .table {
+        color: #ffffff !important;
+        background: transparent !important;
+        margin-bottom: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .food-info .table-responsive {
+        background: rgba(0, 0, 0, 0.3) !important;
+        border-radius: 10px;
+        border: 1px solid #555;
+        overflow: hidden;
+    }
+
+    /* Override Bootstrap table styles */
+    .food-info .table > :not(caption) > * > * {
+        padding: 0.75rem !important;
+        background-color: transparent !important;
+        border-bottom-width: 1px !important;
+        box-shadow: none !important;
+    }
+
+    /* Table Headers */
+    .food-info .table thead {
+        background: linear-gradient(135deg, #dc3545, #b02a37) !important;
+    }
+
+    .food-info .table thead th {
+        color: #ffffff !important;
+        font-weight: 600;
+        border: none !important;
+        padding: 1rem 0.75rem !important;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+        letter-spacing: 0.5px;
+        background: transparent !important;
+    }
+
+    /* Table Body */
+    .food-info .table tbody td {
+        color: #ffffff !important;
+        border-color: #444 !important;
+        padding: 0.75rem !important;
+        background: rgba(42, 42, 42, 0.7) !important;
+        transition: all 0.3s ease;
+    }
+
+    .food-info .table tbody tr:hover td {
+        background: rgba(42, 42, 42, 0.9) !important;
+        color: #ffc107 !important;
+    }
+
+    /* Table Footer */
+    .food-info .table tfoot {
+        background: linear-gradient(135deg, #2a2a2a, #1f1f1f) !important;
+    }
+
+    .food-info .table tfoot th {
+        color: #ffffff !important;
+        font-weight: 700;
+        border: none !important;
+        padding: 1rem 0.75rem !important;
+        font-size: 1rem;
+        background: transparent !important;
+    }
+
+    .food-info .table tfoot .text-success {
+        color: #28a745 !important;
+        font-size: 1.1rem;
+        text-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
+    }
+
+    /* Table Borders */
+    .food-info .table th,
+    .food-info .table td {
+        border-color: #444;
+        vertical-align: middle;
+    }
+
+    /* Responsive Design */
+    .food-info .table-responsive {
+        border-radius: 10px;
+    }
+
+    /* Text Alignment Classes */
+    .food-info .text-center {
+        text-align: center;
+    }
+
+    .food-info .text-end {
+        text-align: right;
+    }
+
+    /* Quantity Styling */
+    .food-info .table tbody td:nth-child(2) {
+        font-weight: 600;
+        color: #ffc107;
+    }
+
+    /* Price Styling */
+    .food-info .table tbody td:nth-child(3),
+    .food-info .table tbody td:nth-child(4) {
+        font-weight: 600;
+        color: #17a2b8;
+    }
+
+    .container-fluid > .row {
+        justify-content: center;
+    }
+
+</style>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark navbar-custom">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="#">
-            <i class="fas fa-film text-warning me-2"></i>
-            <span class="fw-bold">CINEMAX</span>
-        </a>
-        <div class="navbar-nav ms-auto">
-                <span class="navbar-text me-3">
-                    <i class="fas fa-user-circle me-1"></i>
-                    Cashier: <span>Admin</span>
-                </span>
-            <a href="/cashier/" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
-            </a>
-        </div>
-    </div>
-</nav>
+<div th:replace="cashier-templates/common/navigation :: navigation"></div>
 
 <div class="container-fluid py-4">
-    <!-- Step Indicator -->
-    <div class="step-indicator">
-        <div class="step" th:class="${currentStep >= 1} ? 'step active' : 'step'">
-            <div class="step-circle">1</div>
-            <small>Chọn Phim</small>
-        </div>
-        <div class="step" th:class="${currentStep >= 2} ? 'step active' : 'step'">
-            <div class="step-circle">2</div>
-            <small>Chọn Suất</small>
-        </div>
-        <div class="step" th:class="${currentStep >= 3} ? 'step active' : 'step'">
-            <div class="step-circle">3</div>
-            <small>Chọn Ghế</small>
-        </div>
-        <div class="step" th:class="${currentStep >= 4} ? 'step active' : 'step'">
-            <div class="step-circle">4</div>
-            <small>Thông Tin</small>
-        </div>
-        <div class="step" th:class="${currentStep >= 5} ? 'step active' : 'step'">
-            <div class="step-circle">5</div>
-            <small>Thanh Toán</small>
-        </div>
-    </div>
+    <div th:replace="cashier-templates/common/step-indicator :: step-indicator"></div>
 
     <div class="row">
         <div class="col-lg-8">
-            <!-- STEP 1: MOVIE SELECTION -->
             <div class="card card-custom mb-4" th:if="${currentStep == 1}">
                 <div class="card-header">
                     <div class="row align-items-center">
@@ -372,7 +932,6 @@
                         </a>
                     </div>
 
-                    <!-- Pagination -->
                     <div th:if="${moviesPage != null and moviesPage.totalPages > 1}"
                          class="d-flex justify-content-center mt-4">
                         <nav>
@@ -398,7 +957,6 @@
                 </div>
             </div>
 
-            <!-- STEP 2: SCHEDULE SELECTION -->
             <div class="card card-custom mb-4" th:if="${currentStep == 2}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Chọn Suất Chiếu</h5>
@@ -425,6 +983,7 @@
                                 <button type="submit"
                                         th:class="${schedule.room.typeOfRoom == 'Couple' ? 'btn btn-outline-danger w-100' : 'btn btn-outline-primary w-100'}">
                                     <span th:text="${#temporals.format(schedule.startTime, 'HH:mm')}"></span><br>
+                                    <span th:text="${#temporals.format(schedule.endTime, 'HH:mm')}"></span><br>
                                     <small>
                                         Phòng <span th:text="${schedule.room.name}"></span><br>
                                         <span
@@ -443,7 +1002,6 @@
                 </div>
             </div>
 
-            <!-- STEP 3: SEAT SELECTION -->
             <div class="card card-custom mb-4" th:if="${currentStep == 3}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-couch me-2"></i>Chọn Ghế</h5>
@@ -463,86 +1021,94 @@
                         </p>
                     </div>
 
-                    <!-- Error message for seat selection -->
                     <div th:if="${seatError}" class="alert alert-danger">
                         <i class="fas fa-exclamation-triangle me-2"></i>
                         <span th:text="${seatError}"></span>
                     </div>
 
-                    <!-- Seat Legend -->
-                    <div class="seat-legend">
-                        <div class="legend-item">
-                            <span class="seat available" style="width: 20px; height: 20px;"></span>
+                    <div class="seat-legend mb-4"
+                         style="display: flex; gap: 20px; justify-content: center; flex-wrap: wrap;">
+                        <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+                            <span class="seat available"
+                                  style="width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd; background: #f8f9fa;"></span>
                             <small>Trống</small>
                         </div>
-                        <div class="legend-item">
-                            <span class="seat occupied" style="width: 20px; height: 20px;"></span>
+                        <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+                            <span class="seat occupied"
+                                  style="width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd; background: #dc3545; color: white;"></span>
                             <small>Đã đặt</small>
                         </div>
-                        <div class="legend-item">
-                            <span class="seat selected" style="width: 20px; height: 20px;"></span>
+                        <div class="legend-item" style="display: flex; align-items: center; gap: 8px;">
+                            <span class="seat selected"
+                                  style="width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd; background: #ffc107; color: black;"></span>
                             <small>Đang chọn</small>
                         </div>
-                        <div class="legend-item" th:if="${selectedSchedule.roomType != 'Couple'}">
-                            <span class="seat vip available" style="width: 20px; height: 20px;"></span>
+                        <div class="legend-item" th:if="${selectedSchedule.roomType != 'Couple'}"
+                             style="display: flex; align-items: center; gap: 8px;">
+                            <span class="seat vip available"
+                                  style="width: 20px; height: 20px; display: inline-block; border: 1px solid #ddd; background: #6f42c1; color: white;"></span>
                             <small>VIP</small>
                         </div>
-                        <div class="legend-item" th:if="${selectedSchedule.roomType == 'Couple'}">
-                            <span class="seat couple available" style="width: 40px; height: 20px;"></span>
+                        <div class="legend-item" th:if="${selectedSchedule.roomType == 'Couple'}"
+                             style="display: flex; align-items: center; gap: 8px;">
+                            <span class="seat couple available"
+                                  style="width: 40px; height: 20px; display: inline-block; border: 1px solid #ddd; background: #e91e63; color: white;"></span>
                             <small>Ghế đôi</small>
                         </div>
                     </div>
 
-                    <!-- Seat Selection Form -->
                     <div th:if="${seatGridData != null and seatGridData.rows != null and !seatGridData.rows.isEmpty()}">
-                        <form action="/cashier/customer-info" method="post" onsubmit="return validateSeatSelection()">
+                        <form action="/cashier/customer-info" method="post" onsubmit="return validateSeatSelection()"
+                              id="seatSelectionForm">
 
-                            <!-- Screen -->
-                            <div class="screen">
+                            <div class="screen mb-4"
+                                 style="text-align: center; padding: 10px; background: linear-gradient(to bottom, #333, #666); color: white; border-radius: 20px; margin: 20px auto; max-width: 300px;">
                                 <i class="fas fa-desktop me-2"></i>MÀN HÌNH
                             </div>
 
-                            <!-- Seats Grid -->
-                            <div class="seats-container">
-                                <div th:each="row, rowStat : ${seatGridData.rows}" class="seat-row">
-                                    <!-- Row Label -->
-                                    <span class="row-label" th:text="${row.rowLabel}"></span>
+                            <div class="seats-container" style="text-align: center; max-width: 800px; margin: 0 auto;">
+                                <div th:each="row, rowStat : ${seatGridData.rows}" class="seat-row"
+                                     style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px; gap: 5px;">
+                                    <span class="row-label" th:text="${row.rowLabel}"
+                                          style="width: 30px; text-align: center; font-weight: bold; margin-right: 10px;"></span>
 
-                                    <!-- Seats in Row -->
-                                    <div style="display: inline-block;">
+                                    <div style="display: flex; gap: 3px;">
                                         <th:block th:each="seatData, seatStat : ${row.seats}">
-                                            <!-- Existing Seat -->
                                             <span th:if="${seatData.exists}"
-                                                  th:class="${seatData.cssClass}"
+                                                  th:class="'seat ' + ${seatData.cssClass}"
                                                   th:text="${seatData.position}"
+                                                  th:data-seat-id="${seatData.seatId}"
                                                   th:data-seat-position="${seatData.position}"
                                                   th:data-seat-booked="${seatData.isBooked}"
                                                   th:data-seat-type="${seatData.seatType}"
-                                                  th:title="${seatData.seatType == 'COUPLE' ? 'Ghế đôi' : (seatData.isVIP ? 'Ghế VIP' : 'Ghế thường')}"
+                                                  th:data-seat-price="${seatData.calculatedPrice}"
+                                                  th:title="'Ghế ' + ${seatData.position} + ' - ' + ${seatData.seatType == 'COUPLE' ? 'Ghế đôi' : (seatData.isVIP ? 'Ghế VIP' : 'Ghế thường')} + ' - ' + ${#numbers.formatDecimal(seatData.calculatedPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"
                                                   onclick="toggleSeat(this)"
-                                                  style="cursor: pointer;">
+                                                  style="width: 30px; height: 30px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px; cursor: pointer; border: 1px solid #ddd; border-radius: 4px; user-select: none; transition: all 0.2s;">
                                 </span>
-                                            <!-- Placeholder for non-existing seat -->
-                                            <span th:unless="${seatData.exists}" class="seat-placeholder"></span>
+                                            <span th:unless="${seatData.exists}" class="seat-placeholder"
+                                                  style="width: 30px; height: 30px; display: inline-block;"></span>
                                         </th:block>
                                     </div>
+
+                                    <span class="row-label" th:text="${row.rowLabel}"
+                                          style="width: 30px; text-align: center; font-weight: bold; margin-left: 10px;"></span>
                                 </div>
                             </div>
 
-                            <!-- Hidden input for selected seats -->
                             <input type="hidden" id="selectedSeatsInput" name="selectedSeats" value="">
 
-                            <!-- Selected Seats Summary -->
                             <div class="mt-4 text-center">
                                 <div id="selectedSeatsDisplay" class="mb-3" style="display: none;">
                                     <div class="alert alert-info">
                                         <strong>Ghế đã chọn: </strong>
                                         <span id="selectedSeatsList"></span>
+                                        <br><strong>Tổng tiền ghế: </strong>
+                                        <span id="totalSeatPrice">0₫</span>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Continue Button -->
                             <div class="text-center mt-4">
                                 <button type="submit" class="btn btn-warning btn-lg" id="continueBtn">
                                     <i class="fas fa-arrow-right me-2"></i>Tiếp tục
@@ -551,7 +1117,6 @@
                         </form>
                     </div>
 
-                    <!-- No Seats Available -->
                     <div th:if="${seatGridData == null or seatGridData.rows == null or seatGridData.rows.isEmpty()}"
                          class="text-center py-4">
                         <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
@@ -569,7 +1134,6 @@
                 </div>
             </div>
 
-            <!-- STEP 4: CUSTOMER INFO -->
             <div class="card card-custom mb-4" th:if="${currentStep == 4}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông Tin Khách Hàng</h5>
@@ -578,37 +1142,39 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <div class="mb-4">
-                        <h6 th:text="${selectedMovie.movieName}"></h6>
-                        <p class="text-muted">
-                            <span th:text="${selectedSchedule.time}"></span> -
-                            Phòng <span th:text="${selectedSchedule.roomName}"></span><br>
-                            <strong>Ghế đã chọn:</strong>
-                            <span th:each="seat, iterStat : ${selectedSeats}">
-                                <span class="badge bg-warning text-dark" th:text="${seat}"></span><span th:if="${!iterStat.last}">, </span>
-                            </span>
-                        </p>
-                    </div>
-                    <hr>
+                    <form id="customerInfoForm" action="/cashier/confirm-booking" method="post">
+                        <input type="hidden" name="selectedSeats"
+                               th:value="${#strings.listJoin(session.selectedSeatIds, ',')}">
+                        <input type="hidden" name="scheduleId" th:value="${selectedSchedule.scheduleId}">
+                        <div class="mb-4">
+                            <h6 th:text="${selectedMovie.movieName}"></h6>
+                            <p class="text-muted">
+                                <span th:text="${selectedSchedule.time}"></span> -
+                                Phòng <span th:text="${selectedSchedule.roomName}"></span><br>
+                                <strong>Ghế đã chọn:</strong>
+                                <span th:each="seat, iterStat : ${selectedSeats}">
+                        <span class="badge bg-warning text-dark" th:text="${seat}"></span><span
+                                        th:if="${!iterStat.last}">, </span>
+                    </span>
+                            </p>
+                        </div>
+                        <hr>
 
-                    <form action="/cashier/confirm-booking" method="post">
                         <div class="row">
                             <div class="col-md-6">
                                 <h6 class="mb-3"><i class="fas fa-user-circle me-2"></i>Thông tin khách hàng</h6>
-
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label for="customerName" class="form-label">Họ tên</label>
                                         <input type="text" class="form-control" id="customerName"
-                                               name="customerName" placeholder="Nhập họ tên">
+                                               name="customerName" placeholder="Nhập họ tên" required>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label for="customerPhone" class="form-label">Số điện thoại</label>
                                         <input type="tel" class="form-control" id="customerPhone"
-                                               name="customerPhone" placeholder="Nhập số điện thoại">
+                                               name="customerPhone" placeholder="Nhập số điện thoại" required>
                                     </div>
                                 </div>
-
                                 <div class="mb-3">
                                     <label for="customerEmail" class="form-label">Email (tùy chọn)</label>
                                     <input type="email" class="form-control" id="customerEmail"
@@ -618,34 +1184,94 @@
 
                             <div class="col-md-6">
                                 <h6 class="mb-3"><i class="fas fa-hamburger me-2"></i>Đồ ăn & Nước uống</h6>
+                                <div th:if="${theaterStock != null and !theaterStock.isEmpty()}">
+                                    <div class="row">
+                                        <div class="col-md-6 mb-3" th:each="food : ${theaterStock.content}">
+                                            <div class="card h-100">
+                                                <img th:src="@{${food.image}}" class="card-img-top" alt="Food Image"
+                                                     style="height: 150px; object-fit: cover;">
+                                                <div class="card-body d-flex flex-column">
+                                                    <h6 th:text="${food.foodName}"></h6>
+                                                    <p class="mb-2">Giá: <span
+                                                            th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span>
+                                                        đ</p>
+                                                    <p class="text-muted small">Còn lại: <span
+                                                            th:text="${food.quantity}"></span></p>
 
-                                <div th:if="${foodMenu != null and !foodMenu.isEmpty()}">
-                                    <div class="food-item" th:each="food : ${foodMenu}">
-                                        <div class="row align-items-center">
-                                            <div class="col-6">
-                                                <h6 th:text="${food.foodName}" class="mb-1"></h6>
-                                                <p class="text-warning mb-0 fw-bold"
-                                                   th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">
-                                                </p>
-                                            </div>
-                                            <div class="col-6">
-                                                <div class="quantity-controls justify-content-end">
-                                                    <button type="button" class="quantity-btn"
-                                                            onclick="decreaseQuantity(this)">-</button>
-                                                    <input type="number" th:name="'food_' + ${food.theaterStockId}"
-                                                           class="quantity-input" value="0" min="0" max="10">
-                                                    <button type="button" class="quantity-btn"
-                                                            onclick="increaseQuantity(this)">+</button>
+                                                    <div class="input-group mt-auto">
+                                                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                                                                th:onclick="updateQuantity([[${food.theaterStockId}]], -1, [[${food.quantity}]])">
+                                                            -
+                                                        </button>
+                                                        <input type="text" class="form-control text-center"
+                                                               th:id="'quantity-display-' + ${food.theaterStockId}"
+                                                               value="0" readonly>
+                                                        <button class="btn btn-outline-secondary btn-sm" type="button"
+                                                                th:onclick="updateQuantity([[${food.theaterStockId}]], 1, [[${food.quantity}]])">
+                                                            +
+                                                        </button>
+                                                    </div>
+                                                    <input type="hidden"
+                                                           th:id="'food-quantity-' + ${food.theaterStockId}"
+                                                           th:name="'foodQuantities[' + ${food.theaterStockId} + ']'"
+                                                           value="0">
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </div>
 
-                                <div th:if="${foodMenu == null or foodMenu.isEmpty()}"
-                                     class="text-center text-muted py-3">
-                                    <i class="fas fa-utensils fa-2x mb-2"></i>
-                                    <p>Không có đồ ăn</p>
+                                    <div th:if="${totalFoodPages > 1}" class="d-flex justify-content-center mt-4">
+                                        <nav>
+                                            <ul class="pagination">
+                                                <li class="page-item"
+                                                    th:classappend="${theaterStock.first} ? 'disabled'">
+                                                    <a class="page-link" href="#"
+                                                       th:onclick="'changeFoodPage(' + ${currentFoodPage - 1} + ')'">Previous</a>
+                                                </li>
+                                                <li class="page-item"
+                                                    th:each="i : ${#numbers.sequence(0, totalFoodPages - 1)}"
+                                                    th:classappend="${i == currentFoodPage} ? 'active'">
+                                                    <a class="page-link" href="#"
+                                                       th:onclick="'changeFoodPage(' + ${i} + ')'"
+                                                       th:text="${i + 1}"></a>
+                                                </li>
+                                                <li class="page-item"
+                                                    th:classappend="${theaterStock.last} ? 'disabled'">
+                                                    <a class="page-link" href="#"
+                                                       th:onclick="'changeFoodPage(' + ${currentFoodPage + 1} + ')'">Next</a>
+                                                </li>
+                                            </ul>
+                                        </nav>
+                                    </div>
+                                </div>
+                                <div th:if="${theaterStock == null or theaterStock.isEmpty()}">
+                                    <p class="text-center text-muted">Không có đồ ăn hoặc nước uống nào.</p>
+                                </div>
+                            </div>
+
+                            <div class="col-md-12 mt-4">
+                                <h6 class="mb-3"><i class="fas fa-money-check-alt me-2"></i>Phương thức thanh toán</h6>
+                                <div class="card card-custom p-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="form-check">
+                                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                                       id="paymentCash" value="cash" checked>
+                                                <label class="form-check-label" for="paymentCash" style="color: white">
+                                                    <i class="fas fa-money-bill-wave me-2"></i><span>Thanh toán tiền mặt</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <div class="form-check" style="color: white">
+                                                <input class="form-check-input" type="radio" name="paymentMethod"
+                                                       id="paymentBank" value="bank">
+                                                <label class="form-check-label" for="paymentBank">
+                                                    <i class="fas fa-university me-2"></i><span>Chuyển khoản ngân hàng</span>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -657,107 +1283,280 @@
                             </button>
                         </div>
                     </form>
+
+                    <form id="foodPaginationForm" action="/cashier/customer-info" method="post" class="d-none">
+                        <input type="hidden" name="selectedSeats"
+                               th:value="${#strings.listJoin(session.selectedSeatIds, ',')}">
+                        <input type="hidden" id="foodPageInput" name="foodPage" value="">
+                    </form>
+
                 </div>
             </div>
 
-            <!-- STEP 5: CONFIRMATION -->
-            <div class="card card-custom mb-4" th:if="${currentStep == 5}">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Đặt vé thành công</h5>
+            <div th:if="${currentStep == 5}" class="step-content">
+                <div class="row">
+                    <div class="col-12">
+                        <div class="text-center mb-4">
+                            <div class="success-icon mb-3">
+                                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                            </div>
+                            <h2 class="text-success mb-2">Đặt vé thành công!</h2>
+                            <p class="text-muted">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <div class="text-center">
-                        <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
-                        <h4 class="text-success">Đặt vé thành công!</h4>
-                        <p class="text-muted">Vé đã được đặt thành công. Vui lòng thanh toán để hoàn tất.</p>
 
-                        <!-- Booking Summary -->
-                        <div class="row mt-4">
-                            <div class="col-md-8 mx-auto">
-                                <div class="card">
-                                    <div class="card-header bg-light">
-                                        <h6 class="mb-0">Thông tin đặt vé</h6>
+                <div th:if="${bookingResult != null}" class="row">
+                    <div class="col-lg-8">
+                        <div class="card card-custom">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-receipt me-2"></i>Thông tin hóa đơn
+                                </h5>
+                                <div class="invoice-actions">
+                                    <button class="btn btn-outline-primary btn-sm me-2" onclick="window.print()">
+                                        <i class="fas fa-print me-1"></i>In hóa đơn
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="downloadInvoice()">
+                                        <i class="fas fa-download me-1"></i>Tải về
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="invoice-header mb-4">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <h6 class="text-muted mb-1">Mã hóa đơn:</h6>
+                                            <h5 class="text-primary mb-3"
+                                                th:text="'#' + ${bookingResult.invoiceId}"></h5>
+
+                                            <h6 class="text-muted mb-1">Ngày đặt:</h6>
+                                            <p th:text="${bookingResult.bookingDate}"></p>
+                                        </div>
+                                        <div class="col-md-6 text-md-end">
+                                            <h6 class="text-muted mb-1">Tổng tiền:</h6>
+                                            <h3 class="text-warning mb-0"
+                                                th:text="${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></h3>
+                                        </div>
                                     </div>
-                                    <div class="card-body text-start">
-                                        <p><strong>Phim:</strong> <span th:text="${selectedMovie.movieName}"></span></p>
-                                        <p><strong>Suất chiếu:</strong> <span th:text="${selectedSchedule.time}"></span></p>
-                                        <p><strong>Phòng:</strong> <span th:text="${selectedSchedule.roomName}"></span></p>
-                                        <p><strong>Ghế:</strong>
-                                            <span th:each="seat, iterStat : ${selectedSeats}">
-                                                <span class="badge bg-warning text-dark" th:text="${seat}"></span><span th:if="${!iterStat.last}">, </span>
-                                            </span>
-                                        </p>
-                                        <p th:if="${customerInfo.name}"><strong>Khách hàng:</strong> <span th:text="${customerInfo.name}"></span></p>
-                                        <p th:if="${customerInfo.phone}"><strong>Điện thoại:</strong> <span th:text="${customerInfo.phone}"></span></p>
+                                </div>
+
+                                <div class="customer-info mb-4">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="fas fa-user me-2"></i>Thông tin khách hàng
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-2">
+                                                <strong>Họ tên:</strong>
+                                                <span th:text="${bookingResult.customerName}"></span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-2">
+                                                <strong>Số điện thoại:</strong>
+                                                <span th:text="${bookingResult.customerPhone}"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="movie-info mb-4">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="fas fa-film me-2"></i>Thông tin phim
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-2">
+                                                <strong>Tên phim:</strong>
+                                                <span th:text="${bookingResult.movieName}"></span>
+                                            </p>
+                                            <p class="mb-2">
+                                                <strong>Thời lượng:</strong>
+                                                <span th:text="${bookingResult.movieDuration} + ' phút'"></span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-2">
+                                                <strong>Giờ chiếu:</strong>
+                                                <span th:text="${bookingResult.scheduleTime}"></span>
+                                            </p>
+                                            <p class="mb-2">
+                                                <strong>Phòng chiếu:</strong>
+                                                <span th:text="${bookingResult.roomName}"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="seat-info mb-4">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="fas fa-chair me-2"></i>Thông tin ghế
+                                    </h6>
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <p class="mb-2">
+                                                <strong>Vị trí ghế:</strong>
+                                            </p>
+                                            <div class="seat-list">
+                                    <span th:each="seat, iterStat : ${bookingResult.seatPositions}"
+                                          class="badge bg-primary me-1 mb-1"
+                                          th:text="${seat}"></span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <p class="mb-2">
+                                                <strong>Tổng tiền vé:</strong>
+                                                <span class="text-success"
+                                                      th:text="${#numbers.formatDecimal(bookingResult.totalTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div th:if="${bookingResult.foodItems != null and !bookingResult.foodItems.isEmpty()}"
+                                     class="food-info mb-4">
+                                    <h6 class="border-bottom pb-2 mb-3">
+                                        <i class="fas fa-utensils me-2"></i>Thông tin bắp nước
+                                    </h6>
+                                    <div class="table-responsive">
+                                        <table class="table table-sm">
+                                            <thead class="table-light">
+                                            <tr>
+                                                <th>Tên món</th>
+                                                <th class="text-center">Số lượng</th>
+                                                <th class="text-end">Đơn giá</th>
+                                                <th class="text-end">Thành tiền</th>
+                                            </tr>
+                                            </thead>
+                                            <tbody>
+                                            <tr th:each="food : ${bookingResult.foodItems}">
+                                                <td th:text="${food.name}"></td>
+                                                <td class="text-center" th:text="${food.quantity}"></td>
+                                                <td class="text-end"
+                                                    th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
+                                                <td class="text-end"
+                                                    th:text="${#numbers.formatDecimal(food.unitPrice * food.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
+                                            </tr>
+                                            </tbody>
+                                            <tfoot class="table-light">
+                                            <tr>
+                                                <th colspan="3" class="text-end">Tổng tiền bắp nước:</th>
+                                                <th class="text-end text-success"
+                                                    th:text="${#numbers.formatDecimal(bookingResult.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></th>
+                                            </tr>
+                                            </tfoot>
+                                        </table>
+                                    </div>
+                                </div>
+
+                                <div class="total-summary">
+                                    <div class="row">
+                                        <div class="col-md-6 offset-md-6">
+                                            <div class="card bg-light">
+                                                <div class="card-body">
+                                                    <div class="d-flex justify-content-between mb-2">
+                                                        <span>Tiền vé:</span>
+                                                        <span th:text="${#numbers.formatDecimal(bookingResult.totalTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                                                    </div>
+                                                    <div th:if="${bookingResult.totalFoodPrice != null and bookingResult.totalFoodPrice > 0}"
+                                                         class="d-flex justify-content-between mb-2">
+                                                        <span>Tiền bắp nước:</span>
+                                                        <span th:text="${#numbers.formatDecimal(bookingResult.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
+                                                    </div>
+                                                    <hr class="my-2">
+                                                    <div class="d-flex justify-content-between">
+                                                        <strong class="fs-5">Tổng cộng:</strong>
+                                                        <strong class="text-warning fs-5"
+                                                                th:text="${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="row mt-4">
-                            <div class="col-md-6">
-                                <button class="btn btn-success btn-lg w-100" onclick="window.print()">
-                                    <i class="fas fa-print me-2"></i>In vé
-                                </button>
+                    <div class="col-lg-4">
+                        <div class="card card-custom">
+                            <div class="card-header">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-cogs me-2"></i>Thao tác nhanh
+                                </h5>
                             </div>
-                            <div class="col-md-6">
-                                <a href="/cashier/movie/" class="btn btn-outline-primary btn-lg w-100">
-                                    <i class="fas fa-plus me-2"></i>Đặt vé mới
+                            <div class="card-body">
+                                <div class="d-grid gap-3">
+                                    <button class="btn btn-primary btn-lg" onclick="window.print()">
+                                        <i class="fas fa-print me-2"></i>In hóa đơn
+                                    </button>
+
+                                    <button class="btn btn-success btn-lg" onclick="downloadInvoice()">
+                                        <i class="fas fa-download me-2"></i>Tải PDF
+                                    </button>
+
+                                    <button class="btn btn-info btn-lg" onclick="sendInvoiceEmail()">
+                                        <i class="fas fa-envelope me-2"></i>Gửi email
+                                    </button>
+
+                                    <hr>
+
+                                    <a href="/cashier" class="btn btn-outline-primary btn-lg">
+                                        <i class="fas fa-plus me-2"></i>Đặt vé mới
+                                    </a>
+
+                                    <button class="btn btn-outline-secondary btn-lg" onclick="searchBooking()">
+                                        <i class="fas fa-search me-2"></i>Tra cứu vé
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="card card-custom mt-3">
+                            <div class="card-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-info-circle me-2"></i>Lưu ý
+                                </h6>
+                            </div>
+                            <div class="card-body">
+                                <ul class="list-unstyled small mb-0">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        Vui lòng có mặt trước giờ chiếu 15 phút
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        Xuất trình hóa đơn khi vào rạp
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        Giữ vé cẩn thận trong suốt buổi chiếu
+                                    </li>
+                                    <li class="mb-0">
+                                        <i class="fas fa-check-circle text-success me-1"></i>
+                                        Liên hệ quầy vé nếu cần hỗ trợ
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div th:unless="${bookingResult != null}" class="row">
+                    <div class="col-12">
+                        <div class="card card-custom border-danger">
+                            <div class="card-body text-center">
+                                <div class="error-icon mb-3">
+                                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
+                                </div>
+                                <h4 class="text-danger mb-2">Có lỗi xảy ra!</h4>
+                                <p class="text-muted mb-3">Không thể tải thông tin hóa đơn. Vui lòng thử lại.</p>
+                                <a href="/cashier" class="btn btn-primary">
+                                    <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
                                 </a>
                             </div>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- PRICE BREAKDOWN SIDEBAR -->
-        <div class="col-lg-4">
-            <div class="card card-custom sticky-top">
-                <div class="card-header">
-                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Chi tiết giá</h5>
-                </div>
-                <div class="card-body">
-                    <div th:if="${priceBreakdown != null}">
-                        <div th:if="${priceBreakdown.ticketItems != null and !priceBreakdown.ticketItems.isEmpty()}">
-                            <h6 class="text-muted mb-2">Vé xem phim:</h6>
-                            <div class="d-flex justify-content-between mb-1"
-                                 th:each="item : ${priceBreakdown.ticketItems}">
-                                <span th:text="${item.description}"></span>
-                                <span th:text="${#numbers.formatDecimal(item.price, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2 border-top pt-2">
-                                <strong>Tổng vé:</strong>
-                                <strong th:text="${#numbers.formatDecimal(priceBreakdown.totalTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
-                            </div>
-                        </div>
-
-                        <div th:if="${priceBreakdown.foodItems != null and !priceBreakdown.foodItems.isEmpty()}"
-                             class="mt-3">
-                            <h6 class="text-muted mb-2">Bắp nước:</h6>
-                            <div class="d-flex justify-content-between mb-1"
-                                 th:each="item : ${priceBreakdown.foodItems}">
-                                <span th:text="${item.name + ' x' + item.quantity}"></span>
-                                <span th:text="${#numbers.formatDecimal(item.total, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-                            </div>
-                            <div class="d-flex justify-content-between mb-2 border-top pt-2">
-                                <strong>Tổng bắp nước:</strong>
-                                <strong th:text="${#numbers.formatDecimal(priceBreakdown.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
-                            </div>
-                        </div>
-
-                        <hr class="my-3">
-                        <div class="d-flex justify-content-between">
-                            <strong class="fs-5">Tổng cộng:</strong>
-                            <strong class="text-warning fs-4"
-                                    th:text="${#numbers.formatDecimal(priceBreakdown.total, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
-                        </div>
-                    </div>
-
-                    <div th:unless="${priceBreakdown != null}" class="text-center text-muted py-4">
-                        <i class="fas fa-calculator fa-2x mb-3"></i>
-                        <p>Chưa có thông tin giá</p>
-                        <small>Vui lòng chọn ghế để xem chi tiết</small>
                     </div>
                 </div>
             </div>
@@ -767,69 +1566,61 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Simplified seat selection logic
     let selectedSeats = new Set();
 
-    function toggleSeat(element) {
-        const seatPosition = element.getAttribute('data-seat-position');
-        const isBooked = element.getAttribute('data-seat-booked') === 'true';
-
-        console.log('Toggling seat:', seatPosition, 'booked:', isBooked);
-
-        // Don't allow selection of booked seats
-        if (isBooked) {
-            console.log('Cannot select booked seat');
-            return;
+    function toggleSeat(seatElement) {
+        // Check if seat is booked
+        if (seatElement.dataset.seatBooked === 'true') {
+            return; // Can't select booked seats
         }
 
-        const isSelected = selectedSeats.has(seatPosition);
+        const seatId = seatElement.dataset.seatId;
+        const seatPosition = seatElement.dataset.seatPosition;
+        const seatPrice = parseInt(seatElement.dataset.seatPrice) || 0;
 
-        if (isSelected) {
+        if (selectedSeats.has(seatId)) {
             // Deselect seat
-            selectedSeats.delete(seatPosition);
-            element.classList.remove('selected');
-            element.classList.add('available');
-            console.log('Deselected seat:', seatPosition);
+            selectedSeats.delete(seatId);
+            seatElement.classList.remove('selected');
         } else {
             // Select seat
-            selectedSeats.add(seatPosition);
-            element.classList.remove('available');
-            element.classList.add('selected');
-            console.log('Selected seat:', seatPosition);
+            selectedSeats.add(seatId);
+            seatElement.classList.add('selected');
         }
 
         updateSelectedSeatsDisplay();
     }
 
     function updateSelectedSeatsDisplay() {
-        const continueBtn = document.getElementById('continueBtn');
+        const selectedSeatsInput = document.getElementById('selectedSeatsInput');
         const selectedSeatsDisplay = document.getElementById('selectedSeatsDisplay');
         const selectedSeatsList = document.getElementById('selectedSeatsList');
-        const selectedSeatsInput = document.getElementById('selectedSeatsInput');
+        const totalSeatPrice = document.getElementById('totalSeatPrice');
 
-        console.log('Updating display. Selected seats:', Array.from(selectedSeats));
-
-        // Update hidden input
-        if (selectedSeatsInput) {
+        if (selectedSeats.size > 0) {
+            // Update hidden input with seat IDs
             selectedSeatsInput.value = Array.from(selectedSeats).join(',');
-        }
 
-        // Update continue button
-        if (continueBtn) {
-            if (selectedSeats.size > 0) {
-                continueBtn.innerHTML = `<i class="fas fa-arrow-right me-2"></i>Tiếp tục (${selectedSeats.size} ghế)`;
+            // Update display
+            const seatInfo = [];
+            let totalPrice = 0;
 
-                if (selectedSeatsDisplay && selectedSeatsList) {
-                    selectedSeatsList.textContent = Array.from(selectedSeats).sort().join(', ');
-                    selectedSeatsDisplay.style.display = 'block';
+            selectedSeats.forEach(seatId => {
+                const seatElement = document.querySelector(`[data-seat-id="${seatId}"]`);
+                if (seatElement) {
+                    const position = seatElement.dataset.seatPosition;
+                    const price = parseInt(seatElement.dataset.seatPrice) || 0;
+                    seatInfo.push(position);
+                    totalPrice += price;
                 }
-            } else {
-                continueBtn.innerHTML = '<i class="fas fa-arrow-right me-2"></i>Tiếp tục';
+            });
 
-                if (selectedSeatsDisplay) {
-                    selectedSeatsDisplay.style.display = 'none';
-                }
-            }
+            selectedSeatsList.textContent = seatInfo.join(', ');
+            totalSeatPrice.textContent = formatPrice(totalPrice) + '₫';
+            selectedSeatsDisplay.style.display = 'block';
+        } else {
+            selectedSeatsInput.value = '';
+            selectedSeatsDisplay.style.display = 'none';
         }
     }
 
@@ -841,38 +1632,55 @@
         return true;
     }
 
-    // Initialize when page loads
+    function formatPrice(price) {
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+    }
+
+    // Initialize on page load
     document.addEventListener('DOMContentLoaded', function() {
-        console.log('DOM Content Loaded - Setting up simplified seat selection...');
-
-        // Add hover effects to available seats
-        const allSeats = document.querySelectorAll('[data-seat-position]');
-        console.log('Found seats with positions:', allSeats.length);
-
-        allSeats.forEach(seat => {
-            const isBooked = seat.getAttribute('data-seat-booked') === 'true';
-
-            if (!isBooked) {
-                seat.addEventListener('mouseenter', function() {
-                    if (!this.classList.contains('selected')) {
-                        this.style.transform = 'scale(1.1)';
-                        this.style.boxShadow = '0 2px 8px rgba(0,0,0,0.3)';
-                    }
-                });
-
-                seat.addEventListener('mouseleave', function() {
-                    if (!this.classList.contains('selected')) {
-                        this.style.transform = '';
-                        this.style.boxShadow = '';
-                    }
-                });
-            }
-        });
-
-        // Initialize display
+        console.log('Seat selection initialized');
         updateSelectedSeatsDisplay();
-        console.log('Simplified seat selection setup complete');
     });
+
+    function updateQuantity(stockId, change, maxQuantity) {
+        const displayEl = document.getElementById('quantity-display-' + stockId);
+        const hiddenInputEl = document.getElementById('food-quantity-' + stockId);
+
+        let currentValue = parseInt(displayEl.value);
+        let newValue = currentValue + change;
+
+        if (newValue < 0) {
+            newValue = 0;
+        }
+        if (newValue > maxQuantity) {
+            newValue = maxQuantity;
+        }
+
+        // Giới hạn tối đa 10 sản phẩm mỗi loại
+        if (newValue > 10) {
+            newValue = 10;
+        }
+
+        displayEl.value = newValue;
+        hiddenInputEl.value = newValue;
+    }
+
+    function changeFoodPage(page) {
+        // Lấy form phân trang ẩn
+        const paginationForm = document.getElementById('foodPaginationForm');
+        // Đặt giá trị cho page number
+        document.getElementById('foodPageInput').value = page;
+        // Submit form
+        paginationForm.submit();
+    }
+
+    // Trong file: cashier-booking.html
+
+    function downloadInvoice() {
+        window.location.href = '/cashier/invoice/download';
+    }
+
+
 </script>
 </body>
 </html>

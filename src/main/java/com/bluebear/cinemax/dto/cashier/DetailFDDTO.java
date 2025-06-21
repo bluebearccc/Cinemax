@@ -14,5 +14,5 @@ public class DetailFDDTO {
     private InvoiceDTO invoice;
     private TheaterDTO theaterStock;
     private Integer quantity;
-    private BigDecimal totalPrice;
+    private Double totalPrice;
 }
