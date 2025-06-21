@@ -35,7 +35,7 @@
             <form th:action="@{/booking/step1}" method="post">
                 <input type="hidden" name="scheduleId" th:value="${scheduleId}" />
                 <input type="hidden" name="roomId" th:value="${roomId}" />
-
+                <input type="hidden" name="selectedSeats" th:each="seatId : ${selectedSeats}" th:value="${seatId}"/>
                 <!-- Promotion Code Section -->
                 <div class="promo-section">
                     <label class="promo-label">
@@ -79,12 +79,13 @@
                                        th:value="${seat.seatId}"
                                        th:disabled="${seat.booked}"
                                        th:id="'seat-' + ${seat.seatId}"
-                                       th:attr="data-price=${seat.unitPrice}" />
+                                       th:attr="data-price=${seat.unitPrice}, data-position=${seat.position}" />
                                 <label th:for="'seat-' + ${seat.seatId}"
                                        class="seat seat-available"
                                        th:classappend="${seat.booked} ? 'seat-booked' : ''"
                                        th:text="${#strings.substring(seat.position, 1)}">1</label>
                             </div>
+
                         </div>
                     </div>
 
@@ -103,6 +104,15 @@
                         </div>
                     </div>
                 </div>
+                <!-- Selected Seats Summary -->
+                <div class="selected-seats-section mt-4">
+                    <h4><i class="fas fa-couch"></i> Ghế đã chọn:</h4>
+                    <div class="selected-seats-box mt-2">
+                        <span id="selectedSeatsList" class="text-seat">Chưa có ghế nào</span>
+                        <button type="button" id="clearSeatsBtn" class="btn-close-custom" aria-label="Clear"></button>
+                    </div>
+                </div>
+
 
                 <!-- Total Section -->
                 <div class="total-section">
@@ -163,6 +173,7 @@
 
             const total = calculateTotal();
             updateTotalDisplay(total, currentDiscount);
+            updateSelectedSeatsDisplay();
         });
     });
 
@@ -212,6 +223,29 @@
         promoMessage.classList.remove('success', 'error');
         promoMessage.classList.add(isSuccess ? 'success' : 'error');
     }
+    function updateSelectedSeatsDisplay() {
+        const selectedSeats = Array.from(document.querySelectorAll('input[name="selectedSeats"]:checked'))
+            .map(cb => cb.getAttribute('data-position'));
+        document.getElementById('selectedSeatsList').textContent = selectedSeats.length > 0
+            ? selectedSeats.join(', ')
+            : 'Chưa có ghế nào được chọn';
+    }
+
+    // Xử lý nút "Xóa tất cả ghế đã chọn"
+    document.getElementById('clearSeatsBtn').addEventListener('click', function () {
+        document.querySelectorAll('input[name="selectedSeats"]:checked').forEach(cb => {
+            cb.checked = false;
+            const label = document.querySelector(`label[for="${cb.id}"]`);
+            if (label) {
+                label.classList.remove('seat-selected');
+                label.classList.add('seat-available');
+            }
+        });
+
+        const total = calculateTotal();
+        updateTotalDisplay(total, currentDiscount);
+        updateSelectedSeatsDisplay();
+    });
 
     // Handle form submission
     document.querySelector('form').addEventListener('submit', function(e) {
@@ -234,6 +268,7 @@
 
     // Initialize total display
     updateTotalDisplay(0);
+
 </script>
 </body>
 </html>

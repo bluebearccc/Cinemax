@@ -15,9 +15,9 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
     boolean existsBySeatSeatIdAndScheduleScheduleId(Integer seatId, Integer scheduleId);
     @Modifying
     @Transactional
-    @Query(value = "INSERT INTO Detail_Seat (invoiceId, seatId, status, scheduleId) VALUES (:invoiceId, :seatId, :status, :scheduleId)", nativeQuery = true)
+    @Query(value = "INSERT INTO Detail_Seat (invoiceId, seatId, scheduleId ,status) VALUES (:invoiceId, :seatId, :scheduleId, :status)", nativeQuery = true)
     void insertDetailSeat(@Param("invoiceId") int invoiceId,
                           @Param("seatId") int seatId,
-                          @Param("status") String status,
-                          @Param("scheduleId") int scheduleId);
+                          @Param("scheduleId") int scheduleId,
+                          @Param("status")String status);
 }

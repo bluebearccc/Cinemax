@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -11,32 +12,33 @@ import java.time.LocalDateTime;
 @Setter
 @Entity
 @Table(name = "Invoice")
-
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer invoiceId;
 
     @ManyToOne
-    @JoinColumn(name = "customerId", nullable = false)
+    @JoinColumn(name = "CustomerID", nullable = false)
     private Customer customer;
 
     @ManyToOne
-    @JoinColumn(name = "employeeId")
+    @JoinColumn(name = "EmployeeID")
     private Employee employee;
 
     @ManyToOne
-    @JoinColumn(name = "promotionId")
+    @JoinColumn(name = "PromotionID")
     private Promotion promotion;
 
-    @Column
-    private Double discount;
+    @Column(name = "Discount", nullable = true)
+    private Float discount;
 
-    @Column(nullable = false)
+    @Column(name = "BookingDate", nullable = false)
     private LocalDateTime bookingDate;
 
-    @Column(nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalprice;
+    @Column(name = "Totalprice", nullable = false, precision = 10, scale = 2)
+    private BigDecimal totalPrice;
 
-    // Getters and setters
+    @Column(name = "Status", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private InvoiceStatus status;
 }

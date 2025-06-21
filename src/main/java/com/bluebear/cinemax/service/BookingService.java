@@ -1,7 +1,9 @@
 package com.bluebear.cinemax.service;
 
+import com.bluebear.cinemax.dto.InvoiceDTO;
 import com.bluebear.cinemax.dto.SeatDTO;
 import com.bluebear.cinemax.entity.*;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import com.bluebear.cinemax.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -61,8 +63,8 @@ public class BookingService {
     }
     public Invoice bookSeatsAndCombos(Integer scheduleId, List<Integer> seatIds, String promotionCode, Map<Integer, Integer> selectedCombos) {
         BigDecimal total = BigDecimal.ZERO;
-        List<Seat> seats = seatRepo.findAllById(seatIds);
 
+        List<Seat> seats = seatRepo.findAllById(seatIds);
         for (Seat seat : seats) {
             boolean booked = detailSeatRepo.existsBySeatSeatIdAndScheduleScheduleId(seat.getSeatId(), scheduleId);
             if (booked) {
@@ -74,7 +76,6 @@ public class BookingService {
         Optional<Promotion> promoOpt = validatePromotionCode(promotionCode);
         Promotion promo = null;
         BigDecimal discount = BigDecimal.ZERO;
-
         if (promoOpt.isPresent()) {
             promo = promoOpt.get();
             discount = total.multiply(BigDecimal.valueOf(promo.getDiscount())).divide(BigDecimal.valueOf(100));
@@ -84,20 +85,25 @@ public class BookingService {
         }
 
         Optional<Customer> cus = customerRepo.findById(1);
+        if (cus.isEmpty()) throw new IllegalStateException("Không tìm thấy khách hàng.");
 
         Invoice invoice = new Invoice();
         invoice.setCustomer(cus.get());
         invoice.setPromotion(promo);
-        invoice.setDiscount(discount.doubleValue());
+        invoice.setDiscount(discount.floatValue());
         invoice.setBookingDate(LocalDateTime.now());
-        invoice.setTotalprice(total);
+        invoice.setStatus(InvoiceStatus.Cancelled); // chưa thanh toán
+
+        // Tạm set tổng trước combo
+        invoice.setTotalPrice(total);
         invoice = invoiceRepo.save(invoice);
 
         for (Seat seat : seats) {
-            detailSeatRepo.insertDetailSeat(invoice.getInvoiceId(), seat.getSeatId(), "Booked", scheduleId);
+            detailSeatRepo.insertDetailSeat(invoice.getInvoiceId(), seat.getSeatId(), scheduleId,"Booked");
         }
 
-        // Xử lý đồ ăn/combo
+        // Xử lý combo
+        BigDecimal comboTotal = BigDecimal.ZERO;
         for (Map.Entry<Integer, Integer> combo : selectedCombos.entrySet()) {
             Integer theaterStockId = combo.getKey();
             Integer quantity = combo.getValue();
@@ -113,22 +119,25 @@ public class BookingService {
             theaterStockRepo.save(stock);
 
             BigDecimal comboTotalPrice = stock.getUnitPrice().multiply(BigDecimal.valueOf(quantity));
+            comboTotal = comboTotal.add(comboTotalPrice);
 
             DetailFD detailFD = new DetailFD();
             detailFD.setInvoice(invoice);
             detailFD.setTheaterStock(stock);
             detailFD.setQuantity(quantity);
             detailFD.setTotalPrice(comboTotalPrice);
+            detailFD.setStatus("Booked");
             detailFDRepo.save(detailFD);
-
-            total = total.add(comboTotalPrice);
         }
 
-        invoice.setTotalprice(total);
-        invoiceRepo.save(invoice);
+        // Cập nhật tổng giá sau combo
+        total = total.add(comboTotal);
+        invoice.setTotalPrice(total);
+        invoice = invoiceRepo.save(invoice); // update lại
 
         return invoice;
     }
+
     public Map<String, Object> checkPromotionCode(String code, BigDecimal totalAmount) {
         Optional<Promotion> promoOpt = promotionRepo.findByPromotionCode(code);
         Map<String, Object> response = new HashMap<>();
@@ -252,14 +261,14 @@ public class BookingService {
         Invoice invoice = new Invoice();
         invoice.setCustomer(cus.get());
         invoice.setPromotion(promo);
-        invoice.setDiscount(discount.doubleValue());
+        invoice.setDiscount(discount.floatValue());
         invoice.setBookingDate(LocalDateTime.now());
-        invoice.setTotalprice(total);
+        invoice.setTotalPrice(total);
         invoice = invoiceRepo.save(invoice);
 
         // Lưu chi tiết ghế
         for (Seat seat : seats) {
-            detailSeatRepo.insertDetailSeat(invoice.getInvoiceId(), seat.getSeatId(), "Booked", scheduleId);
+            detailSeatRepo.insertDetailSeat(invoice.getInvoiceId(), seat.getSeatId(),  scheduleId,"Booked");
         }
 
         return invoice;

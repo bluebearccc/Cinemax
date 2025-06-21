@@ -38,7 +38,7 @@ public class Movie {
 
     private String movieRate;
 
-    private String actor;
+
 
     private LocalDate startDate;
 

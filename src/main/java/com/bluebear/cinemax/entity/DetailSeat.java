@@ -23,7 +23,8 @@ public class DetailSeat {
     @JoinColumn(name = "scheduleId", nullable = false)
     private Schedule schedule;
 
-    // Getters and setters
+
+// Getters and setters
 
     public Integer getId() {
         return id;

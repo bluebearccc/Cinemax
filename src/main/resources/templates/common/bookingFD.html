@@ -22,6 +22,11 @@
 
     <div class="combo-container">
         <form th:action="@{/booking/step2}" method="post" id="comboForm">
+            <input type="hidden" name="scheduleId" th:value="${scheduleId}">
+            <input type="hidden" name="roomId" th:value="${roomId}">
+            <input type="hidden" name="promotionCode" th:value="${promotionCode}">
+
+            <input type="hidden" name="selectedSeats" th:each="seatId : ${selectedSeats}" th:value="${seatId}"/>
             <div class="combo-grid">
                 <div th:each="combo : ${combos}" class="combo-card" th:attr="data-combo-id=${combo.theaterStockID}">
                     <div class="combo-image-container">
@@ -90,7 +95,7 @@
 
 <div class="order-summary" id="orderSummary">
     <i class="fas fa-shopping-bag me-2"></i>
-    <span id="summaryText">Đã chọn 0 combo - Tổng: 0₫</span>
+    <span id="summaryText">Đã chọn 0 combo - Tổng: 0</span>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -122,7 +127,7 @@
             const quantity = parseInt(input.value) || 0;
             const price = parseInt(input.getAttribute('data-price')) || 0;
 
-            totalAmount += quantity * price;
+            totalAmount += quantity * price ;
             totalItems += quantity;
         });
 
@@ -136,7 +141,7 @@
 
         document.getElementById('totalDisplay').textContent = `Tổng: ${formatPrice(totalAmount)}`;
         document.getElementById('summaryText').textContent =
-            `Đã chọn ${totalItems} combo - Tổng: ${formatPrice(totalAmount)+"0.000"}`;
+            `Đã chọn ${totalItems} combo - Tổng: ${formatPrice(totalAmount)}`;
 
         // Show/hide order summary
         const orderSummary = document.getElementById('orderSummary');
@@ -194,18 +199,7 @@
     });
 
     // Form submission
-    document.getElementById('comboForm').addEventListener('submit', function(e) {
-        if (totalItems === 0) {
-            e.preventDefault();
-            alert('Vui lòng chọn ít nhất một combo trước khi đặt hàng!');
-            return false;
-        }
 
-        // Add loading state
-        const checkoutBtn = document.getElementById('checkoutBtn');
-        checkoutBtn.innerHTML = '<div class="loading"></div> Đang xử lý...';
-        checkoutBtn.disabled = true;
-    });
 
     // Initialize
     updateTotals();

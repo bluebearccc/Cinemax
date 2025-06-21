@@ -31,7 +31,8 @@ public class DetailFD {
 
     @Column(name = "TotalPrice", precision = 10, scale = 2)
     private BigDecimal totalPrice;
-
+    @Column(name = "Status", nullable = false)
+    private String status;
     // Getters and Setters
 
 }
