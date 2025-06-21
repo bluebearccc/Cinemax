@@ -271,7 +271,7 @@ VALUES ('Staff', 'Active', 8, 1, 'Employee 8');
 -- Gán AdminID cho Theater
 UPDATE Theater SET AdminID = 1 WHERE TheaterID = 1;
 
--- Invoice
+-- InvoiceDTO
 INSERT INTO Invoice (CustomerID, EmployeeID, PromotionID, BookingDate, Totalprice)
 VALUES (1, 1, 1, GETDATE(), 100.00);
 INSERT INTO Invoice (CustomerID, EmployeeID, PromotionID, BookingDate, Totalprice)
