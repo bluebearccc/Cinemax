@@ -113,14 +113,15 @@
                     </div>
                 </div>
 
-
                 <!-- Total Section -->
                 <div class="total-section">
                     <div class="total-label">
                         <i class="fas fa-calculator me-2"></i>Tổng thanh toán:
                     </div>
                     <div id="totalAmount" class="total-amount">0 ₫</div>
+                    <div id="detailedBreakdown" class="detailed-breakdown mt-2"></div>
                 </div>
+
 
                 <!-- Continue Button -->
                 <button type="submit" class="continue-btn">
@@ -149,14 +150,43 @@
         });
         return total;
     }
-
+    function calculateDetailedBreakdown() {
+        const breakdown = {};
+        document.querySelectorAll('input[name="selectedSeats"]:checked').forEach(cb => {
+            const price = parseFloat(cb.getAttribute('data-price'));
+            if (breakdown[price]) {
+                breakdown[price] += 1;
+            } else {
+                breakdown[price] = 1;
+            }
+        });
+        return breakdown;
+    }
     function updateTotalDisplay(total, discount = 0) {
         const totalAfterDiscount = Math.max(total - discount, 0);
+        const breakdown = calculateDetailedBreakdown();
+        const detailedBreakdownElement = document.getElementById('detailedBreakdown');
+
+        // Update total amount
         document.getElementById('totalAmount').textContent = new Intl.NumberFormat('vi-VN', {
             style: 'currency',
             currency: 'VND'
         }).format(totalAfterDiscount);
+
+
+        // Display breakdown
+        let breakdownHtml = '';
+        for (const [price, count] of Object.entries(breakdown)) {
+            breakdownHtml += `
+            <div>
+                ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price)} x ${count}
+            </div>
+        `;
+        }
+        breakdownHtml += `<div>= ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(total)}</div>`;
+        detailedBreakdownElement.innerHTML = breakdownHtml;
     }
+
 
     // Handle seat selection
     document.querySelectorAll('input[name="selectedSeats"]').forEach(cb => {

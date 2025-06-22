@@ -11,6 +11,10 @@
 <div class="container-fluid px-0">
     <header class="cinema-header">
         <div class="container text-center">
+            <a th:href="@{/booking?scheduleId={scheduleId}&roomId={roomId}(scheduleId=${scheduleId}, roomId=${roomId})}"
+               class="btn btn-secondary btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Quay lại Đặt Ghế
+            </a>
             <h1 class="header-title">
                 <i class="fas fa-popcorn me-3"></i>Combo Đồ Ăn Đặc Biệt
             </h1>

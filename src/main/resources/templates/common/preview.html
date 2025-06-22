@@ -74,7 +74,19 @@
                     [[${#numbers.formatDecimal(finalPrice, 0, 0)}]]đ
                 </span>
             </div>
+            <div class="text-start mt-4">
+                <form th:action="@{/booking/step1}" method="post">
+                    <!-- Hidden fields -->
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleId}">
+                    <input type="hidden" name="roomId" th:value="${room.roomId}">
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatId}">
+                    <input type="hidden" name="promotionCode" th:value="${promotionCode}">
 
+                    <button type="submit" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-arrow-left"></i> Quay lại trang đặt đồ ăn
+                    </button>
+                </form>
+            </div>
             <form method="post" th:action="@{/booking/confirm}">
                 <!-- Hidden fields -->
                 <input type="hidden" name="scheduleId" th:value="${schedule.scheduleId}">
@@ -95,11 +107,14 @@
                        th:value="${comboQuantities[combo.theaterStockID]}" />
 
                 <div class="text-end mt-4">
+
+
                     <button type="submit" class="btn btn-success btn-lg">
                         <i class="bi bi-check-circle"></i> Xác nhận và thanh toán
                     </button>
                 </div>
             </form>
+
         </div>
     </div>
 </div>
