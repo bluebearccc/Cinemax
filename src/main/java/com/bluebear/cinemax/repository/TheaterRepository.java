@@ -10,5 +10,10 @@ import java.util.List;
 @Repository
 public interface TheaterRepository extends JpaRepository<Theater, Integer> {
     List<Theater> findByStatus(Theater_Status status);
+    List<Theater> findByTheaterNameContainingIgnoreCase(String keyword);
+    // Kiểm tra xem tên rạp đã tồn tại chưa (không phân biệt chữ hoa/thường)
+    boolean existsByTheaterNameIgnoreCase(String theaterName);
 
+    // Kiểm tra xem địa chỉ đã tồn tại chưa (không phân biệt chữ hoa/thường)
+    boolean existsByAddressIgnoreCase(String address);
 }

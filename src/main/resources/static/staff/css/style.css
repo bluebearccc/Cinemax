@@ -406,3 +406,117 @@ a.navbar-brand u, .add-new-item {
         max-width: 100%;
     }
 }
+.schedule-time-slot {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.schedule-time-slot:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.time-display {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Schedule Cards Container */
+.schedule-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: #f8f9fa;
+    border-radius: 12px;
+    border: 2px dashed #dee2e6;
+}
+
+/* Individual Schedule Card */
+.schedule-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    min-width: 200px;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.schedule-card-time {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.schedule-card-theater {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+
+.schedule-card-theater:before {
+    content: "🎬 ";
+    margin-right: 5px;
+}
+
+.schedule-card-room {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.schedule-card-room:before {
+    content: "🚪 ";
+    margin-right: 5px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .schedule-cards-container {
+        flex-direction: column;
+    }
+
+    .schedule-card {
+        min-width: unset;
+    }
+
+    .time-display {
+        font-size: 16px;
+    }
+}
+
+/* Animation for showing/hiding cards */
+.schedule-cards-container {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

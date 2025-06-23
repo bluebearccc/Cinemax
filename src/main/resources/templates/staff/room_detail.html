@@ -161,17 +161,28 @@
         }
 
         .seats-container {
-            max-width: 100%;
+            width: 100%;
             overflow-x: auto;
             padding: 20px 0;
+            background: #fafbfc;
+            border-radius: 12px;
+            margin-top: 20px;
         }
 
         .seats-grid {
-            display: grid;
-            gap: 8px;
-            justify-content: center;
-            min-width: fit-content;
+            display: block;
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
             padding: 0 20px;
+        }
+
+        .seat-row {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 12px;
         }
 
         .row-label {
@@ -180,61 +191,96 @@
             justify-content: center;
             font-weight: bold;
             color: #667eea;
+            font-size: 16px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            padding: 0 12px;
+            min-width: 50px;
+            height: 45px;
+            flex-shrink: 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .column-headers {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-left: 62px; /* Match row label width + gap */
+        }
+
+        .column-header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #667eea;
             font-size: 14px;
-            background: #f8f9fa;
-            border-radius: 6px;
-            padding: 0 8px;
-            min-width: 30px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 8px;
+            min-width: 45px;
+            height: 30px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
 
         .seat {
-            width: 35px;
-            height: 35px;
-            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            border-radius: 10px;
             border: 2px solid #ddd;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 10px;
-            font-weight: 600;
+            font-size: 11px;
+            font-weight: 700;
             cursor: pointer;
             transition: all 0.3s ease;
             position: relative;
             color: #333;
+            flex-shrink: 0;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
         }
 
         .seat:hover {
-            transform: scale(1.1);
+            transform: scale(1.15);
             z-index: 10;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.25);
         }
 
-        /* Seat Types - Updated based on actual data */
+        /* Seat Types - Updated with better styling */
         .seat-Single {
-            background: #e8f4f8;
+            background: linear-gradient(135deg, #e8f4f8 0%, #d1ecf1 100%);
             border-color: #17a2b8;
         }
 
         .seat-Couple {
-            background: #f8d7da;
+            background: linear-gradient(135deg, #f8d7da 0%, #f5c6cb 100%);
             border-color: #dc3545;
-            width: 45px;
+            width: 55px;
         }
 
-        /* VIP Seats - Special styling for VIP seats */
+        /* VIP Seats - Enhanced styling */
         .seat-vip {
-            background: #fff3cd !important;
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%) !important;
             border-color: #ffc107 !important;
-            box-shadow: 0 0 10px rgba(255, 193, 7, 0.3);
+            box-shadow: 0 0 15px rgba(255, 193, 7, 0.4), 0 4px 8px rgba(0,0,0,0.1) !important;
         }
 
         .seat-vip::before {
             content: '⭐';
             position: absolute;
-            top: -3px;
-            right: -3px;
-            font-size: 8px;
+            top: -4px;
+            right: -4px;
+            font-size: 10px;
             color: #ffc107;
+            background: white;
+            border-radius: 50%;
+            width: 16px;
+            height: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         /* Seat Status */
@@ -243,7 +289,7 @@
         }
 
         .seat-Inactive {
-            background: #6c757d !important;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
             border-color: #495057 !important;
             color: white;
             cursor: not-allowed;
@@ -252,10 +298,11 @@
         /* Empty Seat Styling */
         .seat-empty {
             background: transparent !important;
-            border: 1px dashed #ccc !important;
+            border: 2px dashed #ccc !important;
             cursor: default !important;
             color: #ccc;
-            font-size: 10px;
+            font-size: 12px;
+            box-shadow: none !important;
         }
 
         .seat-empty:hover {
@@ -269,20 +316,21 @@
 
         .seat-tooltip {
             position: absolute;
-            bottom: 100%;
+            bottom: 120%;
             left: 50%;
             transform: translateX(-50%);
-            background: #333;
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
             color: white;
-            padding: 8px 12px;
-            border-radius: 6px;
-            font-size: 11px;
+            padding: 12px 16px;
+            border-radius: 8px;
+            font-size: 12px;
             white-space: nowrap;
             z-index: 1000;
             opacity: 0;
             pointer-events: none;
             transition: opacity 0.3s ease;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
 
         .seat-tooltip::after {
@@ -293,9 +341,77 @@
             transform: translateX(-50%);
             width: 0;
             height: 0;
-            border-left: 5px solid transparent;
-            border-right: 5px solid transparent;
-            border-top: 5px solid #333;
+            border-left: 8px solid transparent;
+            border-right: 8px solid transparent;
+            border-top: 8px solid #2c3e50;
+        }
+
+        /* Responsive improvements */
+        @media (max-width: 1200px) {
+            .seats-container {
+                overflow-x: auto;
+            }
+
+            .seats-grid {
+                min-width: 800px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .room-info-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .controls {
+                flex-direction: column;
+                gap: 10px;
+                align-items: stretch;
+            }
+
+            .controls a {
+                text-align: center;
+            }
+
+            .seats-legend {
+                justify-content: center;
+                flex-wrap: wrap;
+            }
+
+            .seat {
+                width: 40px;
+                height: 40px;
+                font-size: 10px;
+            }
+
+            .seat-Couple {
+                width: 50px;
+            }
+
+            .column-header {
+                min-width: 40px;
+                height: 25px;
+                font-size: 12px;
+            }
+
+            .row-label {
+                min-width: 45px;
+                height: 40px;
+                font-size: 14px;
+            }
+
+            .column-headers {
+                padding-left: 57px;
+            }
+
+            .seat-row {
+                gap: 10px;
+                margin-bottom: 10px;
+            }
+
+            .column-headers {
+                gap: 10px;
+                margin-bottom: 15px;
+            }
         }
 
         .seat:hover .seat-tooltip {
@@ -338,63 +454,35 @@
             justify-content: flex-start;
             gap: 15px;
             margin-bottom: 30px;
+            display: flex;
         }
 
         .controls a {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 10px 20px;
+            padding: 12px 24px;
             border-radius: 25px;
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s ease;
             font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
 
         .controls a:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
             color: white;
         }
 
         .back-link {
-            background: #6c757d !important;
+            background: linear-gradient(135deg, #6c757d 0%, #5a6268 100%) !important;
         }
 
         .back-link:hover {
-            background: #5a6268 !important;
-            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4) !important;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .room-info-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .controls {
-                flex-direction: column;
-                gap: 10px;
-                align-items: stretch;
-            }
-
-            .controls a {
-                text-align: center;
-            }
-
-            .seats-legend {
-                justify-content: center;
-            }
-
-            .seat {
-                width: 30px;
-                height: 30px;
-                font-size: 9px;
-            }
-
-            .seat-Couple {
-                width: 38px;
-            }
+            box-shadow: 0 6px 20px rgba(108, 117, 125, 0.4) !important;
         }
     </style>
 </head>
@@ -492,10 +580,6 @@
                     <span>VIP</span>
                 </div>
                 <div class="legend-item">
-                    <div class="legend-color seat-Active"></div>
-                    <span>Active</span>
-                </div>
-                <div class="legend-item">
                     <div class="legend-color seat-Inactive"></div>
                     <span>Inactive</span>
                 </div>
@@ -509,41 +593,49 @@
 
         <!-- Seats Grid -->
         <div class="seats-container">
-            <div class="seats-grid" th:style="'grid-template-columns: 40px repeat(' + ${room.column} + ', 1fr);'">
-                <div></div> <div th:each="col : ${#numbers.sequence(1, room.column)}" class="row-label" th:text="${col}"></div>
+            <div class="seat-layout-wrapper">
+                <!-- Column Headers -->
+                <div class="column-headers">
+                    <div th:each="col : ${#numbers.sequence(1, room.column)}" class="column-header" th:text="${col}"></div>
+                </div>
 
-                <th:block th:each="row : ${#numbers.sequence(1, room.row)}">
-                    <div class="row-label" th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row)}"></div>
+                <!-- Seats Grid -->
+                <div class="seats-grid">
+                    <th:block th:each="row : ${#numbers.sequence(1, room.row)}">
+                        <div class="seat-row">
+                            <!-- Row Label -->
+                            <div class="row-label" th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row)}"></div>
 
-                    <th:block th:each="col : ${#numbers.sequence(1, room.column)}">
-                        <th:block th:with="seatPosition=${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row) + col}">
+                            <!-- Seats in this row -->
+                            <th:block th:each="col : ${#numbers.sequence(1, room.column)}">
+                                <th:block th:with="seatPosition=${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row) + col}">
+                                    <th:block th:with="currentSeats=${room.seats.?[position == #vars.seatPosition]}">
 
-                            <th:block th:with="currentSeats=${room.seats.?[position == #vars.seatPosition]}">
-
-                                <th:block th:if="${not #lists.isEmpty(currentSeats)}">
-                                    <div th:with="seat=${currentSeats[0]}">
-                                        <div class="seat"
+                                        <div th:if="${not #lists.isEmpty(currentSeats)}"
+                                             th:with="seat=${currentSeats[0]}"
+                                             class="seat"
                                              th:classappend="'seat-' + ${seat.seatType} + ' seat-' + ${seat.status} + (${seat.isVIP} ? ' seat-vip' : '')"
                                              th:attr="data-seat-id=${seat.seatID}">
                                             <span th:text="${seat.position}"></span>
                                             <div class="seat-tooltip">
-                                                <div>Vị trí: <span th:text="${seat.position}"></span></div>
-                                                <div>Loại: <span th:text="${seat.seatType}"></span></div>
-                                                <div>Giá: $<span th:text="${#numbers.formatDecimal(seat.unitPrice, 1, 'COMMA', 2, 'POINT')}"></span></div>
-                                                <div>Trạng thái: <span th:text="${seat.status}"></span></div>
-                                                <div th:if="${seat.isVIP}">⭐ Ghế VIP</div>
+                                                <div><strong>Vị trí:</strong> <span th:text="${seat.position}"></span></div>
+                                                <div><strong>Loại:</strong> <span th:text="${seat.seatType}"></span></div>
+                                                <div><strong>Giá:</strong> $<span th:text="${#numbers.formatDecimal(seat.unitPrice, 1, 'COMMA', 2, 'POINT')}"></span></div>
+                                                <div><strong>Trạng thái:</strong> <span th:text="${seat.status}"></span></div>
+                                                <div th:if="${seat.isVIP}"><strong>⭐ Ghế VIP</strong></div>
                                             </div>
                                         </div>
-                                    </div>
-                                </th:block>
 
-                                <div th:if="${#lists.isEmpty(currentSeats)}" class="seat seat-empty">
-                                    <span></span>
-                                </div>
+                                        <div th:if="${#lists.isEmpty(currentSeats)}" class="seat seat-empty">
+                                            <span>--</span>
+                                        </div>
+
+                                    </th:block>
+                                </th:block>
                             </th:block>
-                        </th:block>
+                        </div>
                     </th:block>
-                </th:block>
+                </div>
             </div>
         </div>
     </div>

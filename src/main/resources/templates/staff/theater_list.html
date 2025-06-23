@@ -7,7 +7,7 @@
     <title>Theater Management</title>
     <link rel="stylesheet" th:href="@{/staff/css/style.css}">
     <style>
-        /* Additional styles specific for theater list */
+            /* Additional styles specific for theater list */
         .theater-image {
             width: 100px;
             height: 60px;
@@ -81,6 +81,230 @@
         .btn-view:hover {
             background-color: #1976d2;
             color: white;
+        }
+
+        /* Enhanced Controls Section */
+        .controls {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            margin-bottom: 25px;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            flex-wrap: wrap;
+        }
+
+        /* Enhanced Search Box */
+        .search-box {
+            flex: 1;
+            min-width: 300px;
+        }
+
+        .search-box form {
+            display: flex;
+            position: relative;
+            background: white;
+            border-radius: 25px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .search-box form:focus-within {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .search-input {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            outline: none;
+            font-size: 14px;
+            background: transparent;
+            color: #495057;
+        }
+
+        .search-input::placeholder {
+            color: #adb5bd;
+            font-style: italic;
+        }
+
+        .search-box button {
+            padding: 12px 25px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-box button::before {
+            content: '🔍';
+            margin-right: 8px;
+        }
+
+        .search-box button:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+            transform: translateY(-1px);
+        }
+
+        /* Enhanced Filter Box */
+        .filter-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .filter-box form {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: white;
+            padding: 8px;
+            border-radius: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .filter-box form:focus-within {
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+        }
+
+        .form-select {
+            padding: 10px 15px;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            background: #f8f9fa;
+            color: #495057;
+            font-size: 14px;
+            font-weight: 500;
+            outline: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+
+        .form-select:focus {
+            border-color: #667eea;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .form-select option {
+            padding: 8px;
+            font-weight: 500;
+        }
+
+        .btn-filter {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-filter::before {
+            content: '⚡';
+            margin-right: 6px;
+        }
+
+        .btn-filter:hover {
+            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+        }
+
+        .btn-filter:active {
+            transform: translateY(0);
+        }
+
+        /* Enhanced Add Theater Link */
+        .navbar-brand {
+            background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
+            color: white !important;
+            padding: 12px 24px;
+            border-radius: 25px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        .navbar-brand::before {
+            content: '➕';
+            margin-right: 8px;
+        }
+
+        .navbar-brand:hover {
+            background: linear-gradient(135deg, #e8590c 0%, #d73384 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(253, 126, 20, 0.4);
+            color: white !important;
+            text-decoration: none;
+        }
+
+        .navbar-brand u {
+            text-decoration: none;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 15px;
+            }
+
+            .search-box {
+                min-width: unset;
+            }
+
+            .filter-box {
+                justify-content: center;
+            }
+
+            .filter-box form {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+            }
+
+            .form-select,
+            .btn-filter {
+                width: 100%;
+                text-align: center;
+            }
+        }
+
+        /* Animation for filter changes */
+        .controls * {
+            animation: fadeInUp 0.6s ease-out;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* Modal styles */
@@ -219,12 +443,22 @@
 
     <div class="controls">
         <div class="search-box">
-            <form th:action="@{/theater_list/search}" method="get">
-                <input type="hidden" />
-                <input type="text" name="theaterName" class="search-input" placeholder="Search for theater's name or address">
+            <form th:action="@{/theater/search}" method="get">
+                <input type="text" name="theaterName" class="search-input" placeholder="Search for theater's name" th:value="${currentKeyword}">
+                <button type="submit">Search</button>
             </form>
         </div>
-        <a class="navbar-brand" th:href="@{/theater_list/add_theater}"><u>Add new theater</u></a>
+        <div class="filter-box">
+            <form th:action="@{/theater/filter_status}" method="get" class="d-flex">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="Active" th:selected="${currentStatus == 'Active'}">Active</option>
+                    <option value="Inactive" th:selected="${currentStatus == 'Inactive'}">InActive</option>
+                </select>
+                <button type="submit" class="btn-filter">Lọc</button>
+            </form>
+        </div>
+        <a class="navbar-brand" th:href="@{/theater/add_theater}"><u>Add new theater</u></a>
     </div>
 
     <div class="table-container">
@@ -260,8 +494,8 @@
                 </td>
                 <td>
                     <span class="status-badge"
-                          th:classappend="${theater.status == 'Active'} ? 'status-active' : 'status-inactive'"
-                          th:text="${theater.status == 'Active'} ? 'Active' : 'Inactive'">
+                          th:classappend="${theater.status.name() == 'Active'} ? 'status-active' : 'status-inactive'"
+                          th:text="${theater.status.name() == 'Active'} ? 'Active' : 'Inactive'">
                         Active
                     </span>
                 </td>
