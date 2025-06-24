@@ -243,7 +243,7 @@ public class MovieScheduleController {
                 response.put("theaterId", theater != null ? theater.getTheaterID() : "");
                 response.put("theaterName", theater != null ? theater.getTheaterName() : "");
                 response.put("status", schedule.getStatus().name()); // Thêm status vào response
-
+                response.put("theaterList", theaterServiceImpl.findAllTheaters());
                 response.put("success", true);
             } else {
                 response.put("success", false);
@@ -260,57 +260,172 @@ public class MovieScheduleController {
     @PostMapping("/update_schedule")
     public String updateSchedule(@RequestParam(value = "scheduleID") Integer scheduleId,
                                  @RequestParam(value = "movieID") Integer movieId,
-                                 @RequestParam(value = "selectedRoomIds", required = false) Integer roomId,
+                                 @RequestParam(value = "roomId", required = false) Integer roomId, // Đổi tên từ lần trước
                                  @RequestParam(value = "startTimeUpdate") String startTime_raw,
                                  @RequestParam(value = "dateUpdate") String date_raw,
                                  @RequestParam(value = "theaterUpdate") Integer theaterId,
-                                 @RequestParam(value = "statusUpdate") String status, // Thêm tham số status
+                                 @RequestParam(value = "statusUpdate") String status,
                                  RedirectAttributes redirectAttributes) {
 
-        // --- Bắt đầu kiểm tra isExisted ---
+        // --- Validation 1: Kiểm tra đã có người đặt vé chưa (giữ nguyên) ---
         if (scheduleServiceImpl.isExisted(scheduleId)) {
             redirectAttributes.addFlashAttribute("message", "Cannot edit this schedule. It has associated bookings.");
             return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
         }
-        // --- Kết thúc kiểm tra isExisted ---
 
+        // --- Validation 2: Kiểm tra roomId có được chọn không ---
+        if (roomId == null) {
+            redirectAttributes.addFlashAttribute("message", "Please select a room!");
+            return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
+        }
+
+        // --- Chuyển đổi thời gian ---
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+        LocalDate date = LocalDate.parse(date_raw, dateFormatter);
+        LocalTime startTime = LocalTime.parse(startTime_raw, timeFormatter);
+        MovieDTO movie = movieServiceImpl.getMovieById(movieId);
+        LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
+        LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
+
+        // --- VALIDATION 3 (MỚI): KIỂM TRA PHÒNG CÓ BỊ TRÙNG LỊCH KHÁC KHÔNG ---
+        ScheduleDTO conflictingSchedule = scheduleServiceImpl.isRoomAvailableForUpdate(roomId, actualStartTime, actualEndTime, scheduleId);
+
+        if (conflictingSchedule != null) {
+            // Nếu có xung đột, xây dựng thông báo lỗi chi tiết
+            String errorMessage = String.format(
+                    "The selected room '%s' in theater '%s' is unavailable. It is already scheduled for the movie '%s' from %s to %s.",
+                    conflictingSchedule.getRoomName(),
+                    conflictingSchedule.getTheaterName(),
+                    conflictingSchedule.getMovieName(),
+                    conflictingSchedule.getFormattedStartTime(), // Giả sử bạn có phương thức này trong DTO
+                    conflictingSchedule.getFormattedEndTime() // Giả sử bạn có phương thức này trong DTO
+            );
+            redirectAttributes.addFlashAttribute("message", errorMessage);
+            return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
+        }
+        // --- KẾT THÚC VALIDATION MỚI ---
+
+        // --- Logic cập nhật (giữ nguyên) ---
         ScheduleDTO existingSchedule = scheduleServiceImpl.getScheduleById(scheduleId);
         if (existingSchedule == null) {
             redirectAttributes.addFlashAttribute("message", "Schedule not found for update!");
             return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
         }
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-
-        LocalDate date = LocalDate.parse(date_raw, dateFormatter);
-        LocalTime startTime = LocalTime.parse(startTime_raw, timeFormatter);
-
-        MovieDTO movie = movieServiceImpl.getMovieById(movieId);
-        LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
-        LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
-
         existingSchedule.setStartTime(actualStartTime);
         existingSchedule.setEndTime(actualEndTime);
         existingSchedule.setMovieID(movieId);
-
-        if (roomId != null) {
-            existingSchedule.setRoomID(roomId);
-        } else {
-            redirectAttributes.addFlashAttribute("message", "Please select a room!");
-            return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
-        }
-
+        existingSchedule.setRoomID(roomId);
         try {
             existingSchedule.setStatus(Schedule_Status.valueOf(status));
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("message", "Invalid status value: " + status);
             return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
         }
-
         scheduleServiceImpl.saveSchedule(existingSchedule);
 
         redirectAttributes.addFlashAttribute("message", "Schedule updated successfully!");
         return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
+    }
+    @PostMapping("/update_schedule_ajax")
+    @ResponseBody // Rất quan trọng: Báo cho Spring trả về JSON, không phải tên View
+    public Map<String, Object> updateScheduleAjax(@RequestParam(value = "scheduleID") Integer scheduleId,
+                                                  @RequestParam(value = "movieID") Integer movieId,
+                                                  @RequestParam(value = "roomId", required = false) Integer roomId,
+                                                  @RequestParam(value = "startTimeUpdate") String startTime_raw,
+                                                  @RequestParam(value = "dateUpdate") String date_raw,
+                                                  @RequestParam(value = "theaterUpdate") Integer theaterId,
+                                                  @RequestParam(value = "statusUpdate") String status) {
+
+        Map<String, Object> response = new HashMap<>();
+
+        // --- Validation 1: Kiểm tra đã có người đặt vé chưa ---
+        if (scheduleServiceImpl.isExisted(scheduleId)) {
+            response.put("success", false);
+            response.put("message", "Cannot edit this schedule. It has associated bookings.");
+            return response;
+        }
+
+        // --- Validation 2: Kiểm tra roomId có được chọn không ---
+        if (roomId == null) {
+            response.put("success", false);
+            response.put("message", "Please select a room!");
+            return response;
+        }
+
+        // --- Chuyển đổi thời gian ---
+        try {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+            DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
+            LocalDate date = LocalDate.parse(date_raw, dateFormatter);
+            LocalTime startTime = LocalTime.parse(startTime_raw, timeFormatter);
+            MovieDTO movie = movieServiceImpl.getMovieById(movieId);
+            LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
+            LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
+
+            // --- VALIDATION 3: KIỂM TRA PHÒNG CÓ BỊ TRÙNG LỊCH KHÁC KHÔNG ---
+            ScheduleDTO conflictingSchedule = scheduleServiceImpl.isRoomAvailableForUpdate(roomId, actualStartTime, actualEndTime, scheduleId);
+
+            if (conflictingSchedule != null) {
+                // Nếu có xung đột, xây dựng thông báo lỗi và trả về JSON
+                String errorMessage = String.format(
+                        "The selected room '%s' in theater '%s' is unavailable. It is already scheduled for the movie '%s' from %s to %s.",
+                        conflictingSchedule.getRoomName(),
+                        conflictingSchedule.getTheaterName(),
+                        conflictingSchedule.getMovieName(),
+                        conflictingSchedule.getFormattedStartTime(),
+                        conflictingSchedule.getFormattedEndTime()
+                );
+                response.put("success", false);
+                response.put("message", errorMessage);
+                return response;
+            }
+
+            // --- Logic cập nhật ---
+            ScheduleDTO existingSchedule = scheduleServiceImpl.getScheduleById(scheduleId);
+            if (existingSchedule == null) {
+                response.put("success", false);
+                response.put("message", "Schedule not found for update!");
+                return response;
+            }
+            existingSchedule.setStartTime(actualStartTime);
+            existingSchedule.setEndTime(actualEndTime);
+            existingSchedule.setMovieID(movieId);
+            existingSchedule.setRoomID(roomId);
+            existingSchedule.setStatus(Schedule_Status.valueOf(status));
+
+            scheduleServiceImpl.saveSchedule(existingSchedule);
+
+            response.put("success", true);
+            response.put("message", "Schedule updated successfully!");
+
+        } catch (Exception e) {
+            // Bắt các lỗi khác (ví dụ: định dạng ngày giờ sai)
+            response.put("success", false);
+            response.put("message", "An error occurred: " + e.getMessage());
+        }
+
+        return response;
+    }
+    @GetMapping("/get_rooms_for_edit")
+    public String getRoomsForEditFragment(@RequestParam("theaterId") Integer theaterId,
+                                          // Đổi tên phương thức cho rõ ràng (tùy chọn nhưng khuyến khích)
+                                          @RequestParam("startTime") String startTime_raw,
+                                          @RequestParam("date") String date_raw,
+                                          @RequestParam("movieId") Integer movieId,
+                                          @RequestParam("scheduleId") Integer scheduleId,
+                                          Model model) {
+
+        // THAY ĐỔI LOGIC: Lấy tất cả các phòng của rạp
+        List<RoomDTO> allRoomsInTheater = roomServiceImpl.findAllRoomsByTheaterId(theaterId);
+        model.addAttribute("availableRooms", allRoomsInTheater);
+
+        // Lấy ID phòng đã được chọn của lịch trình hiện tại để check radio button
+        ScheduleDTO currentSchedule = scheduleServiceImpl.getScheduleById(scheduleId);
+        if (currentSchedule != null) {
+            model.addAttribute("selectedRoomId", currentSchedule.getRoomID());
+        }
+
+        return "staff/fragments/available_rooms_fragment_update :: editRoomsFragment"; // <--- DÒNG ĐÚNG
     }
 }

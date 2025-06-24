@@ -18,6 +18,9 @@ public class ScheduleDTO {
     private Integer movieID;
     private Integer roomID;
     private Schedule_Status status;
+    private String movieName;
+    private String roomName;
+    private String theaterName;
 
     public String getFormattedMovieDate() {
         return startTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));

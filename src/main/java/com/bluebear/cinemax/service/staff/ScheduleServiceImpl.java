@@ -4,6 +4,7 @@ import com.bluebear.cinemax.dto.ScheduleDTO;
 import com.bluebear.cinemax.entity.Movie;
 import com.bluebear.cinemax.entity.Room;
 import com.bluebear.cinemax.entity.Schedule;
+import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.repository.MovieRepository;
 import com.bluebear.cinemax.repository.RoomRepository;
 import com.bluebear.cinemax.repository.ScheduleRepository;
@@ -151,6 +152,33 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
         return false;
     }
+
+    @Override
+    public ScheduleDTO isRoomAvailableForUpdate(Integer roomId, LocalDateTime startTime, LocalDateTime endTime, Integer scheduleId) {
+        List<Schedule> conflictingSchedules = scheduleRepository.findConflictingSchedules(roomId, startTime, endTime, scheduleId);
+
+        // 2. Nếu danh sách rỗng, tức là không có xung đột -> phòng trống
+        if (conflictingSchedules.isEmpty()) {
+            return null; // Trả về null để báo hiệu phòng trống
+        }
+
+        // 3. Nếu có xung đột, lấy lịch trình đầu tiên và tạo một DTO chứa đầy đủ thông tin chi tiết
+        Schedule conflict = conflictingSchedules.get(0);
+        Room room = conflict.getRoom();
+        Movie movie = conflict.getMovie();
+        Theater theater = (room != null) ? room.getTheater() : null;
+
+        // Xây dựng một DTO với đầy đủ thông tin để hiển thị cho người dùng
+        return ScheduleDTO.builder()
+                .scheduleID(conflict.getScheduleID())
+                .startTime(conflict.getStartTime())
+                .endTime(conflict.getEndTime())
+                .roomName(room != null ? room.getName() : "N/A")
+                .movieName(movie != null ? movie.getMovieName() : "N/A")
+                .theaterName(theater != null ? theater.getTheaterName() : "N/A")
+                .build();
+    }
+
 
 
 }

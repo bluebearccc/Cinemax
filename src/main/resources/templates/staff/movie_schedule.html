@@ -46,7 +46,7 @@
     <div class="movie-grid">
 
         <div th:each="x : ${movies}" class="movie-column">
-            <div class="movie-card">
+            <div class="movie-card" style="height: 352px;">
                 <a th:href="@{/movie_schedule/show_schedule(movieId=${x.movieID})}">
                     <div class="movie-poster"><img th:src="${x.image}" alt="Movie Poster"></div>
                     <div class="movie-title" th:text="${x.movieName}"></div>

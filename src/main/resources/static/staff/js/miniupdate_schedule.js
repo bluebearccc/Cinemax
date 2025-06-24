@@ -9,6 +9,7 @@ function addNewUpdateSchedule() {
     document.getElementById('editScheduleModal').classList.add('show');
 
     const today = new Date();
+    // Chuyển đổi chuỗi thời gian từ server thành đối tượng Date
     const startDate = new Date(startTimeUpdate);
     const endDate = new Date(endTimeUpdate);
 
@@ -16,6 +17,7 @@ function addNewUpdateSchedule() {
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(0, 0, 0, 0);
 
+    // Xác định ngày bắt đầu cho lịch mini
     if (originalScheduleDate) {
         modalCurrentDateUpdate = new Date(originalScheduleDate);
     } else if (today < startDate) {
@@ -27,34 +29,30 @@ function addNewUpdateSchedule() {
     }
 
     generateMiniCalendarUpdate();
-
-    // Vô hiệu hóa các nút điều hướng và lịch mini khi modal mở
-    $('.nav-btn-mini').addClass('disabled-btn').off('click'); // Vô hiệu hóa nút
-    $('#miniCalendarUpdate').css({'pointer-events': 'none', 'opacity': '0.7'}); // Vô hiệu hóa lịch
 }
 
 function closeEditModal() {
     document.getElementById('editScheduleModal').classList.remove('show');
     modalSelectedDateUpdate = null;
     originalScheduleDate = null;
-
-    // Đảm bảo loại bỏ các trạng thái vô hiệu hóa khi đóng modal (nếu các nút này được dùng ở nơi khác)
-    $('.nav-btn-mini').removeClass('disabled-btn').on('click', function() { /* re-add original click handler if needed */ });
-    $('#miniCalendarUpdate').css({'pointer-events': 'auto', 'opacity': '1'});
 }
 
 function generateMiniCalendarUpdate() {
+    // SỬA LỖI 1: Thay đổi ID thành 'miniCalendarUpdate'
     const calendar = document.getElementById('miniCalendarUpdate');
+    if (!calendar) return; // Dừng lại nếu không tìm thấy calendar
+
     const year = modalCurrentDateUpdate.getFullYear();
     const month = modalCurrentDateUpdate.getMonth();
 
+    // SỬA LỖI 3: Sử dụng các biến ...Update
     const startDate = new Date(startTimeUpdate);
     const endDate = new Date(endTimeUpdate);
-    startDate.setHours(0, 0, 0, 0);
-    endDate.setHours(0, 0, 0, 0);
 
+    // Xóa các ngày cũ
     calendar.innerHTML = '';
 
+    // Thêm header (Mo, Tu, We...)
     const headers = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
     headers.forEach(header => {
         const headerElement = document.createElement('div');
@@ -65,11 +63,12 @@ function generateMiniCalendarUpdate() {
 
     const firstDay = new Date(year, month, 1).getDay();
     const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const today = new Date();
     const adjustedFirstDay = (firstDay === 0) ? 6 : firstDay - 1;
 
     for (let i = 0; i < adjustedFirstDay; i++) {
         const emptyDay = document.createElement('div');
-        emptyDay.className = 'mini-calendar-day empty';
+        emptyDay.className = 'mini-calendar-day';
         emptyDay.style.opacity = '0.3';
         calendar.appendChild(emptyDay);
     }
@@ -78,61 +77,100 @@ function generateMiniCalendarUpdate() {
         const dayElement = document.createElement('div');
         dayElement.className = 'mini-calendar-day';
         dayElement.textContent = day;
-
         const currentDayDate = new Date(year, month, day);
-        currentDayDate.setHours(0, 0, 0, 0);
-
         const todayDate = new Date();
         todayDate.setHours(0, 0, 0, 0);
+        currentDayDate.setHours(0, 0, 0, 0);
 
-        const isInValidMovieRange = currentDayDate >= startDate && currentDayDate <= endDate;
+        // --- BẮT ĐẦU THAY ĐỔI LOGIC ---
+        // Biến kiểm tra xem ngày đang xét có phải là ngày gốc của lịch trình không
         const isOriginalScheduleDate = originalScheduleDate &&
-            currentDayDate.getFullYear() === originalScheduleDate.getFullYear() &&
-            currentDayDate.getMonth() === originalScheduleDate.getMonth() &&
-            currentDayDate.getDate() === originalScheduleDate.getDate();
+            (currentDayDate.getTime() === new Date(originalScheduleDate).setHours(0, 0, 0, 0));
+        // --- KẾT THÚC THAY ĐỔI LOGIC ---
 
-        // Chỉ đánh dấu là 'selected' nếu là ngày lịch trình cũ
-        if (modalSelectedDateUpdate && year === modalSelectedDateUpdate.getFullYear() &&
-            month === modalSelectedDateUpdate.getMonth() && day === modalSelectedDateUpdate.getDate()) {
-            dayElement.classList.add('selected');
+        const isInValidRange = currentDayDate >= startDate && currentDayDate <= endDate;
+        const isPastDate = currentDayDate < todayDate;
+
+        if (!isInValidRange) {
+            dayElement.classList.add('disabled');
+            dayElement.style.cssText = 'opacity: 0.3; cursor: not-allowed; background-color: #f5f5f5; color: #ccc;';
+            dayElement.title = 'Out of range date';
         }
-
-        // Vô hiệu hóa tất cả các ngày trong lịch mini của modal chỉnh sửa
-        dayElement.classList.add('disabled');
-        dayElement.style.opacity = '0.5';
-        dayElement.style.cursor = 'not-allowed';
-        dayElement.style.backgroundColor = '#f5f5f5';
-        dayElement.style.color = '#ccc';
-        dayElement.title = 'Date cannot be changed in edit mode.';
-        // Không thêm onclick cho bất kỳ ngày nào
+            // --- BẮT ĐẦU THAY ĐỔI LOGIC ---
+        // Chỉ vô hiệu hóa ngày quá khứ NẾU nó KHÔNG PHẢI là ngày gốc
+        else if (isPastDate && !isOriginalScheduleDate) {
+            dayElement.classList.add('past-date');
+            dayElement.style.cssText = 'opacity: 0.4; cursor: not-allowed; color: #999; background-color: #fafafa;';
+            dayElement.title = 'Cannot select past dates';
+        }
+        // --- KẾT THÚC THAY ĐỔI LOGIC ---
+        else {
+            if (modalSelectedDateUpdate && year === modalSelectedDateUpdate.getFullYear() &&
+                month === modalSelectedDateUpdate.getMonth() && day === modalSelectedDateUpdate.getDate()) {
+                dayElement.classList.add('selected');
+            }
+            dayElement.onclick = () => selectMiniDateUpdate(year, month, day);
+            dayElement.style.cursor = 'pointer';
+        }
         calendar.appendChild(dayElement);
     }
 
-    const monthNames = [
-        'January', 'February', 'March', 'April', 'May', 'June',
-        'July', 'August', 'September', 'October', 'November', 'December'
-    ];
+    const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
     document.getElementById('currentMonthMiniUpdate').textContent = `${monthNames[month]}, ${year}`;
 }
-
-// Các hàm selectMiniDateUpdate, previousMonthMiniUpdate, nextMonthMiniUpdate
-// sẽ không được gọi hoặc sẽ không có tác dụng do các ngày bị disabled và không có onclick
-// Bạn có thể giữ chúng hoặc xóa chúng nếu bạn chắc chắn không bao giờ muốn tương tác với lịch.
-// Tuy nhiên, vì các nút điều hướng cũng đã bị vô hiệu hóa, việc gọi chúng sẽ không xảy ra qua UI.
 function selectMiniDateUpdate(year, month, day) {
-    // Không cho phép chọn ngày
-    alert('Date cannot be changed in edit mode!');
-    return;
+    const selectedDateObj = new Date(year, month, day);
+    // SỬA LỖI 3: Sử dụng các biến ...Update
+    const startDate = new Date(startTimeUpdate);
+    const endDate = new Date(endTimeUpdate);
+    const todayDate = new Date();
+    todayDate.setHours(0, 0, 0, 0);
+    selectedDateObj.setHours(0, 0, 0, 0);
+
+    if (selectedDateObj < startDate || selectedDateObj > endDate) {
+        alert('Selected date is not within allowed time range!');
+        return;
+    }
+    if (selectedDateObj < todayDate) {
+        alert('Cannot select past dates!');
+        return;
+    }
+
+    // SỬA LỖI 3 & 4: Cập nhật đúng biến và (tạm thời) không cập nhật input ẩn vì chưa rõ ID
+    modalSelectedDateUpdate = new Date(year, month, day);
+
+    // Chú ý: Dòng dưới đây sẽ gây lỗi vì 'selectedDateInput' không có trong modal edit.
+    // Bạn cần xác định input nào trong modal "Edit" dùng để lưu ngày và thay ID vào đây.
+    // Ví dụ, nếu bạn có input ẩn <input type="hidden" id="selectedDateUpdateInput" name="dateUpdate">
+    // thì sẽ dùng: document.getElementById('selectedDateUpdateInput').value = dateStr;
+    // const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    // document.getElementById('selectedDateInput').value = dateStr;
+
+    generateMiniCalendarUpdate();
 }
 
 function previousMonthMiniUpdate() {
-    // Không cho phép thay đổi tháng
-    console.log("Cannot change month in edit mode.");
-    return;
+    // SỬA LỖI 3: Sử dụng các biến ...Update
+    const newDate = new Date(modalCurrentDateUpdate);
+    newDate.setMonth(newDate.getMonth() - 1);
+    const startDate = new Date(startTimeUpdate);
+    const firstDayOfNewMonth = new Date(newDate.getFullYear(), newDate.getMonth(), 1);
+
+    if (firstDayOfNewMonth >= new Date(startDate.getFullYear(), startDate.getMonth(), 1)) {
+        modalCurrentDateUpdate = newDate;
+        generateMiniCalendarUpdate();
+    }
 }
 
 function nextMonthMiniUpdate() {
-    // Không cho phép thay đổi tháng
-    console.log("Cannot change month in edit mode.");
-    return;
+    // SỬA LỖI 3: Sử dụng các biến ...Update
+    const newDate = new Date(modalCurrentDateUpdate);
+    newDate.setMonth(newDate.getMonth() + 1);
+    const endDate = new Date(endTimeUpdate);
+    const lastDayOfNewMonth = new Date(newDate.getFullYear(), newDate.getMonth() + 1, 0);
+
+    if (lastDayOfNewMonth <= new Date(endDate.getFullYear(), endDate.getMonth() + 1, 0)) {
+        modalCurrentDateUpdate = newDate;
+        generateMiniCalendarUpdate();
+    }
 }

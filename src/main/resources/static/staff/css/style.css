@@ -415,6 +415,9 @@ a.navbar-brand u, .add-new-item {
     cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    z-index: 1;
+
 }
 
 .schedule-time-slot:hover {
@@ -434,10 +437,10 @@ a.navbar-brand u, .add-new-item {
     flex-wrap: wrap;
     gap: 15px;
     margin-top: 20px;
-    padding: 20px;
-    background-color: #f8f9fa;
+    padding: 0;
+    background-color: transparent;
     border-radius: 12px;
-    border: 2px dashed #dee2e6;
+    border: none;
 }
 
 /* Individual Schedule Card */
@@ -519,4 +522,10 @@ a.navbar-brand u, .add-new-item {
         opacity: 1;
         transform: translateY(0);
     }
+}
+.schedule-list {
+    display: flex;
+    flex-wrap: wrap; /* Cho phép các mục xuống dòng nếu không đủ chỗ */
+    align-items: flex-start; /* Quan trọng: Ngăn các mục tự kéo dài chiều cao */
+    gap: 15px; /* Tạo khoảng cách giữa các mục cho đẹp hơn */
 }

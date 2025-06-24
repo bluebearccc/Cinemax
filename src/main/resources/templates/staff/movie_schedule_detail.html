@@ -7,105 +7,21 @@
     <link rel="stylesheet" th:href="@{/staff/css/style.css}">
     <link rel="stylesheet" th:href="@{/staff/css/movie_schedule.css}">
     <style>
-        .schedule-detail-item {
-            margin-bottom: 15px;
-            font-size: 16px;
-        }
-        .schedule-detail-item strong {
-            display: inline-block;
-            width: 100px;
-            color: #555;
-        }
-        .btn-danger {
-            background-color: #dc3545;
-            color: white;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
+        #editScheduleModal .modal-content {
+            max-width: 800px; /* Tăng chiều rộng tối đa của modal */
         }
 
-        .room-cards-wrapper {
+        /* 2. Dàn các trường trên cùng một hàng bằng Flexbox */
+        #editScheduleForm .form-row.inline-fields {
             display: flex;
-            flex-wrap: wrap; /* Cho phép các card tự xuống dòng nếu không đủ chỗ */
-            gap: 12px; /* Khoảng cách giữa các card */
-            margin-top: 8px;
+            gap: 20px; /* Tạo khoảng cách giữa các trường */
+            align-items: flex-end; /* Căn chỉnh các trường theo phía dưới */
         }
 
-        .room-card {
-            display: flex; /* Sắp xếp checkbox và label trên cùng một hàng */
-            align-items: center;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 10px 15px;
-            background-color: #f9f9f9;
-            transition: all 0.2s ease-in-out;
-        }
-
-        .room-card:hover {
-            border-color: #007bff;
-            box-shadow: 0 2px 8px rgba(0, 123, 255, 0.15);
-        }
-
-        .room-checkbox {
-            margin-right: 10px;
-            /* Tăng kích thước checkbox cho dễ bấm */
-            width: 18px;
-            height: 18px;
-            cursor: pointer;
-        }
-
-        .room-label {
-            font-weight: 500;
-            color: #333;
-            cursor: pointer;
-        }
-
-        .no-rooms-message {
-            color: #888;
-            font-style: italic;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border: 1px dashed #ccc;
-            border-radius: 5px;
-            text-align: center;
-        }
-        /* Style cho message box */
-        .message-box {
-            padding: 10px 20px;
-            margin-bottom: 20px;
-            border-radius: 5px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .message-box.success {
-            background-color: #d4edda;
-            color: #155724;
-            border: 1px solid #c3e6cb;
-        }
-        .message-box.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-
-        /* Styles cho message box trong modal và các phần tử bị disabled */
-        .modal-message-box {
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-            font-weight: bold;
-            text-align: center;
-        }
-        .modal-message-box.error {
-            background-color: #f8d7da;
-            color: #721c24;
-            border: 1px solid #f5c6cb;
-        }
-        .disabled-element {
-            /* Mờ đi và không cho tương tác */
-            opacity: 0.6;
-            pointer-events: none;
-            cursor: not-allowed;
+        /* 3. Cho phép các group co giãn linh hoạt */
+        #editScheduleForm .form-row.inline-fields .form-group {
+            flex: 1; /* Mỗi trường sẽ chiếm không gian bằng nhau */
+            margin-bottom: 0; /* Bỏ margin dưới vì đã có gap */
         }
     </style>
 
@@ -273,16 +189,17 @@
             <input type="hidden" name="movieID" id="movieIDUpdate" th:value="${movie.getMovieID()}">
             <input type="hidden" name="scheduleID" id="scheduleIDUpdate">
             <div class="form-group">
-                <label class="form-label">Selected Date</label> <div class="calendar-nav-mini">
-                <button type="button" class="nav-btn-mini disabled-btn">‹</button>
-                <span class="current-month-mini" id="currentMonthMiniUpdate"></span>
-                <button type="button" class="nav-btn-mini disabled-btn">›</button>
-            </div>
-                <div class="mini-calendar" id="miniCalendarUpdate" style="pointer-events: none; opacity: 0.7;">
+                <label class="form-label">Selected Date</label>
+                <div class="calendar-nav-mini">
+                    <button type="button" class="nav-btn-mini ">‹</button>
+                    <span class="current-month-mini" id="currentMonthMiniUpdate"></span>
+                    <button type="button" class="nav-btn-mini ">›</button>
                 </div>
-                <input type="text" id="selectedDateInputUpdate" name="dateUpdate" class="form-input" readonly> </div>
-
-            <div class="form-row">
+                <div class="mini-calendar" id="miniCalendarUpdate">
+                </div>
+                <input type="hidden" id="dateUpdateInput" name="dateUpdate">
+            </div>
+            <div class="form-row inline-fields">
                 <div class="form-group">
                     <label class="form-label" for="startTimeUpdate">StartTime</label>
                     <input type="text"
@@ -290,33 +207,36 @@
                            name="startTimeUpdate" class="form-input"
                            placeholder="HH:mm"
                            pattern="([01][0-9]|2[0-3]):[0-5][0-9]"
-                           readonly required>
+                           required>
                 </div>
-            </div>
-            <div class="form-row">
+
                 <div class="form-group">
                     <label class="form-label" for="theaterNameUpdate">Theater</label>
-                    <input type="text" id="theaterNameUpdate" class="form-input" readonly>
-                    <input type="hidden" id="theaterIdUpdate" name="theaterUpdate">
+                    <select id="theaterNameUpdate" name="theaterUpdate" class="form-select" required >
+                        <option th:each="theater:${theatersCbBox}"
+                                th:value="${theater.theaterID}"
+                                th:text="${theater.theaterName}">
+                        </option>
+                    </select>
                 </div>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label class="form-label" for="roomNameUpdate">Room</label>
-                    <input type="text" id="roomNameUpdate" class="form-input" readonly>
-                    <input type="hidden" id="roomIdUpdate" name="selectedRoomIds">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Room</label>
+                        <div class="room-list-container" id="edit-room-list-container">
+                        </div>
+                    </div>
                 </div>
-            </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label class="form-label">Status</label>
+                    <label class="form-label">Suspend the schedule</label>
                     <div class="radio-group">
                         <div class="radio-item">
                             <input type="radio" id="statusActive" name="statusUpdate" value="Active">
-                            <label for="statusActive">Active</label>
+                            <label for="statusActive">No</label>
                             <div class="radio-item">
                                 <input type="radio" id="statusInactive" name="statusUpdate" value="Inactive">
-                                <label for="statusInactive">Inactive</label>
+                                <label for="statusInactive">Yes</label>
                             </div>
                         </div>
                     </div>
@@ -325,12 +245,13 @@
 
             <div class="modal-actions">
                 <button type="button" class="btn btn-cancel" onclick="closeEditModal()">Cancel</button>
-                <button type="submit" class="btn btn-save" id="saveChangesBtn">Save Changes</button>
+                <button type="button" class="btn btn-save" id="saveChangesBtn" onclick="updateScheduleAjax()">Save Changes</button>
                 <button type="button" class="btn btn-delete" id="deleteScheduleBtn" onclick="deleteSchedule($('#scheduleIDUpdate').val())">Delete this schedule</button>
             </div>
         </form>
     </div>
 </div>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script th:inline="javascript">
     const serverData = {
         schedules: [(${schedules})],
@@ -340,7 +261,6 @@
 </script>
 <script th:src="@{/staff/js/miniupdate_schedule.js}"></script>
 <script th:src="@{/staff/js/schedule.js}"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 <script th:inline="javascript">
     $(function(){
         const dateInput = $('#selectedDateInput');
@@ -397,41 +317,61 @@
 </script>
 <script>
     function deleteSchedule(scheduleId) {
-        // Ẩn mọi thông báo lỗi cũ trong modal khi bắt đầu thao tác mới
-        $('#editScheduleMessage').hide().text('');
-
         if (confirm('Do you want to delete this schedule? This action cannot be undone.')) {
             $.ajax({
-                type: 'POST', // Đảm bảo khớp với Controller của bạn
+                type: 'POST',
                 url: '/movie_schedule/delete_schedule',
                 data: { scheduleId: scheduleId },
                 success: function(response) {
                     if (response.success) {
-                        alert('Lịch trình đã được xóa thành công!');
-                        closeEditModal(); // Đóng modal sau khi xóa thành công
-                        location.reload(); // Tải lại trang để cập nhật danh sách lịch
+                        alert('Schedule deleted successfully!'); // Giữ nguyên alert
+                        closeEditModal();
+                        location.reload();
                     } else {
-                        // Hiển thị thông báo lỗi từ server trong modal
-                        $('#editScheduleMessage').text(response.message || 'Failed to delete schedule due to an unknown error.').show();
-                        // alert('Failed to delete this schedule: ' + (response.message || 'Unidentified error.')); // Có thể dùng alert thay thế
+                        // THAY ĐỔI: Hiển thị thông báo lỗi bằng alert
+                        alert(response.message || 'Failed to delete schedule due to an unknown error.');
                     }
                 },
                 error: function(xhr, status, error) {
-                    // Xử lý lỗi AJAX (lỗi mạng, server error)
                     let errorMessage = 'An error occurred while deleting the schedule.';
                     if (xhr.responseJSON && xhr.responseJSON.message) {
                         errorMessage += ': ' + xhr.responseJSON.message;
-                    } else if (error) {
-                        errorMessage += ': ' + error;
                     }
-                    $('#editScheduleMessage').text(errorMessage).show();
+                    // THAY ĐỔI: Hiển thị thông báo lỗi bằng alert
+                    alert(errorMessage);
                     console.error('AJAX Error:', xhr.responseText);
                 }
             });
-        } else {
-            // Người dùng hủy xóa
-            $('#editScheduleMessage').text('Delete operation cancelled.').show();
         }
+    }
+</script>
+<script>
+    function updateScheduleAjax() {
+        // Không cần dòng này nữa: $('#editScheduleMessage').hide().text('');
+        $('#saveChangesBtn').prop('disabled', false);
+
+        const formData = $('#editScheduleForm').serialize();
+
+        $.ajax({
+            type: 'POST',
+            url: '/movie_schedule/update_schedule_ajax',
+            data: formData,
+            success: function(response) {
+                if (response.success) {
+                    alert(response.message); // Hiển thị thông báo thành công
+                    closeEditModal();
+                    location.reload();
+                } else {
+                    // THAY ĐỔI: Hiển thị thông báo lỗi bằng alert
+                    alert(response.message);
+                }
+            },
+            error: function(xhr) {
+                const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'An unexpected error occurred. Please try again.';
+                // THAY ĐỔI: Hiển thị thông báo lỗi bằng alert
+                alert(errorMessage);
+            }
+        });
     }
 </script>
 </body>

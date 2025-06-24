@@ -41,4 +41,11 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
             "WHERE s.ScheduleID = :id", nativeQuery = true)
     List<Schedule> findSchedulesByDetailSeat(@Param("id") Integer id);
 
+    @Query("SELECT s FROM Schedule s WHERE s.room.roomID = :roomId " +
+            "AND s.scheduleID != :scheduleId " +
+            "AND s.startTime < :endTime AND s.endTime > :startTime")
+    List<Schedule> findConflictingSchedules(@Param("roomId") Integer roomId,
+                                            @Param("startTime") LocalDateTime startTime,
+                                            @Param("endTime") LocalDateTime endTime,
+                                            @Param("scheduleId") Integer scheduleId);
 }
