@@ -8,9 +8,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
+
 @Builder
 @Entity
 @Data
@@ -18,6 +17,7 @@ import java.util.Set;
 @NoArgsConstructor
 @Table(name = "Invoice")
 public class Invoice {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "InvoiceID")
@@ -56,6 +56,4 @@ public class Invoice {
 
     @Column(name = "GuestEmail", nullable = true)
     private String guestEmail;
-
-
 }

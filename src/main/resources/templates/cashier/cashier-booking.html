@@ -1021,7 +1021,6 @@
                     </div>
                     <hr>
 
-                    <!-- Hiển thị lịch chiếu theo ngày -->
                     <div th:each="date : ${availableDates}" class="mb-4">
                         <h6 th:text="${#temporals.format(date, 'EEEE, dd/MM/yyyy')}"></h6>
 
@@ -1095,7 +1094,6 @@
                         <p class="text-muted">Phim này hiện tại không có suất chiếu nào.</p>
                     </div>
 
-                    <!-- Thông báo khi không có suất chiếu nào -->
                     <div th:if="${schedules == null or schedules.isEmpty()}" class="text-center py-4">
                         <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
                         <h5 class="text-muted">Không có suất chiếu</h5>
@@ -1118,16 +1116,12 @@
                             <div class="row">
                                 <div class="col-12 text-center">
                                     <div class="screen mb-3">Màn hình</div>
-                                    <!-- Thay thế phần seat map trong template -->
                                     <div class="seat-map-container mb-4">
-                                        <!-- Hiển thị các hàng ghế -->
                                         <div th:each="rowEntry : ${seatsByRow}"
                                              class="seat-row d-flex justify-content-center align-items-center mb-2">
-                                            <!-- Nhãn hàng (A, B, C...) -->
                                             <span class="row-label me-3 fw-bold text-muted"
                                                   style="width: 30px; text-align: center;"
                                                   th:text="${rowEntry.key}"></span>
-                                            <!-- Container cho các ghế trong hàng -->
                                             <div class="d-flex justify-content-center">
                                                 <div th:each="seat, iterStat : ${rowEntry.value}"
                                                      th:id="'seat-' + ${seat.seatID}"
@@ -1144,13 +1138,11 @@
                                                 </div>
                                             </div>
 
-                                            <!-- Nhãn hàng bên phải (tùy chọn) -->
                                             <span class="row-label ms-3 fw-bold text-muted"
                                                   style="width: 30px; text-align: center;"
                                                   th:text="${rowEntry.key}"></span>
                                         </div>
 
-                                        <!-- Chú thích -->
                                         <div class="seat-legend d-flex justify-content-center mt-4">
                                             <div class="d-flex align-items-center me-3">
                                                 <div class="seat-example"
@@ -1380,7 +1372,8 @@
                                     <i class="fas fa-receipt me-2"></i>Thông tin hóa đơn
                                 </h5>
                                 <div class="invoice-actions">
-                                    <button class="btn btn-outline-primary btn-sm" onclick="window.print()">
+                                    <button class="btn btn-outline-primary btn-sm"
+                                            th:onclick="'window.open(\'' + @{/cashier/print-ticket/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=400,height=600\');'">
                                         <i class="fas fa-print me-1"></i>In hóa đơn
                                     </button>
                                 </div>
@@ -1551,7 +1544,8 @@
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-3">
-                                    <button class="btn btn-primary btn-lg" onclick="window.print()">
+                                    <button class="btn btn-primary btn-lg"
+                                            th:onclick="'window.open(\'' + @{/cashier/print-ticket/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=400,height=600\');'">
                                         <i class="fas fa-print me-2"></i>In hóa đơn
                                     </button>
 
@@ -1612,7 +1606,6 @@
         </div>
     </div>
 </div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script th:if="${currentStep == 3}">
     document.addEventListener('DOMContentLoaded', function () {

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -326,8 +327,9 @@ public class CashierController {
             BookingResultDTO result = bookingService.createBooking(bookingRequest);
 
             model.addAttribute("bookingResult", result);
+            session.setAttribute("bookingResult", result);
 
-            model.addAttribute("currentStep", 5); // This was the crucial missing piece
+            model.addAttribute("currentStep", 5);
 
             return "cashier/cashier-booking";
 
@@ -364,7 +366,27 @@ public class CashierController {
         }
     }
 
-    //===========================HELPER===================================
+    @GetMapping("/print-ticket/{invoiceId}")
+    public String printTicket(@PathVariable Integer invoiceId, Model model, RedirectAttributes redirectAttributes, HttpSession session) {
+        try {
+            BookingResultDTO bookingResult = session.getAttribute("bookingResult") != null ? (BookingResultDTO) session.getAttribute("bookingResult") : null;
+
+            if (bookingResult == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thông tin hóa đơn.");
+                return "redirect:/cashier/";
+            }
+
+            model.addAttribute("bookingResult", bookingResult);
+            model.addAttribute("printDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss")));
+
+            return "cashier/print-ticket";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tạo vé để in: " + e.getMessage());
+            return "redirect:/cashier/";
+        }
+    }
+
     public static String normalizeSearchParam(String param) {
         if (param == null) return null;
         param = param.trim();

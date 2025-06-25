@@ -22,24 +22,24 @@
         <p>================================</p>
     </div>
 
-    <p><strong>Mã vé:</strong> [[${bookingResponse.bookingCode}]]</p>
-    <p><strong>Phim:</strong> [[${bookingResponse.movieTitle}]]</p>
-    <p><strong>Suất chiếu:</strong> [[${bookingResponse.showTime}]]</p>
-    <p><strong>Phòng:</strong> [[${bookingResponse.roomName}]]</p>
-    <p><strong>Ghế:</strong> [[${#strings.listJoin(bookingResponse.seatNumbers, ', ')}]]</p>
-    <p><strong>Khách hàng:</strong> [[${bookingResponse.customerName}]]</p>
-    <p><strong>SĐT:</strong> [[${bookingResponse.customerPhone}]]</p>
+    <p><strong>Mã vé:</strong> [[${bookingResult.invoiceId}]]</p>
+    <p><strong>Phim:</strong> [[${bookingResult.movieName}]]</p>
+    <p><strong>Suất chiếu:</strong> [[${bookingResult.scheduleTime}]]</p>
+    <p><strong>Phòng:</strong> [[${bookingResult.roomName}]]</p>
+    <p><strong>Ghế:</strong> [[${#strings.listJoin(bookingResult.seatPositions, ', ')}]]</p>
+    <p><strong>Khách hàng:</strong> [[${bookingResult.customerName}]]</p>
+    <p><strong>SĐT:</strong> [[${bookingResult.customerPhone}]]</p>
 
-    <div th:if="${bookingResponse.foodItems != null and !bookingResponse.foodItems.empty}">
+    <div th:if="${bookingResult.foodItems != null and !bookingResult.foodItems.empty}">
         <p>--------------------------------</p>
         <p><strong>Thực phẩm:</strong></p>
-        <div th:each="food : ${bookingResponse.foodItems}">
-            <p>- [[${food.name}]] x[[${food.quantity}]] = [[${food.totalPrice}]]đ</p>
+        <div th:each="food : ${bookingResult.foodItems}">
+            <p>- [[${food.name}]] x[[${food.quantity}]] = [[${food.quantity * food.unitPrice}]]đ</p>
         </div>
     </div>
 
     <p>================================</p>
-    <p><strong>Tổng tiền: [[${bookingResponse.totalAmount}]]đ</strong></p>
+    <p><strong>Tổng tiền: [[${bookingResult.totalPrice}]]đ</strong></p>
     <p>Ngày in: [[${printDate}]]</p>
     <div style="text-align: center;">
         <p>Cảm ơn quý khách!</p>
