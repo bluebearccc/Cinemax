@@ -1,32 +1,39 @@
 package com.bluebear.cinemax.entity;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.time.LocalDateTime;
+import java.util.Date;
 
 @Entity
 @Table(name = "MovieFeedback")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class MovieFeedback {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ID")
     private Integer id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "CustomerID", nullable = false)
     private Customer customer;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "MovieID", nullable = false)
     private Movie movie;
 
-    @Column(name = "Content")
+    @Column(name = "Content", columnDefinition = "NVARCHAR(MAX)")
     private String content;
 
     @Column(name = "MovieRate")
-    private Integer movieRate = 5;
+    private Integer movieRate;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "CreatedDate", nullable = false, updatable = false)
+    private LocalDateTime createdDate;
 }

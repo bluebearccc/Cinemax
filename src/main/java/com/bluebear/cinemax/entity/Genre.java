@@ -1,10 +1,9 @@
 package com.bluebear.cinemax.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.util.List;
 
 @Entity
@@ -12,16 +11,18 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Genre {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "GenreID")
-    private Integer genreId;
+    private Integer genreID;
 
-    @Column(name = "GenreName", nullable = false)
+    @Column(name = "GenreName", nullable = false, length = 255)
     private String genreName;
 
-    @OneToMany(mappedBy = "genre", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
     @JsonIgnore
-    private List<MovieGenre> movieGenres;
+    private List<Movie> movies;
 }

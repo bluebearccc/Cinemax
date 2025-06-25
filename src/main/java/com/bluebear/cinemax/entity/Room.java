@@ -1,57 +1,52 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bluebear.cinemax.enumtype.Room_Status;
+import com.bluebear.cinemax.enumtype.TypeOfRoom;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
-import java.util.List;
 
-@Entity
-@Table(name = "Room")
+import java.util.List;
+import java.util.Set;
+@Builder
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "Room")
 public class Room {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RoomID")
-    private Integer roomId;
+    private Integer roomID;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
-    @Column(name = "Name", nullable = false, length = 10)
+    @Column(name = "Name", length = 10, nullable = false)
     private String name;
 
     @Column(name = "Collumn", nullable = false)
     private Integer column;
-
+    
     @Column(name = "Row", nullable = false)
     private Integer row;
 
+    @Column(name = "TypeOfRoom", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
-    @Column(name = "TypeOfRoom", nullable = false)
-    private RoomType typeOfRoom;
+    private TypeOfRoom typeOfRoom;
 
+    @Column(name = "Status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private RoomStatus status;
+    private Room_Status status;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Seat> seats;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Schedule> schedules;
-
-    public enum RoomType {
-        Couple, Single
-    }
-
-    public enum RoomStatus {
-        Active, Inactive
-    }
 }

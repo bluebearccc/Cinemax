@@ -1,59 +1,49 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bluebear.cinemax.enumtype.Employee_Status;
+import com.bluebear.cinemax.enumtype.Role;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
+
 import java.util.List;
 
 @Entity
-@Table(name = "Employee")
 @Data
 @NoArgsConstructor
+@Builder
 @AllArgsConstructor
 public class Employee {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "EmployeeID")
-    private Integer employeeId;
+    private Integer id;
+
+    @Column(name = "Position")
+    @Enumerated(EnumType.STRING)
+    private Role position;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Position", nullable = false)
-    private Position position;
+    @Column(name = "Status")
+    private Employee_Status status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private EmployeeStatus status;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "AccountID", nullable = false)
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "AccountID")
     private Account account;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne
     @JoinColumn(name = "AdminID")
     private Employee admin;
 
     @Column(name = "FullName", nullable = false, length = 100)
     private String fullName;
 
-    @OneToMany(mappedBy = "admin", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Employee> subordinates;
-
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Invoice> invoices;
-
-    public enum Position {
-        Admin, Staff, Cashier, Customer_Officer
-    }
-
-    public enum EmployeeStatus {
-        Active, Inactive
-    }
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Invoice> invoiceList;
 }

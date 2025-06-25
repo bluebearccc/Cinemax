@@ -1,52 +1,47 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.bluebear.cinemax.enumtype.Theater_Status;
 import jakarta.persistence.*;
-import java.util.List;
+import lombok.*;
 
-@Entity
-@Table(name = "Theater")
-@Data
+import java.util.List;
+import java.util.Set;
+@Builder
+@Setter
+@Getter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "Theater")
 public class Theater {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "TheaterID")
-    private Integer theaterId;
+    private Integer theaterID;
 
-    @Column(name = "TheaterName", nullable = false, length = 100)
+    @Column(name = "TheaterName", length = 100, nullable = false)
     private String theaterName;
 
-    @Column(name = "Address", nullable = false, length = 100)
+    @Column(name = "Address", length = 100, nullable = false)
     private String address;
 
-    @Column(name = "Image", nullable = false)
+    @Column(name = "Image", length = 255, nullable = false)
     private String image;
 
     @Column(name = "RoomQuantity", nullable = false)
     private Integer roomQuantity;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private TheaterStatus status;
+    @Column(name = "Status", length = 20, nullable = false)
+    private Theater_Status  status;
 
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
+    @OneToMany(mappedBy = "theater")
+    private List<TheaterStock> theaterStock;
+
+    @OneToMany(mappedBy = "theater")
+    private List<Employee> cashiers;
+
+    @OneToMany(mappedBy = "theater")
     private List<Room> rooms;
-
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Employee> employees;
-
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<TheaterStock> theaterStocks;
-
-    public enum TheaterStatus {
-        Active, Inactive
-    }
 }

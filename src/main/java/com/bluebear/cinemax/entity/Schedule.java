@@ -1,23 +1,26 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bluebear.cinemax.enumtype.Schedule_Status;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
-import java.time.LocalDateTime;
-import java.util.List;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+@Builder
 @Entity
-@Table(name = "Schedule")
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "Schedule")
 public class Schedule {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ScheduleID")
-    private Integer scheduleId;
+    private Integer scheduleID;
 
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;
@@ -33,15 +36,8 @@ public class Schedule {
     @JoinColumn(name = "RoomID", nullable = false)
     private Room room;
 
+    @Column(name = "Status", length = 20, nullable = false)
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private ScheduleStatus status;
+    private Schedule_Status status;
 
-    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<DetailSeat> detailSeats;
-
-    public enum ScheduleStatus {
-        Active, Inactive
-    }
 }

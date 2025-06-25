@@ -1,10 +1,12 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bluebear.cinemax.enumtype.Promotion_Status;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -13,17 +15,19 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Promotion {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "PromotionID")
-    private Integer promotionId;
+    private Integer promotionID;
 
-    @Column(name = "PromotionCode", nullable = false, unique = true, length = 10)
+    @Column(name = "PromotionCode", nullable = false, length = 10, unique = true)
     private String promotionCode;
 
     @Column(name = "Discount", nullable = false)
-    private Integer discount;
+    private Integer discount; // Giá trị giảm giá (ví dụ: phần trăm hoặc số tiền cố định)
 
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;
@@ -32,17 +36,13 @@ public class Promotion {
     private LocalDateTime endTime;
 
     @Column(name = "Quantity", nullable = false)
-    private Integer quantity;
+    private Integer quantity; // Số lượng mã khuyến mãi có sẵn
 
+    // Sử dụng Enum để quản lý trạng thái, giúp mã sạch hơn và an toàn kiểu dữ liệu
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private PromotionStatus status;
+    @Column(name = "Status", nullable = false, length = 20)
+    private Promotion_Status status; // Enum PromotionStatus sẽ được định nghĩa bên dưới
 
-    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Invoice> invoices;
-
-    public enum PromotionStatus {
-        Available, Expired
-    }
+    @OneToMany(mappedBy = "promotion")
+    private List<Invoice> InvoiceList;
 }

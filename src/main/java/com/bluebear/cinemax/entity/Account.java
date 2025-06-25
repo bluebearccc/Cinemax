@@ -1,48 +1,36 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bluebear.cinemax.enumtype.Account_Status;
+import com.bluebear.cinemax.enumtype.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import java.util.List;
 
 @Entity
-@Table(name = "Account")
+@Builder
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
-@Builder(toBuilder = true)
+@NoArgsConstructor
 public class Account {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "AccountID")
-    private Integer accountId;
+    private Integer id;
 
-    @Column(name = "Email", nullable = false, unique = true, length = 50)
+    @Column(unique = true, name = "Email")
     private String email;
 
-    @Column(name = "Password", nullable = false, length = 50)
+    @Column(nullable = true, name = "Password")
     private String password;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Role", nullable = false)
     private Role role;
 
+    @Column(name = "Status")
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private AccountStatus status;
-
-    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<History> histories;
-
-    public enum Role {
-        Admin, Customer, Staff, Cashier, Customer_Officer
-    }
-
-    public enum AccountStatus {
-        Active, Banned
-    }
+    private Account_Status status;
 }

@@ -1,448 +1,379 @@
 package com.bluebear.cinemax.controller;
 
-import com.bluebear.cinemax.dto.cashier.*;
-import com.bluebear.cinemax.helper.Helper;
-import com.bluebear.cinemax.repository.cashier.SeatRepository;
-import com.bluebear.cinemax.service.cashier.CashierService;
-import com.bluebear.cinemax.service.cashier.PdfGenerationService;
-import jakarta.servlet.http.HttpServletResponse;
+import com.bluebear.cinemax.dto.*;
+import com.bluebear.cinemax.enumtype.Movie_Status;
+import com.bluebear.cinemax.enumtype.Theater_Status;
+import com.bluebear.cinemax.service.*;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.bluebear.cinemax.helper.Helper.*;
 
 @Controller
 @RequestMapping("/cashier")
 public class CashierController {
-    //Xét Date cho ngày hôm này và 7 ngày tới
+
     private final LocalDateTime currentDate = LocalDateTime.now();
-    private final LocalDateTime sevenDaysFromToday = currentDate.plusDays(7);
+    private final LocalDateTime sevenDate = currentDate.plusDays(7);
 
-    private final Integer CASHIER_THEATER_ID = 1;
-
-    private final CashierService cashierService;
-    private SeatRepository seatRepository;
-    private PdfGenerationService pdfGenerationService;
+    private final Integer theaterId = 1;
 
     @Autowired
-    public CashierController(CashierService cashierService, SeatRepository seatRepository, PdfGenerationService pdfGenerationService) {
-        this.pdfGenerationService = pdfGenerationService;
-        this.seatRepository = seatRepository;
-        this.cashierService = cashierService;
-    }
+    private MovieService movieService;
 
-    public String redirectToMovieSelection() {
-        return "redirect:/cashier/movie/";
-    }
+    @Autowired
+    private GenreService genreService;
 
-    @GetMapping("/movie/")
-    public String selectMovie(Model model,
-                              HttpSession session,
-                              @RequestParam(defaultValue = "0") Integer page,
-                              @RequestParam(defaultValue = "10") Integer size,
-                              @RequestParam(required = false) String sort,
-                              @RequestParam(required = false) String keyword,
-                              @RequestParam(required = false) Integer genreId
-    ) {
+    @Autowired
+    private ScheduleService scheduleService;
+
+    @Autowired
+    private SeatService seatService;
+
+    @Autowired
+    private DetailSeatService detailSeatService;
+
+    @Autowired
+    private TheaterStockService theaterStockService;
+
+    @Autowired
+    private PromotionService promotionService;
+
+    @Autowired
+    private BookingService bookingService;
+
+    @GetMapping({"", "/", "/movie/"})
+    public String getMovie(@RequestParam(required = false) String keyword,
+                           @RequestParam(required = false) Integer genreId,
+                           @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime date,
+                           @RequestParam(defaultValue = "0") Integer page,
+                           @RequestParam(defaultValue = "6") Integer pageSize,
+                           HttpSession session,
+                           Model model) {
         clearSessionData(session);
-        session.setAttribute(ATTR_THEATER_ID, CASHIER_THEATER_ID);
-
+        session.setAttribute("theaterId", theaterId);
         try {
+
             String normalizedKeyword = normalizeSearchParam(keyword);
 
-            Pageable pageable = PageRequest.of(page, 3);
+            LocalDateTime startDate;
+            LocalDateTime endDate;
 
-            Page<MovieDTO> moviesPage;
-
-            if (normalizedKeyword != null && genreId != null) {
-                moviesPage = cashierService.searchPagedMoviesByTheaterAndGenreAndKeyword(
-                        CASHIER_THEATER_ID, genreId, normalizedKeyword, currentDate, pageable);
-            } else if (normalizedKeyword != null) {
-                moviesPage = cashierService.searchPagedMoviesByTheaterAndKeyword(
-                        CASHIER_THEATER_ID, normalizedKeyword, currentDate, pageable);
-            } else if (genreId != null) {
-                moviesPage = cashierService.getPagedMoviesByTheaterAndGenre(
-                        CASHIER_THEATER_ID, genreId, currentDate, pageable);
+            if (date != null) {
+                startDate = date.toLocalDate().atStartOfDay();
+                endDate = date.toLocalDate().atTime(23, 59, 59);
             } else {
-                moviesPage = cashierService.getPagedMovieByTheater(
-                        CASHIER_THEATER_ID, currentDate, pageable);
+                startDate = currentDate;
+                endDate = sevenDate;
             }
 
-            List<String> availableGenres = getAvailableGenresForTheater(CASHIER_THEATER_ID);
-            model.addAttribute("movies", moviesPage.getContent());
-            model.addAttribute("availableGenres", availableGenres);
-            model.addAttribute("moviesPage", moviesPage);
-            model.addAttribute("availableGenres", availableGenres != null ? availableGenres : new ArrayList<>());
-            model.addAttribute("selectedGenreId", genreId);
-            model.addAttribute("keyword", normalizedKeyword);
-            model.addAttribute("theaterId", CASHIER_THEATER_ID);
-            model.addAttribute(ATTR_CURRENT_STEP, 1);
+            Pageable pageable = PageRequest.of(page, pageSize);
 
-            boolean hasSearchCriteria = (normalizedKeyword != null && !normalizedKeyword.isEmpty()) || genreId != null;
-            model.addAttribute("hasSearchCriteria", hasSearchCriteria);
+            Page<MovieDTO> moviesPage = movieService.findMoviesByTheaterAndDateRange(
+                    theaterId, Movie_Status.Active, Theater_Status.Active,
+                    startDate, endDate, pageable);
+
+            if (normalizedKeyword != null && genreId != null) {
+                moviesPage = movieService.findMoviesByTheaterAndGenreAndKeywordAndDateRange(
+                        theaterId, genreId, keyword, Movie_Status.Active, Theater_Status.Active,
+                        startDate, endDate, pageable);
+            } else if (normalizedKeyword != null) {
+                moviesPage = movieService.findMoviesByTheaterAndKeywordAndDateRange(
+                        theaterId, keyword, Movie_Status.Active, Theater_Status.Active,
+                        startDate, endDate, pageable);
+            } else if (genreId != null) {
+                moviesPage = movieService.findMoviesByTheaterAndGenreAndDateRange(
+                        theaterId, genreId, Movie_Status.Active, Theater_Status.Active,
+                        startDate, endDate, pageable);
+            }
+
+            List<GenreDTO> availableGenres = genreService.getAllGenres();
+
+            List<LocalDateTime> availableDates = new ArrayList<>();
+            for (int i = 0; i < 7; i++) {
+                availableDates.add(LocalDateTime.now().plusDays(i).toLocalDate().atStartOfDay());
+            }
+
+            model.addAttribute("movies", moviesPage.getContent());
+            model.addAttribute("moviesPage", moviesPage);
+            model.addAttribute("keyword", normalizedKeyword);
+            model.addAttribute("availableGenres", availableGenres);
+            model.addAttribute("availableDates", availableDates);
+            model.addAttribute("selectedGenreId", genreId);
+            model.addAttribute("selectedDate", date);
+            model.addAttribute("currentDate", currentDate);
+            model.addAttribute("sevenDate", sevenDate);
+            session.setAttribute("theaterID", theaterId);
+            model.addAttribute("currentStep", 1);
             model.addAttribute("totalMovies", moviesPage.getTotalElements());
+
+            boolean hasSearchCriteria = (normalizedKeyword != null && !normalizedKeyword.isEmpty())
+                    || genreId != null
+                    || date != null;
+            model.addAttribute("hasSearchCriteria", hasSearchCriteria);
 
         } catch (Exception e) {
             e.printStackTrace();
             model.addAttribute("movies", new ArrayList<>());
             model.addAttribute("moviesPage", Page.empty());
             model.addAttribute("availableGenres", new ArrayList<>());
+            model.addAttribute("availableDates", new ArrayList<>());
             model.addAttribute("selectedGenreId", null);
+            model.addAttribute("selectedDate", null);
             model.addAttribute("keyword", "");
-            model.addAttribute("theaterId", CASHIER_THEATER_ID);
-            model.addAttribute(ATTR_CURRENT_STEP, 1);
+            model.addAttribute("theaterId", theaterId);
+            model.addAttribute("currentStep", 1);
             model.addAttribute("hasSearchCriteria", false);
             model.addAttribute("totalMovies", 0);
             model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách phim. Vui lòng thử lại.");
         }
 
-        return "cashier-templates/cashier-booking";
+        return "cashier/cashier-booking";
     }
 
-    @GetMapping("/movie/clear-filters")
-    public String clearFilters() {
-        return "redirect:/cashier/movie/";
-    }
-
-    @GetMapping("/{id}/select-schedule")
-    public String selectMovieWithAvailableSchedule(@PathVariable Integer id, Model model, HttpSession session) {
-        try {
-            Integer sessionTheaterId = (Integer) session.getAttribute(ATTR_THEATER_ID);
-            if (sessionTheaterId == null || !sessionTheaterId.equals(CASHIER_THEATER_ID)) {
-                return redirectToMovieSelection();
-            }
-            Page<MovieDTO> moviesPage = cashierService.getPagedMovieByTheater(
-                    CASHIER_THEATER_ID, currentDate, Pageable.unpaged());
-
-            Optional<MovieDTO> movieOpt = moviesPage.getContent().stream()
-                    .filter(movie -> movie.getMovieId().equals(id))
-                    .findFirst();
-
-            if (movieOpt.isEmpty()) {
-                return redirectToMovieSelection();
-            }
-
-            MovieDTO movie = movieOpt.get();
-
-            session.removeAttribute(ATTR_SELECTED_SCHEDULE);
-            session.removeAttribute(ATTR_SELECTED_SEATS);
-            session.removeAttribute(ATTR_CUSTOMER_INFO);
-            session.removeAttribute(ATTR_PRICE_BREAKDOWN);
-
-            session.setAttribute(ATTR_SELECTED_MOVIE, movie);
-            session.setAttribute(ATTR_CURRENT_STEP, 2);
-
-
-            List<ScheduleDTO> schedules = cashierService.getSchedulesByMovieAndDate(
-                    CASHIER_THEATER_ID, id, currentDate, sevenDaysFromToday);
-
-            model.addAttribute(ATTR_SELECTED_MOVIE, movie);
-            model.addAttribute(ATTR_CURRENT_STEP, 2);
-            model.addAttribute("schedules", schedules);
-            model.addAttribute("theaterId", CASHIER_THEATER_ID);
-            model.addAttribute("currentDate", LocalDateTime.now().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")));
-
-            return "cashier-templates/cashier-booking";
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "redirect:/cashier/movie/";
-        }
-    }
-
-    //================SEAT==========================================================
-    @PostMapping("/select-seats")
-    public String selectSeats(@RequestParam String time,
-                              @RequestParam String roomName,
-                              @RequestParam String roomType,
-                              @RequestParam Integer scheduleId,
+    @GetMapping("/{movieID}/select-schedule")
+    public String getSchedule(@PathVariable Integer movieID,
+                              HttpSession session,
                               Model model,
-                              HttpSession session) {
+                              RedirectAttributes redirectAttributes) {
         try {
-            if (!isValidSession(session)) {
+            Integer theaterId = session.getAttribute("theaterID") != null ? (Integer) session.getAttribute("theaterID") : null;
+
+            if (theaterId == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Theater not found");
                 return "redirect:/cashier/movie/";
             }
 
-            clearSeatSelections(session);
+            MovieDTO selectedMovie = movieService.findById(movieID);
 
-            Map<String, Object> scheduleInfo = createScheduleInfo(time, roomName, roomType, scheduleId);
-            session.setAttribute(ATTR_SELECTED_SCHEDULE, scheduleInfo);
-            session.setAttribute(ATTR_CURRENT_STEP, 3);
-
-            List<SeatDTO> seats = cashierService.getSeatsWithBookingDetails(scheduleId);
-
-            Map<String, Object> seatGrid = createSimpleSeatGrid(seats, roomType);
-
-            Page<TheaterStockDTO> foodMenu = cashierService.getAvailableTheaterStockByTheater(CASHIER_THEATER_ID, PageRequest.of(0, 4));
-
-            model.addAttribute("theaterStock", foodMenu);
-            model.addAttribute(ATTR_SELECTED_MOVIE, session.getAttribute(ATTR_SELECTED_MOVIE));
-            model.addAttribute(ATTR_SELECTED_SCHEDULE, scheduleInfo);
-            model.addAttribute(ATTR_CURRENT_STEP, 3);
-            model.addAttribute("seatGridData", seatGrid);
-            model.addAttribute("seats", seats);
-            model.addAttribute("theaterId", CASHIER_THEATER_ID);
-
-            return "cashier-templates/cashier-booking";
-
-        } catch (Exception e) {
-            System.err.println("Error in selectSeats: " + e.getMessage());
-            e.printStackTrace();
-            return "redirect:/cashier/movie/";
-        }
-    }
-
-    private List<Integer> parseSelectedSeats(String selectedSeatsRaw) {
-        if (selectedSeatsRaw == null || selectedSeatsRaw.trim().isEmpty()) {
-            return new ArrayList<>();
-        }
-        try {
-
-            List<Integer> seatIds = Arrays.stream(selectedSeatsRaw.split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .map(s -> {
-                        try {
-                            return Integer.parseInt(s);
-                        } catch (NumberFormatException e) {
-                            System.err.println("Invalid seat ID: " + s);
-                            return null;
-                        }
-                    })
-                    .filter(Objects::nonNull) // Remove null values
-                    .collect(Collectors.toList());
-
-            System.out.println("DEBUG - Parsed seat IDs: " + seatIds);
-            return seatIds;
-
-        } catch (Exception e) {
-            System.err.println("Error parsing selected seats: " + selectedSeatsRaw + " - " + e.getMessage());
-            e.printStackTrace();
-            return new ArrayList<>();
-        }
-    }
-
-    @PostMapping("/customer-info")
-    public String customerInfo(@RequestParam("selectedSeats") String selectedSeatsRaw,
-                               @RequestParam(value = "foodPage", defaultValue = "0") int foodPage,
-                               @RequestParam(value = "foodSize", defaultValue = "4") int foodSize,
-                               Model model, HttpSession session) {
-        try {
-            // Validate session
-            if (!isValidSession(session)) {
-                System.err.println("Invalid session");
+            if (selectedMovie == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Movie not found");
                 return "redirect:/cashier/movie/";
             }
 
-            // Parse selected seats
-            List<Integer> seatIds = parseSelectedSeats(selectedSeatsRaw);
-            System.out.println("DEBUG - Parsed seat IDs count: " + seatIds.size());
-
-            if (seatIds.isEmpty()) {
-                System.err.println("No valid seat IDs found");
-                session.setAttribute("seatError", "Vui lòng chọn ít nhất một ghế.");
-                return "redirect:/cashier/back-to-seats";
+            List<LocalDateTime> availableDates = new ArrayList<>();
+            for (int i = 0; i < 7; i++) {
+                availableDates.add(LocalDateTime.now().plusDays(i).toLocalDate().atStartOfDay());
             }
 
+            Page<ScheduleDTO> schedules = scheduleService.getSchedulesByMovieIdAndDate(theaterId, movieID, currentDate, sevenDate, Pageable.unpaged());
 
-            List<SeatDTO> selectedSeats = Helper.getSeatsByIds(seatIds, seatRepository, cashierService);
-            System.out.println("DEBUG - Found seats count: " + selectedSeats.size());
+            for (ScheduleDTO schedule : schedules.getContent()) {
+                List<SeatDTO> allSeatsInRoom = seatService.getSeatsByRoomId(schedule.getRoomID());
+                List<Integer> bookedSeatIds = detailSeatService.findBookedSeatIdsByScheduleId(schedule.getScheduleID());
+                SeatAvailabilityDTO seatAvailability = new SeatAvailabilityDTO();
 
-            if (selectedSeats.size() != seatIds.size()) {
-                System.err.println("Seat count mismatch. Expected: " + seatIds.size() + ", Found: " + selectedSeats.size());
-                session.setAttribute("seatError", "Một số ghế không còn khả dụng.");
-                return "redirect:/cashier/back-to-seats";
+                int totalSeats = allSeatsInRoom.size();
+                int availableSeats = totalSeats - bookedSeatIds.size();
+                int totalVipSeats = (int) allSeatsInRoom.stream().filter(SeatDTO::getIsVIP).count();
+                int totalRegularSeats = totalSeats - totalVipSeats;
+                int bookedVipSeats = (int) allSeatsInRoom.stream()
+                        .filter(seat -> bookedSeatIds.contains(seat.getSeatID()) && seat.getIsVIP())
+                        .count();
+                int bookedRegularSeats = bookedSeatIds.size() - bookedVipSeats;
+
+                seatAvailability.setTotalSeats(totalSeats);
+                seatAvailability.setAvailableSeats(availableSeats);
+                seatAvailability.setTotalVipSeats(totalVipSeats);
+                seatAvailability.setAvailableVipSeats(totalVipSeats - bookedVipSeats);
+                seatAvailability.setTotalRegularSeats(totalRegularSeats);
+                seatAvailability.setAvailableRegularSeats(totalRegularSeats - bookedRegularSeats);
+                schedule.setSeatAvailability(seatAvailability);
             }
 
-            // Check if any selected seats are booked
-            Map<String, Object> scheduleInfo = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
-            Integer scheduleId = (Integer) scheduleInfo.get("scheduleId");
-
-            List<SeatDTO> currentSeats = cashierService.getSeatsWithBookingDetails(scheduleId);
-            Map<Integer, Boolean> seatBookingStatus = currentSeats.stream()
-                    .collect(Collectors.toMap(SeatDTO::getSeatId, SeatDTO::getIsBooked));
-
-            List<String> seatPositions = selectedSeats.stream()
-                    .map(SeatDTO::getPosition)
-                    .collect(Collectors.toList());
-
-            session.setAttribute(ATTR_SELECTED_SEATS, seatPositions);
-            session.setAttribute("selectedSeatIds", seatIds);
-            session.setAttribute(ATTR_CURRENT_STEP, 4);
-
-            Page<TheaterStockDTO> foodMenu = cashierService.getAvailableTheaterStockByTheater(CASHIER_THEATER_ID, PageRequest.of(foodPage, foodSize));
-
-            model.addAttribute("theaterStock", foodMenu);
-            model.addAttribute("currentFoodPage", foodPage);
-            model.addAttribute("totalFoodPages", foodMenu.getTotalPages());
-            model.addAttribute("hasPreviousFoodPage", foodMenu.hasPrevious());
-            model.addAttribute("hasNextFoodPage", foodMenu.hasNext());
-            model.addAttribute(ATTR_SELECTED_MOVIE, session.getAttribute(ATTR_SELECTED_MOVIE));
-            model.addAttribute(ATTR_SELECTED_SCHEDULE, session.getAttribute(ATTR_SELECTED_SCHEDULE));
-            model.addAttribute(ATTR_SELECTED_SEATS, seatPositions);
-            model.addAttribute(ATTR_CURRENT_STEP, 4);
-            model.addAttribute("theaterId", CASHIER_THEATER_ID);
-
-            return "cashier-templates/cashier-booking";
+            session.setAttribute("selectedMovie", selectedMovie);
+            model.addAttribute("currentStep", 2);
+            model.addAttribute("schedules", schedules);
+            model.addAttribute("selectedMovie", selectedMovie);
+            model.addAttribute("theaterId", theaterId);
+            model.addAttribute("availableDates", availableDates);
 
         } catch (Exception e) {
-            System.err.println("Error in customerInfo: " + e.getMessage());
-            e.printStackTrace();
-            session.setAttribute("seatError", "Có lỗi hệ thống, vui lòng thử lại.");
-            return "redirect:/cashier/back-to-seats";
-        }
-    }
-
-    @PostMapping("/confirm-booking")
-    public String confirmBooking(@RequestParam() Map<String, String> allRequestParams,
-                                 Model model, HttpSession session) {
-        try {
-            Map<Integer, Integer> foodQuantities = new HashMap<>();
-
-            for (Map.Entry<String, String> entry : allRequestParams.entrySet()) {
-                String key = entry.getKey();
-                String value = entry.getValue();
-
-                if (key.startsWith("foodQuantities[")) {
-                    String idStr = key.substring(15, key.length() - 1);
-                    int id = Integer.parseInt(idStr);
-                    int quantity = Integer.parseInt(value);
-                    foodQuantities.put(id, quantity);
-                }
-            }
-
-            Map<Integer, Integer> selectedFood = new HashMap<>();
-            for (Map.Entry<Integer, Integer> entry : foodQuantities.entrySet()) {
-                if (entry.getValue() > 0) {
-                    selectedFood.put(entry.getKey(), entry.getValue());
-                }
-            }
-
-            MovieDTO movie = (MovieDTO) session.getAttribute(ATTR_SELECTED_MOVIE);
-
-            Map<String, Object> scheduleInfo = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
-
-            List<String> seatPositions = (List<String>) session.getAttribute(ATTR_SELECTED_SEATS);
-            List<Integer> selectedSeatIds = (List<Integer>) session.getAttribute("selectedSeatIds");
-            String customerName = allRequestParams.get("customerName");
-            String customerPhone = allRequestParams.get("customerPhone");
-            String customerEmail = allRequestParams.get("customerEmail");
-
-            Integer scheduleId = (Integer) scheduleInfo.get("scheduleId");
-
-            String paymentMethod = allRequestParams.get("paymentMethod");
-
-            BookingRequestDTO bookingRequest = BookingRequestDTO.builder()
-                    .customerName(customerName)
-                    .customerPhone(customerPhone)
-                    .customerEmail(customerEmail)
-                    .scheduleId(scheduleId)
-                    .selectedSeatIds(selectedSeatIds)
-                    .foodQuantities(foodQuantities)
-                    //.promotionCode()
-                    // .employeeId(employeeId)
-                    .build();
-
-            BookingResponseDTO bookingResponse = cashierService.createBooking(bookingRequest);
-
-            if (paymentMethod.equalsIgnoreCase("bank")) {
-                model.addAttribute("bookingResponse", bookingResponse);
-                return "cashier-templates/cashier-payment-bank";
-            }
-
-            model.addAttribute("bookingResult", bookingResponse);
-            session.setAttribute("bookingResult", bookingResponse);
-            model.addAttribute(ATTR_CURRENT_STEP, 5);
-
-            clearSessionData(session);
-
-            return "cashier-templates/cashier-booking";
-
-        } catch (Exception e) {
-            System.err.println("Error in confirmBooking: " + e.getMessage());
             e.printStackTrace();
             return "redirect:/cashier/movie/";
         }
+        return "cashier/cashier-booking";
+    }
+
+    @PostMapping("/select-seats")
+    public String selectSeats(@RequestParam Integer scheduleId,
+                              HttpSession session,
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            Integer theaterId = (Integer) session.getAttribute("theaterID");
+            MovieDTO selectedMovie = (MovieDTO) session.getAttribute("selectedMovie");
+
+            if (theaterId == null || selectedMovie == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Session expired");
+                return "redirect:/cashier/movie/";
+            }
+
+            ScheduleDTO selectedSchedule = scheduleService.getScheduleById(scheduleId);
+            if (selectedSchedule == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Schedule not found");
+                return "redirect:/cashier/" + selectedMovie.getMovieID() + "/select-schedule";
+            }
+
+            List<SeatDTO> allSeatsInRoom = seatService.getSeatsByRoomId(selectedSchedule.getRoomID());
+            List<Integer> bookedSeatIds = detailSeatService.findBookedSeatIdsByScheduleId(scheduleId);
+
+            Map<String, List<SeatDTO>> seatsByRow = allSeatsInRoom.stream()
+                    .sorted(Comparator.comparing(s -> Integer.parseInt(s.getPosition().substring(1))))
+                    .collect(Collectors.groupingBy(
+                            s -> s.getPosition().substring(0, 1),
+                            LinkedHashMap::new,
+                            Collectors.toList()
+                    ));
+
+            session.setAttribute("selectedSchedule", selectedSchedule);
+
+            model.addAttribute("currentStep", 3);
+            model.addAttribute("selectedMovie", selectedMovie);
+            model.addAttribute("selectedSchedule", selectedSchedule);
+            model.addAttribute("seatsByRow", seatsByRow);
+            model.addAttribute("bookedSeatIds", bookedSeatIds);
+            model.addAttribute("theaterId", theaterId);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("errorMessage", "Error loading seats");
+            return "redirect:/cashier/movie/";
+        }
+
+        return "cashier/cashier-booking";
     }
 
     @GetMapping("/back-to-seats")
-    public String backToSeats(HttpSession session, Model model) {
-        if (!isValidSession(session)) {
+    public String goBackToSeats(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+        MovieDTO selectedMovie = (MovieDTO) session.getAttribute("selectedMovie");
+        ScheduleDTO selectedSchedule = (ScheduleDTO) session.getAttribute("selectedSchedule");
+
+        if (selectedMovie == null || selectedSchedule == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Phiên làm việc đã hết hạn. Vui lòng bắt đầu lại.");
             return "redirect:/cashier/movie/";
         }
-
-        Map<String, Object> scheduleInfo = (Map<String, Object>) session.getAttribute(ATTR_SELECTED_SCHEDULE);
-        if (scheduleInfo == null) {
-            return "redirect:/cashier/movie/";
-        }
-
-        String seatError = (String) session.getAttribute("seatError");
-        session.removeAttribute("seatError");
-
-        Integer scheduleId = (Integer) scheduleInfo.get("scheduleId");
-        String roomType = (String) scheduleInfo.get("roomType");
-
-        List<SeatDTO> seats = cashierService.getSeatsWithBookingDetails(scheduleId);
-        Map<String, Object> seatGrid = createSimpleSeatGrid(seats, roomType);
-
-        model.addAttribute(ATTR_SELECTED_MOVIE, session.getAttribute(ATTR_SELECTED_MOVIE));
-        model.addAttribute(ATTR_SELECTED_SCHEDULE, scheduleInfo);
-        model.addAttribute(ATTR_CURRENT_STEP, 3);
-        model.addAttribute("seatGridData", seatGrid);
-        model.addAttribute("seats", seats);
-        model.addAttribute("seatError", seatError);
-        model.addAttribute("theaterId", CASHIER_THEATER_ID);
-
-        return "cashier-templates/cashier-booking";
+        return selectSeats(selectedSchedule.getScheduleID(), session, model, redirectAttributes);
     }
 
-    @GetMapping("/invoice/download")
-    public String downloadInvoice(HttpServletResponse response, HttpSession session) {
+    @PostMapping("/cus-info")
+    public String getCustomerInfo(@RequestParam("seatIDs") String seatIDs,
+                                  @RequestParam(required = false) String foodKeyword,
+                                  @RequestParam(defaultValue = "0") int foodPage,
+                                  HttpSession session, Model model, RedirectAttributes redirectAttributes) {
+
+        MovieDTO selectedMovie = (MovieDTO) session.getAttribute("selectedMovie");
+        ScheduleDTO selectedSchedule = (ScheduleDTO) session.getAttribute("selectedSchedule");
+
+        if (selectedMovie == null || selectedSchedule == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Session expired or invalid.");
+            return "redirect:/cashier/movie/";
+        }
+
+        if (seatIDs == null || seatIDs.isEmpty()) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Please select at least one seat.");
+            return "redirect:/cashier/" + selectedMovie.getMovieID() + "/select-schedule";
+        }
+
+        Integer theaterId = (Integer) session.getAttribute("theaterID");
+        if (theaterId == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Theater information not found in session.");
+            return "redirect:/cashier/movie/";
+        }
+
+        session.setAttribute("selectedSeatIds", seatIDs);
+
+        List<String> selectedSeatIdsList = Arrays.asList(seatIDs.split(","));
+        List<SeatDTO> selectedSeatsInfo = seatService.getSeatsByIds(selectedSeatIdsList.stream()
+                .map(Integer::parseInt)
+                .collect(Collectors.toList()));
+        List<String> seatPositions = selectedSeatsInfo.stream().map(SeatDTO::getPosition).collect(Collectors.toList());
+
+        Pageable foodPageable = PageRequest.of(foodPage, 4);
+        Page<TheaterStockDTO> theaterStockPage = theaterStockService.findAvailableByTheaterIdAndKeyword(theaterId, foodKeyword, foodPageable);
+
+        List<PromotionDTO> promotions = promotionService.getActivePromotions();
+
+        model.addAttribute("promotions", promotions);
+        model.addAttribute("selectedSeats", seatPositions);
+        model.addAttribute("selectedSeatIds", seatIDs);
+        model.addAttribute("theaterStockPage", theaterStockPage);
+        model.addAttribute("foodKeyword", foodKeyword);
+        model.addAttribute("selectedMovie", selectedMovie);
+        model.addAttribute("selectedSchedule", selectedSchedule);
+        model.addAttribute("currentStep", 4);
+        // Add an empty bookingRequest object to avoid null pointer on first load
+        if (!model.containsAttribute("bookingRequest")) {
+            model.addAttribute("bookingRequest", new BookingRequestDTO());
+        }
+
+        return "cashier/cashier-booking";
+    }
+
+    @PostMapping("/confirm-booking")
+    public String confirmBooking(BookingRequestDTO bookingRequest, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         try {
+            BookingResultDTO result = bookingService.createBooking(bookingRequest);
 
-            BookingResponseDTO bookingResult = (BookingResponseDTO) session.getAttribute("bookingResult");
+            model.addAttribute("bookingResult", result);
 
-            if (bookingResult == null) {
-                response.sendError(HttpServletResponse.SC_NOT_FOUND, "Không tìm thấy hóa đơn.");
-                return "redirect:/cashier/movie/";
-            }
+            model.addAttribute("currentStep", 5); // This was the crucial missing piece
 
-            byte[] pdfBytes = pdfGenerationService.generateInvoicePdf(bookingResult);
-
-            response.setContentType("application/pdf");
-            String headerKey = "Content-Disposition";
-            String headerValue = "attachment; filename=invoice_"+ bookingResult.getInvoiceId() + ".pdf";
-            response.setHeader(headerKey, headerValue);
-            response.setContentLength(pdfBytes.length);
-
-            OutputStream outputStream = response.getOutputStream();
-            outputStream.write(pdfBytes);
-            outputStream.flush();
-            outputStream.close();
+            return "cashier/cashier-booking";
 
         } catch (Exception e) {
-            System.err.println("Lỗi khi tạo và tải file PDF: " + e.getMessage());
             e.printStackTrace();
-            return "redirect:/cashier/movie/";
+            model.addAttribute("errorMessage", "Lỗi đặt vé: " + e.getMessage());
+            MovieDTO selectedMovie = (MovieDTO) session.getAttribute("selectedMovie");
+            ScheduleDTO selectedSchedule = (ScheduleDTO) session.getAttribute("selectedSchedule");
+            String seatIDs = (String) session.getAttribute("selectedSeatIds");
+            if (selectedMovie == null || selectedSchedule == null || seatIDs == null) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Phiên làm việc đã hết hạn. Vui lòng thử lại.");
+                return "redirect:/cashier/movie/";
+            }
+            List<String> selectedSeatIdsList = Arrays.asList(seatIDs.split(","));
+            List<SeatDTO> selectedSeatsInfo = seatService.getSeatsByIds(selectedSeatIdsList.stream()
+                    .map(Integer::parseInt)
+                    .collect(Collectors.toList()));
+            List<String> seatPositions = selectedSeatsInfo.stream().map(SeatDTO::getPosition).collect(Collectors.toList());
+
+            Integer theaterId = (Integer) session.getAttribute("theaterID");
+            Page<TheaterStockDTO> theaterStockPage = theaterStockService.findAvailableByTheaterIdAndKeyword(theaterId, null, PageRequest.of(0, 4));
+            List<PromotionDTO> promotions = promotionService.getActivePromotions();
+
+            model.addAttribute("promotions", promotions);
+            model.addAttribute("selectedSeats", seatPositions);
+            model.addAttribute("selectedSeatIds", seatIDs);
+            model.addAttribute("theaterStockPage", theaterStockPage);
+            model.addAttribute("selectedMovie", selectedMovie);
+            model.addAttribute("selectedSchedule", selectedSchedule);
+            model.addAttribute("currentStep", 4);
+            model.addAttribute("bookingRequest", bookingRequest);
+
+            return "cashier/cashier-booking";
         }
-        return redirectToMovieSelection();
     }
 
-}
+    //===========================HELPER===================================
+    public static String normalizeSearchParam(String param) {
+        if (param == null) return null;
+        param = param.trim();
+        return param.isEmpty() ? null : param;
+    }
 
+    public static void clearSessionData(HttpSession session) {
+        session.removeAttribute("selectedMovie");
+        session.removeAttribute("selectedSchedule");
+        session.removeAttribute("selectedSeatIds");
+    }
+}

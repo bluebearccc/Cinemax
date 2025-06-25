@@ -1,49 +1,46 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.bluebear.cinemax.enumtype.TheaterStock_Status;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.util.List;
+import lombok.*;
 
-@Entity
-@Table(name = "Theater_Stock")
+import java.util.List;
+import java.util.Set;
+@Builder
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
+@Entity
+@Table(name = "Theater_Stock")
 public class TheaterStock {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Theater_StockID")
-    private Integer theaterStockId;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer stockID;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "TheaterID", nullable = false)
-    private Theater theater;
+    @Column(name = "FoodName", length = 20, nullable = false)
+    private String itemName;
 
-    @Column(name = "FoodName", nullable = false, length = 20)
-    private String foodName;
+    @Column(name = "Image", length = 255)
+    private String image;
 
     @Column(name = "Quantity", nullable = false)
     private Integer quantity;
 
     @Column(name = "UnitPrice", nullable = false)
-    private Double unitPrice;
-
-    @Column(name = "Image", nullable = false)
-    private String image;
+    private Double price;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status")
-    private StockStatus status;
+    @Column(name = "Status", length = 50, nullable = false)
+    private TheaterStock_Status status;
 
-    @OneToMany(mappedBy = "theaterStock", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<DetailFD> detailFDs;
+    @OneToMany(mappedBy = "theaterStock")
+    private List<Detail_FD> detail_FD;
 
-    public enum StockStatus {
-        Active, Inactive
-    }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TheaterID", nullable = false, referencedColumnName = "TheaterID")
+    private Theater theater;
 }

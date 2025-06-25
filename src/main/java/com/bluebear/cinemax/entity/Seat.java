@@ -1,54 +1,43 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.bluebear.cinemax.enumtype.Seat_Status;
+import com.bluebear.cinemax.enumtype.TypeOfSeat;
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
-import java.util.List;
 
 @Entity
 @Table(name = "Seat")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Seat {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "SeatID")
-    private Integer seatId;
+    private Integer seatID;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne()
     @JoinColumn(name = "RoomID", nullable = false)
     private Room room;
 
+    @Column(name = "SeatType", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
-    @Column(name = "SeatType", nullable = false)
-    private SeatType seatType;
+    private TypeOfSeat seatType;
 
     @Column(name = "Position", nullable = false, length = 10)
     private String position;
 
     @Column(name = "IsVIP", nullable = false)
-    private Boolean isVIP;
+    private boolean isVIP;
 
     @Column(name = "UnitPrice", nullable = false)
     private Double unitPrice;
 
+    @Column(name = "Status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private SeatStatus status;
-
-    @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<DetailSeat> detailSeats;
-
-    public enum SeatType {
-        Couple, Single
-    }
-
-    public enum SeatStatus {
-        Active, Inactive
-    }
+    private Seat_Status status;
 }

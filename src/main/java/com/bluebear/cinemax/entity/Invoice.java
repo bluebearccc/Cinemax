@@ -1,53 +1,61 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
+import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import jakarta.persistence.*;
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.List;
 
-@Entity
-@Table(name = "Invoice")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
+import java.util.Set;
 @Builder
+@Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Table(name = "Invoice")
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "InvoiceID")
-    private Integer invoiceId;
+    private Integer invoiceID;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CustomerID", nullable = false)
+    @JoinColumn(name = "CustomerID" , nullable = true, referencedColumnName = "CustomerID")
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "EmployeeID")
+    @JoinColumn(name = "EmployeeID" , nullable = true, referencedColumnName = "EmployeeID")
     private Employee employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PromotionID")
+    @JoinColumn(name = "PromotionID" , nullable = true, referencedColumnName = "PromotionID")
     private Promotion promotion;
 
-    @Column(name = "Discount")
-    private Float discount;
-
-    @Column(name = "BookingDate", nullable = false)
+    @Column(name = "BookingDate")
     private LocalDateTime bookingDate;
 
-    @Column(name = "Totalprice")
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status")
+    private InvoiceStatus status;
+
+    @Column(name = "TotalPrice")
     private Double totalPrice;
 
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<DetailSeat> detailSeats;
+    @OneToMany(mappedBy = "invoice")
+    private List<Detail_FD> detail_FD;
 
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<DetailFD> detailFDs;
+    @Column(name = "GuestName")
+    private String guestName;
+
+    @Column(name = "GuestPhone")
+    private String guestPhone;
+
+    @Column(name = "GuestEmail", nullable = true)
+    private String guestEmail;
+
+
 }

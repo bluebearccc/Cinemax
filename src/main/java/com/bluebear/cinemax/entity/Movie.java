@@ -1,12 +1,13 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import com.bluebear.cinemax.enumtype.Movie_Status;
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -14,38 +15,37 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Movie {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MovieID")
-    private Integer movieId;
+    private Integer movieID;
 
-    @Column(name = "MovieName", nullable = false)
+    @Column(name = "MovieName", nullable = false, length = 255)
     private String movieName;
 
     @Column(name = "Description", length = 1000)
     private String description;
 
-    @Column(name = "Image", nullable = false)
+    @Column(name = "Image", nullable = false, length = 255)
     private String image;
 
-    @Column(name = "Banner", nullable = false)
+    @Column(name = "Banner", nullable = false, length = 255)
     private String banner;
 
     @Column(name = "Studio", length = 100)
     private String studio;
 
     @Column(name = "Duration", nullable = false)
-    private Integer duration;
+    private int duration;
 
-    @Column(name = "Trailer", nullable = false)
+    @Column(name = "Trailer", nullable = false, length = 255)
     private String trailer;
 
-    @Column(name = "MovieRate")
+    @Column(name = "MovieRate", nullable = false)
     private Double movieRate;
-
-    @Column(name = "Actor", nullable = false, columnDefinition = "nvarchar(MAX)")
-    private String actor;
 
     @Column(name = "StartDate", nullable = false)
     private LocalDateTime startDate;
@@ -53,23 +53,29 @@ public class Movie {
     @Column(name = "EndDate", nullable = false)
     private LocalDateTime endDate;
 
+    @Column(name = "Status", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private MovieStatus status;
+    private Movie_Status status;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<MovieGenre> movieGenres;
+    @ManyToMany
+    @JoinTable(
+            name = "Movie_Genre",
+            joinColumns = @JoinColumn(name = "MovieID"),
+            inverseJoinColumns = @JoinColumn(name = "GenreID")
+    )
+    private List<Genre> genres;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<Schedule> schedules;
+    @ManyToMany
+    @JoinTable(
+            name = "Movie_Actor",
+            joinColumns = @JoinColumn(name = "MovieID"),
+            inverseJoinColumns = @JoinColumn(name = "ActorID")
+    )
+    private List<Actor> actors;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<MovieFeedback> movieFeedbacks;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<MovieFeedback> feedbackList;
 
-    public enum MovieStatus {
-        Active, Removed
-    }
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Schedule> scheduleList;
 }
