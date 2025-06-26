@@ -1,6 +1,7 @@
 package com.bluebear.cinemax.repository;
 
 import com.bluebear.cinemax.entity.DetailSeat;
+import com.bluebear.cinemax.entity.Invoice;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,6 +13,8 @@ import java.util.List;
 
 public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer> {
     List<DetailSeat> findByScheduleScheduleId(Integer scheduleId);
+    List<DetailSeat> findByInvoice(Invoice invoice);
+
     boolean existsBySeatSeatIdAndScheduleScheduleId(Integer seatId, Integer scheduleId);
     @Modifying
     @Transactional

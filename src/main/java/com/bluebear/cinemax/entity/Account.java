@@ -1,12 +1,11 @@
 package com.bluebear.cinemax.entity;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @AllArgsConstructor
-@NoArgsConstructor
-@Data
+@NoArgsConstructor  
+@Getter
+@Setter
 @Entity
 @Table(name = "Account")
 public class Account {

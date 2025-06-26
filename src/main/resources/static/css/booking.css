@@ -205,7 +205,7 @@ body {
     transform: translateY(-2px);
 }
 
-.btn-check:checked + .seat-available {
+.btn-check:checked + .seat-available+ .seat-vip {
     background: #28a745;
     color: white;
     border-color: #1e7e34;
@@ -213,7 +213,7 @@ body {
 }
 
 .seat-booked {
-    background: #dc3545 !important;
+    background: #070606 !important;
     color: white !important;
     cursor: not-allowed !important;
     opacity: 0.7;
@@ -256,9 +256,11 @@ body {
 }
 
 .legend-booked {
-    background: #dc3545;
+    background: #070606;
 }
-
+.legend-isVIP {
+    background:#e74c3c;
+}
 /* Selected Seats Summary */
 .selected-seats-section {
     background: #f8f9fa;
@@ -412,3 +414,45 @@ body {
         transform: translateY(0);
     }
 }
+.seat-vip {
+    background-color: #e74c3c !important;
+
+    color: white;
+}
+.seat-couple-wrapper {
+    display: inline-block;
+    width: calc(2 * 40px + 10px); /* 2 ghế + margin */
+    position: relative;
+    margin: 0 5px;
+}
+
+.seat-couple {
+    background-color: #f44336;
+    border-radius: 8px;
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    font-weight: bold;
+    cursor: pointer;
+}
+/* Ghế VIP khi được chọn (giống ghế thường đã chọn) */
+.btn-check:checked + .seat-vip {
+    background-color: #28a745 !important;
+    border-color: #1e7e34 !important;
+    color: white !important;
+    transform: scale(1.05);
+}
+
+/* Ghế VIP đã đặt (giống như seat-booked) */
+.seat-vip.seat-booked {
+    background-color: #070606 !important;
+    color: white !important;
+    cursor: not-allowed !important;
+    opacity: 0.7;
+}
+.seat-couple.seat-vip {
+    background-color: #e74c3c; /* đỏ VIP */
+    color: white;
+}
+
+

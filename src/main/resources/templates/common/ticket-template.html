@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Vé xem phim - Cinemax</title>
+    <link rel="stylesheet" th:href="@{/css/ticket.css}">
+    <style>
+
+    </style>
+</head>
+<body>
+<div class="ticket-box">
+    <h2>🎟️ Vé xem phim - Cinemax</h2>
+
+    <div class="info">
+        <p><span class="label">🎬 Tên phim:</span> <span th:text="${movieName}"></span></p>
+        <p><span class="label">🏢 Phòng chiếu:</span> <span th:text="${room}"></span></p>
+        <p><span class="label">💺 Ghế ngồi:</span> <span th:text="${seats}"></span></p>
+        <p><span class="label">🕒 Thời gian chiếu:</span> <span th:text="${showtime}"></span></p>
+    </div>
+
+    <hr/>
+
+    <div class="info">
+        <p><span class="label">🧾 Mã hóa đơn:</span> <span th:text="${invoiceId}"></span></p>
+        <p><span class="label">💵 Số tiền:</span> <span th:text="${amount}"></span> VND</p>
+        <p><span class="label">🏦 Ngân hàng:</span> <span th:text="${bankCode}"></span></p>
+    </div>
+
+    <div class="qr-code">
+        <img th:src="@{https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VNPAY-${invoiceId}}" alt="QR Code"/>
+        <p>Mã QR vé của bạn</p>
+    </div>
+
+    <div class="footer">
+        Cảm ơn bạn đã đặt vé tại <strong>Cinemax</strong>! <br>
+        Vui lòng xuất trình mã QR khi vào rạp.
+    </div>
+</div>
+</body>
+</html>
+

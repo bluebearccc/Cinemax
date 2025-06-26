@@ -7,6 +7,7 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,4 +42,9 @@ public class Invoice {
     @Column(name = "Status", nullable = false)
     @Enumerated(EnumType.STRING)
     private InvoiceStatus status;
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
+    private List<DetailSeat> detailSeats;
+    public List<DetailSeat> getDetailSeats() {
+        return detailSeats;
+    }
 }

@@ -1,7 +1,10 @@
 package com.bluebear.cinemax.service;
 import com.bluebear.cinemax.config.VnpayConfig;
 import com.bluebear.cinemax.entity.Invoice;
+import com.bluebear.cinemax.entity.Schedule;
 import com.bluebear.cinemax.entity.TheaterStock;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
+import com.bluebear.cinemax.repository.InvoiceRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,7 @@ import com.bluebear.cinemax.repository.TheaterStockRepository;
 @Service
 @RequiredArgsConstructor
 public class VnpayService {
+    private final InvoiceRepository invoiceRepo;
     private final VnpayConfig vnpayConfig;
     private final BookingService bookingService;
     private final TheaterStockRepository theaterStockRepo;
@@ -113,4 +117,10 @@ public class VnpayService {
             throw new RuntimeException("Lỗi khi tạo HMAC SHA512", e);
         }
     }
+    public Invoice getPendingInvoiceById(int id) {
+        return invoiceRepo.findByInvoiceIdAndStatus(id, InvoiceStatus.Booked)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn đang chờ thanh toán"));
+    }
+
+
 }

@@ -11,4 +11,5 @@ public interface MovieGenreRepository extends JpaRepository<MovieGenre, Integer>
     List<MovieGenre> findByGenreId(int genreId);
 
     List<MovieGenre> findByMovieId(int movieId);
+
 }

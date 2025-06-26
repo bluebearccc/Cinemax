@@ -12,7 +12,7 @@ public class SeatDTO {
     private Integer seatId;
     private String position;
     private String seatType;
-    private boolean isVIP;
+    private boolean VIP;
     private BigDecimal unitPrice;
     private boolean isBooked;
 }
