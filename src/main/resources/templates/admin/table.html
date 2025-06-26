@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta content="width=device-width, initial-scale=1.0" name="viewport">
+  <title>Account Management - Cinemax Admin</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/admin/styles.css}">
+</head>
+
+<body>
+
+<nav class="sidebar" id="sidebar">
+  <div class="sidebar-header">
+    <a class="logo" href="#">
+      <i class="fas fa-film"></i>
+      <span class="logo-text">Cinemax</span>
+    </a>
+  </div>
+
+  <ul class="nav-menu">
+    <li class="nav-item">
+      <a class="nav-link" href="#">
+        <i class="fas fa-tachometer-alt"></i>
+        <span class="nav-text">Dashboard</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link active" href="#">
+        <i class="fas fa-user-cog"></i>
+        <span class="nav-text">Accounts</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">
+        <i class="fas fa-film"></i>
+        <span class="nav-text">Movies</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">
+        <i class="fas fa-ticket-alt"></i>
+        <span class="nav-text">Bookings</span>
+      </a>
+    </li>
+    <li class="nav-item">
+      <a class="nav-link" href="#">
+        <i class="fas fa-cog"></i>
+        <span class="nav-text">Settings</span>
+      </a>
+    </li>
+  </ul>
+</nav>
+
+<!-- Main Content -->
+<div class="main-content">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <h1>Account Management</h1>
+      <div class="breadcrumb">
+        <i class="fas fa-home"></i>
+        <a th:href="@{/admin/dashboard}">Dashboard</a> / Accounts
+      </div>
+    </div>
+    <div class="header-right">
+      <button class="toggle-btn" onclick="toggleSidebar()">
+        <i class="fas fa-bars"></i>
+      </button>
+      <div class="user-profile">
+        <div class="user-avatar">
+          <i class="fas fa-user"></i>
+        </div>
+        <span>Admin User</span>
+        <i class="fas fa-chevron-down"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- Flash Messages -->
+  <div class="alert alert-success" th:if="${successMessage}" style="display: block;">
+    <i class="fas fa-check-circle"></i>
+    <span th:text="${successMessage}">Success message</span>
+  </div>
+
+  <div class="alert alert-danger" th:if="${errorMessage}" style="display: block;">
+    <i class="fas fa-exclamation-circle"></i>
+    <span th:text="${errorMessage}">Error message</span>
+  </div>
+
+  <div class="alert alert-warning" th:if="${emailError}" style="display: block;">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span th:text="${emailError}">Email error</span>
+  </div>
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-title">
+        <i class="fas fa-table"></i>
+        Account List
+      </div>
+      <div class="card-actions">
+        <div class="search-box">
+          <form th:action="@{/admin/customer/search}" method="get">
+            <input
+                    class="search-input"
+                    type="text"
+                    id="searchInput"
+                    name="fullName"
+                    placeholder="Search Full Name..."
+                    th:value="${keyword}">
+
+            <button type="submit" class="search-btn">
+              <i class="fas fa-search"></i>
+            </button>
+          </form>
+        </div>
+        <button class="btn btn-primary" onclick="showAddModal()">
+          <i class="fas fa-plus"></i>
+          Add Customer
+        </button>
+      </div>
+    </div>
+
+    <div class="table-container">
+      <table class="table">
+        <thead>
+        <tr>
+          <th>ID</th>
+          <th>
+            Full Name
+            <div style="display: inline-flex; gap: 5px; margin-left: 10px;">
+              <a th:href="@{/admin/customer/sort/asc(keyword=${keyword})}" class="btn btn-sm btn-outline">
+                <i class="fas fa-sort-alpha-down"></i>
+              </a>
+              <a th:href="@{/admin/customer/sort/desc(keyword=${keyword})}" class="btn btn-sm btn-outline">
+                <i class="fas fa-sort-alpha-up"></i>
+              </a>
+            </div>
+          </th>
+          <th>Email</th>
+          <th>Phone</th>
+          <th>Role</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        <tr th:each="customer : ${customers}"
+            th:with="
+                statusAction=${customer.account.status} ? 'Active' : 'Deactive',
+                statusLabel=${customer.account.status} ? 'Active' : 'Deactive',
+                statusClass=${customer.account.status} ? 'btn btn-success btn-sm' : 'btn btn-danger btn-sm'">
+
+          <td th:text="${customer.customerID}">1</td>
+          <td th:text="${customer.fullName}">Full Name</td>
+          <td th:text="${customer.account.email}">Email</td>
+          <td th:text="${customer.phone}">Phone</td>
+          <td th:text="${customer.getAccount().getRole()}">Role</td>
+
+          <td>
+            <form th:action="@{'/admin/customer/' + ${customer.getAccount().getId()} + '/' + ${statusAction}}"
+                  method="post" style="display:inline;">
+              <button type="submit"
+                      th:text="${statusLabel}"
+                      th:class="${statusClass}">
+              </button>
+            </form>
+          </td>
+
+          <td>
+            <div class="action-buttons">
+              <button class="btn btn-sm btn-primary"
+                      type="button"
+                      th:attr="onclick=|showEditModal('${customer.customerID}', '${customer.fullName}', '${customer.phone}', '${customer.account.email}', '${customer.account.role}', '${customer.account.status}')|">
+                <i class="fas fa-edit"></i>
+              </button>
+
+              <button class="btn btn-sm btn-danger"
+                      th:attr="onclick=|deleteCustomer(${customer.customerID}, ${customer.account.status})|">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Customer Modal -->
+<div class="modal" id="addCustomerModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">
+        <i class="fas fa-user-plus"></i>
+        Add New Customer
+      </div>
+      <button class="modal-close" onclick="hideAddModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form id="addCustomerForm" th:action="@{/admin/customer/add}" method="post" onsubmit="return validateForm()">
+      <div class="modal-body">
+        <div class="form-grid">
+          <!-- Customer Info -->
+          <div>
+            <div class="form-section">
+              <div class="form-group">
+                <label>Full Name *</label>
+                <input class="form-control" name="fullName" required type="text">
+              </div>
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input class="form-control" name="phone" type="tel">
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Info -->
+          <div>
+            <div class="form-section">
+              <div class="form-group">
+                <label>Email *</label>
+                <input class="form-control" name="email" required type="email">
+              </div>
+              <div class="form-group">
+                <label>Password *</label>
+                <input class="form-control" name="password" required type="password">
+              </div>
+              <div class="form-group">
+                <label>Role *</label>
+                <select class="form-control" name="role" required>
+                  <option value="">Select Role</option>
+                  <option value="CUSTOMER">Customer</option>
+                  <option value="EMPLOYEE">Employee</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" name="statusChecked" value="true"> Account Active
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="hideAddModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Save Customer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Customer Modal -->
+<div class="modal" id="editCustomerModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title">
+        <i class="fas fa-user-edit"></i>
+        Edit Customer
+      </div>
+      <button class="modal-close" onclick="hideEditModal()">
+        <i class="fas fa-times"></i>
+      </button>
+    </div>
+
+    <form id="editCustomerForm" th:action="@{/admin/customer/update}" method="post" onsubmit="return validateForm()">
+      <input type="hidden" name="id" id="editCustomerId">
+
+      <div class="modal-body">
+        <div class="form-grid">
+          <!-- Customer Info -->
+          <div>
+            <div class="form-section">
+              <div class="form-group">
+                <label>Full Name *</label>
+                <input class="form-control" name="fullName" id="editFullName" required type="text">
+              </div>
+              <div class="form-group">
+                <label>Phone Number</label>
+                <input class="form-control" name="phone" id="editPhone" type="tel">
+              </div>
+            </div>
+          </div>
+
+          <!-- Account Info -->
+          <div>
+            <div class="form-section">
+              <div class="form-group">
+                <label>Email *</label>
+                <input class="form-control" name="email" id="editEmail" required type="email">
+              </div>
+              <div class="form-group">
+                <label>Password (leave blank to keep current)</label>
+                <input class="form-control" name="password" id="editPassword" type="password">
+              </div>
+              <div class="form-group">
+                <label>Role *</label>
+                <select class="form-control" name="role" id="editRole" required>
+                  <option value="">Select Role</option>
+                  <option value="CUSTOMER">Customer</option>
+                  <option value="EMPLOYEE">Employee</option>
+                  <option value="ADMIN">Admin</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>
+                  <input type="checkbox" name="statusChecked" id="editStatusChecked" value="true"> Account Active
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="hideEditModal()">
+          <i class="fas fa-times"></i> Cancel
+        </button>
+        <button type="submit" class="btn btn-primary">
+          <i class="fas fa-save"></i> Update Customer
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+
+<script>
+  function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    sidebar.classList.toggle('collapsed');
+  }
+
+  function showAddModal() {
+    document.getElementById('addCustomerModal').style.display = 'block';
+  }
+
+  function hideAddModal() {
+    document.getElementById('addCustomerModal').style.display = 'none';
+    document.getElementById('addCustomerForm').reset();
+  }
+
+
+  function deleteCustomer(id, status) {
+    const isActive = status === 'true' || status === true;
+
+    if (isActive) {
+      alert("Cannot delete active customer. Please deactivate the customer first.");
+      return;
+    }
+
+    if (confirm("Are you sure you want to delete this customer?")) {
+      fetch(`/admin/customer/delete/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Requested-With': 'XMLHttpRequest'
+        }
+      }).then(response => {
+        if (response.ok) {
+          if (response.redirected) {
+            window.location.href = response.url;
+          } else {
+            window.location.reload();
+          }
+        } else {
+          return response.text().then(text => {
+            throw new Error(text || 'Failed to delete customer');
+          });
+        }
+      }).catch(error => {
+        console.error('Error:', error);
+        alert("Error deleting customer: " + error.message);
+      });
+    }
+  }
+
+
+  window.onclick = function(event) {
+    const modal = document.getElementById('addCustomerModal');
+    if (event.target === modal) {
+      hideAddModal();
+    }
+  }
+
+  function validateForm() {
+    const phoneInput = document.querySelector('input[name="phone"]');
+    const phone = phoneInput.value.trim();
+    if (phone.length === 0) return true;
+    const phonePattern = /^09\d{8}$/;
+    if (!phonePattern.test(phone)) {
+      alert("Phone number must be 10 digits and start with 09.");
+      phoneInput.focus();
+      return false;
+    }
+    return true;
+  }
+
+  function showEditModal(id, fullName, phone, email, role, status) {
+    // if (role === 'CUSTOMER') {
+    //     alert("Customers are not allowed to be edited.");
+    //     return;
+    // }
+    document.getElementById('editCustomerId').value = id;
+    document.getElementById('editFullName').value = fullName;
+    document.getElementById('editPhone').value = phone;
+    document.getElementById('editEmail').value = email;
+    document.getElementById('editPassword').value = '';
+    document.getElementById('editRole').value = role;
+    document.getElementById('editStatusChecked').checked = (status === 'true' || status === true);
+
+    document.getElementById('editCustomerModal').style.display = 'block';
+  }
+
+  function hideEditModal() {
+    document.getElementById('editCustomerModal').style.display = 'none';
+    document.getElementById('editCustomerForm').reset();
+  }
+
+
+</script>
+
+</body>
+</html>

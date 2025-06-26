@@ -1,60 +1,97 @@
 package com.bluebear.cinemax.repository;
 
-import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
-import com.bluebear.cinemax.entity.Schedule;
-import com.bluebear.cinemax.enumtype.Movie_Status;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
-    //find by condition
 
-    @Query("SELECT m FROM Movie m JOIN m.genres g WHERE g.genreID = :genreId")
-    List<Movie> findByGenreIdAndStatus(Integer genreId, Movie_Status status, Pageable pageable);
+    // Tìm phim theo trạng thái
+    List<Movie> findByStatus(Movie.MovieStatus status);
 
-    List<Movie> findByGenresAndStatusOrderByMovieRateDesc(Genre genre, Movie_Status status, Pageable pageable);
+    // Tìm phim đang chiếu (Active và trong khoảng thời gian)
+    @Query("SELECT m FROM Movie m WHERE m.status = 'Active' AND m.startDate <= :currentDate AND m.endDate >= :currentDate")
+    List<Movie> findActiveMovies(@Param("currentDate") LocalDate currentDate);
 
-    List<Movie> findBymovieNameContainingIgnoreCaseAndStatus(String movieName, Movie_Status status, Pageable pageable);
+    // Tìm phim sắp chiếu
+    @Query("SELECT m FROM Movie m WHERE m.status = 'Active' AND m.startDate > :currentDate")
+    List<Movie> findUpcomingMovies(@Param("currentDate") LocalDate currentDate);
 
-    List<Movie> findByGenresAndMovieNameContainingIgnoreCaseAndStatus(Genre genre, String movieName, Movie_Status status, Pageable pageable);
+    // Tìm phim theo tên (có thể search) - không phân biệt hoa thường
+    List<Movie> findByMovieNameContainingIgnoreCase(String movieName);
 
-    Movie findTop1ByStatusOrderByMovieRateDesc(Movie_Status status);
+    // Tìm phim theo tên và trạng thái
+    List<Movie> findByMovieNameContainingIgnoreCaseAndStatus(String movieName, Movie.MovieStatus status);
 
-    List<Movie> findMoviesByGenresAndMovieNameContainingIgnoreCaseAndStatusOrderByMovieRateDesc(Genre genre, String movieName, Movie_Status status, Pageable pageable);
+    // Tìm phim theo thể loại
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.movieGenres mg WHERE mg.genre.genreId = :genreId AND m.status = 'Active'")
+    List<Movie> findByGenreId(@Param("genreId") Integer genreId);
 
-    List<Movie> findMovesByMovieNameContainingIgnoreCaseAndStatusOrderByMovieRateDesc(String movieName, Movie_Status status, Pageable pageable);
+    // Tìm phim theo thể loại (bao gồm cả Removed)
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.movieGenres mg WHERE mg.genre.genreId = :genreId")
+    List<Movie> findByGenreIdIncludingRemoved(@Param("genreId") Integer genreId);
 
-    List<Movie> findTop3ByStatusOrderByMovieRateDesc(Movie_Status status);
+    // Tìm phim theo thể loại và trạng thái
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.movieGenres mg WHERE mg.genre.genreId = :genreId AND m.status = :status")
+    List<Movie> findByGenreIdAndStatus(@Param("genreId") Integer genreId, @Param("status") Movie.MovieStatus status);
 
-    List<Movie> findMoviesByStartDateBeforeAndEndDateAfterOrderByMovieRateDesc(Date currentDate, Date nowDate);
+    // Tìm phim theo diễn viên
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.movieActors ma WHERE ma.actor.actorId = :actorId AND m.status = 'Active'")
+    List<Movie> findByActorId(@Param("actorId") Integer actorId);
 
-    List<Movie> findMoviesByStartDateAfter(Date currentDate);
+    // Tìm phim theo diễn viên (bao gồm cả Removed)
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.movieActors ma WHERE ma.actor.actorId = :actorId")
+    List<Movie> findByActorIdIncludingRemoved(@Param("actorId") Integer actorId);
 
-    @Query("SELECT DISTINCT s.movie FROM Schedule s WHERE CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
-    List<Movie> findMoviesWithScheduleToday(Date today);
+    // Tìm top phim theo rating
+    List<Movie> findTop10ByStatusOrderByMovieRateDesc(Movie.MovieStatus status);
 
-    @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
-    List<Movie> findMoviesWithScheduleTodayWithTheater(int theaterId, Date today);
-    //count
+    // Tìm phim theo nhiều criteria
+    @Query("SELECT DISTINCT m FROM Movie m " +
+            "LEFT JOIN m.movieGenres mg " +
+            "WHERE (:movieName IS NULL OR LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%'))) " +
+            "AND (:genreId IS NULL OR mg.genre.genreId = :genreId) " +
+            "AND (:status IS NULL OR m.status = :status)")
+    List<Movie> findMoviesByCriteria(@Param("movieName") String movieName,
+                                     @Param("genreId") Integer genreId,
+                                     @Param("status") Movie.MovieStatus status);
 
-    int countMovieByStatus(Movie_Status status);
+    // Tìm phim theo khoảng thời gian
+    @Query("SELECT m FROM Movie m WHERE m.startDate >= :startDate AND m.endDate <= :endDate AND m.status = 'Active'")
+    List<Movie> findByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-    int countMovieByGenresAndStatus(Genre genre, Movie_Status status);
+    // Tìm phim theo rating tối thiểu
+    @Query("SELECT m FROM Movie m WHERE m.movieRate >= :minRating AND m.status = 'Active' ORDER BY m.movieRate DESC")
+    List<Movie> findByMinRating(@Param("minRating") Double minRating);
 
-    int countMovieByMovieNameContainingAndStatus(String movieName, Movie_Status status);
+    // Tìm phim theo duration
+    @Query("SELECT m FROM Movie m WHERE m.duration >= :minDuration AND m.duration <= :maxDuration AND m.status = 'Active'")
+    List<Movie> findByDurationRange(@Param("minDuration") Integer minDuration, @Param("maxDuration") Integer maxDuration);
 
-    int countMovieByGenresAndMovieNameContainingAndStatus(Genre genre, String movieName, Movie_Status status);
+    // Tìm phim mới nhất
+    @Query("SELECT m FROM Movie m WHERE m.status = 'Active' ORDER BY m.startDate DESC")
+    List<Movie> findLatestMovies();
 
-    //find all
+    // Tìm phim phổ biến (theo rating)
+    @Query("SELECT m FROM Movie m WHERE m.status = 'Active' AND m.movieRate IS NOT NULL ORDER BY m.movieRate DESC")
+    List<Movie> findPopularMovies();
 
-    List<Movie> findAllByStatus(Movie_Status status, Pageable pageable);
+    // Đếm phim theo trạng thái
+    long countByStatus(Movie.MovieStatus status);
 
-    List<Movie> findAllByStatusOrderByMovieRateDesc(Movie_Status status, Pageable pageable);
+    // Đếm phim theo thể loại
+    @Query("SELECT COUNT(DISTINCT m) FROM Movie m JOIN m.movieGenres mg WHERE mg.genre.genreId = :genreId AND m.status = 'Active'")
+    long countByGenreId(@Param("genreId") Integer genreId);
+
+    // Kiểm tra phim có tồn tại theo tên
+    boolean existsByMovieNameIgnoreCase(String movieName);
+
+    // Tìm phim theo studio
+    List<Movie> findByStudioContainingIgnoreCaseAndStatus(String studio, Movie.MovieStatus status);
 }

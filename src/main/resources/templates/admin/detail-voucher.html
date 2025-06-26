@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Voucher Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .breadcrumb-text {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-warning {
+            background: var(--warning-orange);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-warning:hover {
+            background: #e8a317;
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .detail-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary-blue);
+        }
+
+        .detail-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .voucher-code {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 1.2rem;
+            text-align: center;
+            border: 2px dashed var(--primary-blue);
+        }
+
+        .discount-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--success-green);
+            text-align: center;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .status-active {
+            background: rgba(52, 168, 83, 0.2);
+            color: var(--success-green);
+        }
+
+        .status-inactive {
+            background: rgba(234, 67, 53, 0.2);
+            color: var(--danger-red);
+        }
+
+        .status-expired {
+            background: rgba(128, 128, 128, 0.2);
+            color: var(--text-muted);
+        }
+
+        .quantity-display {
+            text-align: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--warning-orange);
+        }
+
+        .date-value {
+            color: var(--text-primary);
+            font-weight: 500;
+        }
+
+        .validity-indicator {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .validity-active {
+            border-color: var(--success-green);
+            background: rgba(52, 168, 83, 0.05);
+        }
+
+        .validity-expired {
+            border-color: var(--danger-red);
+            background: rgba(234, 67, 53, 0.05);
+        }
+
+        .validity-inactive {
+            border-color: var(--text-muted);
+            background: rgba(128, 128, 128, 0.05);
+        }
+
+        .validity-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .validity-text {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .validity-desc {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a class="nav-link" href="/admin">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link" href="/admin/movies">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        </a>
+        <a class="nav-link active" href="/admin/vouchers">
+            <i class="fas fa-ticket-alt"></i>Vouchers
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="header-section fade-in">
+        <div class="header-content">
+            <h2>Voucher Details</h2>
+            <p class="breadcrumb-text">Dashboard > Vouchers > <span th:text="${voucher.promotionCode}">SAVE20</span></p>
+        </div>
+        <div class="action-buttons">
+            <a href="/admin/vouchers" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i>Back to List
+            </a>
+            <a th:href="@{/admin/vouchers/edit/{id}(id=${voucher.promotionId})}" class="btn-warning">
+                <i class="fas fa-edit"></i>Edit Voucher
+            </a>
+        </div>
+    </div>
+
+    <!-- Voucher Details -->
+    <div class="detail-grid fade-in">
+        <!-- Main Information -->
+        <div class="detail-card">
+            <h3 class="card-title">
+                <i class="fas fa-ticket-alt"></i>
+                Voucher Information
+            </h3>
+
+            <div class="detail-item">
+                <div class="detail-label">Promotion Code</div>
+                <div class="voucher-code" th:text="${voucher.promotionCode}">SAVE20</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Discount Percentage</div>
+                <div class="discount-value" th:text="${voucher.formattedDiscount}">20%</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Start Date & Time</div>
+                <div class="date-value" th:text="${voucher.formattedStartTime}">Jan 15, 2024 10:00</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">End Date & Time</div>
+                <div class="date-value" th:text="${voucher.formattedEndTime}">Apr 15, 2024 23:59</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Available Quantity</div>
+                <div class="quantity-display" th:text="${voucher.quantity}">100</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">Status</div>
+                <div th:class="${voucher.status == 'Active'} ? 'status-badge status-active' :
+                               (${voucher.expired} ? 'status-badge status-expired' : 'status-badge status-inactive')"
+                     th:text="${voucher.expired} ? 'Expired' : ${voucher.status}">Active</div>
+            </div>
+        </div>
+
+        <!-- Status & Validity -->
+        <div class="detail-card">
+            <h3 class="card-title">
+                <i class="fas fa-info-circle"></i>
+                Validity Status
+            </h3>
+
+            <div th:if="${voucher.active}" class="validity-indicator validity-active">
+                <div class="validity-icon" style="color: var(--success-green);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="validity-text" style="color: var(--success-green);">Valid & Active</div>
+                <div class="validity-desc">This voucher is currently active and can be used</div>
+            </div>
+
+            <div th:if="${voucher.expired}" class="validity-indicator validity-expired">
+                <div class="validity-icon" style="color: var(--danger-red);">
+                    <i class="fas fa-times-circle"></i>
+                </div>
+                <div class="validity-text" style="color: var(--danger-red);">Expired</div>
+                <div class="validity-desc">This voucher has expired and cannot be used</div>
+            </div>
+
+            <div th:if="${!voucher.active and !voucher.expired}" class="validity-indicator validity-inactive">
+                <div class="validity-icon" style="color: var(--text-muted);">
+                    <i class="fas fa-pause-circle"></i>
+                </div>
+                <div class="validity-text" style="color: var(--text-muted);">Inactive</div>
+                <div class="validity-desc">This voucher is not currently active</div>
+            </div>
+
+            <!-- Additional Info -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <div class="detail-item">
+                    <div class="detail-label">Voucher ID</div>
+                    <div class="detail-value" th:text="${voucher.promotionId}">#001</div>
+                </div>
+
+                <div class="detail-item" th:if="${voucher.quantity != null and voucher.quantity == 0}">
+                    <div class="detail-label">Usage Status</div>
+                    <div class="detail-value" style="color: var(--danger-red);">All vouchers used</div>
+                </div>
+
+                <div class="detail-item" th:if="${voucher.quantity != null and voucher.quantity > 0}">
+                    <div class="detail-label">Remaining Uses</div>
+                    <div class="detail-value" th:text="${voucher.quantity} + ' remaining'">50 remaining</div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn-primary w-100" th:onclick="|copyToClipboard('${voucher.promotionCode}')|">
+                        <i class="fas fa-copy"></i>Copy Voucher Code
+                    </button>
+                    <button type="button" class="btn-secondary w-100" th:onclick="|confirmDelete(${voucher.promotionId}, '${voucher.promotionCode}')|">
+                        <i class="fas fa-trash"></i>Delete Voucher
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" style="color: var(--text-primary);">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="color: var(--text-primary);">
+                <p>Are you sure you want to delete voucher <strong id="deleteVoucherCode"></strong>?</p>
+                <p class="text-danger">This action cannot be undone.</p>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="copyToast" class="toast" role="alert">
+        <div class="toast-header" style="background: var(--card-bg); border-bottom: 1px solid var(--border-color);">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            <strong class="me-auto" style="color: var(--text-primary);">Success</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" style="background: var(--card-bg); color: var(--text-primary);">
+            Voucher code copied to clipboard!
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    });
+
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+            toast.show();
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+        });
+    }
+
+    // Delete confirmation
+    function confirmDelete(voucherId, voucherCode) {
+        document.getElementById('deleteVoucherCode').textContent = voucherCode;
+        document.getElementById('deleteForm').action = '/admin/vouchers/delete/' + voucherId;
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+</script>
+</body>
+</html>

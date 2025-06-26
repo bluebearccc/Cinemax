@@ -1,75 +1,200 @@
 package com.bluebear.cinemax.entity;
-
-import com.bluebear.cinemax.enumtype.Movie_Status;
 import jakarta.persistence.*;
-import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "Movie")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
-@Builder
 public class Movie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MovieID")
-    private Integer movieID;
+    private Integer movieId;
 
-    @Column(name = "MovieName", nullable = false, length = 255)
+    @Column(name = "MovieName", nullable = false)
     private String movieName;
 
-    @Column(name = "Description", length = 1000)
+    @Column(name = "Description", columnDefinition = "nvarchar(MAX)")
     private String description;
 
-    @Column(name = "Image", nullable = false, length = 255)
+    @Column(name = "Image", nullable = false)
     private String image;
 
-    @Column(name = "Banner", nullable = false, length = 255)
+    @Column(name = "Banner", nullable = false)
     private String banner;
 
-    @Column(name = "Studio", length = 100)
+    @Column(name = "Studio")
     private String studio;
 
     @Column(name = "Duration", nullable = false)
-    private int duration;
+    private Integer duration;
 
-    @Column(name = "Trailer", nullable = false, length = 255)
+    @Column(name = "Trailer", nullable = false)
     private String trailer;
 
-    @Column(name = "MovieRate", nullable = false)
-    private Double movieRate;
-
-    @Column(name = "Actor", nullable = false, columnDefinition = "NVARCHAR(MAX)")
-    private String actor;
+    @Column(name = "MovieRate", precision = 3, scale = 1)
+    private BigDecimal movieRate;
 
     @Column(name = "StartDate", nullable = false)
-    private Date startDate;
+    private LocalDate startDate;
 
     @Column(name = "EndDate", nullable = false)
-    private Date endDate;
+    private LocalDate endDate;
 
-    @Column(name = "Status", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
-    private Movie_Status status;
+    @Column(name = "Status", nullable = false)
+    private MovieStatus status;
 
-    @ManyToMany
-    @JoinTable(
-            name = "Movie_Genre",
-            joinColumns = @JoinColumn(name = "MovieID"),
-            inverseJoinColumns = @JoinColumn(name = "GenreID")
-    )
-    private List<Genre> genres;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<MovieGenre> movieGenres;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<MovieFeedback> feedbackList;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Set<MovieActor> movieActors;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Schedule> scheduleList;
+    // Enum for Status
+    public enum MovieStatus {
+        Active, Removed
+    }
+
+    // Constructors
+    public Movie() {}
+
+    public Movie(String movieName, String image, String banner, Integer duration,
+                 String trailer, LocalDate startDate, LocalDate endDate, MovieStatus status) {
+        this.movieName = movieName;
+        this.image = image;
+        this.banner = banner;
+        this.duration = duration;
+        this.trailer = trailer;
+        this.startDate = startDate;
+        this.endDate = endDate;
+        this.status = status;
+    }
+
+    // Getters and Setters
+    public Integer getMovieId() {
+        return movieId;
+    }
+
+    public void setMovieId(Integer movieId) {
+        this.movieId = movieId;
+    }
+
+    public String getMovieName() {
+        return movieName;
+    }
+
+    public void setMovieName(String movieName) {
+        this.movieName = movieName;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public String getImage() {
+        return image;
+    }
+
+    public void setImage(String image) {
+        this.image = image;
+    }
+
+    public String getBanner() {
+        return banner;
+    }
+
+    public void setBanner(String banner) {
+        this.banner = banner;
+    }
+
+    public String getStudio() {
+        return studio;
+    }
+
+    public void setStudio(String studio) {
+        this.studio = studio;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public String getTrailer() {
+        return trailer;
+    }
+
+    public void setTrailer(String trailer) {
+        this.trailer = trailer;
+    }
+
+    public BigDecimal getMovieRate() {
+        return movieRate;
+    }
+
+    public void setMovieRate(BigDecimal movieRate) {
+        this.movieRate = movieRate;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
+    public void setStartDate(LocalDate startDate) {
+        this.startDate = startDate;
+    }
+
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
+    public void setEndDate(LocalDate endDate) {
+        this.endDate = endDate;
+    }
+
+    public MovieStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(MovieStatus status) {
+        this.status = status;
+    }
+
+    public Set<MovieGenre> getMovieGenres() {
+        return movieGenres;
+    }
+
+    public void setMovieGenres(Set<MovieGenre> movieGenres) {
+        this.movieGenres = movieGenres;
+    }
+
+    public Set<MovieActor> getMovieActors() {
+        return movieActors;
+    }
+
+    public void setMovieActors(Set<MovieActor> movieActors) {
+        this.movieActors = movieActors;
+    }
+
+    @Override
+    public String toString() {
+        return "Movie{" +
+                "movieId=" + movieId +
+                ", movieName='" + movieName + '\'' +
+                ", description='" + description + '\'' +
+                ", duration=" + duration +
+                ", movieRate=" + movieRate +
+                ", status=" + status +
+                '}';
+    }
 }

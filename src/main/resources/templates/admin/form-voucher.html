@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Add/Edit Voucher</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .breadcrumb-text {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .btn-secondary {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-title i {
+            color: var(--primary-blue);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--danger-red);
+        }
+
+        .form-control {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-control:focus {
+            background: var(--darker-bg);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-red);
+            box-shadow: 0 0 0 0.2rem rgba(234, 67, 53, 0.25);
+        }
+
+        .form-select {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 12px 16px;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .form-select option {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .form-select:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            outline: none;
+        }
+
+        .invalid-feedback {
+            color: var(--danger-red);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .form-help {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .input-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .input-group-text {
+            background: var(--border-color);
+            border: 1px solid var(--border-color);
+            border-right: none;
+            color: var(--text-primary);
+            padding: 12px 16px;
+            border-radius: 8px 0 0 8px;
+        }
+
+        .input-group .form-control {
+            border-left: none;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            color: white;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 28px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -12px;
+        }
+
+        .col-md-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 12px;
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 16px;
+        }
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .form-container {
+                padding: 24px;
+            }
+
+            .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a class="nav-link" href="/admin">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link" href="/admin/movies">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+
+        <a class="nav-link active" href="/admin/vouchers">
+            <i class="fas fa-ticket-alt"></i>Vouchers
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="header-section fade-in">
+        <div class="header-content">
+            <h2 th:text="${isEdit} ? 'Edit Voucher' : 'Add New Voucher'">Add New Voucher</h2>
+            <p class="breadcrumb-text">Dashboard > Vouchers > <span th:text="${isEdit} ? 'Edit' : 'Add'">Add</span></p>
+        </div>
+        <a href="/admin/vouchers" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i>Back to List
+        </a>
+    </div>
+
+    <!-- Form -->
+    <div class="form-container fade-in">
+        <h3 class="form-title">
+            <i th:class="${isEdit} ? 'fas fa-edit' : 'fas fa-plus'"></i>
+            <span th:text="${isEdit} ? 'Edit Voucher Information' : 'Create New Voucher'">Create New Voucher</span>
+        </h3>
+
+        <form th:action="${isEdit} ? @{/admin/vouchers/edit/{id}(id=${voucher.promotionId})} : @{/admin/vouchers/add}"
+              method="post" th:object="${voucher}" id="voucherForm" novalidate>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required" for="promotionCode">Promotion Code</label>
+                        <input type="text"
+                               class="form-control"
+                               id="promotionCode"
+                               th:field="*{promotionCode}"
+                               placeholder="e.g., SAVE20, WELCOME10"
+                               maxlength="10"
+                               required>
+                        <div class="form-help">
+                            Maximum 10 characters. Must be unique.
+                        </div>
+                        <div class="invalid-feedback" id="promotionCodeError"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required" for="discount">Discount Percentage</label>
+                        <div class="input-group">
+                            <input type="number"
+                                   class="form-control"
+                                   id="discount"
+                                   th:field="*{discount}"
+                                   placeholder="20"
+                                   min="1"
+                                   max="100"
+                                   required>
+                            <span class="input-group-text">%</span>
+                        </div>
+                        <div class="form-help">
+                            Enter a value between 1% and 100%
+                        </div>
+                        <div class="invalid-feedback" id="discountError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required" for="startTime">Start Date & Time</label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="startTime"
+                               th:field="*{formattedStartTime}"
+                               required>
+                        <div class="form-help">
+                            When the voucher becomes active
+                        </div>
+                        <div class="invalid-feedback" id="startTimeError"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required" for="endTime">End Date & Time</label>
+                        <input type="datetime-local"
+                               class="form-control"
+                               id="endTime"
+                               th:field="*{formattedEndTime}"
+                               required>
+                        <div class="form-help">
+                            When the voucher expires
+                        </div>
+                        <div class="invalid-feedback" id="endTimeError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required" for="quantity">Available Quantity</label>
+                        <input type="number"
+                               class="form-control"
+                               id="quantity"
+                               th:field="*{quantity}"
+                               placeholder="100"
+                               min="1"
+                               required>
+                        <div class="form-help">
+                            Number of times this voucher can be used
+                        </div>
+                        <div class="invalid-feedback" id="quantityError"></div>
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required" for="status">Status</label>
+                        <select class="form-select" id="status" th:field="*{status}" required>
+                            <option value="">Select Status</option>
+                            <option value="Active">Active</option>
+                            <option value="Inactive">Inactive</option>
+                        </select>
+                        <div class="form-help">
+                            Current status of the voucher
+                        </div>
+                        <div class="invalid-feedback" id="statusError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preview Section -->
+            <div id="voucherPreview" style="display: none; margin-top: 24px; padding: 20px; background: rgba(66, 133, 244, 0.05); border: 1px solid rgba(66, 133, 244, 0.2); border-radius: 8px;">
+                <h5 style="color: var(--primary-blue); margin-bottom: 16px;">
+                    <i class="fas fa-eye"></i> Voucher Preview
+                </h5>
+                <div style="background: var(--card-bg); padding: 16px; border-radius: 8px; text-align: center;">
+                    <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 8px;" id="previewCode">
+                        -
+                    </div>
+                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-green); margin-bottom: 8px;" id="previewDiscount">
+                        -
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--text-secondary);" id="previewPeriod">
+                        Valid Period: -
+                    </div>
+                    <div style="font-size: 0.875rem; color: var(--warning-orange); margin-top: 4px;" id="previewQuantity">
+                        -
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="btn-group">
+                <button type="submit" class="btn-primary">
+                    <i th:class="${isEdit} ? 'fas fa-save' : 'fas fa-plus'"></i>
+                    <span th:text="${isEdit} ? 'Update Voucher' : 'Create Voucher'">Create Voucher</span>
+                </button>
+                <a href="/admin/vouchers" class="btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('voucherForm');
+        const previewSection = document.getElementById('voucherPreview');
+
+        // Form elements
+        const promotionCodeInput = document.getElementById('promotionCode');
+        const discountInput = document.getElementById('discount');
+        const startTimeInput = document.getElementById('startTime');
+        const endTimeInput = document.getElementById('endTime');
+        const quantityInput = document.getElementById('quantity');
+        const statusInput = document.getElementById('status');
+
+        // Preview elements
+        const previewCode = document.getElementById('previewCode');
+        const previewDiscount = document.getElementById('previewDiscount');
+        const previewPeriod = document.getElementById('previewPeriod');
+        const previewQuantity = document.getElementById('previewQuantity');
+
+        // Update preview
+        function updatePreview() {
+            const code = promotionCodeInput.value || 'VOUCHER';
+            const discount = discountInput.value || '0';
+            const startTime = startTimeInput.value;
+            const endTime = endTimeInput.value;
+            const quantity = quantityInput.value || '0';
+
+            previewCode.textContent = code;
+            previewDiscount.textContent = discount + '% OFF';
+
+            if (startTime && endTime) {
+                const start = new Date(startTime).toLocaleDateString();
+                const end = new Date(endTime).toLocaleDateString();
+                previewPeriod.textContent = `Valid Period: ${start} - ${end}`;
+            } else {
+                previewPeriod.textContent = 'Valid Period: -';
+            }
+
+            previewQuantity.textContent = `${quantity} uses available`;
+
+            // Show preview if any field has value
+            if (code !== 'VOUCHER' || discount !== '0' || startTime || endTime || quantity !== '0') {
+                previewSection.style.display = 'block';
+            } else {
+                previewSection.style.display = 'none';
+            }
+        }
+
+        // Add event listeners for preview
+        [promotionCodeInput, discountInput, startTimeInput, endTimeInput, quantityInput].forEach(input => {
+            input.addEventListener('input', updatePreview);
+        });
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+
+            // Clear previous errors
+            document.querySelectorAll('.form-control, .form-select').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.textContent = '';
+            });
+
+            // Validate promotion code
+            const promotionCode = promotionCodeInput.value.trim();
+            if (!promotionCode) {
+                showError('promotionCode', 'Promotion code is required');
+                isValid = false;
+            } else if (promotionCode.length < 3) {
+                showError('promotionCode', 'Promotion code must be at least 3 characters');
+                isValid = false;
+            } else if (promotionCode.length > 10) {
+                showError('promotionCode', 'Promotion code must not exceed 10 characters');
+                isValid = false;
+            } else if (!/^[A-Z0-9]+$/.test(promotionCode)) {
+                showError('promotionCode', 'Promotion code must contain only uppercase letters and numbers');
+                isValid = false;
+            }
+
+            // Validate discount
+            const discount = parseInt(discountInput.value);
+            if (!discount || discount < 1 || discount > 100) {
+                showError('discount', 'Discount must be between 1% and 100%');
+                isValid = false;
+            }
+
+            // Validate dates
+            const startTime = new Date(startTimeInput.value);
+            const endTime = new Date(endTimeInput.value);
+            const now = new Date();
+
+            if (!startTimeInput.value) {
+                showError('startTime', 'Start date and time is required');
+                isValid = false;
+            } else if (startTime < now) {
+                showError('startTime', 'Start time cannot be in the past');
+                isValid = false;
+            }
+
+            if (!endTimeInput.value) {
+                showError('endTime', 'End date and time is required');
+                isValid = false;
+            } else if (endTime <= startTime) {
+                showError('endTime', 'End time must be after start time');
+                isValid = false;
+            }
+
+            // Validate quantity
+            const quantity = parseInt(quantityInput.value);
+            if (!quantity || quantity < 1) {
+                showError('quantity', 'Quantity must be at least 1');
+                isValid = false;
+            }
+
+            // Validate status
+            if (!statusInput.value) {
+                showError('status', 'Status is required');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function showError(fieldName, message) {
+            const field = document.getElementById(fieldName);
+            const errorDiv = document.getElementById(fieldName + 'Error');
+
+            field.classList.add('is-invalid');
+            errorDiv.textContent = message;
+        }
+
+        // Auto-uppercase promotion code
+        promotionCodeInput.addEventListener('input', function() {
+            this.value = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+
+                // Scroll to first error
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+
+        // Set minimum date to today for new vouchers
+        const today = new Date();
+        const minDateTime = today.toISOString().slice(0, 16);
+
+        if (!startTimeInput.value) {
+            startTimeInput.min = minDateTime;
+        }
+
+        endTimeInput.min = minDateTime;
+
+        // Update end time minimum when start time changes
+        startTimeInput.addEventListener('change', function() {
+            endTimeInput.min = this.value;
+            if (endTimeInput.value && endTimeInput.value <= this.value) {
+                endTimeInput.value = '';
+            }
+        });
+
+        // Initialize preview
+        updatePreview();
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    });
+</script>
+</body>
+</html>

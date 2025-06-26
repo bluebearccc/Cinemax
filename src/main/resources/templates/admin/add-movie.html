@@ -1,0 +1,797 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Movie - BlueBear Cinema</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .breadcrumb-text {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .btn-back {
+            background: var(--border-color);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text-primary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-back:hover {
+            background: var(--card-hover);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+
+        .form-section-title {
+            color: var(--text-primary);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-section-title i {
+            color: var(--primary-blue);
+        }
+
+        .form-label {
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--danger-red);
+        }
+
+        .form-label.optional::after {
+            content: " (tùy chọn)";
+            color: var(--text-muted);
+            font-weight: 400;
+            font-size: 0.9em;
+        }
+
+        .form-control {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+            margin-bottom: 20px;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-control:focus {
+            background: var(--darker-bg);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            color: var(--text-primary);
+        }
+
+        .form-select {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-bottom: 20px;
+        }
+
+        .form-select option {
+            background: var(--card-bg);
+            color: var(--text-primary);
+        }
+
+        .form-check {
+            margin-bottom: 10px;
+        }
+
+        .form-check-input {
+            background-color: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .form-check-input:checked {
+            background-color: var(--primary-blue);
+            border-color: var(--primary-blue);
+        }
+
+        .form-check-input:focus {
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+        }
+
+        .form-check-label {
+            color: var(--text-primary);
+            margin-left: 8px;
+        }
+
+        .genres-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .actors-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .btn-submit {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 8px;
+            padding: 16px 32px;
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
+        }
+
+        .btn-reset {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px 32px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        .btn-reset:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .image-preview {
+            width: 100%;
+            max-width: 200px;
+            height: 280px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .banner-preview {
+            width: 100%;
+            max-width: 400px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 8px;
+            border: 2px solid var(--border-color);
+            margin-top: 10px;
+            display: none;
+        }
+
+        .help-text {
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .info-box {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            color: var(--primary-blue);
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .info-box i {
+            font-size: 1.2rem;
+        }
+
+        .error-message {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .success-message {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .genres-grid,
+            .actors-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-container {
+                padding: 20px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a class="nav-link" href="/">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link active" href="/movies">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        <a class="nav-link" href="/genres">
+            <i class="fas fa-tags"></i>Genres
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="header-section fade-in">
+        <div class="header-content">
+            <h2>Add New Movie</h2>
+            <p class="breadcrumb-text">Dashboard > Movies > Add New</p>
+        </div>
+        <a href="/movies" class="btn-back">
+            <i class="fas fa-arrow-left"></i>Back to Movies
+        </a>
+    </div>
+
+    <!-- Info Box -->
+    <div class="info-box fade-in">
+        <i class="fas fa-info-circle"></i>
+        <div>
+            <strong>Thông tin:</strong> Chỉ có tên phim là bắt buộc. Các thông tin khác có thể để trống và sẽ được thiết lập giá trị mặc định.
+            Bạn có thể chỉnh sửa lại sau khi tạo phim.
+        </div>
+    </div>
+
+    <!-- Flash Messages -->
+    <div th:if="${error}" class="error-message fade-in">
+        <i class="fas fa-exclamation-triangle"></i>
+        <span th:text="${error}">Error message</span>
+    </div>
+
+    <div th:if="${success}" class="success-message fade-in">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${success}">Success message</span>
+    </div>
+
+    <!-- Add Movie Form -->
+    <div class="form-container fade-in">
+        <form th:action="@{/movies/add}" method="post" id="addMovieForm" novalidate>
+
+            <!-- Basic Information Section -->
+            <div class="form-section-title">
+                <i class="fas fa-info-circle"></i>
+                Basic Information
+            </div>
+
+            <div class="row">
+                <div class="col-md-8">
+                    <label for="movieName" class="form-label required">Movie Name</label>
+                    <input type="text" class="form-control" id="movieName" name="movieName"
+                           placeholder="Enter movie name" required maxlength="100">
+                    <div class="help-text">Maximum 100 characters - <strong>Bắt buộc</strong></div>
+                </div>
+                <div class="col-md-4">
+                    <label for="status" class="form-label optional">Status</label>
+                    <select class="form-select" id="status" name="status">
+                        <option value="">Auto (sẽ set Active)</option>
+                        <option value="Active" selected>Active</option>
+                        <option value="Removed">Removed</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="description" class="form-label optional">Description</label>
+                    <textarea class="form-control" id="description" name="description" rows="4"
+                              placeholder="Enter movie description (tùy chọn)" maxlength="1000"></textarea>
+                    <div class="help-text">Maximum 1000 characters - Có thể để trống</div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="studio" class="form-label optional">Studio</label>
+                    <input type="text" class="form-control" id="studio" name="studio"
+                           placeholder="Enter studio name (tùy chọn)" maxlength="50">
+                </div>
+                <div class="col-md-3">
+                    <label for="duration" class="form-label optional">Duration (minutes)</label>
+                    <input type="number" class="form-control" id="duration" name="duration"
+                           placeholder="120 (mặc định)" min="1" max="500">
+                    <div class="help-text">Mặc định: 120 phút nếu để trống</div>
+                </div>
+                <div class="col-md-3">
+                    <label for="movieRate" class="form-label optional">Rating (0-5)</label>
+                    <input type="number" class="form-control" id="movieRate" name="movieRate"
+                           placeholder="0.0 (mặc định)" step="0.1" min="0" max="5">
+                    <div class="help-text">Mặc định: 0.0 nếu để trống</div>
+                </div>
+            </div>
+
+            <!-- Media Section -->
+            <div class="form-section-title">
+                <i class="fas fa-images"></i>
+                Media & Assets (Tùy chọn)
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="image" class="form-label optional">Poster Image URL</label>
+                    <input type="url" class="form-control" id="image" name="image"
+                           placeholder="https://example.com/poster.jpg (tùy chọn)" onchange="previewImage()">
+                    <div class="help-text">URL to movie poster image - Có thể để trống</div>
+                    <img id="imagePreview" class="image-preview" alt="Poster Preview">
+                </div>
+                <div class="col-md-6">
+                    <label for="banner" class="form-label optional">Banner Image URL</label>
+                    <input type="url" class="form-control" id="banner" name="banner"
+                           placeholder="https://example.com/banner.jpg (tùy chọn)" onchange="previewBanner()">
+                    <div class="help-text">URL to movie banner image - Có thể để trống</div>
+                    <img id="bannerPreview" class="banner-preview" alt="Banner Preview">
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-md-12">
+                    <label for="trailer" class="form-label optional">Trailer URL</label>
+                    <input type="url" class="form-control" id="trailer" name="trailer"
+                           placeholder="https://youtube.com/watch?v=... (tùy chọn)">
+                    <div class="help-text">YouTube or other video platform URL - Có thể để trống</div>
+                </div>
+            </div>
+
+            <!-- Schedule Section -->
+            <div class="form-section-title">
+                <i class="fas fa-calendar-alt"></i>
+                Schedule (Tùy chọn)
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="startDate" class="form-label optional">Start Date</label>
+                    <input type="date" class="form-control" id="startDate" name="startDate">
+                    <div class="help-text">Mặc định: 7 ngày từ hôm nay nếu để trống</div>
+                </div>
+                <div class="col-md-6">
+                    <label for="endDate" class="form-label optional">End Date</label>
+                    <input type="date" class="form-control" id="endDate" name="endDate">
+                    <div class="help-text">Mặc định: 30 ngày sau start date nếu để trống</div>
+                </div>
+            </div>
+
+            <!-- Genres Section -->
+            <div class="form-section-title">
+                <i class="fas fa-tags"></i>
+                Genres (Tùy chọn)
+            </div>
+
+            <div class="help-text" style="margin-bottom: 15px;">Select up to 5 genres for this movie - Có thể để trống</div>
+            <div class="genres-grid">
+                <div th:each="genre : ${allGenres}" class="form-check">
+                    <input class="form-check-input genre-checkbox" type="checkbox"
+                           th:id="'genre_' + ${genre.genreId}" th:name="genreIds" th:value="${genre.genreId}">
+                    <label class="form-check-label" th:for="'genre_' + ${genre.genreId}" th:text="${genre.genreName}">
+                        Action
+                    </label>
+                </div>
+            </div>
+
+            <!-- Actors Section -->
+            <div class="form-section-title">
+                <i class="fas fa-users"></i>
+                Actors (Tùy chọn)
+            </div>
+
+            <div class="help-text" style="margin-bottom: 15px;">Select actors for this movie - Có thể để trống</div>
+            <div class="actors-grid">
+                <div th:each="actor : ${allActors}" class="form-check">
+                    <input class="form-check-input actor-checkbox" type="checkbox"
+                           th:id="'actor_' + ${actor.actorId}" th:name="actorIds" th:value="${actor.actorId}">
+                    <label class="form-check-label" th:for="'actor_' + ${actor.actorId}" th:text="${actor.actorName}">
+                        Robert Downey Jr.
+                    </label>
+                </div>
+            </div>
+
+            <!-- Submit Buttons -->
+            <div class="row" style="margin-top: 32px;">
+                <div class="col-md-6">
+                    <button type="submit" class="btn-submit">
+                        <i class="fas fa-plus me-2"></i>Add Movie
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <button type="reset" class="btn-reset">
+                        <i class="fas fa-refresh me-2"></i>Reset Form
+                    </button>
+                </div>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Form validation and interactions - RELAXED VERSION
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('addMovieForm');
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+        const genreCheckboxes = document.querySelectorAll('.genre-checkbox');
+        const actorCheckboxes = document.querySelectorAll('.actor-checkbox');
+
+        // Set minimum date to today (but not required)
+        const today = new Date().toISOString().split('T')[0];
+        startDateInput.min = today;
+        endDateInput.min = today;
+
+        // Validate date range only if both dates are provided
+        function validateDates() {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+
+            if (startDateInput.value && endDateInput.value) {
+                if (startDate >= endDate) {
+                    endDateInput.setCustomValidity('End date must be after start date');
+                } else {
+                    endDateInput.setCustomValidity('');
+                }
+            } else {
+                endDateInput.setCustomValidity(''); // Clear validation if either is empty
+            }
+        }
+
+        startDateInput.addEventListener('change', function() {
+            if (this.value) {
+                endDateInput.min = this.value;
+            }
+            validateDates();
+        });
+
+        endDateInput.addEventListener('change', validateDates);
+
+        // Limit genre selection to 5 (but not required)
+        function limitGenreSelection() {
+            const checkedGenres = document.querySelectorAll('.genre-checkbox:checked');
+            if (checkedGenres.length >= 5) {
+                genreCheckboxes.forEach(checkbox => {
+                    if (!checkbox.checked) {
+                        checkbox.disabled = true;
+                    }
+                });
+            } else {
+                genreCheckboxes.forEach(checkbox => {
+                    checkbox.disabled = false;
+                });
+            }
+        }
+
+        genreCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', limitGenreSelection);
+        });
+
+        // Form submission validation - RELAXED
+        form.addEventListener('submit', function(e) {
+            const movieName = document.getElementById('movieName').value.trim();
+
+            // Only check movie name is required
+            if (!movieName) {
+                e.preventDefault();
+                alert('Tên phim là bắt buộc!');
+                document.getElementById('movieName').focus();
+                return false;
+            }
+
+            const checkedGenres = document.querySelectorAll('.genre-checkbox:checked');
+
+            // Only check genre limit, not requirement
+            if (checkedGenres.length > 5) {
+                e.preventDefault();
+                alert('Please select no more than 5 genres for the movie.');
+                return false;
+            }
+
+            // Only validate dates if both are provided
+            if (startDateInput.value && endDateInput.value) {
+                validateDates();
+            }
+
+            // Basic form validation
+            if (!form.checkValidity()) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            form.classList.add('was-validated');
+        });
+
+        // Add fade-in animation
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    });
+
+    // Image preview functions
+    function previewImage() {
+        const imageUrl = document.getElementById('image').value;
+        const preview = document.getElementById('imagePreview');
+
+        if (imageUrl && isValidImageUrl(imageUrl)) {
+            preview.src = imageUrl;
+            preview.style.display = 'block';
+            preview.onerror = function() {
+                this.style.display = 'none';
+            };
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+    function previewBanner() {
+        const bannerUrl = document.getElementById('banner').value;
+        const preview = document.getElementById('bannerPreview');
+
+        if (bannerUrl && isValidImageUrl(bannerUrl)) {
+            preview.src = bannerUrl;
+            preview.style.display = 'block';
+            preview.onerror = function() {
+                this.style.display = 'none';
+            };
+        } else {
+            preview.style.display = 'none';
+        }
+    }
+
+    function isValidImageUrl(url) {
+        try {
+            new URL(url);
+            return /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url);
+        } catch {
+            return false;
+        }
+    }
+</script>
+</body>
+</html>
