@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -29,4 +30,8 @@ public class Detail_FD {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "Theater_StockID", referencedColumnName = "Theater_StockID")
     private TheaterStock theaterStock;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status")
+    private InvoiceStatus status;
 }

@@ -72,11 +72,11 @@
             </thead>
             <tbody>
             <tr th:each="detail : ${detail_FDs}">
-                <td th:text="${detail.invoiceId}"></td>
-                <td th:text="${itemName}"></td>
+                <td th:text="${detail.getTheaterStockId()}"></td>
+                <td th:text="${detail.itemName}"></td>
                 <td th:text="${detail.quantity}"></td>
                 <td th:text="${detail.getFormattedBookingDate()}"></td>
-                <td th:text="${#numbers.formatCurrency(detail.totalPrice)}"></td>
+                <td th:text="${#numbers.formatCurrency(detail.getTotalPrice())}"></td>
             </tr>
             <!-- Hiển thị thông báo khi không có dữ liệu -->
             <tr th:if="${#lists.isEmpty(detail_FDs)}">

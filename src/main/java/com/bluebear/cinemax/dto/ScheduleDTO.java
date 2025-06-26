@@ -5,7 +5,6 @@ import lombok.*;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 @Data
 @NoArgsConstructor
@@ -19,8 +18,11 @@ public class ScheduleDTO {
     private Integer roomID;
     private Schedule_Status status;
     private String movieName;
+    private String roomType;
     private String roomName;
     private String theaterName;
+
+    private SeatAvailabilityDTO seatAvailability;
 
     public String getFormattedMovieDate() {
         return startTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));

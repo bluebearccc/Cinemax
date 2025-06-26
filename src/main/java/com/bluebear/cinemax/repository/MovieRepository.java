@@ -2,7 +2,10 @@ package com.bluebear.cinemax.repository;
 
 import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
+import com.bluebear.cinemax.entity.Schedule;
 import com.bluebear.cinemax.enumtype.Movie_Status;
+import com.bluebear.cinemax.enumtype.Theater_Status;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +13,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.List;
 
 @Repository
@@ -21,46 +25,95 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     @Query(value="select * from Movie m where LOWER(m.MovieName) LIKE LOWER(CONCAT('%', :name, '%')) AND m.StartDate <= GETDATE() And m.EndDate >= GETDATE()", nativeQuery = true)
     List<Movie> findAllByMovieName(@Param("name") String name);
 
-    @Query("SELECT m FROM Movie m JOIN m.genres g WHERE g.genreID = :genreId")
-    List<Movie> findByGenreIdAndStatus(Integer genreId, Movie_Status status, Pageable pageable);
+    //=========================================cashier
+    // 1. Lấy theo theaterId + status + theaterStatus + khoảng ngày
+    @Query("""
+    SELECT DISTINCT m FROM Movie m
+    JOIN m.scheduleList s
+    JOIN s.room r
+    JOIN r.theater t
+    WHERE t.theaterID = :theaterId
+    AND m.status = :status
+    AND t.status = :theaterStatus
+    AND s.startTime BETWEEN :startDate AND :endDate
+    """)
+    Page<Movie> findByTheaterIdAndDateRange(
+            @Param("theaterId") Integer theaterId,
+            @Param("status") Movie_Status status,
+            @Param("theaterStatus") Theater_Status theaterStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
 
-    List<Movie> findByGenresAndStatusOrderByMovieRateDesc(Genre genre, Movie_Status status, Pageable pageable);
+    // 2. Lọc theo genre + theater + khoảng ngày
+    @Query("""
+        SELECT DISTINCT m FROM Movie m
+        JOIN m.genres g
+        JOIN m.scheduleList s
+        JOIN s.room r
+        JOIN r.theater t
+        WHERE g.genreID = :genreId
+        AND t.theaterID = :theaterId
+        AND m.status = :status
+        AND t.status = :theaterStatus
+        AND s.startTime BETWEEN :startDate AND :endDate
+    """)
+    Page<Movie> findByTheaterIdAndGenreIdAndDateRange(
+            @Param("theaterId") Integer theaterId,
+            @Param("genreId") Integer genreId,
+            @Param("status") Movie_Status status,
+            @Param("theaterStatus") Theater_Status theaterStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
 
-    List<Movie> findBymovieNameContainingIgnoreCaseAndStatus(String movieName, Movie_Status status, Pageable pageable);
+    // 3. Lọc theo keyword + theater + khoảng ngày
+    @Query("""
+        SELECT DISTINCT m FROM Movie m
+        JOIN m.scheduleList s
+        JOIN s.room r
+        JOIN r.theater t
+        WHERE t.theaterID = :theaterId
+        AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        AND m.status = :status
+        AND t.status = :theaterStatus
+        AND s.startTime BETWEEN :startDate AND :endDate
+    """)
+    Page<Movie> findByTheaterIdAndKeywordAndDateRange(
+            @Param("theaterId") Integer theaterId,
+            @Param("keyword") String keyword,
+            @Param("status") Movie_Status status,
+            @Param("theaterStatus") Theater_Status theaterStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
 
-    List<Movie> findByGenresAndMovieNameContainingIgnoreCaseAndStatus(Genre genre, String movieName, Movie_Status status, Pageable pageable);
-
-    Movie findTop1ByStatusOrderByMovieRateDesc(Movie_Status status);
-
-    List<Movie> findMoviesByGenresAndMovieNameContainingIgnoreCaseAndStatusOrderByMovieRateDesc(Genre genre, String movieName, Movie_Status status, Pageable pageable);
-
-    List<Movie> findMovesByMovieNameContainingIgnoreCaseAndStatusOrderByMovieRateDesc(String movieName, Movie_Status status, Pageable pageable);
-
-    List<Movie> findTop3ByStatusOrderByMovieRateDesc(Movie_Status status);
-
-    List<Movie> findMoviesByStartDateBeforeAndEndDateAfterOrderByMovieRateDesc(LocalDateTime currentDate, LocalDateTime nowDate);
-
-    List<Movie> findMoviesByStartDateAfter(LocalDateTime currentDate);
-
-    @Query("SELECT DISTINCT s.movie FROM Schedule s WHERE CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
-    List<Movie> findMoviesWithScheduleToday(LocalDateTime today);
-
-    @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
-    List<Movie> findMoviesWithScheduleTodayWithTheater(int theaterId, LocalDateTime today);
-    //count
-
-    int countMovieByStatus(Movie_Status status);
-
-    int countMovieByGenresAndStatus(Genre genre, Movie_Status status);
-
-    int countMovieByMovieNameContainingAndStatus(String movieName, Movie_Status status);
-
-    int countMovieByGenresAndMovieNameContainingAndStatus(Genre genre, String movieName, Movie_Status status);
-
-    //find all
-
-    List<Movie> findAllByStatus(Movie_Status status, Pageable pageable);
-
-    List<Movie> findAllByStatusOrderByMovieRateDesc(Movie_Status status, Pageable pageable);
+    // 4. Lọc theo genre + keyword + theater + khoảng ngày
+    @Query("""
+                SELECT DISTINCT m FROM Movie m
+                JOIN m.genres g
+                JOIN m.scheduleList s
+                JOIN s.room r
+                JOIN r.theater t
+                WHERE g.genreID = :genreId
+                AND t.theaterID = :theaterId
+                AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+                AND m.status = :status
+                AND t.status = :theaterStatus
+                AND s.startTime BETWEEN :startDate AND :endDate
+            """)
+    Page<Movie> findByTheaterIdAndGenreIdAndKeywordAndDateRange(
+            @Param("theaterId") Integer theaterId,
+            @Param("genreId") Integer genreId,
+            @Param("keyword") String keyword,
+            @Param("status") Movie_Status status,
+            @Param("theaterStatus") Theater_Status theaterStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
 
 }

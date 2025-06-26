@@ -3,6 +3,7 @@ package com.bluebear.cinemax.service.staff;
 import com.bluebear.cinemax.dto.TheaterStockDTO;
 import com.bluebear.cinemax.entity.Theater; // Assuming you have a Theater entity
 import com.bluebear.cinemax.entity.TheaterStock;
+import com.bluebear.cinemax.enumtype.TheaterStock_Status;
 import com.bluebear.cinemax.repository.TheaterRepository;
 import com.bluebear.cinemax.repository.TheaterStockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,16 +31,15 @@ public class TheaterStockServiceImpl implements TheaterStockService {
         }
 
         TheaterStock theaterStock = new TheaterStock();
-        theaterStock.setStockID(theaterStockDTO.getId()); // Assuming DTO's 'id' maps to entity's 'stockID'
-        theaterStock.setItemName(theaterStockDTO.getItemName());
+        theaterStock.setStockID(theaterStockDTO.getTheaterStockId()); // Assuming DTO's 'id' maps to entity's 'stockID'
+        theaterStock.setItemName(theaterStockDTO.getFoodName());
         theaterStock.setImage(theaterStockDTO.getImage());
         theaterStock.setQuantity(theaterStockDTO.getQuantity());
-        theaterStock.setPrice(theaterStockDTO.getPrice());
-        theaterStock.setStatus(theaterStockDTO.getStatus());
+        theaterStock.setPrice(theaterStockDTO.getUnitPrice());
+        theaterStock.setStatus(Enum.valueOf(TheaterStock_Status.class, theaterStockDTO.getStatus()));
 
-        // Set the associated Theater entity
-        if (theaterStockDTO.getTheaterId() != null) {
-            theaterRepository.findById(theaterStockDTO.getTheaterId())
+        if (theaterStockDTO.getTheaterStockId() != null) {
+            theaterRepository.findById(theaterStockDTO.getTheaterStockId())
                     .ifPresent(theaterStock::setTheater);
         } else {
             // If theaterId is null in DTO, ensure no Theater is associated
@@ -61,13 +61,13 @@ public class TheaterStockServiceImpl implements TheaterStockService {
             return null;
         }
         return TheaterStockDTO.builder()
-                .id(theaterStock.getStockID())
-                .theaterId(theaterStock.getTheater() != null ? theaterStock.getTheater().getTheaterID() : null)
-                .itemName(theaterStock.getItemName())
+                .theaterStockId(theaterStock.getStockID())
+                .theaterStockId(theaterStock.getTheater() != null ? theaterStock.getTheater().getTheaterID() : null)
+                .foodName(theaterStock.getItemName())
                 .image(theaterStock.getImage())
                 .quantity(theaterStock.getQuantity())
-                .price(theaterStock.getPrice())
-                .status(theaterStock.getStatus())
+                .unitPrice(theaterStock.getPrice())
+                .status(theaterStock.getStatus().name())
                 .build();
     }
 

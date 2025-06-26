@@ -1,0 +1,54 @@
+<!DOCTYPE html >
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>In Vé Xem Phim</title>
+    <style>
+        @media print {
+            .no-print { display: none; }
+        }
+        .ticket {
+            width: 300px;
+            margin: 0 auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+<div class="ticket">
+    <div style="text-align: center;">
+        <h2>CINEMAX THEATER</h2>
+        <p>================================</p>
+    </div>
+
+    <p><strong>Mã vé:</strong> [[${bookingResult.invoiceId}]]</p>
+    <p><strong>Phim:</strong> [[${bookingResult.movieName}]]</p>
+    <p><strong>Suất chiếu:</strong> [[${bookingResult.scheduleTime}]]</p>
+    <p><strong>Phòng:</strong> [[${bookingResult.roomName}]]</p>
+    <p><strong>Ghế:</strong> [[${#strings.listJoin(bookingResult.seatPositions, ', ')}]]</p>
+    <p><strong>Khách hàng:</strong> [[${bookingResult.customerName}]]</p>
+    <p><strong>SĐT:</strong> [[${bookingResult.customerPhone}]]</p>
+
+    <div th:if="${bookingResult.foodItems != null and !bookingResult.foodItems.empty}">
+        <p>--------------------------------</p>
+        <p><strong>Thực phẩm:</strong></p>
+        <div th:each="food : ${bookingResult.foodItems}">
+            <p>- [[${food.name}]] x[[${food.quantity}]] = [[${food.quantity * food.unitPrice}]]đ</p>
+        </div>
+    </div>
+
+    <p>================================</p>
+    <p><strong>Tổng tiền: [[${bookingResult.totalPrice}]]đ</strong></p>
+    <p>Ngày in: [[${printDate}]]</p>
+    <div style="text-align: center;">
+        <p>Cảm ơn quý khách!</p>
+    </div>
+</div>
+
+<div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()">In Vé</button>
+    <button onclick="window.close()">Đóng</button>
+</div>
+</body>
+</html>

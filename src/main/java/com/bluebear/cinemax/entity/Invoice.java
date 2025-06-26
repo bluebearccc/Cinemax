@@ -5,11 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
-import java.util.Set;
 @Builder
 @Entity
 @Data
@@ -23,19 +22,23 @@ public class Invoice {
     private Integer invoiceID;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "CustomerID" , nullable = false, referencedColumnName = "CustomerID")
+    @JoinColumn(name = "CustomerID", referencedColumnName = "CustomerID")
     private Customer customer;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "EmployeeID" , nullable = false, referencedColumnName = "EmployeeID")
+    @JoinColumn(name = "EmployeeID", referencedColumnName = "EmployeeID")
     private Employee employee;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "PromotionID" , nullable = false, referencedColumnName = "PromotionID")
+    @JoinColumn(name = "PromotionID", referencedColumnName = "PromotionID")
     private Promotion promotion;
 
     @Column(name = "BookingDate")
     private LocalDateTime bookingDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status")
+    private InvoiceStatus status;
 
     @Column(name = "TotalPrice")
     private Double totalPrice;
@@ -43,5 +46,12 @@ public class Invoice {
     @OneToMany(mappedBy = "invoice")
     private List<Detail_FD> detail_FD;
 
+    @Column(name = "GuestName")
+    private String guestName;
 
+    @Column(name = "GuestPhone")
+    private String guestPhone;
+
+    @Column(name = "GuestEmail", nullable = true)
+    private String guestEmail;
 }

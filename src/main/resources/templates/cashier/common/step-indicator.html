@@ -1,0 +1,22 @@
+<div class="step-indicator" th:fragment="step-indicator">
+    <div class="step" th:class="${currentStep >= 1} ? 'step active' : 'step'">
+        <div class="step-circle">1</div>
+        <small>Chọn Phim</small>
+    </div>
+    <div class="step" th:class="${currentStep >= 2} ? 'step active' : 'step'">
+        <div class="step-circle">2</div>
+        <small>Chọn Suất</small>
+    </div>
+    <div class="step" th:class="${currentStep >= 3} ? 'step active' : 'step'">
+        <div class="step-circle">3</div>
+        <small>Chọn Ghế</small>
+    </div>
+    <div class="step" th:class="${currentStep >= 4} ? 'step active' : 'step'">
+        <div class="step-circle">4</div>
+        <small>Thông Tin</small>
+    </div>
+    <div class="step" th:class="${currentStep >= 5} ? 'step active' : 'step'">
+        <div class="step-circle">5</div>
+        <small>Thanh Toán</small>
+    </div>
+</div>

@@ -103,8 +103,8 @@ public class TheaterStockController {
                            @RequestParam(value = "imageInput", required = false) MultipartFile img,
                            @RequestParam("theaterID") Integer theaterID) {
 
-        if(theaterStockDTO.getTheaterId() == null) {
-            theaterStockDTO.setTheaterId(theaterID);
+        if(theaterStockDTO.getTheaterStockId() == null) {
+            theaterStockDTO.setTheater(theaterServiceImpl.getTheaterById(theaterID));
         }
         if(img != null && !img.isEmpty()) {
             try {
@@ -154,7 +154,7 @@ public class TheaterStockController {
         List<Detail_FDDTO> detail_FDs = detailFDServiceImpl.findByTheaterStockID(stockId);
         theModel.addAttribute("employee", e);
         theModel.addAttribute("detail_FDs", detail_FDs);
-        theModel.addAttribute("itemName", theaterStockServiceImpl.findById(stockId).getItemName() );
+        theModel.addAttribute("itemName", theaterStockServiceImpl.findById(stockId).getFoodName() );
 
         return "staff/item-sold";
     }

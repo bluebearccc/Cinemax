@@ -1,0 +1,48 @@
+<div class="card card-custom mb-4" th:if="${currentStep == 5}" th:fragment="confirmation">
+    <div class="card-header">
+        <h5 class="mb-0"><i class="fas fa-check-circle me-2"></i>Đặt vé thành công</h5>
+    </div>
+    <div class="card-body">
+        <div class="text-center">
+            <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+            <h4 class="text-success">Đặt vé thành công!</h4>
+            <p class="text-muted">Vé đã được đặt thành công. Vui lòng thanh toán để hoàn tất.</p>
+
+            <!-- Booking Summary -->
+            <div class="row mt-4">
+                <div class="col-md-8 mx-auto">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h6 class="mb-0">Thông tin đặt vé</h6>
+                        </div>
+                        <div class="card-body text-start">
+                            <p><strong>Phim:</strong> <span th:text="${selectedMovie.movieName}"></span></p>
+                            <p><strong>Suất chiếu:</strong> <span th:text="${selectedSchedule.time}"></span></p>
+                            <p><strong>Phòng:</strong> <span th:text="${selectedSchedule.roomName}"></span></p>
+                            <p><strong>Ghế:</strong>
+                                <span th:each="seat, iterStat : ${selectedSeats}">
+                                                <span class="badge bg-warning text-dark" th:text="${seat}"></span><span th:if="${!iterStat.last}">, </span>
+                                            </span>
+                            </p>
+                            <p th:if="${customerInfo.name}"><strong>Khách hàng:</strong> <span th:text="${customerInfo.name}"></span></p>
+                            <p th:if="${customerInfo.phone}"><strong>Điện thoại:</strong> <span th:text="${customerInfo.phone}"></span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <button class="btn btn-success btn-lg w-100" onclick="window.print()">
+                        <i class="fas fa-print me-2"></i>In vé
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <a href="/cashier/movie/" class="btn btn-outline-primary btn-lg w-100">
+                        <i class="fas fa-plus me-2"></i>Đặt vé mới
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
