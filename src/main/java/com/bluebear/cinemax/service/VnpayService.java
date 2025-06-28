@@ -1,10 +1,12 @@
 package com.bluebear.cinemax.service;
 import com.bluebear.cinemax.config.VnpayConfig;
-import com.bluebear.cinemax.entity.Invoice;
-import com.bluebear.cinemax.entity.Schedule;
-import com.bluebear.cinemax.entity.TheaterStock;
-import com.bluebear.cinemax.enumtype.InvoiceStatus;
+import com.bluebear.cinemax.dto.InvoiceDTO;
+import com.bluebear.cinemax.entity.*;
+import com.bluebear.cinemax.dto.*;
+import com.bluebear.cinemax.enumtype.Invoice_Status;
 import com.bluebear.cinemax.repository.InvoiceRepository;
+import com.bluebear.cinemax.repository.ScheduleRepository;
+import com.bluebear.cinemax.repository.SeatRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -16,23 +18,27 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.stream.Collectors;
+
 import com.bluebear.cinemax.repository.TheaterStockRepository;
 @Service
 @RequiredArgsConstructor
 public class VnpayService {
+    private final ScheduleRepository scheduleRepo;
+    private final SeatRepository seatRepo;
     private final InvoiceRepository invoiceRepo;
     private final VnpayConfig vnpayConfig;
     private final BookingService bookingService;
     private final TheaterStockRepository theaterStockRepo;
-    public String createPaymentUrl(Invoice invoice, HttpServletRequest request) {
-        if (invoice.getTotalPrice() == null) {
+    public String createPaymentUrl(InvoiceDTO invoice, HttpServletRequest request) {
+        if (invoice.getTotalprice() == null) {
             throw new IllegalStateException("Invoice chưa có tổng tiền.");
         }
 
         String vnp_Version = "2.1.0";
         String vnp_Command = "pay";
         String orderType = "other";
-        long vnp_Amount = invoice.getTotalPrice().multiply(BigDecimal.valueOf(100)).longValue();
+        long vnp_Amount = Math.round(invoice.getTotalprice() * 100);
         String vnp_TxnRef = String.valueOf(invoice.getInvoiceId());
         String vnp_IpAddr = getIpAddress(request);
 
@@ -117,10 +123,63 @@ public class VnpayService {
             throw new RuntimeException("Lỗi khi tạo HMAC SHA512", e);
         }
     }
-    public Invoice getPendingInvoiceById(int id) {
-        return invoiceRepo.findByInvoiceIdAndStatus(id, InvoiceStatus.Booked)
-                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn đang chờ thanh toán"));
+    public InvoiceDTO getInvoiceDTOById(Integer invoiceId) {
+
+            Invoice invoice = invoiceRepo.findById(invoiceId)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+
+            InvoiceDTO dto = new InvoiceDTO();
+            dto.setInvoiceId(invoice.getInvoiceId());
+            dto.setCustomerId(invoice.getCustomer() != null ? invoice.getCustomer().getID() : null);
+            dto.setEmployeeId(invoice.getEmployee() != null ? invoice.getEmployee().getId() : null);
+            dto.setPromotionId(invoice.getPromotion() != null ? invoice.getPromotion().getPromotionID() : null);
+            dto.setBookingDate(invoice.getBookingDate());
+            dto.setDiscount(invoice.getDiscount());
+            dto.setTotalprice(invoice.getTotalPrice() != null ? invoice.getTotalPrice().doubleValue() : null);
+
+            // Map danh sách ghế
+            List<DetailSeatDTO> seatDTOs = invoice.getDetailSeats().stream().map(ds -> {
+                DetailSeatDTO detailSeatDTO = new DetailSeatDTO();
+                detailSeatDTO.setId(ds.getId());
+                detailSeatDTO.setInvoiceID(invoice.getInvoiceId());
+                detailSeatDTO.setSeatID(ds.getSeat().getSeatId());
+                detailSeatDTO.setScheduleID(ds.getSchedule().getScheduleId());
+                return detailSeatDTO;
+            }).collect(Collectors.toList());
+            dto.setDetailSeats(seatDTOs);
+
+            return dto;
+        }
+    public ScheduleDTO getScheduleDTO(Integer scheduleId) {
+        Schedule schedule = scheduleRepo.findById(scheduleId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu"));
+
+        ScheduleDTO dto = new ScheduleDTO();
+        dto.setScheduleID(schedule.getScheduleId());
+        dto.setStartTime(schedule.getStartTime());
+
+        // Movie
+        Movie movie = schedule.getMovie();
+        MovieDTO movieDTO = new MovieDTO();
+        movieDTO.setMovieID(movie.getMovieID());
+        movieDTO.setMovieName(movie.getMovieName());
+        dto.setMovie(movieDTO);
+
+        // Room
+        Room room = schedule.getRoom();
+        RoomDTO roomDTO = new RoomDTO();
+        roomDTO.setRoomID(room.getRoomID());
+        roomDTO.setName(room.getName());
+        dto.setRoom(roomDTO);
+
+        return dto;
     }
+    public String getSeatPosition(Integer seatId) {
+        return seatRepo.findById(seatId)
+                .map(Seat::getPosition)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy ghế"));
+    }
+
 
 
 }

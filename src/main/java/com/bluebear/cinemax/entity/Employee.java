@@ -1,40 +1,48 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Employee_Status;
+import com.bluebear.cinemax.enumtype.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
 @Table(name = "Employee")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
+@Builder
 public class Employee {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer employeeID;
+    @Column(name = "EmployeeID")
+    private Integer id;
 
-    @Column(nullable = false, length = 255)
-    private String position;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Position", nullable = false, length = 50)
+    private Role position;
 
-    @Column(nullable = false, length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status", nullable = false, length = 20)
+    private Employee_Status status;
 
+    @OneToOne
+    @JoinColumn(name = "AccountID", nullable = false)
+    private Account account;
 
-    @Column(name = "accountID", nullable = false)
-    private int account;
+    @ManyToOne
+    @JoinColumn(name = "TheaterID", nullable = false)
+    private Theater theater;
 
+    @ManyToOne
+    @JoinColumn(name = "AdminID")
+    private Employee admin;
 
-    @Column(name = "theaterID", nullable = false)
-    private int theater;
-
-
-    @Column(name = "adminID")
-    private Boolean admin;
-
-    @Column(nullable = false, length = 100)
+    @Column(name = "FullName", nullable = false, length = 100)
     private String fullName;
 
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Invoice> invoiceList;
 }

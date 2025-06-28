@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-
+import com.bluebear.cinemax.dto.*;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
@@ -47,15 +47,23 @@ public class VnpayController {
                 String email = "nguyentavan188@gmail.com"; // ← thay bằng email thật
                 String subject = "🎟️ Vé xem phim thành công - Hóa đơn #" + txnRef;
 
-                Invoice invoice = invoiceRepo.findById(Integer.parseInt(txnRef)).orElseThrow();
-                Schedule schedule = invoice.getDetailSeats().getFirst().getSchedule();
-                Room room = schedule.getRoom();
-                List<Seat> seats = invoice.getDetailSeats().stream()
-                        .map(DetailSeat::getSeat)
-                        .collect(Collectors.toList()); // bạn cần ánh xạ ManyToMany giữa Invoice và Seat
-                String seatString = seats.stream()
-                        .map(Seat::getPosition)
-                        .collect(Collectors.joining(", "));
+                InvoiceDTO invoiceDTO = vnpayService.getInvoiceDTOById(Integer.parseInt(txnRef));
+
+                // Lấy lịch chiếu từ ghế đầu tiên
+                DetailSeatDTO firstSeat = invoiceDTO.getDetailSeats().getFirst();
+                Integer scheduleId = firstSeat.getScheduleID();
+
+                // Gọi service (hoặc tự mở rộng getInvoiceDTOById để trả luôn dữ liệu này)
+                ScheduleDTO schedule = vnpayService.getScheduleDTO(scheduleId);
+                RoomDTO room = schedule.getRoom();
+                MovieDTO movie = schedule.getMovie();
+
+                // Lấy danh sách vị trí ghế
+                List<String> seatPositions = invoiceDTO.getDetailSeats().stream()
+                        .map(ds -> vnpayService.getSeatPosition(ds.getSeatID()))
+                        .collect(Collectors.toList());
+
+                String seatString = String.join(", ", seatPositions);
 
                 Map<String, Object> emailData = Map.of(
                         "invoiceId", txnRef,

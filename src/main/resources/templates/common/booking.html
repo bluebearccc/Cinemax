@@ -35,6 +35,7 @@
             <form th:action="@{/booking/step1}" method="post">
                 <input type="hidden" name="scheduleId" th:value="${scheduleId}" />
                 <input type="hidden" name="roomId" th:value="${roomId}" />
+
                 <input type="hidden" name="selectedSeats" th:each="seatId : ${selectedSeats}" th:value="${seatId}"/>
                 <!-- Promotion Code Section -->
                 <div class="promo-section">
@@ -95,13 +96,13 @@
                                     <input type="checkbox"
                                            class="btn-check"
                                            name="selectedSeats"
-                                           th:value="${seat.seatId}"
+                                           th:value="${seat.seatID}"
                                            th:disabled="${seat.booked}"
-                                           th:id="'seat-' + ${seat.seatId}"
+                                           th:id="'seat-' + ${seat.seatID}"
                                            th:attr="data-price=${seat.unitPrice}, data-position=${seat.position}" />
-                                    <label th:for="'seat-' + ${seat.seatId}"
+                                    <label th:for="'seat-' + ${seat.seatID}"
                                            class="seat seat-available"
-                                           th:classappend="(${seat.booked} ? 'seat-booked ' : '') + (${seat.VIP} ? 'seat-vip' : '')"
+                                           th:classappend="(${seat.booked} ? 'seat-booked ' : '') + (${seat.isVIP} ? 'seat-vip' : '')"
                                            th:text="${#strings.substring(seat.position, 1)}">1</label>
                                 </div>
                             </div>

@@ -75,7 +75,7 @@
           </div>
         </div>
         <div class="mt-4">
-          <a th:href="@{/user/profile/edit(customerId=${customer.customerId})}" class="btn btn-primary btn-edit">
+          <a th:href="@{/user/profile/edit(customerId=${customer.id})}" class="btn btn-primary btn-edit">
             <i class="fas fa-edit me-2"></i>Chỉnh sửa thông tin
           </a>
         </div>
@@ -101,6 +101,10 @@
           <div class="movie-title" th:text="${items.movie.movieName}">Tên phim</div>
           <div class="movie-info">
             <div class="movie-detail">
+              <i class="movie-image"></i>
+              <img th:src="${items.movie.image}" alt="Poster phim">
+            </div>
+            <div class="movie-detail">
               <i class="fas fa-clock"></i>
               <span th:text="${items.movie.duration} + ' phút'">120 phút</span>
             </div>
@@ -118,7 +122,7 @@
             <span class="rating-value" th:text="${#numbers.formatDecimal(items.movie.movieRate, 1, 1)} + '/5'">4.5/5</span>
           </div>
           <form th:action="@{/feedback/submit}" method="post" class="mt-2">
-            <input type="hidden" name="customerId" th:value="${customer.customerId}" />
+            <input type="hidden" name="customerId" th:value="${customer.id}" />
             <input type="hidden" name="theaterId" th:value="${items.theater.theaterId}" />
             <div class="mb-2">
               <textarea name="content" rows="2" class="form-control" placeholder="Góp ý dịch vụ..."></textarea>

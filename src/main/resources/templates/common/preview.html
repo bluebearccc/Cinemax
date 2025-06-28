@@ -77,7 +77,7 @@
             <div class="text-center mt-4">
                 <h5><i class="bi bi-qr-code-scan"></i> Quét mã VietQR để chuyển khoản</h5>
 
-                <img th:src="'https://img.vietqr.io/image/MB-0969823151-compact2.png?amount=' + ${#numbers.formatDecimal(finalPrice, 0, 0)} + '&addInfo=CINEMAX-HD' + ${schedule.scheduleId}"
+                <img th:src="'https://img.vietqr.io/image/MB-0969823151-compact2.png?amount=' + ${#numbers.formatDecimal(finalPrice, 0, 0)} + '&addInfo=CINEMAX-HD' + ${schedule.scheduleID}"
                      alt="VietQR" class="img-fluid border rounded-4 p-2 shadow"
                      style="max-width: 300px;">
 
@@ -89,10 +89,10 @@
             <div class="text-start mt-4">
                 <form th:action="@{/booking/step1}" method="post">
                     <!-- Hidden fields -->
-                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleId}">
-                    <input type="hidden" name="roomId" th:value="${room.roomId}">
-                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatId}">
-                    <input type="hidden" name="promotionCode" th:value="${promotionCode}">
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                    <input type="hidden" name="roomId" th:value="${room.roomID}">
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}">
+                    <input type="hidden" name="promotionCode" th:value="${promotion}">
 
                     <button type="submit" class="btn btn-secondary btn-lg">
                         <i class="bi bi-arrow-left"></i> Quay lại trang đặt đồ ăn
@@ -101,8 +101,8 @@
             </div>
             <form method="post" th:action="@{/booking/confirm}">
                 <!-- Hidden fields -->
-                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleId}">
-                <input type="hidden" name="roomId" th:value="${room.roomId}">
+                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                <input type="hidden" name="roomId" th:value="${room.roomID}">
 
                 <!-- Chỉ hiển thị promotionCode nếu promotion != null -->
                 <div th:if="${promotion != null}">
@@ -112,7 +112,7 @@
                     <input type="hidden" name="promotionCode" value="">
                 </div>
 
-                <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatId}" />
+                <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
                 <input type="hidden" th:each="combo : ${comboList}"
                        th:if="${comboQuantities[combo.theaterStockID] != null}"
                        th:name="'comboQuantities[' + ${combo.theaterStockID} + ']'"

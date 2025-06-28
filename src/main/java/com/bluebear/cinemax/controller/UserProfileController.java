@@ -24,17 +24,15 @@ public class UserProfileController {
 
     @GetMapping("/user/profile")
     public String showUserProfile(@RequestParam("customerId") Integer customerId, Model model) {
-        Customer customer = userProfileService.getCustomerById(customerId);
+        CustomerDTO customer = userProfileService.getCustomerById(customerId);
         if (customer == null) {
             model.addAttribute("errorMessage", "Không tìm thấy người dùng.");
             return "error/404";
         }
 
-        Account account = customer.getAccount();
-        List<Invoice> watchedInvoices = userProfileService.getBookedInvoicesByCustomer(customer);
+        AccountDTO account = userProfileService.getAccountById(customer.getAccountID().longValue());
+        List<InvoiceDTO> watchedInvoices = userProfileService.getBookedInvoicesByCustomer(customer);
         boolean hasWatched = userProfileService.hasWatchedMovies(customer);
-
-        // Lấy danh sách phim đã xem (chỉ khi phim đã chiếu)
         List<WatchedMovieDTO> watchedMovies = userProfileService.getWatchedMovies(customer);
 
         model.addAttribute("account", account);
@@ -47,13 +45,14 @@ public class UserProfileController {
     }
     @GetMapping("/user/profile/edit")
     public String showEditProfileForm(@RequestParam("customerId") Integer customerId, Model model) {
-        Customer customer = userProfileService.getCustomerById(customerId);
+        CustomerDTO customer = userProfileService.getCustomerById(customerId);
         if (customer == null) {
             model.addAttribute("errorMessage", "Không tìm thấy người dùng.");
             return "error/404";
         }
 
-        Account account = customer.getAccount();
+        AccountDTO account = userProfileService.getAccountById(customer.getAccountID().longValue());
+
 
         model.addAttribute("customer", customer);
         model.addAttribute("account", account);
@@ -71,8 +70,8 @@ public class UserProfileController {
                                 @RequestParam("theaterId")Integer theaterId,
                                 Model model) {
 
-        Customer customer = userProfileService.getCustomerById(customerId);
-        Account account = userProfileService.getAccountById(accountId);
+        CustomerDTO customer = userProfileService.getCustomerById(customerId);
+        AccountDTO account = userProfileService.getAccountById(accountId);
 //        Theater theater =userProfileService.getTheaterById(theaterId);
 
         if (customer == null || account == null) {

@@ -1,9 +1,8 @@
 package com.bluebear.cinemax.controller;
+import com.bluebear.cinemax.dto.*;
+import com.bluebear.cinemax.enumtype.Theater_Status;
 import com.bluebear.cinemax.service.EmailService;
-import com.bluebear.cinemax.dto.InvoiceDTO;
-import com.bluebear.cinemax.dto.SeatDTO;
 import com.bluebear.cinemax.entity.*;
-import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import com.bluebear.cinemax.repository.*;
 import com.bluebear.cinemax.service.BookingService;
 import com.bluebear.cinemax.service.VnpayService;
@@ -17,7 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import com.bluebear.cinemax.repository.TheaterStockRepository;
-import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,10 +57,10 @@ public class BookingController {
                         TreeMap::new,
                         Collectors.toList()
                 ));
-        BigDecimal estimatedTotal = seats.stream()
+        double estimatedTotal = seats.stream()
                 .filter(seat -> !seat.isBooked())
-                .map(SeatDTO::getUnitPrice)
-                .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .mapToDouble(seat -> seat.getUnitPrice().doubleValue())
+                .sum();
 
 
         model.addAttribute("totalAmount", estimatedTotal);
@@ -80,13 +78,13 @@ public class BookingController {
                                      @RequestParam("roomId") Integer roomId,
                                      @RequestParam("selectedSeats") List<Integer> seatIds,
                                      @RequestParam(value = "promotionCode", required = false) String promotionCode,
-                                     Model model, RedirectAttributes redirect) {
+                                     Model model, RedirectAttributes redirect   ) {
         try {
             // Xử lý ghế và mã giảm giá
-            BigDecimal totalAmount = bookingService.calculateTotalAmount(scheduleId, seatIds, promotionCode);
+            Double totalAmount = bookingService.calculateTotalAmount(scheduleId, seatIds, promotionCode);
 
             // Chuẩn bị dữ liệu cho bước 2
-            List<TheaterStock> combos = theaterStockRepo.findByStatus("active");
+            List<TheaterStockDTO> combos = theaterStockRepo.findByStatus(Theater_Status.Active).stream().map(TheaterStockDTO::new).collect(Collectors.toList());
 
             model.addAttribute("scheduleId", scheduleId);
             model.addAttribute("roomId", roomId);
@@ -113,48 +111,32 @@ public class BookingController {
                                      Model model,
                                      HttpSession session) {
         try {
-            Map<Integer, Integer> comboQuantities = new HashMap<>();
-            for (Map.Entry<String, String> entry : allParams.entrySet()) {
-                String key = entry.getKey();
-                if (key.startsWith("comboQuantities[")) {
-                    String idStr = key.substring(16, key.length() - 1);
-                    try {
-                        Integer comboId = Integer.parseInt(idStr);
-                        Integer quantity = Integer.parseInt(entry.getValue());
-                        if (quantity > 0) {
-                            comboQuantities.put(comboId, quantity);
-                        }
-                    } catch (NumberFormatException ignored) {}
-                }
+            Map<Integer, Integer> comboQuantities = extractComboQuantities(allParams);
+
+            ScheduleDTO schedule = new ScheduleDTO(scheduleRepository.findById(scheduleId).orElseThrow());
+            RoomDTO room = new RoomDTO(roomRepository.findById(roomId).orElseThrow());
+
+            List<SeatDTO> selectedSeats = seatRepository.findAllById(seatIds)
+                    .stream().map(SeatDTO::new).toList();
+
+            List<TheaterStockDTO> combos = theaterStockRepo.findAllById(comboQuantities.keySet())
+                    .stream().map(TheaterStockDTO::new).toList();
+
+            double totalSeatPrice = selectedSeats.stream().mapToDouble(SeatDTO::getUnitPrice).sum();
+
+            double totalComboPrice = 0;
+            for (TheaterStockDTO combo : combos) {
+                int qty = comboQuantities.get(combo.getTheaterStockID());
+                totalComboPrice += combo.getUnitPrice().doubleValue() * qty;
             }
 
-//            InvoiceDTO invoice = bookingService.bookSeatsAndCombos(scheduleId, seatIds, promotionCode, comboQuantities);
-
-            // 2. Lấy các thông tin chi tiết để preview
-            Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(); // JPA Repo
-            Room room = roomRepository.findById(roomId).orElseThrow();
-            List<Seat> selectedSeats = seatRepository.findAllById(seatIds);
-            List<TheaterStock> combos = theaterStockRepo.findAllById(comboQuantities.keySet());
-
-            // 3. Tính tổng tiền
-            BigDecimal totalSeatPrice = selectedSeats.stream()
-                    .map(Seat::getUnitPrice)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            BigDecimal totalComboPrice = BigDecimal.ZERO;
-            for (TheaterStock combo : combos) {
-                int quantity = comboQuantities.get(combo.getTheaterStockID());
-                totalComboPrice = totalComboPrice.add(combo.getUnitPrice().multiply(BigDecimal.valueOf(quantity)));
-            }
-
-            BigDecimal total = totalSeatPrice.add(totalComboPrice);
-
-            // 4. Áp dụng giảm giá nếu có
-            Promotion promo = promotionRepository.findByPromotionCode(promotionCode).orElse(null);
+            double total = totalSeatPrice + totalComboPrice;
+            PromotionDTO promo = promotionRepository.findByPromotionCode(promotionCode)
+                    .map(PromotionDTO::new).orElse(null);
             double discount = (promo != null && promo.isValid()) ? promo.getDiscount() / 100.0 : 0.0;
-            BigDecimal finalPrice = total.multiply(BigDecimal.valueOf(1 - discount));
+            double finalPrice = total * (1 - discount);
 
-            // 5. Truyền dữ liệu sang view
+
             model.addAttribute("schedule", schedule);
             model.addAttribute("room", room);
             model.addAttribute("selectedSeats", selectedSeats);
@@ -165,9 +147,6 @@ public class BookingController {
             model.addAttribute("promotion", promo);
 
             return "common/preview";
-
-
-
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute("error", e.getMessage());
             return "redirect:/booking?scheduleId=" + scheduleId + "&roomId=" + roomId;
@@ -183,7 +162,6 @@ public class BookingController {
                                                    RedirectAttributes redirect,
                                                    HttpServletRequest request) {
         try {
-            // Parse combo quantities từ allParams
             Map<Integer, Integer> comboQuantities = new HashMap<>();
             for (Map.Entry<String, String> entry : allParams.entrySet()) {
                 String key = entry.getKey();
@@ -199,30 +177,23 @@ public class BookingController {
                 }
             }
 
-            // 1. Tạo hóa đơn tạm thời (chưa thanh toán)
-            Invoice invoice = bookingService.bookSeatsAndCombos(scheduleId, seatIds, promotionCode, comboQuantities);
-            System.out.println("Created invoice: " + invoice.getInvoiceId() + ", total: " + invoice.getTotalPrice());
-            // 2. Gọi service để tạo URL thanh toán VNPAY
-            String vnpayUrl = vnpayService.createPaymentUrl(invoice,request);
-
-            // 3. Chuyển hướng sang VNPAY
-            System.out.println("Redirecting to VNPAY: " + vnpayUrl);
-
+            InvoiceDTO invoice = bookingService.bookSeatsAndCombos(scheduleId, seatIds, promotionCode, comboQuantities);
+            String vnpayUrl = vnpayService.createPaymentUrl(invoice, request);
             return "redirect:" + vnpayUrl;
 
         } catch (Exception e) {
-            e.printStackTrace(); // <== thêm dòng này để in lỗi ra console
+            e.printStackTrace();
             redirect.addFlashAttribute("error", "Đã có lỗi xảy ra: " + e.getMessage());
             return "redirect:/booking?scheduleId=" + scheduleId + "&roomId=" + roomId;
         }
-
     }
+
 
     // API kiểm tra mã giảm giá
     @ResponseBody
     @GetMapping("/checkPromotion")
     public Map<String, Object> checkPromotion(@RequestParam("code") String code,
-                                              @RequestParam("totalAmount") BigDecimal totalAmount) {
+                                              @RequestParam("totalAmount") Double totalAmount) {
         return bookingService.checkPromotionCode(code, totalAmount);
     }
 
@@ -230,7 +201,24 @@ public class BookingController {
     @ResponseBody
     @PostMapping("/applyPromotion")
     public Map<String, Object> applyPromotion(@RequestParam("code") String code,
-                                              @RequestParam("totalAmount") BigDecimal totalAmount) {
+                                              @RequestParam("totalAmount") Double totalAmount) {
         return bookingService.applyPromotionCode(code, totalAmount);
+    }
+    private Map<Integer, Integer> extractComboQuantities(Map<String, String> allParams) {
+        Map<Integer, Integer> result = new HashMap<>();
+        for (Map.Entry<String, String> entry : allParams.entrySet()) {
+            String key = entry.getKey();
+            if (key.startsWith("comboQuantities[")) {
+                String idStr = key.substring(16, key.length() - 1);
+                try {
+                    Integer comboId = Integer.parseInt(idStr);
+                    Integer quantity = Integer.parseInt(entry.getValue());
+                    if (quantity > 0) {
+                        result.put(comboId, quantity);
+                    }
+                } catch (NumberFormatException ignored) {}
+            }
+        }
+        return result;
     }
 }

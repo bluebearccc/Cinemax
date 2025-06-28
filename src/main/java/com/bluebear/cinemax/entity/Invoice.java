@@ -1,6 +1,7 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enumtype.InvoiceStatus;
+
+import com.bluebear.cinemax.enumtype.Invoice_Status;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -36,12 +37,12 @@ public class Invoice {
     @Column(name = "BookingDate", nullable = false)
     private LocalDateTime bookingDate;
 
-    @Column(name = "Totalprice", nullable = false, precision = 10, scale = 2)
-    private BigDecimal totalPrice;
+    @Column(name = "Totalprice", nullable = false)
+    private Double totalPrice;
 
     @Column(name = "Status", nullable = false)
     @Enumerated(EnumType.STRING)
-    private InvoiceStatus status;
+    private Invoice_Status status;
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<DetailSeat> detailSeats;
     public List<DetailSeat> getDetailSeats() {

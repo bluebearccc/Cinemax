@@ -1,16 +1,25 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Schedule_Status;
 import jakarta.persistence.*;
+import lombok.*;
+
 import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "Schedule")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Schedule {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ScheduleID")
-    private int scheduleId;
+    private Integer scheduleId;
 
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;
@@ -18,75 +27,18 @@ public class Schedule {
     @Column(name = "EndTime", nullable = false)
     private LocalDateTime endTime;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MovieID", nullable = false)
     private Movie movie;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "RoomID", nullable = false)
     private Room room;
 
-    // Constructors
-    public Schedule() {
-    }
+    @Column(name = "Status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private Schedule_Status status;
 
-    public Schedule(LocalDateTime startTime, LocalDateTime endTime, Movie movie, Room room) {
-        this.startTime = startTime;
-        this.endTime = endTime;
-        this.movie = movie;
-        this.room = room;
-    }
-
-    // Getters and Setters
-    public int getScheduleId() {
-        return scheduleId;
-    }
-
-    public void setScheduleId(int scheduleId) {
-        this.scheduleId = scheduleId;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Movie getMovie() {
-        return movie;
-    }
-
-    public void setMovie(Movie movie) {
-        this.movie = movie;
-    }
-
-    public Room getRoom() {
-        return room;
-    }
-
-    public void setRoom(Room room) {
-        this.room = room;
-    }
-
-    // toString() Method
-    @Override
-    public String toString() {
-        return "Schedule{" +
-                "scheduleId=" + scheduleId +
-                ", startTime=" + startTime +
-                ", endTime=" + endTime +
-                ", movie=" + (movie != null ? movie.getMovieName() : "null") +
-                ", room=" + (room != null ? room.getName() : "null") +
-                '}';
-    }
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetailSeat> detailSeatList;
 }

@@ -1,41 +1,50 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Room_Status;
+import com.bluebear.cinemax.enumtype.Seat_Status;
+import com.bluebear.cinemax.enumtype.TypeOfRoom;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Objects;
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
+import java.util.List;
+
 @Entity
 @Table(name = "Room")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Room {
 
-    // Getters and Setters
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "RoomID")
-    private int roomId;
+    private Integer roomID;
 
-
-    @ManyToOne
-    @JoinColumn(name = "TheaterID", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
-    @Column(name = "Name", length = 10, nullable = false)
+    @Column(name = "Name", nullable = false, length = 10)
     private String name;
 
     @Column(name = "Collumn", nullable = false)
-    private int column;
+    private Integer collumn;
 
     @Column(name = "Row", nullable = false)
-    private int row;
+    private Integer row;
 
-    @Column(name = "TypeOfRoom", length = 20)
-    private String typeOfRoom;
+    @Column(name = "TypeOfRoom", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private TypeOfRoom typeOfRoom;
 
-    // Constructors
+    @Column(name = "Status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private Room_Status status;
 
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Seat> seats;
 
-
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Schedule> schedules;
 }

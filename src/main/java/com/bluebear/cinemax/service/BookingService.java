@@ -1,9 +1,9 @@
 package com.bluebear.cinemax.service;
 
-import com.bluebear.cinemax.dto.InvoiceDTO;
-import com.bluebear.cinemax.dto.SeatDTO;
+import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
-import com.bluebear.cinemax.enumtype.InvoiceStatus;
+import com.bluebear.cinemax.enumtype.Invoice_Status;
+import com.bluebear.cinemax.enumtype.TypeOfSeat;
 import com.bluebear.cinemax.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
@@ -11,6 +11,8 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
+
 
 @Service
 public class BookingService {
@@ -34,16 +36,16 @@ public class BookingService {
     }
 
     public List<SeatDTO> getSeatsWithStatus(Integer roomId, Integer scheduleId) {
-        List<Seat> seats = seatRepo.findByRoomRoomId(roomId);
+        List<Seat> seats = seatRepo.findByRoomRoomID(roomId);
         List<SeatDTO> seatDTOs = new ArrayList<>();
 
         for (Seat seat : seats) {
             boolean booked = detailSeatRepo.existsBySeatSeatIdAndScheduleScheduleId(seat.getSeatId(), scheduleId);
             SeatDTO dto = new SeatDTO();
-            dto.setSeatId(seat.getSeatId());
+            dto.setSeatID(seat.getSeatId());
             dto.setPosition(seat.getPosition());
-            dto.setSeatType(seat.getSeatType());
-            dto.setVIP(seat.isVIP());
+            dto.setSeatType(TypeOfSeat.valueOf(seat.getSeatType()));
+            dto.setIsVIP(seat.isVIP());
             dto.setUnitPrice(seat.getUnitPrice());
             dto.setBooked(booked);
             seatDTOs.add(dto);
@@ -51,117 +53,104 @@ public class BookingService {
 
         return seatDTOs;
     }
-    public Optional<Promotion> validatePromotionCode(String code) {
-        Optional<Promotion> promoOpt = promotionRepo.findByPromotionCode(code);
-        if (promoOpt.isPresent()) {
-            Promotion promo = promoOpt.get();
-            if (promo.getEndTime().isAfter(LocalDateTime.now()) && promo.getQuantity() > 0) {
-                return promoOpt;
-            }
-        }
-        return Optional.empty();
+
+    public Optional<PromotionDTO> validatePromotionCode(String code) {
+        return promotionRepo.findByPromotionCode(code)
+                .filter(promo -> promo.getEndTime().isAfter(LocalDateTime.now()) && promo.getQuantity() > 0)
+                .map(promo -> new PromotionDTO(promo.getPromotionID(), promo.getPromotionCode(), promo.getDiscount(), promo.getEndTime(), promo.getQuantity()));
     }
-    public Invoice bookSeatsAndCombos(Integer scheduleId, List<Integer> seatIds, String promotionCode, Map<Integer, Integer> selectedCombos) {
-        BigDecimal total = BigDecimal.ZERO;
+
+    @Transactional
+    public InvoiceDTO bookSeatsAndCombos(Integer scheduleId, List<Integer> seatIds, String promotionCode, Map<Integer, Integer> selectedCombos) {
+        double total = 0.0;
 
         List<Seat> seats = seatRepo.findAllById(seatIds);
         for (Seat seat : seats) {
-            boolean booked = detailSeatRepo.existsBySeatSeatIdAndScheduleScheduleId(seat.getSeatId(), scheduleId);
-            if (booked) {
+            if (detailSeatRepo.existsBySeatSeatIdAndScheduleScheduleId(seat.getSeatId(), scheduleId)) {
                 throw new IllegalStateException("Một số ghế đã được đặt.");
             }
-            total = total.add(seat.getUnitPrice());
+            total += seat.getUnitPrice().doubleValue();
         }
 
-        Optional<Promotion> promoOpt = validatePromotionCode(promotionCode);
+        Optional<Promotion> promoOpt = promotionRepo.findByPromotionCode(promotionCode)
+                .filter(p -> p.getEndTime().isAfter(LocalDateTime.now()) && p.getQuantity() > 0);
         Promotion promo = null;
-        BigDecimal discount = BigDecimal.ZERO;
+        double discount = 0.0;
+
         if (promoOpt.isPresent()) {
             promo = promoOpt.get();
-            discount = total.multiply(BigDecimal.valueOf(promo.getDiscount())).divide(BigDecimal.valueOf(100));
-            total = total.subtract(discount);
+            discount = total * promo.getDiscount() / 100.0;
+            total -= discount;
             promo.setQuantity(promo.getQuantity() - 1);
             promotionRepo.save(promo);
         }
 
-        Optional<Customer> cus = customerRepo.findById(1);
-        if (cus.isEmpty()) throw new IllegalStateException("Không tìm thấy khách hàng.");
+        Customer customer = customerRepo.findById(1).orElseThrow(() -> new IllegalStateException("Không tìm thấy khách hàng."));
 
         Invoice invoice = new Invoice();
-        invoice.setCustomer(cus.get());
+        invoice.setCustomer(customer);
         invoice.setPromotion(promo);
-        invoice.setDiscount(discount.floatValue());
+        invoice.setDiscount((float) discount);
         invoice.setBookingDate(LocalDateTime.now());
-        invoice.setStatus(InvoiceStatus.Cancelled); // chưa thanh toán
-
-        // Tạm set tổng trước combo
+        invoice.setStatus(Invoice_Status.Cancelled);
         invoice.setTotalPrice(total);
         invoice = invoiceRepo.save(invoice);
 
         for (Seat seat : seats) {
-            detailSeatRepo.insertDetailSeat(invoice.getInvoiceId(), seat.getSeatId(), scheduleId,"Booked");
+            detailSeatRepo.insertDetailSeat(invoice.getInvoiceId(), seat.getSeatId(), scheduleId, "Booked");
         }
 
-        // Xử lý combo
-        BigDecimal comboTotal = BigDecimal.ZERO;
+        double comboTotal = 0.0;
         for (Map.Entry<Integer, Integer> combo : selectedCombos.entrySet()) {
-            Integer theaterStockId = combo.getKey();
-            Integer quantity = combo.getValue();
+            TheaterStock stock = theaterStockRepo.findById(combo.getKey())
+                    .orElseThrow(() -> new IllegalArgumentException("Combo không tồn tại: " + combo.getKey()));
 
-            TheaterStock stock = theaterStockRepo.findById(theaterStockId)
-                    .orElseThrow(() -> new IllegalArgumentException("Combo không tồn tại: " + theaterStockId));
-
-            if (stock.getQuantity() < quantity) {
+            if (stock.getQuantity() < combo.getValue()) {
                 throw new IllegalStateException("Không đủ hàng cho combo: " + stock.getFoodName());
             }
 
-            stock.setQuantity(stock.getQuantity() - quantity);
+            stock.setQuantity(stock.getQuantity() - combo.getValue());
             theaterStockRepo.save(stock);
 
-            BigDecimal comboTotalPrice = stock.getUnitPrice().multiply(BigDecimal.valueOf(quantity));
-            comboTotal = comboTotal.add(comboTotalPrice);
+            double comboTotalPrice = stock.getUnitPrice().doubleValue()*1000 * combo.getValue();
+            comboTotal += comboTotalPrice;
 
             DetailFD detailFD = new DetailFD();
             detailFD.setInvoice(invoice);
             detailFD.setTheaterStock(stock);
-            detailFD.setQuantity(quantity);
+            detailFD.setQuantity(combo.getValue());
             detailFD.setTotalPrice(comboTotalPrice);
             detailFD.setStatus("Booked");
             detailFDRepo.save(detailFD);
         }
 
-        // Cập nhật tổng giá sau combo
-        total = total.add(comboTotal);
+        total += comboTotal;
         invoice.setTotalPrice(total);
-        invoice = invoiceRepo.save(invoice); // update lại
 
-        return invoice;
+        invoice = invoiceRepo.save(invoice);
+
+        return new InvoiceDTO(invoice);
     }
 
-    public Map<String, Object> checkPromotionCode(String code, BigDecimal totalAmount) {
-        Optional<Promotion> promoOpt = promotionRepo.findByPromotionCode(code);
+
+    public Map<String, Object> checkPromotionCode(String code, double totalAmount) {
+        Optional<PromotionDTO> promoOpt = validatePromotionCode(code);
         Map<String, Object> response = new HashMap<>();
 
         if (promoOpt.isPresent()) {
-            Promotion promo = promoOpt.get();
-            if (promo.getEndTime().isAfter(LocalDateTime.now()) && promo.getQuantity() > 0) {
-                BigDecimal discount = totalAmount.multiply(BigDecimal.valueOf(promo.getDiscount())).divide(BigDecimal.valueOf(100));
-                response.put("valid", true);
-                response.put("discount", discount);
-                response.put("message", "Mã hợp lệ! Bạn được giảm: " + discount + " VNĐ.");
-            } else {
-                response.put("valid", false);
-                response.put("message", "Mã giảm giá đã hết hạn hoặc không còn khả dụng.");
-            }
+            PromotionDTO promo = promoOpt.get();
+            double discount = totalAmount * promo.getDiscount() / 100.0;
+            response.put("valid", true);
+            response.put("discount", discount);
+            response.put("message", "Mã hợp lệ! Bạn được giảm: " + discount + " VNĐ.");
         } else {
             response.put("valid", false);
-            response.put("message", "Mã giảm giá không tồn tại.");
+            response.put("message", "Mã giảm giá không tồn tại hoặc đã hết hạn.");
         }
-
         return response;
     }
     @Transactional
-    public Map<String, Object> applyPromotionCode(String code, BigDecimal totalAmount) {
+    public Map<String, Object> applyPromotionCode(String code, double totalAmount) {
         Optional<Promotion> promoOpt = promotionRepo.findByPromotionCode(code);
         Map<String, Object> response = new HashMap<>();
 
@@ -170,7 +159,7 @@ public class BookingService {
 
             // Kiểm tra thời hạn và số lượng mã
             if (promo.getEndTime().isAfter(LocalDateTime.now()) && promo.getQuantity() > 0) {
-                BigDecimal discount = totalAmount.multiply(BigDecimal.valueOf(promo.getDiscount())).divide(BigDecimal.valueOf(100));
+                double discount = totalAmount * promo.getDiscount() / 100.0;
 
                 // Cập nhật số lượng mã giảm giá
                 promo.setQuantity(promo.getQuantity() - 1);
@@ -190,87 +179,68 @@ public class BookingService {
 
         return response;
     }
-    public BigDecimal calculateTotalAmount(Integer scheduleId, List<Integer> seatIds, String promotionCode) {
-        // Lấy danh sách DetailSeat theo scheduleId
-        List<DetailSeat> detailSeats = detailSeatRepo.findByScheduleScheduleId(scheduleId);
 
-        // Lọc ra các ghế có ID trong danh sách `seatIds`
-        List<Seat> seats = detailSeats.stream()
-                .filter(detailSeat -> seatIds.contains(detailSeat.getSeat().getSeatId()))
-                .map(DetailSeat::getSeat)
-                .toList();
+    public double calculateTotalAmount(Integer scheduleId, List<Integer> seatIds, String promotionCode) {
+        List<Seat> seats = seatRepo.findAllById(seatIds);
+        double totalSeatAmount = seats.stream()
+                .mapToDouble(seat -> seat.getUnitPrice().doubleValue())
+                .sum();
 
-        // Tính tổng tiền ghế
-        BigDecimal totalSeatAmount = seats.stream()
-                .map(Seat::getUnitPrice) // Lấy giá từng ghế
-                .reduce(BigDecimal.ZERO, BigDecimal::add); // Tổng tiền các ghế
-
-        // Nếu không có mã giảm giá, trả về tổng tiền ghế
         if (promotionCode == null || promotionCode.isBlank()) {
             return totalSeatAmount;
         }
 
-        // Kiểm tra mã giảm giá
-        Optional<Promotion> promoOpt = promotionRepo.findByPromotionCode(promotionCode);
+        Optional<Promotion> promoOpt = promotionRepo.findByPromotionCode(promotionCode)
+                .filter(p -> p.getEndTime().isAfter(LocalDateTime.now()) && p.getQuantity() > 0);
+
         if (promoOpt.isEmpty()) {
-            throw new IllegalStateException("Mã giảm giá không hợp lệ.");
+            throw new IllegalStateException("Mã giảm giá không hợp lệ hoặc hết hạn.");
         }
 
-        Promotion promotion = promoOpt.get();
-
-        // Kiểm tra thời hạn và số lượng mã
-        if (!promotion.isValid()) {
-            throw new IllegalStateException("Mã giảm giá đã hết hạn hoặc không còn khả dụng.");
-        }
-
-        // Tính tiền giảm giá
-        BigDecimal discountAmount = totalSeatAmount.multiply(BigDecimal.valueOf(promotion.getDiscount()))
-                .divide(BigDecimal.valueOf(100));
-
-        // Trả về tổng tiền sau khi áp dụng mã giảm giá
-        return totalSeatAmount.subtract(discountAmount).max(BigDecimal.ZERO); // Đảm bảo không âm
+        Promotion promo = promoOpt.get();
+        double discount = totalSeatAmount * promo.getDiscount() / 100.0;
+        return Math.max(totalSeatAmount - discount, 0);
     }
     @Transactional
-    public Invoice bookSeatsTemp(Integer scheduleId, List<Integer> seatIds, String promotionCode) {
-        BigDecimal total = BigDecimal.ZERO;
+    public InvoiceDTO bookSeatsTemp(Integer scheduleId, List<Integer> seatIds, String promotionCode) {
+        double total = 0.0;
         List<Seat> seats = seatRepo.findAllById(seatIds);
 
         for (Seat seat : seats) {
-            boolean booked = detailSeatRepo.existsBySeatSeatIdAndScheduleScheduleId(seat.getSeatId(), scheduleId);
-            if (booked) {
+            if (detailSeatRepo.existsBySeatSeatIdAndScheduleScheduleId(seat.getSeatId(), scheduleId)) {
                 throw new IllegalStateException("Một số ghế đã được đặt.");
             }
-            total = total.add(seat.getUnitPrice());
+            total += seat.getUnitPrice().doubleValue();
         }
 
-        Optional<Promotion> promoOpt = validatePromotionCode(promotionCode);
+        Optional<Promotion> promoOpt = promotionRepo.findByPromotionCode(promotionCode)
+                .filter(p -> p.getEndTime().isAfter(LocalDateTime.now()) && p.getQuantity() > 0);
         Promotion promo = null;
-        BigDecimal discount = BigDecimal.ZERO;
+        double discount = 0.0;
 
         if (promoOpt.isPresent()) {
             promo = promoOpt.get();
-            discount = total.multiply(BigDecimal.valueOf(promo.getDiscount())).divide(BigDecimal.valueOf(100));
-            total = total.subtract(discount);
+            discount = total * promo.getDiscount() / 100.0;
+            total -= discount;
             promo.setQuantity(promo.getQuantity() - 1);
             promotionRepo.save(promo);
         }
 
-        Optional<Customer> cus = customerRepo.findById(1); // Cần chỉnh nếu có login
-        if (cus.isEmpty()) throw new IllegalStateException("Khách hàng không tồn tại.");
+        Customer customer = customerRepo.findById(1).orElseThrow(() -> new IllegalStateException("Không tìm thấy khách hàng."));
 
         Invoice invoice = new Invoice();
-        invoice.setCustomer(cus.get());
+        invoice.setCustomer(customer);
         invoice.setPromotion(promo);
-        invoice.setDiscount(discount.floatValue());
+        invoice.setDiscount((float) discount);
         invoice.setBookingDate(LocalDateTime.now());
         invoice.setTotalPrice(total);
+        invoice.setStatus(Invoice_Status.Cancelled);
         invoice = invoiceRepo.save(invoice);
 
-        // Lưu chi tiết ghế
         for (Seat seat : seats) {
-            detailSeatRepo.insertDetailSeat(invoice.getInvoiceId(), seat.getSeatId(),  scheduleId,"Booked");
+            detailSeatRepo.insertDetailSeat(invoice.getInvoiceId(), seat.getSeatId(), scheduleId, "Booked");
         }
 
-        return invoice;
+        return new InvoiceDTO(invoice);
     }
 }

@@ -1,60 +1,35 @@
 package com.bluebear.cinemax.entity;
-import jakarta.persistence.*;
 
+import com.bluebear.cinemax.enumtype.DetailSeat_Status;
+import com.bluebear.cinemax.enumtype.Movie_Status;
+import jakarta.persistence.*;
+import lombok.*;
 
 @Entity
 @Table(name = "Detail_Seat")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class DetailSeat {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "ID")
     private Integer id;
 
     @ManyToOne
-    @JoinColumn(name = "invoiceId", nullable = false)
+    @JoinColumn(name = "InvoiceID", nullable = false)
     private Invoice invoice;
 
     @ManyToOne
-    @JoinColumn(name = "seatId", nullable = false)
+    @JoinColumn(name = "SeatID", nullable = false)
     private Seat seat;
 
-
     @ManyToOne
-    @JoinColumn(name = "scheduleId", nullable = false)
+    @JoinColumn(name = "ScheduleID", nullable = false)
     private Schedule schedule;
 
-
-// Getters and setters
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Invoice getInvoice() {
-        return invoice;
-    }
-
-    public void setInvoice(Invoice invoice) {
-        this.invoice = invoice;
-    }
-
-    public Seat getSeat() {
-        return seat;
-    }
-
-    public void setSeat(Seat seat) {
-        this.seat = seat;
-    }
-
-    public Schedule getSchedule() {
-        return schedule;
-    }
-
-    public void setSchedule(Schedule schedule) {
-        this.schedule = schedule;
-    }
+    @Column(name = "Status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private DetailSeat_Status status;
 }

@@ -1,7 +1,15 @@
 package com.bluebear.cinemax.entity;
+import com.bluebear.cinemax.enumtype.Movie_Status;
+import com.bluebear.cinemax.enumtype.Theater_Status;
 import jakarta.persistence.*;
-import java.math.BigDecimal;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 @Entity
 @Table(name = "Theater_Stock")
 public class TheaterStock {
@@ -20,71 +28,17 @@ public class TheaterStock {
     @Column(name = "Quantity", nullable = false)
     private Integer quantity;
 
-    @Column(name = "UnitPrice", precision = 10, scale = 2, nullable = false)
-    private BigDecimal unitPrice;
+    @Column(name = "UnitPrice", nullable = false)
+    private Double unitPrice;
 
     @Column(name = "Image", length = 255, nullable = false)
     private String image;
 
     @Column(name = "Status", length = 20)
-    private String status;
+    @Enumerated(EnumType.STRING)
+    private Theater_Status status;
 
     // Getters and Setters
 
-    public Integer getTheaterStockID() {
-        return theaterStockID;
-    }
-
-    public void setTheaterStockID(Integer theaterStockID) {
-        this.theaterStockID = theaterStockID;
-    }
-
-    public int getTheater() {
-        return theater;
-    }
-
-    public void setTheater(int theater) {
-        this.theater = theater;
-    }
-
-    public String getFoodName() {
-        return foodName;
-    }
-
-    public void setFoodName(String foodName) {
-        this.foodName = foodName;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public BigDecimal getUnitPrice() {
-        return unitPrice;
-    }
-
-    public void setUnitPrice(BigDecimal unitPrice) {
-        this.unitPrice = unitPrice;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
 
 }

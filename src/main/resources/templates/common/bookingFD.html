@@ -30,7 +30,11 @@
             <input type="hidden" name="roomId" th:value="${roomId}">
             <input type="hidden" name="promotionCode" th:value="${promotionCode}">
 
-            <input type="hidden" name="selectedSeats" th:each="seatId : ${selectedSeats}" th:value="${seatId}"/>
+            <!-- ✅ Đúng cách: -->
+            <th:block th:each="seatId : ${selectedSeats}">
+                <input type="hidden" name="selectedSeats" th:value="${seatId}" />
+            </th:block>
+
             <div class="combo-grid">
                 <div th:each="combo : ${combos}" class="combo-card" th:attr="data-combo-id=${combo.theaterStockID}">
                     <div class="combo-image-container">
@@ -51,7 +55,7 @@
                         </p>
 
                         <div class="combo-price-section">
-                            <div class="combo-price" th:text="${#numbers.formatInteger(combo.unitPrice, 0, 'POINT')} + '0.000₫'">
+                            <div class="combo-price" th:text="${#numbers.formatInteger(combo.unitPrice, 0, 'POINT')} +đ ">
                                 50.000₫
                             </div>
                             <div class="combo-stock">

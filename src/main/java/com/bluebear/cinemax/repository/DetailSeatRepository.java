@@ -13,7 +13,6 @@ import java.util.List;
 
 public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer> {
     List<DetailSeat> findByScheduleScheduleId(Integer scheduleId);
-    List<DetailSeat> findByInvoice(Invoice invoice);
 
     boolean existsBySeatSeatIdAndScheduleScheduleId(Integer seatId, Integer scheduleId);
     @Modifying

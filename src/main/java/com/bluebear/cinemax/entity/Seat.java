@@ -26,7 +26,7 @@ public class Seat {
 
     private boolean isVIP;
 
-    private BigDecimal unitPrice;
+    private Double unitPrice;
 
     private String status; // 'Active', 'Inactive'
 
