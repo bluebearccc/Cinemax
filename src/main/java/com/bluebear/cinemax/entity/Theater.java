@@ -5,14 +5,13 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.List;
-import java.util.Set;
-@Builder
-@Setter
-@Getter
-@NoArgsConstructor
-@AllArgsConstructor
+
 @Entity
 @Table(name = "Theater")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Theater {
 
     @Id
@@ -20,23 +19,26 @@ public class Theater {
     @Column(name = "TheaterID")
     private Integer theaterID;
 
-    @Column(name = "TheaterName", length = 100, nullable = false)
+    @Column(name = "TheaterName", nullable = false, length = 100)
     private String theaterName;
 
-    @Column(name = "Address", length = 100, nullable = false)
+    @Column(name = "Address", nullable = false, length = 100)
     private String address;
 
-    @Column(name = "Image", length = 255, nullable = false)
+    @Column(name = "Image", nullable = false, length = 255)
     private String image;
 
     @Column(name = "RoomQuantity", nullable = false)
     private Integer roomQuantity;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "Status", length = 20, nullable = false)
-    private Theater_Status  status;
+    @Column(name = "ServiceRate", nullable = true)
+    private Double serviceRate;
 
-    @OneToMany(mappedBy = "theater")
+    @Column(name = "Status", nullable = false, length = 20)
+    @Enumerated(EnumType.STRING)
+    private Theater_Status status;
+
+    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TheaterStock> theaterStock;
 
     @OneToMany(mappedBy = "theater")

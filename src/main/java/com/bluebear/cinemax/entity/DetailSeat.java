@@ -1,6 +1,7 @@
 package com.bluebear.cinemax.entity;
 
 import com.bluebear.cinemax.enumtype.DetailSeat_Status;
+import com.bluebear.cinemax.enumtype.Movie_Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import lombok.*;
 public class DetailSeat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = "Id")
     private Integer id;
 
     @ManyToOne

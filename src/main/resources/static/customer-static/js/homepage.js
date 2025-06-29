@@ -1,59 +1,3 @@
-let currentSlide = 0;
-const slides = document.querySelectorAll('.slide');
-const dots = document.querySelectorAll('.nav-dot');
-let slideInterval;
-
-function showSlide(index) {
-    // Remove active class from all slides and dots
-    slides.forEach(slide => slide.classList.remove('active'));
-    dots.forEach(dot => dot.classList.remove('active'));
-
-    // Add active class to current slide and dot
-    slides[index].classList.add('active');
-    dots[index].classList.add('active');
-
-    currentSlide = index;
-}
-
-function nextSlide() {
-    currentSlide = (currentSlide + 1) % slides.length;
-    showSlide(currentSlide);
-}
-
-function goToSlide(index) {
-    clearInterval(slideInterval);
-    showSlide(index);
-    startSlideshow();
-}
-
-function startSlideshow() {
-    slideInterval = setInterval(nextSlide, 5000); // Change slide every 5 seconds
-}
-
-// Start automatic slideshow
-startSlideshow();
-
-// Smooth animations on load
-window.addEventListener('load', () => {
-    const slideContent = document.querySelector('.slide-content');
-    slideContent.style.animation = 'slideInLeft 1s ease-out';
-});
-
-// Add slide-in animation
-const style = document.createElement('style');
-style.textContent = `
-            @keyframes slideInLeft {
-                from {
-                    opacity: 0;
-                    transform: translateX(-100px) translateY(-50%);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0) translateY(-50%);
-                }
-            }
-        `;
-document.head.appendChild(style);
 
 document.querySelectorAll('.carouselMovie-container').forEach(container => {
     const carouselMovie = container.querySelector('.carouselMovie');
@@ -122,7 +66,7 @@ function generateDates(selectedIndex = 0) {
     const today = new Date();
     const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    for (let i = 0; i < 7; i++) {
+    for (let i = 0; i < 14; i++) {
         const date = new Date(today);
         date.setDate(today.getDate() + i);
 
@@ -152,7 +96,7 @@ function attachLoadMoreEvent() {
         let currentNumOfFeedback = parseInt(document.getElementById("currentNumberOfFeedback").value);
 
         $.ajax({
-            url: "/customer/home/loadFeedback", type: "get", data: {
+            url: "/home/loadFeedback", type: "get", data: {
                 currentNumberOfFeedback: currentNumOfFeedback
             }, success: function (data) {
                 let container = document.querySelector('div.feedback-area');
@@ -176,7 +120,7 @@ function attachDateItemEvents() {
             const roomType = document.querySelector('.custom-button-item.active span').innerText;
 
             $.ajax({
-                url: "/customer/home/loadBookMovie",
+                url: "/home/loadBookMovie",
                 type: "get",
                 data: {
                     selectedIndex: selectedIndex,
@@ -212,7 +156,7 @@ function attachCinemaItemEvents() {
             const roomType = document.querySelector('.custom-button-item.active span').innerText;
 
             $.ajax({
-                url: "/customer/home/loadBookMovie",
+                url: "/home/loadBookMovie",
                 type: "get",
                 data: {
                     selectedIndex: selectedIndex,
@@ -249,7 +193,7 @@ function attachRoomItemEvents() {
             const roomType = document.querySelector('.custom-button-item.active span').innerText;
 
             $.ajax({
-                url: "/customer/home/loadBookMovie",
+                url: "/home/loadBookMovie",
                 type: "get",
                 data: {
                     selectedIndex: selectedIndex,

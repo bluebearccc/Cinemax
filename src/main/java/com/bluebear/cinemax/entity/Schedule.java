@@ -2,19 +2,18 @@ package com.bluebear.cinemax.entity;
 
 import com.bluebear.cinemax.enumtype.Schedule_Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-@Builder
+import java.util.Date;
+import java.util.List;
+
 @Entity
-@Data
-@AllArgsConstructor
-@NoArgsConstructor
 @Table(name = "Schedule")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Schedule {
 
     @Id
@@ -36,8 +35,10 @@ public class Schedule {
     @JoinColumn(name = "RoomID", nullable = false)
     private Room room;
 
-    @Column(name = "Status", length = 20, nullable = false)
+    @Column(name = "Status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Schedule_Status status;
 
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetailSeat> detailSeatList;
 }

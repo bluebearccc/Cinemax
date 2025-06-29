@@ -1,16 +1,16 @@
 function generateDates(selectedIndex = 0) {
-    const dateSelector = document.getElementById('date-selector');
+    let dateSelector = document.getElementById('date-selector');
     dateSelector.innerHTML = '';
-    const today = new Date();
-    const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    let today = new Date();
+    let dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
-    for (let i = 0; i < 7; i++) {
-        const date = new Date(today);
+    for (let i = 0; i < 14; i++) {
+        let date = new Date(today);
         date.setDate(today.getDate() + i);
 
-        const dayLabel = i === 0 ? 'Today' : dayNames[date.getDay()];
+        let dayLabel = i === 0 ? 'Today' : dayNames[date.getDay()];
 
-        const dateItem = document.createElement('div');
+        let dateItem = document.createElement('div');
         dateItem.className = 'date-item';
         dateItem.dataset.index = i; // 👈 dùng index (0–6)
 
@@ -30,7 +30,7 @@ function generateDates(selectedIndex = 0) {
 generateDates();
 
 function openTrailer() {
-    const modal = document.getElementById('trailerModal');
+    let modal = document.getElementById('trailerModal');
     modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
 
@@ -43,8 +43,8 @@ function openTrailer() {
 }
 
 function closeTrailer() {
-    const modal = document.getElementById('trailerModal');
-    const iframe = document.getElementById("trailerFrame");
+    let modal = document.getElementById('trailerModal');
+    let iframe = document.getElementById("trailerFrame");
     var videoSrc = iframe.src;
     iframe.src = videoSrc;
     modal.style.opacity = '0';
@@ -56,7 +56,7 @@ function closeTrailer() {
 
 // Close modal when clicking outside
 window.onclick = function (event) {
-    const modal = document.getElementById('trailerModal');
+    let modal = document.getElementById('trailerModal');
     if (event.target === modal) {
         closeTrailer();
     }
@@ -64,21 +64,21 @@ window.onclick = function (event) {
 
 // Add parallax effect to hero section
 window.addEventListener('scroll', function () {
-    const scrolled = window.pageYOffset;
-    const heroSection = document.querySelector('.hero-section');
+    let scrolled = window.pageYOffset;
+    let heroSection = document.querySelector('.hero-section');
     heroSection.style.transform = `translateY(${scrolled * 0.5}px)`;
 });
 
 // Add hover effect to poster
-const poster = document.querySelector('.movie-poster');
+let poster = document.querySelector('.movie-poster');
 poster.addEventListener('mousemove', function (e) {
-    const rect = this.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    const rotateX = (y - centerY) / 10;
-    const rotateY = (centerX - x) / 10;
+    let rect = this.getBoundingClientRect();
+    let x = e.clientX - rect.left;
+    let y = e.clientY - rect.top;
+    let centerX = rect.width / 2;
+    let centerY = rect.height / 2;
+    let rotateX = (y - centerY) / 10;
+    let rotateY = (centerX - x) / 10;
 
     this.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
 });
@@ -88,14 +88,14 @@ poster.addEventListener('mouseleave', function () {
 });
 
 document.querySelectorAll('.carouselCast-container').forEach(container => {
-    const carouselCast = container.querySelector('.carouselCast');
-    const cardsCast = container.querySelectorAll('.cast-card');
-    const totalcardsCast = cardsCast.length;
+    let carouselCast = container.querySelector('.carouselCast');
+    let cardsCast = container.querySelectorAll('.cast-card');
+    let totalcardsCast = cardsCast.length;
 
     let currentSlideCast = 0;
 
     function getcardsCastToShow(numberOfActor) {
-        // const width = window.innerWidth;
+        // let width = window.innerWidth;
         // if (width < 600) return 2;
         // if (width < 900) return 3;
         // if (width < 1200) return 4;
@@ -111,8 +111,8 @@ document.querySelectorAll('.carouselCast-container').forEach(container => {
     let maxSlidesCast = Math.max(0, totalcardsCast - cardsCastToShow);
 
     function updatecarouselCast() {
-        const cardWidth = carouselCast.clientWidth / cardsCastToShow;
-        const offset = -currentSlideCast * cardWidth;
+        let cardWidth = carouselCast.clientWidth / cardsCastToShow;
+        let offset = -currentSlideCast * cardWidth;
         carouselCast.style.transform = `translateX(${offset}px)`;
     }
 
@@ -141,8 +141,8 @@ document.querySelectorAll('.carouselCast-container').forEach(container => {
     });
 
     // Gán sự kiện cho nút
-    const prevBtn = container.querySelector('.prev-btn');
-    const nextBtn = container.querySelector('.next-btn');
+    let prevBtn = container.querySelector('.prev-btn');
+    let nextBtn = container.querySelector('.next-btn');
 
     if (prevBtn) prevBtn.addEventListener('click', prevSlideCast);
     if (nextBtn) nextBtn.addEventListener('click', nextSlideCast);
@@ -152,36 +152,17 @@ document.querySelectorAll('.carouselCast-container').forEach(container => {
     init();
 });
 
-function attachLoadMoreEvent() {
-    document.getElementById('load-feedback')?.addEventListener('click', function () {
-        let currentNumOfFeedback = parseInt(document.getElementById("currentNumberOfFeedback").value);
-
-        $.ajax({
-            url: "/customer/movie-detail/loadfeedback", type: "get", data: {
-                currentNumberOfFeedback: currentNumOfFeedback
-            }, success: function (data) {
-                let container = document.querySelector('div.feedback-area');
-                container.innerHTML = data;
-                // Gắn lại listener sau khi innerHTML xong
-                attachLoadMoreEvent();
-            }, error: function (e) {
-                alert('Lỗi khi tải trang: ' + e.statusText);
-            }
-        });
-    });
-}
-
 function attachDateItemEvents() {
-    const dateItems = document.querySelectorAll('.date-item');
+    let dateItems = document.querySelectorAll('.date-item');
 
     dateItems.forEach(item => {
         item.addEventListener('click', function () {
             dateItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-            const selectedIndex = parseInt(this.dataset.index);
-            const theaterId = parseInt(document.querySelector('div.cinema-item.active input').value);
-            const roomType = document.querySelector('.custom-button-item.active span').innerText;
-            const movieId = parseInt(document.getElementById('movieId').value);
+            let selectedIndex = parseInt(this.dataset.index);
+            let theaterId = parseInt(document.querySelector('div.cinema-item.active input').value);
+            let roomType = document.querySelector('.custom-button-item.active span').innerText;
+            let movieId = parseInt(document.getElementById('movieId').value);
 
             $.ajax({
                 url: "/customer/movie-detail/loadSchedule",
@@ -210,16 +191,16 @@ function attachDateItemEvents() {
 }
 
 function attachCinemaItemEvents() {
-    const cinemaItems = document.querySelectorAll('.cinema-item');
+    let cinemaItems = document.querySelectorAll('.cinema-item');
     cinemaItems.forEach(item => {
         item.addEventListener('click', function () {
             cinemaItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
 
-            const selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
-            const theaterId = parseInt(item.querySelector('input').value);
-            const roomType = document.querySelector('.custom-button-item.active span').innerText;
-            const movieId = parseInt(document.getElementById('movieId').value);
+            let selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
+            let theaterId = parseInt(item.querySelector('input').value);
+            let roomType = document.querySelector('.custom-button-item.active span').innerText;
+            let movieId = parseInt(document.getElementById('movieId').value);
 
             $.ajax({
                 url: "/customer/movie-detail/loadSchedule",
@@ -231,7 +212,6 @@ function attachCinemaItemEvents() {
                     movieId: movieId
                 },
                 success: function (data) {
-                    console.log(data);
                     document.getElementById('book-detail-showtimes').innerHTML = data;
 
                     // Gọi lại generateDates để gắn active đúng ngày
@@ -249,16 +229,16 @@ function attachCinemaItemEvents() {
 }
 
 function attachRoomItemEvents() {
-    const roomButtonItems = document.querySelectorAll('.custom-button-item');
+    let roomButtonItems = document.querySelectorAll('.custom-button-item');
     roomButtonItems.forEach(item => {
         item.addEventListener('click', () => {
             roomButtonItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
 
-            const selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
-            const theaterId = parseInt(document.querySelector('div.cinema-item.active input').value);
-            const roomType = document.querySelector('.custom-button-item.active span').innerText;
-            const movieId = parseInt(document.getElementById('movieId').value);
+            let selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
+            let theaterId = parseInt(document.querySelector('div.cinema-item.active input').value);
+            let roomType = document.querySelector('.custom-button-item.active span').innerText;
+            let movieId = parseInt(document.getElementById('movieId').value);
 
             $.ajax({
                 url: "/customer/movie-detail/loadSchedule",
@@ -270,7 +250,6 @@ function attachRoomItemEvents() {
                     movieId: movieId
                 },
                 success: function (data) {
-                    console.log(data);
                     document.getElementById('book-detail-showtimes').innerHTML = data;
 
                     // Gọi lại generateDates để gắn active đúng ngày
@@ -287,8 +266,271 @@ function attachRoomItemEvents() {
     });
 }
 
+function attachLoadMoreEvent() {
+    document.getElementById('load-feedback')?.addEventListener('click', function () {
+        let currentPage = parseInt(document.getElementById("currentPage").value);
+        let movieId = parseInt(document.getElementById("movieId").value);
+
+        $.ajax({
+            url: "/customer/movie-detail/loadFeedback", type: "get", data: {
+                currentPage: currentPage,
+                movieId: movieId
+            }, success: function (data) {
+                let container = document.querySelector('div.comments-section');
+                container.innerHTML = data;
+                // Gắn lại listener sau khi innerHTML xong
+                attachLoadMoreEvent();
+                attachShowMoreCommentEvent();
+                initializeCommentSection();
+            }, error: function (e) {
+                alert('Lỗi khi tải trang: ' + e.statusText);
+            }
+        });
+    });
+}
+
+function attachShowMoreCommentEvent() {
+    let showMore = document.querySelectorAll('.load-more-replies-movie-detail');
+    showMore.forEach(item => {
+        item.addEventListener('click', (e) => {
+            let div = e.target.closest('.replies-movie-detail');
+            let currentNumOfComment = parseInt(div.querySelector('.currentNumOfComment').value);
+            let feedbackId = parseInt(div.querySelector('.feedbackId').value);
+            $.ajax({
+                url: "/customer/movie-detail/loadComment",
+                type: "get",
+                data: {
+                    currentNumOfComment: currentNumOfComment,
+                    feedbackId: feedbackId
+                },
+                success: function (data) {
+                    div.closest('.replies-ajax').innerHTML = data;
+                    attachLoadMoreEvent();
+                    attachShowMoreCommentEvent();
+                    initializeCommentSection();
+                },
+                error: function (e) {
+                    alert("Lỗi khi tải lịch chiếu");
+                }
+            });
+        });
+    });
+}
+
 document.addEventListener('DOMContentLoaded', attachLoadMoreEvent);
 document.addEventListener('DOMContentLoaded', attachDateItemEvents);
 document.addEventListener('DOMContentLoaded', attachCinemaItemEvents);
 document.addEventListener('DOMContentLoaded', attachRoomItemEvents);
+document.addEventListener('DOMContentLoaded', attachShowMoreCommentEvent);
+
+function toggleReplyForm(button, authorId) {
+    let parentComment = button.closest('.comment-content-movie-detail');
+    let existingForm = parentComment.querySelector('.reply-form-container-movie-detail');
+    if (existingForm) {
+        existingForm.remove();
+        return;
+    }
+
+    let replyFormContainer = document.createElement('div');
+    replyFormContainer.className = 'reply-form-container-movie-detail';
+    replyFormContainer.innerHTML = `
+        <form class="reply-form-movie-detail" data-author-id="${authorId}">
+            <div class="comment-form-movie-detail" style="margin-top: 10px;">
+                <div class="comment-avatar"><i class="fas fa-user"></i></div>
+                <div class="comment-input-wrapper-movie-detail">
+                    <textarea name="text" class="comment-input-movie-detail" placeholder="Write your thought..." rows="1" required></textarea>
+                    <div class="form-actions-movie-detail" style="display: flex;">
+                        <button type="button" class="btn-cancel-movie-detail">Cancel</button>
+                        <button type="submit" class="btn-submit-movie-detail">Submit</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    `;
+    parentComment.appendChild(replyFormContainer);
+    replyFormContainer.querySelector('.comment-input-movie-detail').focus();
+}
+
+function updateStarsOnClick(star) {
+    let ratingContainer = star.parentElement;
+    let ratingValue = parseInt(star.dataset.value);
+    let stars = ratingContainer.querySelectorAll('.star-movie-detail');
+    let hiddenInput = ratingContainer.querySelector('.rating-value-movie-detail');
+
+    if (hiddenInput) {
+        hiddenInput.value = ratingValue;
+    }
+
+    stars.forEach((s, index) => {
+        s.classList.toggle('fas', index < ratingValue);
+        s.classList.toggle('far', index >= ratingValue);
+    });
+}
+
+function previewStarsOnHover(star) {
+    let ratingContainer = star.parentElement;
+    let hoverValue = parseInt(star.dataset.value);
+    let stars = ratingContainer.querySelectorAll('.star-movie-detail');
+
+    stars.forEach((s, index) => {
+        s.classList.toggle('fas', index < hoverValue);
+        s.classList.toggle('far', index >= hoverValue);
+    });
+}
+
+function resetStarsOnMouseOut(ratingContainer) {
+    let stars = ratingContainer.querySelectorAll('.star-movie-detail');
+    let hiddenInput = ratingContainer.querySelector('.rating-value-movie-detail');
+    let selectedValue = parseInt(hiddenInput?.value) || 0;
+
+    stars.forEach((s, index) => {
+        s.classList.toggle('fas', index < selectedValue);
+        s.classList.toggle('far', index >= selectedValue);
+    });
+}
+
+function resetStarSelectionInForm(form) {
+    form.querySelectorAll('.star-movie-detail').forEach(s => {
+        s.classList.remove('fas');
+        s.classList.add('far');
+    });
+    let hiddenInput = form.querySelector('.rating-value-movie-detail');
+    if (hiddenInput) {
+        hiddenInput.value = '';
+    }
+}
+
+function handleCommentSectionClick(e) {
+    let target = e.target;
+    if (target.classList.contains('reply-btn-movie-detail')) {
+        e.preventDefault();
+        let authorId = target.dataset.authorId;
+        toggleReplyForm(target, authorId);
+    }
+    if (target.classList.contains('btn-cancel-movie-detail')) {
+        target.closest('.reply-form-container-movie-detail').remove();
+    }
+    if (target.classList.contains('star-movie-detail')) {
+        updateStarsOnClick(target);
+    }
+}
+
+function handleStarHover(e) {
+    if (e.target.classList.contains('star-movie-detail')) {
+        previewStarsOnHover(e.target);
+    }
+}
+
+function handleStarMouseOut(e) {
+    if (e.target.classList.contains('star-rating-input-movie-detail')) {
+        resetStarsOnMouseOut(e.target);
+    }
+}
+
+function handleMainCommentSubmit(form) {
+    let content = form.querySelector('.comment-input-movie-detail').value;
+    let rating = form.querySelector('.rating-value-movie-detail')?.value;
+    let movieId = document.querySelector('#movieId').value;
+    let customerId = document.getElementById("customerId").value;
+    let currentPage = document.getElementById("currentPage").value;
+    let totalPage = document.getElementById("totalPage").value;
+
+    if (rating.trim() === '') {
+        rating = null;
+    }
+
+    $.ajax({
+        url: "/customer/movie-detail/addFeedback", type: "post", data: {
+            customerId: customerId,
+            movieId: movieId,
+            content: content,
+            rate: rating,
+            currentPage: currentPage,
+            totalPage: totalPage
+        }, success: function (data) {
+            let container = document.querySelector('div.comments-section');
+            container.innerHTML = data;
+            attachLoadMoreEvent();
+            attachShowMoreCommentEvent();
+            initializeCommentSection();
+        }, error: function (e) {
+            alert('Lỗi khi tải trang: ' + e.statusText);
+        }
+    });
+
+
+    form.reset();
+    resetStarSelectionInForm(form);
+    form.querySelector('.form-actions-movie-detail').style.display = 'none';
+}
+
+function handleReplySubmit(form, repliedId) {
+    let bigDiv = form.closest('.bigger-comment-movie-detail');
+    let content = form.querySelector('.comment-input-movie-detail').value;
+    let feedbackId = parseInt(bigDiv.querySelector('.feedbackId').value);
+    let authorId= document.getElementById("customerId").value
+    let currentNumOfComment = parseInt(bigDiv.querySelector('.currentNumOfComment').value);
+    repliedId = parseInt(repliedId);
+
+    $.ajax({
+        url: "/customer/movie-detail/addComment", type: "post", data: {
+            feedbackId: feedbackId,
+            authorId: authorId,
+            repliedId: repliedId,
+            content: content,
+            currentNumOfComment: currentNumOfComment
+        }, success: function (data) {
+            let container = bigDiv.querySelector('.replies-ajax');
+            container.innerHTML = data;
+            attachLoadMoreEvent();
+            attachShowMoreCommentEvent();
+            initializeCommentSection();
+        }, error: function (e) {
+            alert('Lỗi khi tải trang: ' + e.statusText);
+        }
+    });
+
+    form.closest('.reply-form-container-movie-detail').remove();
+}
+
+function handleSubmitDelegator(e) {
+    e.preventDefault();
+    let form = e.target;
+
+    if (form.id === 'mainCommentFormMovieDetail') {
+        handleMainCommentSubmit(form);
+    } else if (form.classList.contains('reply-form-movie-detail')) {
+        handleReplySubmit(form, form.dataset.authorId);
+    }
+}
+
+function initializeCommentSection() {
+    let commentSection = document.querySelector('.comment-section-movie-detail');
+    if (!commentSection) return;
+
+    commentSection.addEventListener('click', handleCommentSectionClick);
+    commentSection.addEventListener('mouseover', handleStarHover);
+    commentSection.addEventListener('mouseout', handleStarMouseOut);
+    commentSection.addEventListener('submit', handleSubmitDelegator);
+
+    let mainCommentForm = document.getElementById('mainCommentFormMovieDetail');
+    if (mainCommentForm) {
+        let mainTextarea = mainCommentForm.querySelector('.comment-input-movie-detail');
+        let mainFormActions = mainCommentForm.querySelector('.form-actions-movie-detail');
+        let mainCancelBtn = mainCommentForm.querySelector('#main-cancel-btn');
+
+        mainTextarea.addEventListener('focus', () => {
+            mainFormActions.style.display = 'flex';
+        });
+
+        mainCancelBtn.addEventListener('click', () => {
+            mainTextarea.value = '';
+            mainFormActions.style.display = 'none';
+        });
+    }
+}
+
+document.addEventListener('DOMContentLoaded', initializeCommentSection);
+
+
 

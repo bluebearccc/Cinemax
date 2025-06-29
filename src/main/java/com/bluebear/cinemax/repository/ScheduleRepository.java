@@ -15,7 +15,10 @@ import java.util.List;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
+    Page<Schedule> findByStatus(Schedule_Status status, Pageable pageable);
 
+    @Query("SELECT s FROM Movie m JOIN m.scheduleList s WHERE m.movieID = :movieId AND CAST(s.startTime AS DATE) = CAST(:day AS DATE) AND s.startTime > :day AND s.status = :status")
+    Page<Schedule> findSchedulesByMovie_MovieIDInTodayAndStatus(int movieId, LocalDateTime day, Schedule_Status status, Pageable pageable);
     List<Schedule> findByMovie_MovieID(Integer movieId);
 
     @Query(value = "SELECT * FROM Schedule s WHERE s.MovieID = :movieId AND s.RoomID = :roomId AND CAST(s.EndTime AS DATE) = :date", nativeQuery = true)
@@ -35,6 +38,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
 
     List<Schedule> findByStatus(Schedule_Status status);
 
+    @Query("SELECT s FROM Movie m JOIN m.scheduleList s JOIN s.room r JOIN r.theater t WHERE m.movieID = :movieId AND t.theaterID = :theaterId AND CAST(s.startTime AS DATE) = CAST(:day AS DATE) AND s.startTime > :day AND LOWER(r.typeOfRoom) = LOWER(:roomType) AND s.status = :status")
+    Page<Schedule> findSchedulesByMovie_MovieIDAndTheaterAndDayAndRoomTypeStatus(int movieId, int theaterId, LocalDateTime day, Schedule_Status status, String roomType, Pageable pageable);
     @Query("SELECT s FROM Movie m JOIN m.scheduleList s WHERE m.movieID = :movieId AND CAST(s.startTime AS DATE) = CAST(:day AS DATE) AND s.status = :status")
     List<Schedule> findSchedulesByMovie_MovieIDInTodayAndStatus(int movieId, LocalDateTime day, Schedule_Status status);
 

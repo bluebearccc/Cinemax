@@ -18,12 +18,25 @@ import java.util.List;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
+    @Query("SELECT m FROM Movie m JOIN m.genres g WHERE g.genreID = :genreId")
+    Page<Movie> findByGenreIdAndStatus(Integer genreId, Movie_Status status, Pageable pageable);
+
+    Page<Movie> findBymovieNameContainingIgnoreCaseAndStatus(String movieName, Movie_Status status, Pageable pageable);
+
+    Page<Movie> findByGenresAndMovieNameContainingIgnoreCaseAndStatus(Genre genre, String movieName, Movie_Status status, Pageable pageable);
+
+    Movie findTop1ByStatusOrderByMovieRateDesc(Movie_Status status);
+
+    @Query("SELECT m FROM Movie m WHERE m.status = :status AND CAST(m.startDate AS DATE) <= CAST(:today AS DATE) ORDER BY m.movieRate desc")
+    Page<Movie> findTopCurrentlyShowByStatusOrderByMovieRateDesc(Movie_Status status, LocalDateTime today, Pageable pageable);
 
     @Query(value="select * from Movie m where m.StartDate <= GETDATE() And m.EndDate >= GETDATE()", nativeQuery = true)
     List<Movie> findAllShowingMovies();
+    Page<Movie> findMoviesByStartDateBeforeAndEndDateAfter(LocalDateTime currentDate, LocalDateTime nowDate, Pageable pageable);
 
     @Query(value="select * from Movie m where LOWER(m.MovieName) LIKE LOWER(CONCAT('%', :name, '%')) AND m.StartDate <= GETDATE() And m.EndDate >= GETDATE()", nativeQuery = true)
     List<Movie> findAllByMovieName(@Param("name") String name);
+    Page<Movie> findMoviesByStartDateAfter(LocalDateTime currentDate, Pageable pageable);
 
     //=========================================cashier
     // 1. Lấy theo theaterId + status + theaterStatus + khoảng ngày
@@ -45,6 +58,8 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
+    @Query("SELECT DISTINCT s.movie FROM Schedule s WHERE CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
+    Page<Movie> findMoviesWithScheduleToday(LocalDateTime today, Pageable pageable);
 
     // 2. Lọc theo genre + theater + khoảng ngày
     @Query("""
@@ -68,6 +83,8 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
+    @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND LOWER(r.typeOfRoom) = LOWER(:roomType) AND CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
+    Page<Movie> findMoviesWithScheduleTodayWithTheaterAndRoomType(int theaterId, LocalDateTime today, String roomType, Pageable pageable);
 
     // 3. Lọc theo keyword + theater + khoảng ngày
     @Query("""
@@ -90,6 +107,9 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
+    //Movie-Controller-Filter
+    @Query("SELECT m FROM Movie m WHERE LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%')) AND m.status = :status")
+    Page<Movie> findMoviesByMovieNameAndStatus(String movieName, Movie_Status status, Pageable pageable);
 
     // 4. Lọc theo genre + keyword + theater + khoảng ngày
     @Query("""
@@ -115,5 +135,17 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.scheduleList s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%')) AND s.startTime > :now AND m.status = :status")
+    Page<Movie> findMoviesByTheaterIdAndMovieNameAndStatus(int theaterId, String movieName, Movie_Status status, LocalDateTime now, Pageable pageable);
 
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.genres g WHERE g.genreID = :genreId AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%')) AND m.status = :status")
+    Page<Movie> findMoviesByGenreIdAndMovieNameAndStatus(int genreId, String movieName, Movie_Status status, Pageable pageable);
+
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.genres g JOIN m.scheduleList s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND g.genreID = :genreId AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%')) AND s.startTime > :now AND m.status = :status")
+    Page<Movie> findMoviesByTheaterIdAndGenreIdAndMovieNameAndStatus(int theaterId, int genreId, String movieName, Movie_Status status, LocalDateTime now, Pageable pageable);
+
+    @Query("SELECT DISTINCT m FROM Movie m JOIN m.feedbackList mf WHERE m.status = :status")
+    Page<Movie> findMoviesThatHaveFeedback(Movie_Status status, Pageable pageable);
+    //find all
+    Page<Movie> findAllByStatus(Movie_Status status, Pageable pageable);
 }

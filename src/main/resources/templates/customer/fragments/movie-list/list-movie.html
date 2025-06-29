@@ -1,0 +1,63 @@
+<div class="filter-tab tab" th:fragment="list-movie" id="list-movie-wrapper">
+    <div class="empty-state" th:if="${#lists.isEmpty(movies.content)}">
+        <div class="empty-icon">😔</div>
+        <h3>No suitable movies found.</h3>
+        <p>Please try again with different search criteria.</p>
+    </div>
+    <div class="tab-area">
+        <div class="tab-item active">
+            <div class="row mb-10 justify-content-center">
+                <div th:each="movie : ${movies.content}" class="col-sm-6 col-lg-3">
+                    <div class="movie-grid">
+                        <div class="movie-thumb c-thumb">
+                            <a th:href="@{/customer/movie-detail(movieId=${movie.movieID})}">
+                                <img th:src="@{${movie.image}}" alt="movie"
+                                     style="width: 352px; height: 493.58px">
+                            </a>
+                        </div>
+                        <div class="movie-content bg-one">
+                            <h5 class="title m-0 movie-title-movie-list">
+                                <a th:href="@{/customer/movie-detail(movieId=${movie.movieID})}" th:text="${movie.movieName}"
+                                   style="font-size: 20px"></a>
+                            </h5>
+                            <ul class="movie-rating-percent">
+                                <li>
+                                    <div class="thumb">
+                                        <i class="fas fa-ticket-alt fa-2x"
+                                           style="color:#f5c518;"></i>
+                                    </div>
+                                    <span class="content"
+                                          th:text="${movie.ticketSold} + ' ticket' + (${movie.ticketSold > 1 ? 's' : ''}) + ' sold'">
+                                    </span>
+                                </li>
+                                <li>
+                                    <div class="thumb">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <span class="content" th:text="${movie.duration} + ' minutes'"></span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pagination-area text-center">
+        <a href="" th:style="${movies.number + 1 == 1} ? 'display:none'"
+           th:onclick="'filmLoader(' + ${movies.number} + '); return false;'"><i
+                class="fas fa-angle-double-left"></i><span>Prev</span></a>
+        <a href="" th:each="i : ${#numbers.sequence(1, movies.getTotalPages(), 1)}"
+           th:class="${i == movies.number + 1} ? 'active' : ''"
+           th:text="${i}"
+           th:onclick="'filmLoader(' + ${i} + '); return false;'"></a>
+        <a href="" th:style="${movies.number + 1 >= movies.getTotalPages()} ? 'display:none'"
+           th:onclick="'filmLoader(' + ${movies.number + 1 + 1} + '); return false;'"><span>Next</span><i
+                class="fas fa-angle-double-right"></i></a>
+    </div>
+</div>
+
+
+
+
+

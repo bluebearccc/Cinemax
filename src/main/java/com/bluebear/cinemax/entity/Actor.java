@@ -1,18 +1,17 @@
 package com.bluebear.cinemax.entity;
+
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
-@Builder
+
+@Entity
+@Table(name = "Actor")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "Actor")
+@Builder
 public class Actor {
 
     @Id
@@ -26,7 +25,7 @@ public class Actor {
     @Column(name = "Image", nullable = false, length = 255)
     private String image;
 
-    @ManyToMany(mappedBy = "actors", fetch = FetchType.LAZY)
     @JsonIgnore
+    @ManyToMany(mappedBy = "actors")
     private List<Movie> movies;
 }

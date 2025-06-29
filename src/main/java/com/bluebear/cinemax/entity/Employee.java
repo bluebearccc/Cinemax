@@ -3,34 +3,33 @@ package com.bluebear.cinemax.entity;
 import com.bluebear.cinemax.enumtype.Employee_Status;
 import com.bluebear.cinemax.enumtype.Role;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
+@Table(name = "Employee")
 @Data
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
+@Builder
 public class Employee {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "EmployeeID")
     private Integer id;
 
-    @Column(name = "Position")
     @Enumerated(EnumType.STRING)
+    @Column(name = "Position", nullable = false, length = 50)
     private Role position;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status")
+    @Column(name = "Status", nullable = false, length = 20)
     private Employee_Status status;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "AccountID")
+    @OneToOne
+    @JoinColumn(name = "AccountID", nullable = false)
     private Account account;
 
     @ManyToOne

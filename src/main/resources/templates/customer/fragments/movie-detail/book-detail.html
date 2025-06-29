@@ -1,0 +1,38 @@
+<div class="showtimes" th:fragment="book-detail">
+    <div th:class="${theater.getTheaterID() == currentTheater.theaterID} ? 'cinema-item active' : 'cinema-item'"
+         th:each="theater : ${theaters}">
+        <input type="hidden" th:value="${theater.theaterID}">
+        <div class="cinema-logo">CGV</div>
+        <div>
+            <div th:text="${theater.theaterName}"></div>
+        </div>
+    </div>
+    <div class="button-container">
+        <div th:class="(${roomType.toLowerCase()} == 'single') ? 'custom-button-item active' : 'custom-button-item'">
+            <i class="fas fa-user"></i><span>Single</span>
+        </div>
+
+        <div th:class="(${roomType.toLowerCase()} == 'couple') ? 'custom-button-item active' : 'custom-button-item'">
+            <i class="fas fa-user-friends"></i><span>Couple</span>
+        </div>
+    </div>
+    <div class="date-selector" id="date-selector">
+    </div>
+
+    <div class="empty-state" th:if="${#lists.isEmpty(schedules.content)}">
+        <div class="empty-icon">😔</div>
+        <h3>Oops, No Showtimes Found.</h3>
+        <p>Please try searching for another date</p>
+    </div>
+    <div class="time-slots">
+        <button th:each="schedule : ${schedules}"
+                th:disabled="${schedule.numberOfSeatsRemain == 0}"
+                th:class="${schedule.numberOfSeatsRemain == 0} ? 'showtime-btn out-of-slot' : 'showtime-btn'">
+                            <span class="time-slot"
+                                  th:text="${#temporals.format(schedule.startTime, 'HH:mm') + ' - ' + #temporals.format(schedule.endTime, 'HH:mm')}"></span>
+            <span th:class="${schedule.numberOfSeatsRemain == 0} ? 'rem-seat out-of-seat' : 'rem-seat'"
+                  th:text="${schedule.numberOfSeatsRemain} + ' seat' + (${schedule.numberOfSeatsRemain > 1} ? 's' : '') + ' available'">
+                            </span>
+        </button>
+    </div>
+</div>

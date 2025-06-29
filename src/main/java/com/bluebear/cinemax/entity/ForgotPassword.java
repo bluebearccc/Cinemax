@@ -2,8 +2,6 @@ package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -25,8 +23,8 @@ public class ForgotPassword {
     @JoinColumn(name = "Accountid", nullable = false)
     private Account account;
 
-    @Column(name = "expire_date", nullable = false)
-    private LocalDateTime expiryDate;
+    @Column(name = "expiry_date", nullable = false)
+    private Date expiryDate;
 
 }
 

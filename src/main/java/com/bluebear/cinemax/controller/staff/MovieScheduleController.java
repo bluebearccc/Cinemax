@@ -3,7 +3,11 @@ package com.bluebear.cinemax.controller.staff;
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.enumtype.Schedule_Status;
-import com.bluebear.cinemax.service.staff.*;
+import com.bluebear.cinemax.service.employee.EmployeeService;
+import com.bluebear.cinemax.service.movie.MovieService;
+import com.bluebear.cinemax.service.room.RoomService;
+import com.bluebear.cinemax.service.schedule.ScheduleService;
+import com.bluebear.cinemax.service.theater.TheaterService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,19 +27,19 @@ import java.util.*;
 public class MovieScheduleController {
 
     @Autowired
-    TheaterServiceImpl theaterServiceImpl;
+    TheaterService theaterServiceImpl;
 
     @Autowired
-    EmployeeServiceImpl employeeServiceImpl;
+    EmployeeService employeeServiceImpl;
 
     @Autowired
-    RoomServiceImpl roomServiceImpl;
+    RoomService roomServiceImpl;
 
     @Autowired
-    ScheduleServiceImpl scheduleServiceImpl;
+    ScheduleService scheduleServiceImpl;
 
     @Autowired
-    MovieServiceImpl movieServiceImpl;
+    MovieService movieServiceImpl;
 
     @GetMapping
     public String getMovieSchedulePage(Model model) {
@@ -59,11 +63,11 @@ public class MovieScheduleController {
 
     @GetMapping("/show_schedule")
     public String showSchedule(@RequestParam("movieId") Integer movieID, Model model) {
-        EmployeeDTO e = employeeServiceImpl.getEmployeeById(4);
+        EmployeeDTO e = employeeServiceImpl.findById(4);
 
         List<RoomDTO> rooms = roomServiceImpl.findAllRoomsByTheaterId(e.getTheaterId());
 
-        MovieDTO movie = movieServiceImpl.getMovieById(movieID);
+        MovieDTO movie = movieServiceImpl.getMovieById(movieID).get();
 
         List<ScheduleDTO> schedules = scheduleServiceImpl.findByMovieId(movieID);
 
@@ -127,7 +131,7 @@ public class MovieScheduleController {
 
         List<String> availableRoomsId = new ArrayList<>();
 
-        MovieDTO mo = movieServiceImpl.getMovieById(movieId);
+        MovieDTO mo = movieServiceImpl.getMovieById(movieId).get();
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -136,7 +140,7 @@ public class MovieScheduleController {
         LocalTime startTime = LocalTime.parse(startTime_raw, timeFormatter);
 
         LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
-        LocalDateTime actualEndTime = actualStartTime.plusMinutes(movieServiceImpl.getMovieById(movieId).getDuration());
+        LocalDateTime actualEndTime = actualStartTime.plusMinutes(movieServiceImpl.getMovieById(movieId).get().getDuration());
 
         if(actualEndTime.isAfter(mo.getEndDate())) {
             String message = "Cannot add schedule because this movie is out of valid date range";
@@ -169,7 +173,7 @@ public class MovieScheduleController {
                                @RequestParam(value = "date") String date_raw,
                                RedirectAttributes redirectAttributes) {
         RoomDTO room = new RoomDTO();
-        MovieDTO movie = movieServiceImpl.getMovieById(movieId);
+        MovieDTO movie = movieServiceImpl.getMovieById(movieId).get();
 
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -284,7 +288,7 @@ public class MovieScheduleController {
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalDate date = LocalDate.parse(date_raw, dateFormatter);
         LocalTime startTime = LocalTime.parse(startTime_raw, timeFormatter);
-        MovieDTO movie = movieServiceImpl.getMovieById(movieId);
+        MovieDTO movie = movieServiceImpl.getMovieById(movieId).get();
         LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
         LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
 
@@ -359,7 +363,7 @@ public class MovieScheduleController {
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
             LocalDate date = LocalDate.parse(date_raw, dateFormatter);
             LocalTime startTime = LocalTime.parse(startTime_raw, timeFormatter);
-            MovieDTO movie = movieServiceImpl.getMovieById(movieId);
+            MovieDTO movie = movieServiceImpl.getMovieById(movieId).get();
             LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
             LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
 

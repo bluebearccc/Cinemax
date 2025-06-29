@@ -3,7 +3,6 @@ package com.bluebear.cinemax.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
 import java.util.Date;
 
 @Entity
@@ -16,16 +15,17 @@ public class VerifyToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Id")
     private Integer id;
 
     @Column(nullable = false, unique = true, name = "Email")
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "Token")
     private String token;
 
-    @Column(nullable = false)
-    private LocalDateTime expiresAt;
+    @Column(nullable = false, name = "ExpiresAt")
+    private Date expiresAt;
 
     @Column(nullable = false, name = "[Password]")
     private String password;

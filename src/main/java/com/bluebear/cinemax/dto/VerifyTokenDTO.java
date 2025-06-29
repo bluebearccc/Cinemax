@@ -9,10 +9,16 @@ import java.util.Date;
 @AllArgsConstructor
 @Builder
 public class VerifyTokenDTO {
+
     private Integer id;
+
     private String email;
+
     private String token;
+
     private Date expiresAt;
+
     private String password;
+
     private String fullName;
 }

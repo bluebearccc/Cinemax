@@ -1,12 +1,12 @@
 package com.bluebear.cinemax.controller.staff;
 
 import com.bluebear.cinemax.dto.*;
-import com.bluebear.cinemax.entity.Detail_FD;
-import com.bluebear.cinemax.entity.Employee;
-import com.bluebear.cinemax.entity.Theater;
-import com.bluebear.cinemax.entity.TheaterStock;
 import com.bluebear.cinemax.enumtype.TheaterStock_Status;
-import com.bluebear.cinemax.service.staff.*;
+import com.bluebear.cinemax.service.detail_fd.DetaillFD_Service;
+import com.bluebear.cinemax.service.employee.EmployeeService;
+import com.bluebear.cinemax.service.invoice.InvoiceService;
+import com.bluebear.cinemax.service.theater.TheaterService;
+import com.bluebear.cinemax.service.theaterstock.TheaterStockService;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import com.bluebear.cinemax.config.ExcelGeneratoForDetailItemSold;
@@ -31,20 +30,19 @@ import com.bluebear.cinemax.config.ExcelGeneratoForDetailItemSold;
 public class TheaterStockController {
 
     @Autowired
-    private TheaterServiceImpl theaterServiceImpl;
+    private TheaterService theaterServiceImpl;
 
     @Autowired
-    private TheaterStockServiceImpl theaterStockServiceImpl;
+    private TheaterStockService theaterStockServiceImpl;
 
     @Autowired
-    private EmployeeServiceImpl employeeService;
+    private EmployeeService employeeService;
 
     @Autowired
-    private DetailFD_ServiceImpl detailFDServiceImpl;
+    private InvoiceService invoiceServiceImpl;
+
     @Autowired
-    private InvoiceServiceImpl invoiceServiceImpl;
-    @Autowired
-    private DetailFD_ServiceImpl detailFD_ServiceImpl;
+    private DetaillFD_Service detailFD_ServiceImpl;
 
     @GetMapping("/search")
     public String searchTheaterStock(@RequestParam("itemName") String itemName, Model model) {
@@ -155,7 +153,7 @@ public class TheaterStockController {
     public String listFD(Model theModel, @RequestParam("id") Integer stockId) {
 
         EmployeeDTO e = employeeService.getEmployeeById(4);
-        List<Detail_FDDTO> detail_FDs = detailFDServiceImpl.findByTheaterStockID(stockId);
+        List<Detail_FDDTO> detail_FDs = detailFD_ServiceImpl.findByTheaterStockID(stockId);
         theModel.addAttribute("employee", e);
         theModel.addAttribute("detail_FDs", detail_FDs);
         theModel.addAttribute("itemName", theaterStockServiceImpl.findById(stockId).getFoodName() );

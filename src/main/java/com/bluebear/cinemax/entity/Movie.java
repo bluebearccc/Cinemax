@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Age_Limit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -26,6 +27,10 @@ public class Movie {
     @Column(name = "MovieName", nullable = false, length = 255)
     private String movieName;
 
+    @Column(name = "Age_limit", length = 10)
+    @Enumerated(EnumType.STRING)
+    private Age_Limit ageLimit;
+
     @Column(name = "Description", length = 1000)
     private String description;
 
@@ -39,12 +44,12 @@ public class Movie {
     private String studio;
 
     @Column(name = "Duration", nullable = false)
-    private int duration;
+    private Integer duration;
 
     @Column(name = "Trailer", nullable = false, length = 255)
     private String trailer;
 
-    @Column(name = "MovieRate", nullable = false)
+    @Column(name = "MovieRate", nullable = true)
     private Double movieRate;
 
     @Column(name = "StartDate", nullable = false)
@@ -57,7 +62,7 @@ public class Movie {
     @Enumerated(EnumType.STRING)
     private Movie_Status status;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Movie_Genre",
             joinColumns = @JoinColumn(name = "MovieID"),

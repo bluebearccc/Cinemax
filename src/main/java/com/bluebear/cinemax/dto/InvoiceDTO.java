@@ -1,6 +1,6 @@
 package com.bluebear.cinemax.dto;
 
-import com.bluebear.cinemax.entity.Detail_FD;
+import com.bluebear.cinemax.enumtype.Invoice_Status;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,13 +14,16 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class InvoiceDTO {
-    private Integer id;
+    private Integer invoiceID;
     private Integer customerID;
-    private Integer EmployeeID;
+    private Integer employeeID;
     private Integer promotionID;
+    private Float discount;
     private LocalDateTime bookingDate;
     private Double totalPrice;
-
     private List<Detail_FDDTO> detail_FDDTO;
-
+    private String guestName;
+    private String guestEmail;
+    private String guestPhone;
+    private Invoice_Status status;
 }

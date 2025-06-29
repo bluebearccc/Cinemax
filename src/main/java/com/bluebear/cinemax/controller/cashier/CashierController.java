@@ -3,7 +3,14 @@ package com.bluebear.cinemax.controller.cashier;
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.enumtype.Theater_Status;
-import com.bluebear.cinemax.service.*;
+import com.bluebear.cinemax.service.booking.BookingService;
+import com.bluebear.cinemax.service.detailseat.DetailSeatService;
+import com.bluebear.cinemax.service.genre.GenreService;
+import com.bluebear.cinemax.service.movie.MovieService;
+import com.bluebear.cinemax.service.promotion.PromotionService;
+import com.bluebear.cinemax.service.schedule.ScheduleService;
+import com.bluebear.cinemax.service.seat.SeatService;
+import com.bluebear.cinemax.service.theaterstock.TheaterStockService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -170,7 +177,7 @@ public class CashierController {
             Page<ScheduleDTO> schedules = scheduleService.getSchedulesByMovieIdAndDate(theaterId, movieID, currentDate, sevenDate, Pageable.unpaged());
 
             for (ScheduleDTO schedule : schedules.getContent()) {
-                List<SeatDTO> allSeatsInRoom = seatService.getSeatsByRoomId(schedule.getRoomID());
+                List<SeatDTO> allSeatsInRoom = (List<SeatDTO>) seatService.getSeatsByRoomId(schedule.getRoomID());
                 List<Integer> bookedSeatIds = detailSeatService.findBookedSeatIdsByScheduleId(schedule.getScheduleID());
                 SeatAvailabilityDTO seatAvailability = new SeatAvailabilityDTO();
 
@@ -226,7 +233,7 @@ public class CashierController {
                 return "redirect:/cashier/" + selectedMovie.getMovieID() + "/select-schedule";
             }
 
-            List<SeatDTO> allSeatsInRoom = seatService.getSeatsByRoomId(selectedSchedule.getRoomID());
+            List<SeatDTO> allSeatsInRoom = (List<SeatDTO>) seatService.getSeatsByRoomId(selectedSchedule.getRoomID());
             List<Integer> bookedSeatIds = detailSeatService.findBookedSeatIdsByScheduleId(scheduleId);
 
             Map<String, List<SeatDTO>> seatsByRow = allSeatsInRoom.stream()

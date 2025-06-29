@@ -3203,6 +3203,7 @@ input[type="submit"] {
 .event-grid .movie-content,
 .movie-grid .movie-content {
   padding: 0 20px;
+  min-height: 176px;
 }
 
 .sports-grid .movie-content .title,

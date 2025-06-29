@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/customer-static/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/odometer.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/home-page.css}">
+
+
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <title>Homepage</title>
+</head>
+
+<body>
+<!-- ==========Preloader========== -->
+<div th:replace="common/fragments/preloader :: preloader">
+</div>
+<!-- ==========Preloader========== -->
+<!-- ==========Overlay========== -->
+<a href="#0" class="scrollToTop">
+    <i class="fas fa-angle-up"></i>
+</a>
+<!-- ==========Overlay========== -->
+<div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
+<!-- ==========Header-Section========== -->
+<header th:replace="common/fragments/header :: header-section">
+</header>
+<!-- ==========Header-Section========== -->
+
+<!-- ==========Banner-Section========== -->
+<section class="hero" id="home">
+    <div class="hero-content">
+        <h1>The Ultimate Cinema Experience</h1>
+        <p>Book movie tickets online easily and quickly with thousands of screenings every day. Enjoy the latest
+            blockbuster movies with excellent picture and sound quality.</p>
+        <div class="hero-buttons">
+            <a href="#movies" class="btn-primary">🎟️ Book Now</a>
+        </div>
+    </div>
+</section>
+
+<section class="featured-section-hot-film" id="movies">
+    <h2 class="section-title-hot-film">🔥 The Hottest</h2>
+    <div class="movies-grid-hot-film">
+        <div class="movie-card-hot-film" th:each="topMovie : ${topMovies.content}"
+             th:onclick="|window.location.href='/customer/movie-detail?movieId=${topMovie.movieID}'|">
+            <img class="movie-poster-hot-film" th:src="${topMovie.banner}">
+            <div class="movie-info-hot-film">
+                <h3 th:text="${topMovie.movieName}"></h3>
+                <p th:text="${topMovie.description}">Cuộc chiến epic giữa các siêu anh hùng để bảo vệ trái đất khỏi mối
+                    đe dọa từ không gian.</p>
+            </div>
+            <div class="movie-meta-hot-film">
+                <span class="rating-hot-film" th:text=" '⭐' + ${topMovie.movieRate}"></span>
+                <span class="genre-hot-film" th:text="${topMovie.genres.getFirst().genreName}"></span>
+            </div>
+            <button class="book-btn-hot-film">Đặt Vé Ngay</button>
+        </div>
+    </div>
+</section>
+<!-- ==========Banner-Section========== -->
+
+<!-- ==========Sports-Section========== -->
+<section class="sports-section padding-top padding-bottom container">
+    <div class="container">
+        <div class="tab">
+            <h2 class="section-title-hot-film">🎬 now showing</h2>
+            <div class="tab-area mb-30-none">
+                <div class="container">
+                    <div class="carouselMovie-wrapper">
+                        <div class="carouselMovie-container">
+                            <button class="nav-button prev prev-btn">‹</button>
+                            <button class="nav-button next next-btn">›</button>
+                            <div class="carouselMovie">
+                                <div class="movie-card" th:each="movie : ${currentMovies.content}"
+                                     th:onclick="|window.location.href='/customer/movie-detail?movieId=${movie.movieID}'|">
+                                    <div class="movie-poster"
+                                         th:style="'background-image:url(' + @{${movie.image}} + ');'">
+                                        <div class="age-rating p" th:text="${movie.movieRate}"></div>
+                                    </div>
+                                    <div class="movie-info">
+                                        <div class="movie-title" th:text="${movie.movieName}"></div>
+                                        <div class="movie-release" th:text="${movie.duration} + ' minutes'"></div>
+                                        <div class="movie-genre" th:each="movieGenre : ${movie.genres}"
+                                             th:text="${movieGenre.genreName}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="sports-section padding-top padding-bottom">
+    <div class="container">
+        <div class="tab">
+            <h2 class="section-title-hot-film">🎬 coming soon</h2>
+            <div class="tab-area mb-30-none">
+                <div class="container">
+                    <div class="carouselMovie-wrapper">
+                        <div class="carouselMovie-container">
+                            <button class="nav-button prev prev-btn">‹</button>
+                            <button class="nav-button next next-btn">›</button>
+                            <div class="carouselMovie">
+                                <div class="movie-card" th:each="movie : ${futureMovies.content}"
+                                     th:onclick="|window.location.href='/customer/movie-detail?movieId=${movie.movieID}'|">
+                                    <div class="movie-poster"
+                                         th:style="'background-image:url(' + @{${movie.image}} + ');'">
+                                        <div class="age-rating p" th:text="${movie.movieRate}"></div>
+                                    </div>
+                                    <div class="movie-info">
+                                        <div class="movie-title" th:text="${movie.movieName}"></div>
+                                        <div class="movie-release" th:text="${movie.duration} + ' minutes'"></div>
+                                        <div class="movie-release"
+                                             th:text="'Release Date: ' + ${#temporals.format(movie.startDate, 'dd/MM/yyyy')}"></div>
+                                        <div class="movie-genre" th:each="movieGenre : ${movie.genres}"
+                                             th:text="${movieGenre.genreName}"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="container book-movie-area" th:replace="customer/fragments/homepage/book-area :: book-movie-area">
+</div>
+<div class="container feedback-area" th:replace="customer/fragments/homepage/feedback-area :: feedback-area">
+</div>
+<!-- ==========Footer-Section========== -->
+<footer class="footer-section" th:replace="common/fragments/footer :: footer">
+</footer>
+<!-- ==========Footer-Section========== -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/customer-static/js/homepage.js}"></script>
+<script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
+<script th:src="@{/customer-static/js/plugins.js}"></script>
+<script th:src="@{/customer-static/js/bootstrap.min.js}"></script>
+<script th:src="@{/customer-static/js/isotope.pkgd.min.js}"></script>
+<script th:src="@{/customer-static/js/magnific-popup.min.js}"></script>
+<script th:src="@{/customer-static/js/owl.carousel.min.js}"></script>
+<script th:src="@{/customer-static/js/wow.min.js}"></script>
+<script th:src="@{/customer-static/js/countdown.min.js}"></script>
+<script th:src="@{/customer-static/js/odometer.min.js}"></script>
+<script th:src="@{/customer-static/js/viewport.jquery.js}"></script>
+<script th:src="@{/customer-static/js/main.js}"></script>
+</body>
+
+</html>

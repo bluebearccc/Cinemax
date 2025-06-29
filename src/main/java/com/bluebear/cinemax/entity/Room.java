@@ -1,21 +1,19 @@
 package com.bluebear.cinemax.entity;
 
 import com.bluebear.cinemax.enumtype.Room_Status;
+import com.bluebear.cinemax.enumtype.Seat_Status;
 import com.bluebear.cinemax.enumtype.TypeOfRoom;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
-import java.util.Set;
-@Builder
+
+@Entity
+@Table(name = "Room")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Entity
-@Table(name = "Room")
+@Builder
 public class Room {
 
     @Id
@@ -27,16 +25,16 @@ public class Room {
     @JoinColumn(name = "TheaterID", nullable = false)
     private Theater theater;
 
-    @Column(name = "Name", length = 10, nullable = false)
+    @Column(name = "Name", nullable = false, length = 10)
     private String name;
 
     @Column(name = "Collumn", nullable = false)
-    private Integer column;
-    
+    private Integer collumn;
+
     @Column(name = "Row", nullable = false)
     private Integer row;
 
-    @Column(name = "TypeOfRoom", length = 20, nullable = false)
+    @Column(name = "TypeOfRoom", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private TypeOfRoom typeOfRoom;
 

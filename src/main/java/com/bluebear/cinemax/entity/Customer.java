@@ -1,18 +1,17 @@
 package com.bluebear.cinemax.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 
 @Entity
+@Table(name = "Customer")
 @Data
 @NoArgsConstructor
-@Builder
 @AllArgsConstructor
+@Builder
 public class Customer {
 
     @Id
@@ -20,20 +19,23 @@ public class Customer {
     @Column(name = "CustomerID")
     private Integer id;
 
-    @OneToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "AccountID")
+    @OneToOne
+    @JoinColumn(name = "AccountID", nullable = false)
     private Account account;
 
-    @Column(name = "FullName")
+    @Column(name = "FullName", nullable = false, length = 100)
     private String fullName;
 
-    @Column(name = "Phone")
+    @Column(name = "Phone", length = 20)
     private String phone;
 
+    @Column(name = "Point")
+    private Integer point;
+
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<MovieFeedback> feedbackList;
 
-    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Invoice> invoiceList;
-
 }
