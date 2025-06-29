@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.service.staff;
 
+import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.dto.TheaterStockDTO;
 import com.bluebear.cinemax.entity.Theater; // Assuming you have a Theater entity
 import com.bluebear.cinemax.entity.TheaterStock;
@@ -30,46 +31,72 @@ public class TheaterStockServiceImpl implements TheaterStockService {
             return null;
         }
 
-        TheaterStock theaterStock = new TheaterStock();
-        theaterStock.setStockID(theaterStockDTO.getTheaterStockId()); // Assuming DTO's 'id' maps to entity's 'stockID'
-        theaterStock.setItemName(theaterStockDTO.getFoodName());
-        theaterStock.setImage(theaterStockDTO.getImage());
-        theaterStock.setQuantity(theaterStockDTO.getQuantity());
-        theaterStock.setPrice(theaterStockDTO.getUnitPrice());
-        theaterStock.setStatus(Enum.valueOf(TheaterStock_Status.class, theaterStockDTO.getStatus()));
+        TheaterStock.TheaterStockBuilder builder = TheaterStock.builder()
+                .stockID(theaterStockDTO.getTheaterStockId()) // Gán ID nếu đây là trường hợp cập nhật
+                .itemName(theaterStockDTO.getFoodName())      // Ánh xạ foodName (DTO) -> itemName (Entity)
+                .image(theaterStockDTO.getImage())
+                .quantity(theaterStockDTO.getQuantity())
+                .price(theaterStockDTO.getUnitPrice());     // Ánh xạ unitPrice (DTO) -> price (Entity)
 
-        if (theaterStockDTO.getTheaterStockId() != null) {
-            theaterRepository.findById(theaterStockDTO.getTheaterStockId())
-                    .ifPresent(theaterStock::setTheater);
-        } else {
-            // If theaterId is null in DTO, ensure no Theater is associated
-            theaterStock.setTheater(null);
+        // Xử lý chuyển đổi Status từ String sang Enum một cách an toàn
+        if (theaterStockDTO.getStatus() != null && !theaterStockDTO.getStatus().isEmpty()) {
+            try {
+                // Chuyển sang chữ hoa để khớp với tên của Enum
+                builder.status(TheaterStock_Status.valueOf(theaterStockDTO.getStatus()));
+            } catch (IllegalArgumentException e) {
+                System.err.println("Giá trị status không hợp lệ: " + theaterStockDTO.getStatus());
+            }
         }
 
-        return theaterStock;
+        // --- SỬA LỖI LOGIC QUAN TRỌNG ---
+        // Lấy Theater từ DB dựa trên theaterID trong TheaterDTO lồng nhau
+        if (theaterStockDTO.getTheater() != null && theaterStockDTO.getTheater().getTheaterID() != null) {
+            theaterRepository.findById(theaterStockDTO.getTheater().getTheaterID())
+                    .ifPresent(builder::theater); // Gán theater tìm thấy cho builder
+        }
+
+        return builder.build();
     }
 
     /**
-     * Converts a TheaterStock entity to a TheaterStockDTO.
-     * Extracts theaterId from the associated Theater entity.
+     * Chuyển đổi từ TheaterStock (Entity) sang TheaterStockDTO.
      *
-     * @param theaterStock The entity to convert.
-     * @return The converted TheaterStockDTO.
+     * @param theaterStock Đối tượng Entity đầu vào.
+     * @return Đối tượng DTO.
      */
     private TheaterStockDTO convertToDTO(TheaterStock theaterStock) {
         if (theaterStock == null) {
             return null;
         }
+
         return TheaterStockDTO.builder()
                 .theaterStockId(theaterStock.getStockID())
-                .theaterStockId(theaterStock.getTheater() != null ? theaterStock.getTheater().getTheaterID() : null)
+                .theater(convertToTheaterDTO(theaterStock.getTheater())) // Gọi hàm helper để chuyển đổi Theater
                 .foodName(theaterStock.getItemName())
                 .image(theaterStock.getImage())
                 .quantity(theaterStock.getQuantity())
                 .unitPrice(theaterStock.getPrice())
-                .status(theaterStock.getStatus().name())
+                .status(theaterStock.getStatus().name()) // Chuyển Enum thành String an toàn
                 .build();
     }
+
+
+    private TheaterDTO convertToTheaterDTO(Theater theater) {
+        if (theater == null) {
+            return null;
+        }
+
+        return TheaterDTO.builder()
+                .theaterID(theater.getTheaterID())
+                .theaterName(theater.getTheaterName())
+                .address(theater.getAddress())
+                .image(theater.getImage())
+                .roomQuantity(theater.getRoomQuantity())
+                .status(theater.getStatus())
+                // Cố ý không set 'rooms' và 'theaterStockS' để tránh lỗi lặp vô hạn
+                .build();
+    }
+
 
     @Override
     public List<TheaterStockDTO> findByTheaterId(Integer theaterId) {
@@ -137,34 +164,5 @@ public class TheaterStockServiceImpl implements TheaterStockService {
         }
     }
 
-    // You might also want to explicitly add an update method if `saveTheaterStock` isn't
-    // strictly handling all update scenarios as desired, though `save` can often perform upsert.
-    // However, given your interface, `saveTheaterStock` is expected to handle updates if ID is present.
-    // If you add an explicit `updateTheaterStock` to the interface later, uncomment this:
-    /*
-    @Transactional
-    public TheaterStockDTO updateTheaterStock(Integer id, TheaterStockDTO theaterStockDTO) {
-        Optional<TheaterStock> existingTheaterStockOptional = theaterStockRepository.findById(id);
-        if (existingTheaterStockOptional.isPresent()) {
-            TheaterStock existingTheaterStock = existingTheaterStockOptional.get();
 
-            existingTheaterStock.setItemName(theaterStockDTO.getItemName());
-            existingTheaterStock.setImage(theaterStockDTO.getImage());
-            existingTheaterStock.setQuantity(theaterStockDTO.getQuantity());
-            existingTheaterStock.setPrice(theaterStockDTO.getPrice());
-            existingTheaterStock.setStatus(theaterStockDTO.getStatus());
-
-            if (theaterStockDTO.getTheaterId() != null) {
-                theaterRepository.findById(theaterStockDTO.getTheaterId())
-                        .ifPresent(existingTheaterStock::setTheater);
-            } else {
-                existingTheaterStock.setTheater(null);
-            }
-
-            TheaterStock updatedTheaterStock = theaterStockRepository.save(existingTheaterStock);
-            return convertToDTO(updatedTheaterStock);
-        }
-        return null; // TheaterStock not found
-    }
-    */
 }

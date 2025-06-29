@@ -62,7 +62,7 @@
               onsubmit="return validateForm()">
 
             <input type="hidden" th:field="*{theaterStockId}">
-            <input type="hidden" name="theaterID" th:value="${employee.theaterId}">
+            <input type="hidden" name="theaterID" th:value="1">
 
             <div class="form-row">
                 <!-- Left Column - General Information -->
@@ -123,7 +123,7 @@
                                        value="Active"
                                        th:field="*{status}"
                                        th:checked="${theaterStock.status == 'Active'}"
-                                       checked>
+                                       >
                                 <label for="statusActive">Active</label>
                             </div>
                             <div class="radio-item">

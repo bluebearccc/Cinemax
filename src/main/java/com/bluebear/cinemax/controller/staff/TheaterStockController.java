@@ -5,6 +5,7 @@ import com.bluebear.cinemax.entity.Detail_FD;
 import com.bluebear.cinemax.entity.Employee;
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.entity.TheaterStock;
+import com.bluebear.cinemax.enumtype.TheaterStock_Status;
 import com.bluebear.cinemax.service.staff.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -101,11 +102,14 @@ public class TheaterStockController {
     @PostMapping("/process_stock")
     public String showForm(Model theModel, @ModelAttribute("theaterStock") TheaterStockDTO theaterStockDTO,
                            @RequestParam(value = "imageInput", required = false) MultipartFile img,
+                           @RequestParam("status") TheaterStock_Status status,
                            @RequestParam("theaterID") Integer theaterID) {
-
-        if(theaterStockDTO.getTheaterStockId() == null) {
-            theaterStockDTO.setTheater(theaterServiceImpl.getTheaterById(theaterID));
+        TheaterDTO theater = theaterServiceImpl.getTheaterById(theaterID);
+        if (theater == null) {
+            throw new RuntimeException("Theater not found with ID: " + theaterID);
         }
+        theaterStockDTO.setTheater(theater);
+        theaterStockDTO.setStatus(String.valueOf(status));
         if(img != null && !img.isEmpty()) {
             try {
                 String uploadDir = "uploads/images";
@@ -140,7 +144,7 @@ public class TheaterStockController {
     @GetMapping
     public String listTheaterStock(Model theModel) {
         EmployeeDTO e = employeeService.getEmployeeById(2);
-        List<TheaterStockDTO> theaterStocks = theaterStockServiceImpl.findByTheaterId(e.getTheaterId());
+            List<TheaterStockDTO> theaterStocks = theaterStockServiceImpl.findByTheaterId(e.getTheaterId());
         theModel.addAttribute("employee", e);
         theModel.addAttribute("theaterStocks", theaterStocks);
         theModel.addAttribute("size", theaterStocks.size());

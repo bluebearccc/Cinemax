@@ -17,4 +17,5 @@ public class TheaterStockDTO {
     private Double unitPrice;
     private String image;
     private String status;
+
 }
