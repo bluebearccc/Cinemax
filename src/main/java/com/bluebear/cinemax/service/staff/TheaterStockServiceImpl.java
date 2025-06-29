@@ -9,6 +9,8 @@ import com.bluebear.cinemax.repository.TheaterRepository;
 import com.bluebear.cinemax.repository.TheaterStockRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +40,6 @@ public class TheaterStockServiceImpl implements TheaterStockService {
                 .quantity(theaterStockDTO.getQuantity())
                 .price(theaterStockDTO.getUnitPrice());     // Ánh xạ unitPrice (DTO) -> price (Entity)
 
-        // Xử lý chuyển đổi Status từ String sang Enum một cách an toàn
         if (theaterStockDTO.getStatus() != null && !theaterStockDTO.getStatus().isEmpty()) {
             try {
                 // Chuyển sang chữ hoa để khớp với tên của Enum
@@ -101,6 +102,7 @@ public class TheaterStockServiceImpl implements TheaterStockService {
     @Override
     public List<TheaterStockDTO> findByTheaterId(Integer theaterId) {
         List<TheaterStock> theaterStocks = theaterStockRepository.findByTheater_TheaterId(theaterId);
+
         return theaterStocks.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -163,6 +165,33 @@ public class TheaterStockServiceImpl implements TheaterStockService {
             return false;
         }
     }
+
+
+    @Override
+    public Page<TheaterStockDTO> getAllTheaterStock(Pageable pageable) {
+        Page<TheaterStock> theaterStocksPage = theaterStockRepository.findAll(pageable);
+        return theaterStocksPage.map(this::convertToDTO);
+    }
+    @Override
+    public Page<TheaterStockDTO> findByTheaterIdAndItemName(Integer theaterId, String itemName, Pageable pageable) {
+        // Gọi phương thức repository tương ứng
+        Page<TheaterStock> theaterStockPage = theaterStockRepository.findByTheater_TheaterIDAndItemNameContainingIgnoreCase(
+                theaterId, itemName, pageable);
+
+        // Chuyển đổi Page<Entity> sang Page<DTO> và trả về
+        return theaterStockPage.map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<TheaterStockDTO> findByTheaterId(Integer theaterId, Pageable pageable) {
+        return theaterStockRepository.findByTheater_TheaterID(theaterId, pageable).map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<TheaterStockDTO> findByItemName(String itemName, Pageable pageable) {
+        return theaterStockRepository.findByItemNameContainingIgnoreCase(itemName, pageable).map(this::convertToDTO);
+    }
+
 
 
 }

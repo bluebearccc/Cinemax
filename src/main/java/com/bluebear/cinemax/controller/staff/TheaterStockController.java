@@ -9,6 +9,9 @@ import com.bluebear.cinemax.enumtype.TheaterStock_Status;
 import com.bluebear.cinemax.service.staff.*;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -52,7 +55,6 @@ public class TheaterStockController {
         List<TheaterStockDTO> searchResults = theaterStockServiceImpl.findByItemName(itemName, e.getTheaterId() );
         model.addAttribute("employee", e);
         model.addAttribute("theaterStocks", searchResults);
-        model.addAttribute("size", searchResults.size());
         return "staff/list";
     }
 
@@ -71,6 +73,8 @@ public class TheaterStockController {
     @GetMapping("/add_stock")
     public String showForm(Model theModel) {
         boolean isAdd = true;
+        List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters();
+        theModel.addAttribute("allTheaters", allTheaters);
         EmployeeDTO e = employeeService.getEmployeeById(2);
         theModel.addAttribute("employee", e);
         theModel.addAttribute("theaterStock", new TheaterStockDTO());
@@ -142,46 +146,101 @@ public class TheaterStockController {
     }
 
     @GetMapping
-    public String listTheaterStock(Model theModel) {
-        EmployeeDTO e = employeeService.getEmployeeById(2);
-            List<TheaterStockDTO> theaterStocks = theaterStockServiceImpl.findByTheaterId(e.getTheaterId());
-        theModel.addAttribute("employee", e);
-        theModel.addAttribute("theaterStocks", theaterStocks);
-        theModel.addAttribute("size", theaterStocks.size());
+    public String listTheaterStock(Model theModel,
+                                   @RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(defaultValue = "10") int size,
+                                   @RequestParam(name = "itemName", required = false) String itemName,
+                                   @RequestParam(name = "theaterId", required = false) Integer theaterId) {
+
+        Pageable pageable = PageRequest.of(page, size);
+        Page<TheaterStockDTO> theaterStockPage;
+
+        // Kịch bản 1: Tìm kiếm có tên VÀ có lọc theo rạp
+        if (theaterId != null && itemName != null && !itemName.trim().isEmpty()) {
+            theaterStockPage = theaterStockServiceImpl.findByTheaterIdAndItemName(theaterId, itemName.trim(), pageable);
+        }
+        // Kịch bản 2: Chỉ tìm kiếm theo tên (trên tất cả các rạp)
+        else if (itemName != null && !itemName.trim().isEmpty()) {
+            theaterStockPage = theaterStockServiceImpl.findByItemName(itemName.trim(), pageable);
+        }
+        // Kịch bản 3: Chỉ lọc theo rạp (không tìm kiếm tên)
+        else if (theaterId != null) {
+            theaterStockPage = theaterStockServiceImpl.findByTheaterId(theaterId, pageable);
+        }
+        // Kịch bản 4: Mặc định, không tìm kiếm, không lọc rạp -> Lấy tất cả
+        else {
+            theaterStockPage = theaterStockServiceImpl.getAllTheaterStock(pageable);
+        }
+
+        // Lấy danh sách tất cả các rạp để hiển thị trên dropdown
+        List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters(); // Bạn cần có phương thức này trong TheaterService
+
+        // Thêm các thuộc tính vào model để view có thể sử dụng
+        theModel.addAttribute("employee", employeeService.getEmployeeById(1));
+        theModel.addAttribute("theaterStocks", theaterStockPage);
+        theModel.addAttribute("currentPage", pageable.getPageNumber());
+        theModel.addAttribute("allTheaters", allTheaters);
+        theModel.addAttribute("totalPages", theaterStockPage.getTotalPages());
+        theModel.addAttribute("selectedTheaterId", theaterId);
+        theModel.addAttribute("itemName", itemName);
+
         return "staff/list";
     }
 
-    @GetMapping("/item_sold_details")
-    public String listFD(Model theModel, @RequestParam("id") Integer stockId) {
+//    @GetMapping("/item_sold_details")
+//    public String listFD(Model theModel, @RequestParam("id") Integer stockId) {
+//
+//        EmployeeDTO e = employeeService.getEmployeeById(4);
+//        List<Detail_FDDTO> detail_FDs = detailFDServiceImpl.findByTheaterStockID(stockId);
+//        theModel.addAttribute("employee", e);
+//        theModel.addAttribute("detail_FDs", detail_FDs);
+//        theModel.addAttribute("itemName", theaterStockServiceImpl.findById(stockId).getFoodName() );
+//
+//        return "staff/item-sold";
+//    }
+//
+//    @GetMapping("/getItemData")
+//    @ResponseBody
+//    public TheaterStockDTO getItemData(@RequestParam("id") Integer stockId) {
+//        return theaterStockServiceImpl.findById(stockId);
+//    }
+//
+//    @GetMapping("/export_to_excel")
+//    public void exportIntoExcelFile(@RequestParam("id") Integer stockId, HttpServletResponse response) throws IOException {
+//        response.setContentType("application/octet-stream");
+//        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
+//        String currentDateTime = dateFormatter.format(new Date());
+//
+//        String headerKey = "Content-Disposition";
+//        String headerValue = "attachment; filename=item_sold_details_" + currentDateTime + ".xlsx";
+//        response.setHeader(headerKey, headerValue);
+//
+//        List <Detail_FDDTO> listFDs = detailFD_ServiceImpl.findByTheaterStockID(stockId);
+//        ExcelGeneratoForDetailItemSold generator = new ExcelGeneratoForDetailItemSold(listFDs);
+//        generator.generateExcelFile(response);
+//    }
+@GetMapping("/theaters_filter")
+public String getTheaterFilterPage(Model theModel,
+                                   @RequestParam("theaterId") Integer theaterID,
+                                   @RequestParam(name = "itemName", required = false) String itemName, // Nên để itemName không bắt buộc
+                                   @RequestParam(defaultValue = "0") int page,
+                                   @RequestParam(defaultValue = "10") int size) {
 
-        EmployeeDTO e = employeeService.getEmployeeById(4);
-        List<Detail_FDDTO> detail_FDs = detailFDServiceImpl.findByTheaterStockID(stockId);
-        theModel.addAttribute("employee", e);
-        theModel.addAttribute("detail_FDs", detail_FDs);
-        theModel.addAttribute("itemName", theaterStockServiceImpl.findById(stockId).getFoodName() );
+    Pageable pageable = PageRequest.of(page, size);
 
-        return "staff/item-sold";
-    }
+    // Gọi service để lấy dữ liệu đã lọc và phân trang
+    Page<TheaterStockDTO> resultPage = theaterStockServiceImpl.findByTheaterIdAndItemName(theaterID, itemName, pageable);
 
-    @GetMapping("/getItemData")
-    @ResponseBody
-    public TheaterStockDTO getItemData(@RequestParam("id") Integer stockId) {
-        return theaterStockServiceImpl.findById(stockId);
-    }
+    // Thêm các thuộc tính vào model để view có thể sử dụng
+    theModel.addAttribute("page", resultPage);
+    theModel.addAttribute("selectedTheaterId", theaterID);
+    theModel.addAttribute("itemName", itemName);
 
-    @GetMapping("/export_to_excel")
-    public void exportIntoExcelFile(@RequestParam("id") Integer stockId, HttpServletResponse response) throws IOException {
-        response.setContentType("application/octet-stream");
-        DateFormat dateFormatter = new SimpleDateFormat("yyyy-MM-dd_HH:mm:ss");
-        String currentDateTime = dateFormatter.format(new Date());
+    // Lấy danh sách rạp để hiển thị lại dropdown
+    List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters();
+    theModel.addAttribute("allTheaters", allTheaters);
 
-        String headerKey = "Content-Disposition";
-        String headerValue = "attachment; filename=item_sold_details_" + currentDateTime + ".xlsx";
-        response.setHeader(headerKey, headerValue);
-
-        List <Detail_FDDTO> listFDs = detailFD_ServiceImpl.findByTheaterStockID(stockId);
-        ExcelGeneratoForDetailItemSold generator = new ExcelGeneratoForDetailItemSold(listFDs);
-        generator.generateExcelFile(response);
-    }
+    return "staff/list";
+}
 
 }

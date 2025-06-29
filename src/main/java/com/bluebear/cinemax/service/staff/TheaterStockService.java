@@ -1,7 +1,8 @@
 package com.bluebear.cinemax.service.staff;
 
 import com.bluebear.cinemax.dto.TheaterStockDTO;
-import com.bluebear.cinemax.entity.TheaterStock;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
@@ -18,4 +19,10 @@ public interface TheaterStockService {
     public TheaterStockDTO findById(Integer id);
 
     public boolean isDeleted(Integer id);
+
+
+    Page<TheaterStockDTO> getAllTheaterStock(Pageable pageable);
+    Page<TheaterStockDTO> findByTheaterId(Integer theaterId, Pageable pageable);
+    Page<TheaterStockDTO> findByItemName(String itemName, Pageable pageable);
+    Page<TheaterStockDTO> findByTheaterIdAndItemName(Integer theaterId, String itemName, Pageable pageable);
 }
