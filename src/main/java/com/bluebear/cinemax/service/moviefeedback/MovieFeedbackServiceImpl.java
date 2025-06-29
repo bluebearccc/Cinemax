@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.service.moviefeedback;
 
+import com.bluebear.cinemax.dto.MovieFeedbackCommentDTO;
 import com.bluebear.cinemax.dto.MovieFeedbackDTO;
 import com.bluebear.cinemax.entity.Customer;
 import com.bluebear.cinemax.entity.Movie;
@@ -7,14 +8,14 @@ import com.bluebear.cinemax.entity.MovieFeedback;
 import com.bluebear.cinemax.repository.CustomerRepository;
 import com.bluebear.cinemax.repository.MovieFeedbackRepository;
 import com.bluebear.cinemax.repository.MovieRepository;
+import com.bluebear.cinemax.service.moviefeedbackcomment.MovieFeedbackCommentServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class MovieFeedbackServiceImpl implements MovieFeedbackService {
@@ -25,20 +26,20 @@ public class MovieFeedbackServiceImpl implements MovieFeedbackService {
     private CustomerRepository customerRepository;
     @Autowired
     private MovieRepository movieRepository;
+    @Autowired
+    private MovieFeedbackCommentServiceImpl commentService;
 
-    // Create
     public MovieFeedbackDTO create(MovieFeedbackDTO dto) {
-        MovieFeedback feedback = fromDTO(dto);
-        feedback.setCreatedDate(new Date());
+        MovieFeedback feedback = toEntity(dto);
+        LocalDateTime now = LocalDateTime.now();
+        feedback.setCreatedDate(now);
         return toDTO(feedbackRepository.save(feedback));
     }
 
-    // Read (get by id)
     public MovieFeedbackDTO getById(Integer id) {
         return feedbackRepository.findById(id).map(this::toDTO).orElse(null);
     }
 
-    // Update
     public MovieFeedbackDTO update(Integer id, MovieFeedbackDTO dto) {
         return feedbackRepository.findById(id).map(existing -> {
             Optional<Customer> customerOpt = customerRepository.findById(dto.getCustomerId());
@@ -51,7 +52,6 @@ public class MovieFeedbackServiceImpl implements MovieFeedbackService {
         }).orElse(null);
     }
 
-    // Delete
     public boolean delete(Integer id) {
         if (feedbackRepository.existsById(id)) {
             feedbackRepository.deleteById(id);
@@ -60,33 +60,57 @@ public class MovieFeedbackServiceImpl implements MovieFeedbackService {
         return false;
     }
 
-    // Get feedback by movieId with pagination, sorted by CreatedDate desc
-    public List<MovieFeedbackDTO> getAllByMovieIdSort(Integer movieId, Pageable pageable) {
+    public Page<MovieFeedbackDTO> getAllByMovieIdSort(Integer movieId, Pageable pageable) {
         Movie movie = movieRepository.findById(movieId).orElse(null);
         return feedbackRepository.findByMovieOrderByCreatedDateDesc(movie, pageable)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+                .map(this::toDTO);
     }
 
-    public List<MovieFeedbackDTO> getAllByMovieId(Integer movieId, Pageable pageable) {
+    public Page<MovieFeedbackDTO> getAllByMovieId(Integer movieId, Pageable pageable) {
         Movie movie = movieRepository.findById(movieId).orElse(null);
-        return feedbackRepository.findByMovie(movie, pageable)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+        return feedbackRepository.findByMovieOrderByIdDesc(movie, pageable)
+                .map(this::toDTO);
     }
 
-    // Count feedbacks by movieId
-    public int countFeedbackByMovieId(Integer movieId) {
+    public Page<MovieFeedbackDTO> getAllByMovieIdWithComments(Integer movieId, Pageable pageable) {
         Movie movie = movieRepository.findById(movieId).orElse(null);
-        return (int) feedbackRepository.countByMovie(movie);
+        Page<MovieFeedbackDTO> feedbackDTOS = feedbackRepository.findByMovieOrderByIdDesc(movie, pageable).map(this::toDTO);
+
+        for (MovieFeedbackDTO feedbackDTO : feedbackDTOS) {
+            List<MovieFeedbackCommentDTO> commentDTOS = commentService.getCommentsByFeedbackId(feedbackDTO.getId(), Pageable.unpaged()).toList();
+            feedbackDTO.setComments(commentDTOS);
+        }
+
+        return feedbackDTOS;
+    }
+
+    public Page<MovieFeedbackDTO> getAllByMovieIdWithCommentCount(Integer movieId, Pageable pageable) {
+        Movie movie = movieRepository.findById(movieId).orElse(null);
+        Page<MovieFeedbackDTO> movieFeedbackDTOS = feedbackRepository.findByMovieOrderByIdDesc(movie, pageable).map(this::toDTO);
+
+        for (MovieFeedbackDTO movieFeedbackDTO : movieFeedbackDTOS) {
+            movieFeedbackDTO.setTotalComments(commentService.countCommentByFeedbackId(movieFeedbackDTO.getId()));
+        }
+
+        return movieFeedbackDTOS;
+    }
+
+    public MovieFeedbackDTO getFeedBackWithCommentByFeedbackId(Integer feedbackId) {
+        MovieFeedbackDTO feedbackDTO = getById(feedbackId);
+        List<MovieFeedbackCommentDTO> commentDTOS = commentService.getCommentsByFeedbackId(feedbackId, Pageable.unpaged()).toList();
+        feedbackDTO.setComments(commentDTOS);
+        return feedbackDTO;
+    }
+
+    public MovieFeedbackDTO getFeedBackWithCommentCountByFeedbackId(Integer feedbackId) {
+        MovieFeedbackDTO feedbackDTO = getById(feedbackId);
+        feedbackDTO.setTotalComments(commentService.countCommentByFeedbackId(feedbackId));
+        return feedbackDTO;
     }
 
     public int countDistinctMovieByFeedBack() {
         return (int) feedbackRepository.countMoviesWithFeedback();
     }
-    // --- Mapping methods ---
 
     public MovieFeedbackDTO toDTO(MovieFeedback feedback) {
         MovieFeedbackDTO dto = new MovieFeedbackDTO();
@@ -100,7 +124,7 @@ public class MovieFeedbackServiceImpl implements MovieFeedbackService {
         return dto;
     }
 
-    public MovieFeedback fromDTO(MovieFeedbackDTO dto) {
+    public MovieFeedback toEntity(MovieFeedbackDTO dto) {
         Optional<Customer> customerOpt = customerRepository.findById(dto.getCustomerId());
         Optional<Movie> movieOpt = movieRepository.findById(dto.getMovieId());
 
@@ -114,7 +138,7 @@ public class MovieFeedbackServiceImpl implements MovieFeedbackService {
         feedback.setMovie(movieOpt.get());
         feedback.setContent(dto.getContent());
         feedback.setMovieRate(dto.getMovieRate());
-        feedback.setCreatedDate(dto.getCreatedDate() != null ? dto.getCreatedDate() : new Date());
+        feedback.setCreatedDate(dto.getCreatedDate() != null ? dto.getCreatedDate() : LocalDateTime.now());
         return feedback;
     }
 }

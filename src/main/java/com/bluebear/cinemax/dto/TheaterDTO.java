@@ -14,7 +14,9 @@
         private String theaterName;
         private String address;
         private String image;
-        private int roomQuantity;
+        private Integer roomQuantity;
+        private Double serviceRate;
+        private Integer numberOfRate;
         private Theater_Status status;
 
         private List<RoomDTO> rooms;

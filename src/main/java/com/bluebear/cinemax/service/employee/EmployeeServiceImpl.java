@@ -7,7 +7,6 @@ import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.repository.AccountRepository;
 import com.bluebear.cinemax.repository.EmployeeRepository;
 import com.bluebear.cinemax.repository.TheaterRepository;
-import com.bluebear.cinemax.service.employee.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class EmployeeServiceImpl implements EmployeeService {
+public class EmployeeServiceImpl implements EmployeeService{
 
     @Autowired
     private EmployeeRepository employeeRepository;
@@ -27,7 +26,7 @@ public class EmployeeServiceImpl implements EmployeeService {
 
 
     // Convert entity → DTO
-    public EmployeeDTO entityToDto(Employee employee) {
+     public EmployeeDTO toDTO(Employee employee) {
         if (employee == null) return null;
 
         Integer accountId = employee.getAccount() != null ? employee.getAccount().getId() : null;
@@ -47,7 +46,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     // Convert DTO → entity
-    public Employee dtoToEntity(EmployeeDTO dto) {
+    public Employee toEntity(EmployeeDTO dto) {
         if (dto == null) return null;
 
         Optional<Account> accountOpt = accountRepository.findById(dto.getAccountId());
@@ -68,21 +67,21 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     public EmployeeDTO save(EmployeeDTO dto) {
-        Employee entity = dtoToEntity(dto);
+        Employee entity = toEntity(dto);
         Employee saved = employeeRepository.save(entity);
-        return entityToDto(saved);
+        return toDTO(saved);
     }
 
     public EmployeeDTO findById(Integer id) {
         Optional<Employee> optional = employeeRepository.findById(id);
-        return optional.map(this::entityToDto).orElse(null);
+        return optional.map(this::toDTO).orElse(null);
     }
 
     public List<EmployeeDTO> findAll() {
         List<Employee> employees = employeeRepository.findAll();
         List<EmployeeDTO> dtos = new ArrayList<>();
         for (Employee e : employees) {
-            dtos.add(entityToDto(e));
+            dtos.add(toDTO(e));
         }
         return dtos;
     }
@@ -93,6 +92,6 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     public EmployeeDTO findByAccountId(Integer accountId) {
         Optional<Employee> optional = employeeRepository.findByAccount_Id(accountId);
-        return optional.map(this::entityToDto).orElse(null);
+        return optional.map(this::toDTO).orElse(null);
     }
 }

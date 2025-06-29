@@ -7,7 +7,10 @@ import java.util.List;
 import java.util.Optional;
 
 public interface GenreService {
-    // CRUD operations
+    GenreDTO toDTO(Genre genre);
+
+    Genre toEntity(GenreDTO dto);
+
     GenreDTO createGenre(GenreDTO dto);
 
     List<GenreDTO> getAllGenres();
@@ -17,9 +20,4 @@ public interface GenreService {
     Optional<GenreDTO> updateGenre(Integer id, GenreDTO dto);
 
     void deleteGenre(Integer id);
-
-    // Optional: conversion methods
-    GenreDTO convertToDTO(Genre genre);
-
-    Genre convertToEntity(GenreDTO dto);
 }

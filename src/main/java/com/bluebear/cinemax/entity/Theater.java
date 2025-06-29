@@ -29,7 +29,10 @@ public class Theater {
     private String image;
 
     @Column(name = "RoomQuantity", nullable = false)
-    private int roomQuantity;
+    private Integer roomQuantity;
+
+    @Column(name = "ServiceRate", nullable = true)
+    private Double serviceRate;
 
     @Column(name = "Status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)

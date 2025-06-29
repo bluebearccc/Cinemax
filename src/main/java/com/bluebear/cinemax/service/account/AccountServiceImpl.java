@@ -12,10 +12,11 @@ import java.util.Optional;
 
 @Service
 public class AccountServiceImpl implements AccountService {
+
     @Autowired
     private AccountRepository accountRepository;
 
-    public Account dtoToEntity(AccountDTO dto) {
+    public Account toEntity(AccountDTO dto) {
         if (dto == null) return null;
         Account account = new Account();
         account.setId(dto.getId());
@@ -26,7 +27,7 @@ public class AccountServiceImpl implements AccountService {
         return account;
     }
 
-    public AccountDTO entityToDto(Account account) {
+    public AccountDTO toDTO(Account account) {
         if (account == null) return null;
         AccountDTO dto = new AccountDTO();
         dto.setId(account.getId());
@@ -38,14 +39,14 @@ public class AccountServiceImpl implements AccountService {
     }
 
     public AccountDTO save(AccountDTO dto) {
-        Account entity = dtoToEntity(dto);
+        Account entity = toEntity(dto);
         Account saved = accountRepository.save(entity);
-        return entityToDto(saved);
+        return toDTO(saved);
     }
 
     public AccountDTO findById(Integer id) {
         Optional<Account> optional = accountRepository.findById(id);
-        if (optional.isPresent()) return entityToDto(optional.get());
+        if (optional.isPresent()) return toDTO(optional.get());
         else return null;
     }
 
@@ -54,7 +55,7 @@ public class AccountServiceImpl implements AccountService {
         List<AccountDTO> dtos = new ArrayList<>();
 
         for (Account account : accounts) {
-            AccountDTO dto = entityToDto(account);
+            AccountDTO dto = toDTO(account);
             dtos.add(dto);
         }
 
@@ -83,5 +84,8 @@ public class AccountServiceImpl implements AccountService {
         }
     }
 }
+
+
+
 
 

@@ -6,21 +6,26 @@ import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.dto.MovieFeedbackDTO;
 import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.service.genre.GenreService;
-import com.bluebear.cinemax.service.moviefeedback.MovieFeedbackService;
 import com.bluebear.cinemax.service.movie.MovieService;
+import com.bluebear.cinemax.service.moviefeedback.MovieFeedbackService;
+import com.bluebear.cinemax.service.schedule.ScheduleService;
 import com.bluebear.cinemax.service.theater.TheaterService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Controller
-//@RestController
+@RequestMapping()
 public class HomeController {
 
     @Autowired
@@ -31,58 +36,70 @@ public class HomeController {
     private MovieFeedbackService movieFeedbackService;
     @Autowired
     private TheaterService theaterService;
+    @Autowired
+    private ScheduleService scheduleService;
 
-    private List<MovieDTO> topMovies;
-    private List<MovieDTO> currentMovies;
-    private List<MovieDTO> futureMovies;
+    private Page<MovieDTO> topMovies;
+    private Page<MovieDTO> currentMovies;
+    private Page<MovieDTO> futureMovies;
     private List<GenreDTO> genres;
-    private List<TheaterDTO> theaters;
-    private List<MovieDTO> theaterMovies;
+    private Page<TheaterDTO> theaters;
+    private Page<MovieDTO> theaterMovies;
+    private Page<MovieDTO> moviesHaveFeedback;
     private TheaterDTO currentTheater;
-    private Map<MovieDTO, List<MovieFeedbackDTO>> movieFeedbacks = new LinkedHashMap<>();
+    private Map<MovieDTO, Page<MovieFeedbackDTO>> movieFeedbacks;
 
     int maximumFeedback;
     int currentNumberOfFeedback;
+    String currentWebPage;
 
     @PostConstruct public void init() {
+        genres = genreService.getAllGenres();
         maximumFeedback = movieFeedbackService.countDistinctMovieByFeedBack();
     }
 
-    @GetMapping("/home")
+    @GetMapping()
     public String home(Model model) {
+        movieFeedbacks = new LinkedHashMap<>();
         currentMovies = movieService.findAllMoviesCurrentlyShow();
-        for (MovieDTO movieDTO : currentMovies.subList(0, Constant.FEEDBACK_PER_ROW)) {
+        moviesHaveFeedback = movieService.findMoviesThatHaveFeedback(Pageable.unpaged());
+        for (MovieDTO movieDTO : moviesHaveFeedback.getContent().subList(0, Constant.FEEDBACK_PER_ROW)) {
             movieFeedbacks.put(movieDTO, movieFeedbackService.getAllByMovieId(movieDTO.getMovieID(), PageRequest.of(0,Constant.FEEDBACK_PER_CELL)));
         }
 
+        String roomType = "single";
+
+        currentWebPage = "home";
         currentNumberOfFeedback = movieFeedbacks.size();
         theaters = theaterService.getAllTheaters();
-        currentTheater = theaters.getFirst();
+        currentTheater = theaters.getContent().getFirst();
         futureMovies = movieService.findAllMoviesWillShow();
         topMovies = movieService.findTop3MoviesHighestRate();
-        theaterMovies = movieService.findMoviesByScheduleAndTheater(new Date(), 1);
+        theaterMovies = movieService.findMoviesByScheduleAndTheaterAndRoomType(LocalDateTime.now(), currentTheater.getTheaterID(), roomType);
 
+        model.addAttribute("roomType", roomType);
+        model.addAttribute("currentWebPage", currentWebPage);
         model.addAttribute("currentTheater", currentTheater);
         model.addAttribute("theaterMovies", theaterMovies);
         model.addAttribute("maximumFeedback", maximumFeedback);
-        model.addAttribute("feedbackPage", 0);
         model.addAttribute("currentNumberOfFeedback", currentNumberOfFeedback);
         model.addAttribute("feedbacks", movieFeedbacks);
         model.addAttribute("currentMovies", currentMovies);
         model.addAttribute("futureMovies", futureMovies);
         model.addAttribute("topMovies", topMovies);
         model.addAttribute("theaters", theaters);
-        return "/customer/home";
+        model.addAttribute("genres", genres);
+        return "customer/home";
     }
 
-    @GetMapping("/loadFeedback")
+    @GetMapping("/home/loadFeedback")
     public String loadFeedback(Model model, @RequestParam(name = "currentNumberOfFeedback") int currentNumOfFeedback) {
         int endIndex = currentNumOfFeedback + Constant.FEEDBACK_PER_ROW;
         if (endIndex > maximumFeedback) {
             endIndex = currentNumOfFeedback + (maximumFeedback - currentNumOfFeedback);
         }
 
-        for (MovieDTO movieDTO : currentMovies.subList(0, endIndex)) {
+        for (MovieDTO movieDTO : moviesHaveFeedback.getContent().subList(0, endIndex)) {
             movieFeedbacks.put(movieDTO, movieFeedbackService.getAllByMovieId(movieDTO.getMovieID(), PageRequest.of(0,Constant.FEEDBACK_PER_CELL)));
         }
 
@@ -94,13 +111,15 @@ public class HomeController {
         return "customer/fragments/homepage/feedback-area :: feedback-area";
     }
 
-    @GetMapping("/loadBookMovie")
-    public String loadBookMovie(Model model, @RequestParam(name = "selectedIndex") int selectedIndex, @RequestParam(name = "theaterId") int theaterId) {
-        Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, + selectedIndex);
-        theaterMovies = movieService.findMoviesByScheduleAndTheater(calendar.getTime(), theaterId);
-        System.out.println("hehehe");
+    @GetMapping("/home/loadBookMovie")
+    public String loadBookMovie(Model model, @RequestParam(name = "selectedIndex") int selectedIndex, @RequestParam(name = "theaterId") int theaterId, @RequestParam(name = "roomType") String roomType) {
+        LocalDateTime dateTime = LocalDateTime.now();
+        if (selectedIndex > 0) {
+            dateTime = LocalDateTime.now().plusDays(selectedIndex).toLocalDate().atStartOfDay();
+        }
+        theaterMovies = movieService.findMoviesByScheduleAndTheaterAndRoomType(dateTime, theaterId, roomType);
         currentTheater = theaterService.getTheaterById(theaterId);
+        model.addAttribute("roomType", roomType);
         model.addAttribute("theaterMovies", theaterMovies);
         model.addAttribute("currentTheater", currentTheater);
         model.addAttribute("theaters", theaters);

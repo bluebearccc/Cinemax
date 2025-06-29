@@ -1,9 +1,9 @@
 package com.bluebear.cinemax.entity;
-
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Table(name = "MovieFeedback")
@@ -15,14 +15,14 @@ public class MovieFeedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = "Id")
     private Integer id;
 
-    @ManyToOne()
+    @ManyToOne(optional = false)
     @JoinColumn(name = "CustomerID", nullable = false)
     private Customer customer;
 
-    @ManyToOne()
+    @ManyToOne(optional = false)
     @JoinColumn(name = "MovieID", nullable = false)
     private Movie movie;
 
@@ -32,7 +32,9 @@ public class MovieFeedback {
     @Column(name = "MovieRate")
     private Integer movieRate;
 
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "CreatedDate", nullable = false, updatable = false)
-    private Date createdDate;
+    @Column(name = "CreatedDate")
+    private LocalDateTime createdDate;
+
+    @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<MovieFeedbackComment> comments;
 }

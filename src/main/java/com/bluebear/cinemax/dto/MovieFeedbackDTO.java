@@ -2,7 +2,8 @@ package com.bluebear.cinemax.dto;
 
 import lombok.*;
 
-import java.util.Date;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -22,6 +23,9 @@ public class MovieFeedbackDTO {
 
     private Integer movieRate;
 
-    private Date createdDate;
-}
+    private Integer totalComments;
 
+    private LocalDateTime createdDate;
+
+    private List<MovieFeedbackCommentDTO> comments;
+}

@@ -21,8 +21,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
     @Autowired
     private AccountRepository accountRepository;
 
-    // Convert Entity to DTO
-    public ForgotPasswordDTO convertToDTO(ForgotPassword entity) {
+    public ForgotPasswordDTO toDTO(ForgotPassword entity) {
         return ForgotPasswordDTO.builder()
                 .id(entity.getId())
                 .otp(entity.getOtp())
@@ -31,8 +30,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                 .build();
     }
 
-    // Convert DTO to Entity
-    public ForgotPassword convertToEntity(ForgotPasswordDTO dto) {
+    public ForgotPassword ToEntity(ForgotPasswordDTO dto) {
         Account account = accountRepository.findById(dto.getAccountId())
                 .orElseThrow(() -> new RuntimeException("Account not found with ID: " + dto.getAccountId()));
 
@@ -44,32 +42,28 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                 .build();
     }
 
-    // Create
     @Transactional
     public ForgotPasswordDTO createForgotPassword(ForgotPasswordDTO dto) {
-        ForgotPassword entity = convertToEntity(dto);
+        ForgotPassword entity = ToEntity(dto);
         ForgotPassword saved = forgotPasswordRepository.save(entity);
-        return convertToDTO(saved);
+        return toDTO(saved);
     }
 
-    // Read by ID
     @Transactional
     public ForgotPasswordDTO getForgotPasswordById(Integer id) {
         ForgotPassword entity = forgotPasswordRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("ForgotPassword not found with ID: " + id));
-        return convertToDTO(entity);
+        return toDTO(entity);
     }
 
-    // Read all
     @Transactional
     public List<ForgotPasswordDTO> getAllForgotPasswords() {
         return forgotPasswordRepository.findAll()
                 .stream()
-                .map(this::convertToDTO)
+                .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // Update
     @Transactional
     public ForgotPasswordDTO updateForgotPassword(Integer id, ForgotPasswordDTO dto) {
         ForgotPassword existing = forgotPasswordRepository.findById(id)
@@ -82,10 +76,9 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
                 .orElseThrow(() -> new RuntimeException("Account not found with ID: " + dto.getAccountId())));
 
         ForgotPassword updated = forgotPasswordRepository.save(existing);
-        return convertToDTO(updated);
+        return toDTO(updated);
     }
 
-    // Delete
     @Transactional
     public void deleteForgotPassword(Integer id) {
         if (!forgotPasswordRepository.existsById(id)) {
@@ -100,7 +93,7 @@ public class ForgotPasswordServiceImpl implements ForgotPasswordService {
         Optional<ForgotPassword> entity = forgotPasswordRepository.findByAccount(account);
         if (entity.isPresent()) {
             ForgotPassword forgotPassword = entity.get();
-            return convertToDTO(forgotPassword);
+            return toDTO(forgotPassword);
         } else
             return null;
     }

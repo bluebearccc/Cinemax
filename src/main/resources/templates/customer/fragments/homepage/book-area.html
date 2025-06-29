@@ -1,18 +1,17 @@
 <div class="container book-movie-area" th:fragment="book-movie-area">
-    <h1 class="page-title">Book Movie Tickets</h1>
+    <h1 class="section-title-hot-film">Book Movie Tickets</h1>
 
     <div class="booking-container">
         <div class="cinema-list">
             <h3>Select Cinema</h3>
             <div th:class="${theater.getTheaterID() == currentTheater.theaterID} ? 'cinema-item active' : 'cinema-item'"
-                 th:each="theater : ${theaters}">
+                 th:each="theater : ${theaters.content}">
                 <input type="hidden" th:value="${theater.theaterID}">
                 <div class="cinema-logo">CGV</div>
                 <div>
                     <div th:text="${theater.theaterName}"></div>
                 </div>
             </div>
-
         </div>
 
         <div class="schedule-section">
@@ -21,6 +20,15 @@
                     <h2 class="schedule-title" th:text="'Movie Schedule at ' + ${currentTheater.theaterName}"></h2>
                     <p class="cinema-address" th:text="${currentTheater.address}"></p>
                 </div>
+                <div class="button-container">
+                    <div th:class="(${roomType.toLowerCase()} == 'single') ? 'custom-button-item active' : 'custom-button-item'">
+                        <i class="fas fa-user"></i><span>Single</span>
+                    </div>
+
+                    <div th:class="(${roomType.toLowerCase()} == 'couple') ? 'custom-button-item active' : 'custom-button-item'">
+                        <i class="fas fa-user-friends"></i><span>Couple</span>
+                    </div>
+                </div>
             </div>
 
             <div class="date-selector" id="date-selector">
@@ -28,12 +36,12 @@
             </div>
 
             <div class="movie-listbook-session" id="movie-listbook-session">
-                <div class="empty-state" th:if="${#lists.isEmpty(theaterMovies)}">
+                <div class="empty-state" th:if="${#lists.isEmpty(theaterMovies.content)}">
                     <div class="empty-icon">😔</div>
                     <h3>Oops, no showtimes found.</h3>
                     <p>Please try selecting another date.</p>
                 </div>
-                <div class="movie-cardbook-session" th:each="movie : ${theaterMovies}">
+                <div class="movie-cardbook-session" th:each="movie : ${theaterMovies.content}">
                     <div class="movie-infobook-session">
                         <img class="movie-posterbook-session"
                              th:src="@{${movie.image}}">
@@ -51,9 +59,14 @@
                         </div>
                     </div>
                     <div class="showtimes">
-                        <button class="showtime-btn"
-                                th:each="schedule : ${movie.schedules}"
-                                th:text="${#dates.format(schedule.startTime, 'HH:mm')} + ' - ' + ${#dates.format(schedule.endTime, 'HH:mm')}">
+                        <button th:each="schedule : ${movie.schedules}"
+                                th:disabled="${schedule.numberOfSeatsRemain == 0}"
+                                th:class="${schedule.numberOfSeatsRemain == 0} ? 'showtime-btn out-of-slot' : 'showtime-btn'">
+                            <span class="time-slot"
+                                  th:text="${#temporals.format(schedule.startTime, 'HH:mm') + ' - ' + #temporals.format(schedule.endTime, 'HH:mm')}"></span>
+                            <span th:class="${schedule.numberOfSeatsRemain == 0} ? 'rem-seat out-of-seat' : 'rem-seat'"
+                                  th:text="${schedule.numberOfSeatsRemain} + ' seat' + (${schedule.numberOfSeatsRemain > 1} ? 's' : '') + ' available'">
+                            </span>
                         </button>
                     </div>
                 </div>

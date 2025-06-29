@@ -2,17 +2,16 @@ package com.bluebear.cinemax.entity;
 
 import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @Entity
-@Builder
+@Table(name = "Account")
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Account {
 
     @Id
@@ -20,24 +19,25 @@ public class Account {
     @Column(name = "AccountID")
     private Integer id;
 
-    @Column(unique = true, name = "Email")
+    @Column(name = "Email", nullable = false, unique = true, length = 50)
     private String email;
 
-    @Column(nullable = true, name = "[Password]")
+    @Column(name = "Password", nullable = false, length = 50)
     private String password;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "[Role]", nullable = false)
+    @Column(name = "Role", nullable = false, length = 50)
     private Role role;
 
-    @Column(name = "Status")
     @Enumerated(EnumType.STRING)
+    @Column(name = "Status", nullable = false, length = 10)
     private Account_Status status;
 
-    public Account(String email, String password, Role role, Account_Status status) {
-        this.email = email;
-        this.password = password;
-        this.role = role;
-        this.status = status;
-    }
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Customer customer;
+
+    @OneToOne(mappedBy = "account", cascade = CascadeType.ALL)
+    @JsonIgnore
+    private Employee employee;
 }

@@ -16,8 +16,8 @@ public interface EmployeeService {
 
     EmployeeDTO findByAccountId(Integer accountId);
 
-    // Optional: expose conversion methods
-    Employee dtoToEntity(EmployeeDTO dto);
+    // Convert methods
+    EmployeeDTO toDTO(Employee employee);
 
-    EmployeeDTO entityToDto(Employee employee);
+    Employee toEntity(EmployeeDTO dto);
 }

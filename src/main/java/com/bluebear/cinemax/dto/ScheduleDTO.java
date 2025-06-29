@@ -3,6 +3,7 @@ package com.bluebear.cinemax.dto;
 import com.bluebear.cinemax.enumtype.Schedule_Status;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 @Data
@@ -11,9 +12,10 @@ import java.util.Date;
 @Builder
 public class ScheduleDTO {
     private Integer scheduleID;
-    private Date startTime;
-    private Date endTime;
+    private LocalDateTime startTime;
+    private LocalDateTime endTime;
     private Integer movieID;
     private Integer roomID;
+    private Integer numberOfSeatsRemain;
     private Schedule_Status status;
 }

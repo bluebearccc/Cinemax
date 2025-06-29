@@ -1,9 +1,6 @@
 package com.bluebear.cinemax.controller;
 
-import com.bluebear.cinemax.dto.AccountDTO;
-import com.bluebear.cinemax.dto.CustomerDTO;
-import com.bluebear.cinemax.dto.ForgotPasswordDTO;
-import com.bluebear.cinemax.dto.VerifyTokenDTO;
+import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
 import com.bluebear.cinemax.service.account.AccountServiceImpl;
@@ -11,9 +8,13 @@ import com.bluebear.cinemax.service.customer.CustomerServiceImpl;
 import com.bluebear.cinemax.service.email.EmailServiceImpl;
 import com.bluebear.cinemax.service.employee.EmployeeServiceImpl;
 import com.bluebear.cinemax.service.forgotpassword.ForgotPasswordServiceImpl;
+import com.bluebear.cinemax.service.genre.GenreService;
+import com.bluebear.cinemax.service.theater.TheaterService;
 import com.bluebear.cinemax.service.verifytoken.VerifyTokenServiceImpl;
+import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -37,16 +38,31 @@ public class AuthenticationController {
     private EmailServiceImpl emailService;
     @Autowired
     private VerifyTokenServiceImpl verifyTokenService;
+    @Autowired
+    private GenreService genreService;
+    @Autowired
+    private TheaterService theaterService;
 
+    private List<GenreDTO> genres;
+    private Page<TheaterDTO> theaters;
+
+    @PostConstruct
+    public void init() {
+        genres = genreService.getAllGenres();
+        theaters = theaterService.getAllTheaters();
+    }
 
     @GetMapping("/login")
-    public String login() {
+    public String login(Model model) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         return "common/login";
     }
 
     @PostMapping("/login")
     public String login(@RequestParam("email") String email, @RequestParam("password") String password, Model model, HttpSession session) {
         AccountDTO account = accountService.findAccountByEmail(email);
+        System.out.println("account: " + account.getId());
         if (account == null || !account.getPassword().equals(password)) {
             model.addAttribute("error", "Invalid email or password");
             return "common/login";
@@ -59,12 +75,17 @@ public class AuthenticationController {
             if (customerDTO != null) {
                 session.setAttribute("customer", customerDTO);
             } else {
-                session.setAttribute("employee", employeeService.findByAccountId(account.getId()));
+                int id = account.getId();
+                EmployeeDTO employeeDTO = employeeService.findByAccountId(id);
+                session.setAttribute("employee", employeeDTO);
             }
+
+            model.addAttribute("genres", genres);
+            model.addAttribute("theaters", theaters);
 
             return switch (account.getRole()) {
                 case Admin -> "redirect:/admin/dashboard";
-                case Customer -> "redirect:/home";
+                case Customer -> "redirect:/";
                 case Staff -> "redirect:/staff/home";
                 case Cashier -> "redirect:/cashier/home";
                 case Customer_Officer -> "redirect:/officer/home";
@@ -77,13 +98,17 @@ public class AuthenticationController {
     }
 
     @GetMapping("/register")
-    public String register() {
+    public String register(Model model) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         return "common/register";
     }
 
     @PostMapping("/register")
     public String register(@RequestParam("email") String email, @RequestParam("password") String password, @RequestParam("fullName") String fullName, Model model, HttpSession session) {
         AccountDTO account = accountService.findAccountByEmail(email.trim());
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         if (account != null) {
             model.addAttribute("error", "Existed User");
             return "common/register";
@@ -103,6 +128,8 @@ public class AuthenticationController {
     @GetMapping("/verifytoken")
     public String verifyToken(@RequestParam("token") String token, HttpSession session, Model model) {
         VerifyTokenDTO verifyTokenDTO = verifyTokenService.findByToken(token);
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         if (verifyTokenDTO == null) {
             model.addAttribute("error", "Invalid token");
             return "common/register";
@@ -112,24 +139,28 @@ public class AuthenticationController {
             return "common/register";
         }
         else {
-            AccountDTO accountDTO = new AccountDTO(verifyTokenDTO.getEmail(), verifyTokenDTO.getPassword(), Role.Customer, Account_Status.Active);
+            AccountDTO accountDTO = AccountDTO.builder().email(verifyTokenDTO.getEmail()).password(verifyTokenDTO.getPassword()).role(Role.Customer).status(Account_Status.Active).build();
             AccountDTO accountDTO1 = accountService.save(accountDTO);
             session.setAttribute("account", accountDTO1);
             CustomerDTO customerDTO = CustomerDTO.builder().accountID(accountDTO1.getId()).fullName(verifyTokenDTO.getFullName()).build();
             CustomerDTO customerDTO1 = customerService.save(customerDTO);
             session.setAttribute("customer", customerDTO1);
             verifyTokenService.deleteTokenByEmail(verifyTokenDTO.getEmail());
-            return "redirect:/home";
+            return "redirect:/";
         }
     }
 
     @GetMapping("/forgotpassword")
-    public String forgotpassword() {
+    public String forgotpassword(Model model) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         return "common/verify-email";
     }
 
     @GetMapping("/resendotp")
-    public String resendotp(@RequestParam("email") String email, HttpSession session) {
+    public String resendotp(@RequestParam("email") String email, HttpSession session, Model model) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         AccountDTO account = (AccountDTO) session.getAttribute("account");
         ForgotPasswordDTO forgotPasswordDTO = forgotPasswordService.findForgotPasswordByAccountId(account.getId());
         if (forgotPasswordDTO != null) {
@@ -145,6 +176,8 @@ public class AuthenticationController {
 
     @GetMapping("/verifyemail")
     public String verifyemail(@RequestParam("email") String email, RedirectAttributes redirectAttributes, Model model, HttpSession session) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         AccountDTO account = accountService.findAccountByEmail(email);
         if (account != null && account.getStatus() == Account_Status.Active) {
             session.setAttribute("account", account);
@@ -171,6 +204,8 @@ public class AuthenticationController {
 
     @PostMapping("/otp")
     public String otp(@RequestParam("email") String email, @RequestParam("otp") String otp, Model model, HttpSession session) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         Integer otpInt = null;
 
         try {
@@ -200,12 +235,16 @@ public class AuthenticationController {
     }
 
     @GetMapping("/newpass")
-    public String newpass() {
+    public String newpass(Model model) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         return "common/reset-password";
     }
 
     @PostMapping("/updatepassword")
     public String updatePassword(@RequestParam("password") String password, HttpSession session, Model model) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         AccountDTO account = (AccountDTO) session.getAttribute("account");
         if (account != null) {
             account.setPassword(password);
@@ -219,7 +258,7 @@ public class AuthenticationController {
             }
             return switch (account.getRole()) {
                 case Admin -> "redirect:/admin/dashboard";
-                case Customer -> "redirect:/home";
+                case Customer -> "redirect:/";
                 case Staff -> "redirect:/staff/home";
                 case Cashier -> "redirect:/cashier/home";
                 case Customer_Officer -> "redirect:/officer/home";
@@ -228,6 +267,12 @@ public class AuthenticationController {
         }
         model.addAttribute("error", "Something went wrong");
         return "redirect:/newpass";
+    }
+
+    @GetMapping("/logout")
+    public String logout(HttpSession session) {
+        session.invalidate();
+        return "redirect:/";
     }
 
     public int otpGenerator() {

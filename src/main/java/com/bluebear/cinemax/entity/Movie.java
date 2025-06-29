@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -25,6 +26,9 @@ public class Movie {
     @Column(name = "MovieName", nullable = false, length = 255)
     private String movieName;
 
+    @Column(name = "Age_limit", length = 10)
+    private String ageLimit;
+
     @Column(name = "Description", length = 1000)
     private String description;
 
@@ -38,34 +42,39 @@ public class Movie {
     private String studio;
 
     @Column(name = "Duration", nullable = false)
-    private int duration;
+    private Integer duration;
 
     @Column(name = "Trailer", nullable = false, length = 255)
     private String trailer;
 
-    @Column(name = "MovieRate", nullable = false)
+    @Column(name = "MovieRate", nullable = true)
     private Double movieRate;
 
-    @Column(name = "Actor", nullable = false, columnDefinition = "NVARCHAR(MAX)")
-    private String actor;
-
     @Column(name = "StartDate", nullable = false)
-    private Date startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "EndDate", nullable = false)
-    private Date endDate;
+    private LocalDateTime endDate;
 
     @Column(name = "Status", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
     private Movie_Status status;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "Movie_Genre",
             joinColumns = @JoinColumn(name = "MovieID"),
             inverseJoinColumns = @JoinColumn(name = "GenreID")
     )
     private List<Genre> genres;
+
+    @ManyToMany
+    @JoinTable(
+            name = "Movie_Actor",
+            joinColumns = @JoinColumn(name = "MovieID"),
+            inverseJoinColumns = @JoinColumn(name = "ActorID")
+    )
+    private List<Actor> actors;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MovieFeedback> feedbackList;

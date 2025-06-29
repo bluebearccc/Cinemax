@@ -2,11 +2,11 @@ package com.bluebear.cinemax.service.theater;
 
 import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.entity.Theater;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
 public interface TheaterService {
-    // --- CRUD ---
     TheaterDTO createTheater(TheaterDTO dto);
 
     TheaterDTO updateTheater(Integer id, TheaterDTO dto);
@@ -15,10 +15,11 @@ public interface TheaterService {
 
     TheaterDTO getTheaterById(Integer id);
 
-    List<TheaterDTO> getAllTheaters();
+    TheaterDTO getTheaterByIdWithRateCounts(Integer id);
 
-    // --- Mapping ---
-    TheaterDTO toDTO(Theater entity);
+    Page<TheaterDTO> getAllTheaters();
 
-    Theater toEntity(TheaterDTO dto);
+    TheaterDTO toDTO(com.bluebear.cinemax.entity.Theater entity);
+
+    com.bluebear.cinemax.entity.Theater toEntity(TheaterDTO dto);
 }

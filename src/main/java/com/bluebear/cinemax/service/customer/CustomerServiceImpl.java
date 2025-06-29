@@ -5,14 +5,12 @@ import com.bluebear.cinemax.entity.Account;
 import com.bluebear.cinemax.entity.Customer;
 import com.bluebear.cinemax.repository.AccountRepository;
 import com.bluebear.cinemax.repository.CustomerRepository;
-import com.bluebear.cinemax.service.moviefeedback.MovieFeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class CustomerServiceImpl implements CustomerService {
@@ -20,10 +18,8 @@ public class CustomerServiceImpl implements CustomerService {
     private CustomerRepository customerRepository;
     @Autowired
     private AccountRepository accountRepository;
-    @Autowired
-    private MovieFeedbackService movieFeedbackService;
 
-    public CustomerDTO entityToDto(Customer customer) {
+    public CustomerDTO toDTO(Customer customer) {
         if (customer == null) return null;
 
         CustomerDTO dto = new CustomerDTO();
@@ -34,41 +30,37 @@ public class CustomerServiceImpl implements CustomerService {
         return dto;
     }
 
-    public Customer dtoToEntity(CustomerDTO dto) {
+    public Customer toEntity(CustomerDTO dto) {
         if (dto == null) return null;
 
         Customer customer = new Customer();
         customer.setId(dto.getId());
         customer.setFullName(dto.getFullName());
         customer.setPhone(dto.getPhone());
-
         if (dto.getAccountID() != null) {
             Optional<Account> optional = accountRepository.findById(dto.getAccountID());
             optional.ifPresent(customer::setAccount);
         }
 
-        if (dto.getMovieFeedback() != null) {
-            customer.setFeedbackList(dto.getMovieFeedback().stream().map(movieFeedbackDTO -> movieFeedbackService.fromDTO(movieFeedbackDTO)).collect(Collectors.toList()));
-        }
         return customer;
     }
 
     public CustomerDTO save(CustomerDTO dto) {
-        Customer entity = dtoToEntity(dto);
+        Customer entity = toEntity(dto);
         Customer saved = customerRepository.save(entity);
-        return entityToDto(saved);
+        return toDTO(saved);
     }
 
     public CustomerDTO findById(Integer id) {
         return customerRepository.findById(id)
-                .map(this::entityToDto)
+                .map(this::toDTO)
                 .orElse(null);
     }
 
     public List<CustomerDTO> findAll() {
         List<CustomerDTO> dtos = new ArrayList<>();
         for (Customer c : customerRepository.findAll()) {
-            dtos.add(entityToDto(c));
+            dtos.add(toDTO(c));
         }
         return dtos;
     }
@@ -79,7 +71,7 @@ public class CustomerServiceImpl implements CustomerService {
 
     public CustomerDTO getUserByAccountID(Integer accountId) {
         return customerRepository.findByAccount_Id(accountId)
-                .map(this::entityToDto)
+                .map(this::toDTO)
                 .orElse(null);
     }
 }

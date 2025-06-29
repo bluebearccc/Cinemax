@@ -1,6 +1,8 @@
 package com.bluebear.cinemax.service.seat;
 
 import com.bluebear.cinemax.enumtype.Seat_Status;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.bluebear.cinemax.dto.SeatDTO;
 import com.bluebear.cinemax.entity.Room;
@@ -21,12 +23,10 @@ public class SeatServiceImpl implements SeatService {
     @Autowired
     private RoomRepository roomRepository;
 
-
     public SeatDTO createSeat(SeatDTO dto) {
         Seat seat = toEntity(dto);
         return toDTO(seatRepository.save(seat));
     }
-
 
     public SeatDTO updateSeat(Integer seatID, SeatDTO dto) {
         Optional<Seat> optionalSeat = seatRepository.findById(seatID);
@@ -36,7 +36,7 @@ public class SeatServiceImpl implements SeatService {
         Seat seat = optionalSeat.get();
         seat.setSeatType(dto.getSeatType());
         seat.setPosition(dto.getPosition());
-        seat.setVIP(dto.isVIP());
+        seat.setIsVIP(dto.getIsVIP());
         seat.setUnitPrice(dto.getUnitPrice());
         seat.setStatus(dto.getStatus());
         if (!optionalRoom.isEmpty()) {seat.setRoom(optionalRoom.get());}
@@ -44,11 +44,9 @@ public class SeatServiceImpl implements SeatService {
         return toDTO(seatRepository.save(seat));
     }
 
-
     public void deleteSeat(Integer seatID) {
         seatRepository.deleteById(seatID);
     }
-
 
     public SeatDTO getSeatById(Integer seatID) {
         return seatRepository.findById(seatID)
@@ -56,22 +54,15 @@ public class SeatServiceImpl implements SeatService {
                 .orElse(null);
     }
 
-    public List<SeatDTO> getAllSeats() {
-        return seatRepository.findByStatus(Seat_Status.Active)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    public Page<SeatDTO> getAllSeats() {
+        return seatRepository.findByStatus(Seat_Status.Active, Pageable.unpaged())
+                .map(this::toDTO);
     }
 
-
-    public List<SeatDTO> getSeatsByRoomId(Integer roomID) {
-        return seatRepository.findByRoom_RoomIDAndStatus(roomID, Seat_Status.Active)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    public Page<SeatDTO> getSeatsByRoomId(Integer roomID) {
+        return seatRepository.findByRoom_RoomIDAndStatus(roomID, Seat_Status.Active, Pageable.unpaged())
+                .map(this::toDTO);
     }
-
-    // ==================== Mapping ====================
 
     public SeatDTO toDTO(Seat entity) {
         SeatDTO dto = new SeatDTO();
@@ -79,19 +70,18 @@ public class SeatServiceImpl implements SeatService {
         dto.setRoomID(entity.getRoom().getRoomID());
         dto.setSeatType(entity.getSeatType());
         dto.setPosition(entity.getPosition());
-        dto.setVIP(entity.isVIP());
+        dto.setIsVIP(entity.getIsVIP());
         dto.setUnitPrice(entity.getUnitPrice());
         dto.setStatus(entity.getStatus());
         return dto;
     }
-
 
     public Seat toEntity(SeatDTO dto) {
         Seat seat = new Seat();
         seat.setSeatID(dto.getSeatID());
         seat.setSeatType(dto.getSeatType());
         seat.setPosition(dto.getPosition());
-        seat.setVIP(dto.isVIP());
+        seat.setIsVIP(dto.getIsVIP());
         seat.setUnitPrice(dto.getUnitPrice());
         seat.setStatus(dto.getStatus());
 
@@ -102,3 +92,4 @@ public class SeatServiceImpl implements SeatService {
         return seat;
     }
 }
+

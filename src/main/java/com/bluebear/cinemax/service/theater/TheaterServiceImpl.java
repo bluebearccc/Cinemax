@@ -1,18 +1,16 @@
 package com.bluebear.cinemax.service.theater;
 
-import com.bluebear.cinemax.dto.RoomDTO;
 import com.bluebear.cinemax.dto.TheaterDTO;
-import com.bluebear.cinemax.entity.Room;
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.enumtype.Theater_Status;
 import com.bluebear.cinemax.repository.RoomRepository;
 import com.bluebear.cinemax.repository.TheaterRepository;
 import com.bluebear.cinemax.service.room.RoomService;
-import org.hibernate.Hibernate;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -57,11 +55,20 @@ public class TheaterServiceImpl implements TheaterService {
                 .orElse(null);
     }
 
-    public List<TheaterDTO> getAllTheaters() {
-        return theaterRepository.findByStatus(Theater_Status.Active).stream().map(this::toDTO).collect(Collectors.toList());
+    public TheaterDTO getTheaterByIdWithRateCounts(Integer id) {
+        TheaterDTO theaterDTO = theaterRepository.findById(id)
+                .map(this::toDTO)
+                .orElse(null);
+
+        theaterDTO.setServiceRate(4.5);
+        theaterDTO.setNumberOfRate(24);
+
+        return theaterDTO;
     }
 
-    // ==================== Mapping ====================
+    public Page<TheaterDTO> getAllTheaters() {
+        return theaterRepository.findByStatus(Theater_Status.Active, Pageable.unpaged()).map(this::toDTO);
+    }
 
     public TheaterDTO toDTO(Theater entity) {
         TheaterDTO dto = new TheaterDTO();
@@ -70,6 +77,7 @@ public class TheaterServiceImpl implements TheaterService {
         dto.setAddress(entity.getAddress());
         dto.setImage(entity.getImage());
         dto.setRoomQuantity(entity.getRoomQuantity());
+        dto.setServiceRate(entity.getServiceRate());
         dto.setStatus(entity.getStatus());
         return dto;
     }
@@ -81,6 +89,7 @@ public class TheaterServiceImpl implements TheaterService {
         entity.setAddress(dto.getAddress());
         entity.setImage(dto.getImage());
         entity.setRoomQuantity(dto.getRoomQuantity());
+        entity.setServiceRate(dto.getServiceRate());
         entity.setStatus(dto.getStatus());
         if (dto.getRooms() != null) {entity.setRooms(dto.getRooms().stream().map(roomDTO -> roomService.toEntity(roomDTO)).collect(Collectors.toList()));}
         return entity;

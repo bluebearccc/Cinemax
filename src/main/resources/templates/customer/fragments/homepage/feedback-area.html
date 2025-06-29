@@ -1,8 +1,9 @@
 <div class="container feedback-area" th:fragment="feedback-area">
-    <h1 class="page-title" style="margin-top: 60px;">Featured Comments</h1>
+    <h1 class="section-title-hot-film" style="margin-top: 60px;">Featured Comments</h1>
     <div class="grid">
         <!-- Card 1 -->
-        <div class="card" th:each="movie : ${feedbacks.keySet()}">
+        <div class="card" th:each="movie : ${feedbacks.keySet()}"
+             th:onclick="|window.location.href='/customer/movie-detail?movieId=${movie.movieID}'|">
             <div class="card-image">
                 <img th:src="@{${movie.image}}">
                 <div class="card-overlay">
@@ -19,14 +20,20 @@
                     <div class="comment-header">
                         <div class="avatar"><i class="fa fa-user"></i></div>
                         <div class="comment-info">
-                            <div class="username" th:text="${comment.customerName}"></div>
-                            <div class="timestamp" th:text="${#dates.format(comment.createdDate, 'dd/MM/yyyy HH:mm')}"></div>
+                            <div class="comment-info-small">
+                                <div class="username" th:text="${comment.customerName}"></div>
+                                <div th:if="${comment.movieRate != null}">
+                                    <i class="fas fa-star" th:each="i : ${#numbers.sequence(1, comment.movieRate)}"></i>
+                                </div>
+                            </div>
+                            <div class="timestamp"
+                                 th:text="${#temporals.format(comment.createdDate, 'dd/MM/yyyy HH:mm')}"></div>
                         </div>
 
                     </div>
                     <div class="comment-text" th:text="${comment.content}">
                     </div>
-                    <a href="#" class="read-more">Read more</a>
+                    <a th:href="@{/customer/movie-detail(movieId=${movie.movieID})}" class="read-more">Read more</a>
                 </div>
             </div>
         </div>
@@ -34,7 +41,6 @@
     <div class="load-more-container" th:style="${currentNumberOfFeedback == maximumFeedback} ? 'display: none' : ''">
         <input type="hidden" th:value="${maximumFeedback}" id="maximumFeedback">
         <input type="hidden" th:value="${currentNumberOfFeedback}" id="currentNumberOfFeedback">
-        <input type="hidden" th:value="${feedbackPage}" id="feedbackPage">
 
         <button class="load-more-btn" id="load-feedback">Load More</button>
     </div>

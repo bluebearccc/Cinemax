@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Entity
 @Table(name = "Seat")
@@ -32,7 +33,7 @@ public class Seat {
     private String position;
 
     @Column(name = "IsVIP", nullable = false)
-    private boolean isVIP;
+    private Boolean isVIP;
 
     @Column(name = "UnitPrice", nullable = false)
     private Double unitPrice;
@@ -40,4 +41,7 @@ public class Seat {
     @Column(name = "Status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Seat_Status status;
+
+    @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetailSeat> detailSeatList;
 }

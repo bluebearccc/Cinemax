@@ -2,12 +2,13 @@ package com.bluebear.cinemax.service.moviefeedback;
 
 import com.bluebear.cinemax.dto.MovieFeedbackDTO;
 import com.bluebear.cinemax.entity.MovieFeedback;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 
 public interface MovieFeedbackService {
-    // CRUD methods
+
     MovieFeedbackDTO create(MovieFeedbackDTO dto);
 
     MovieFeedbackDTO getById(Integer id);
@@ -16,18 +17,21 @@ public interface MovieFeedbackService {
 
     boolean delete(Integer id);
 
-    // Feedback listing methods
-    List<MovieFeedbackDTO> getAllByMovieIdSort(Integer movieId, Pageable pageable);
+    Page<MovieFeedbackDTO> getAllByMovieIdSort(Integer movieId, Pageable pageable);
 
-    List<MovieFeedbackDTO> getAllByMovieId(Integer movieId, Pageable pageable);
+    Page<MovieFeedbackDTO> getAllByMovieId(Integer movieId, Pageable pageable);
 
-    // Count methods
-    int countFeedbackByMovieId(Integer movieId);
+    Page<MovieFeedbackDTO> getAllByMovieIdWithComments(Integer movieId, Pageable pageable);
+
+    Page<MovieFeedbackDTO> getAllByMovieIdWithCommentCount(Integer movieId, Pageable pageable);
+
+    MovieFeedbackDTO getFeedBackWithCommentByFeedbackId(Integer feedbackId);
+
+    MovieFeedbackDTO getFeedBackWithCommentCountByFeedbackId(Integer feedbackId);
 
     int countDistinctMovieByFeedBack();
 
-    // Mapping methods
     MovieFeedbackDTO toDTO(MovieFeedback feedback);
 
-    MovieFeedback fromDTO(MovieFeedbackDTO dto);
+    MovieFeedback toEntity(MovieFeedbackDTO dto);
 }

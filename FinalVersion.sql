@@ -15,6 +15,12 @@ CREATE TABLE Genre (
   GenreName varchar(255) NOT NULL
 );
 
+CREATE TABLE Actor (
+  ActorID   int IDENTITY PRIMARY KEY,
+  ActorName varchar(255) NOT NULL,
+  Image     varchar(255) NOT NULL
+);
+
 CREATE TABLE Movie (
   MovieID     int IDENTITY PRIMARY KEY,
   MovieName   nvarchar(255) NOT NULL,
@@ -24,8 +30,7 @@ CREATE TABLE Movie (
   Studio      nvarchar(100) NULL,
   Duration    int NOT NULL,
   Trailer     varchar(255) NOT NULL,
-  MovieRate   DECIMAL(3,1) CHECK (MovieRate Between 0 and 5) NOT NULL,
-  Actor       nvarchar(MAX) NOT NULL,
+  MovieRate   DECIMAL(3,1) CHECK (MovieRate Between 0 and 5) NULL,
   StartDate   Date NOT NULL,
   EndDate	  Date NOT NULL,
   Status	  varchar(10) CHECK (Status IN ('Active', 'Removed')) NOT NULL
@@ -36,6 +41,14 @@ CREATE TABLE Movie_Genre (
   GenreID int NOT NULL,
   MovieID int NOT NULL,
   FOREIGN KEY (GenreID) REFERENCES Genre(GenreID),
+  FOREIGN KEY (MovieID) REFERENCES Movie(MovieID)
+);
+
+CREATE TABLE Movie_Actor (
+  Id	  int IDENTITY PRIMARY KEY,
+  ActorID int NOT NULL,
+  MovieID int NOT NULL,
+  FOREIGN KEY (ActorID) REFERENCES Actor(ActorID),
   FOREIGN KEY (MovieID) REFERENCES Movie(MovieID)
 );
 
@@ -64,10 +77,11 @@ CREATE TABLE Theater (
   Address      nvarchar(100) NOT NULL,
   Image        varchar(255) NOT NULL,
   RoomQuantity int NOT NULL,
+  ServiceRate  int DECIMAL(3,1) CHECK (MovieRate Between 0 and 5) NULL, 
   Status	   varchar(20) CHECK (Status IN ('Active', 'Inactive')) NOT NULL	   
 );
 
-CREATE TABLE Room (
+CREATE TABLE Room (0
   RoomID     int IDENTITY PRIMARY KEY,
   TheaterID  int NOT NULL,
   Name       varchar(10) NOT NULL,
@@ -173,8 +187,10 @@ CREATE TABLE ServiceFeedback (
   CustomerID int NOT NULL,
   CreatedDate datetime DEFAULT GETDATE(),
   Content    nvarchar(MAX),
+  TheaterID  int NOT NULL,
   Status      varchar(20) CHECK (Status IN ('Suported', 'Not_Suported')) NOT NULL,
-  FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID)
+  FOREIGN KEY (CustomerID) REFERENCES Customer(CustomerID),
+  FOREIGN KEY (TheaterID) REFERENCES Theater(TheaterID)
 );
 
 CREATE TABLE History (
@@ -189,7 +205,24 @@ CREATE TABLE History (
   FOREIGN KEY (AccountID) REFERENCES Account(AccountID)
 );
 
+CREATE TABLE ForgotPassword (
+    id INT IDENTITY PRIMARY KEY,
+    otp INT NOT NULL UNIQUE,
+    Accountid INT NOT NULL,
+    expiry_date DATETIME NOT NULL,
+    FOREIGN KEY (Accountid) REFERENCES Account(AccountID)
+);
 
+CREATE TABLE VerifyToken (
+    id INT IDENTITY PRIMARY KEY,
+    Email VARCHAR(255) NOT NULL UNIQUE,
+    token VARCHAR(255) NOT NULL UNIQUE,
+    expiresAt DATETIME NOT NULL,
+    [Password] VARCHAR(255) NOT NULL,
+    FullName VARCHAR(255) NOT NULL
+);
+
+--TRIGGER
 
 --trigger tính MovieRate
 GO
@@ -214,3 +247,60 @@ BEGIN
     ) I ON M.MovieID = I.MovieID;
 END;
 
+GO
+CREATE TRIGGER trg_UpdateServiceRate
+ON ServiceFeedback
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Cập nhật ServiceRate cho mỗi TheaterID bị ảnh hưởng
+    UPDATE T
+    SET T.ServiceRate = (
+        SELECT CAST(AVG(CAST(Rate AS DECIMAL(3,1))) AS DECIMAL(3,1))
+        FROM ServiceFeedback SF
+        WHERE SF.TheaterID = T.TheaterID
+    )
+    FROM Theater T
+    INNER JOIN (
+        SELECT DISTINCT TheaterID
+        FROM inserted
+    ) i ON T.TheaterID = i.TheaterID;
+END;
+
+GO
+CREATE TRIGGER trg_DecreasePromotionQuantity
+ON Invoice
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Giảm số lượng Promotion nếu được sử dụng
+    UPDATE P
+    SET 
+        P.Quantity = P.Quantity - 1,
+        P.Status = CASE 
+                      WHEN (P.Quantity - 1) <= 0 THEN 'Expired'
+                      ELSE P.Status
+                   END
+    FROM Promotion P
+    INNER JOIN inserted i ON P.PromotionID = i.PromotionID
+    WHERE i.PromotionID IS NOT NULL;
+END;
+
+GO
+CREATE TRIGGER trg_DecreaseTheaterStock
+ON Detail_FD
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    -- Trừ số lượng thực phẩm đã bán từ kho của rạp
+    UPDATE TS
+    SET TS.Quantity = TS.Quantity - i.Quantity
+    FROM Theater_Stock TS
+    INNER JOIN inserted i ON TS.Theater_StockID = i.Theater_StockID;
+END;

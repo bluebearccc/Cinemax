@@ -29,10 +29,10 @@ public class Room {
     private String name;
 
     @Column(name = "Collumn", nullable = false)
-    private int collumn;
+    private Integer collumn;
 
     @Column(name = "Row", nullable = false)
-    private int row;
+    private Integer row;
 
     @Column(name = "TypeOfRoom", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)

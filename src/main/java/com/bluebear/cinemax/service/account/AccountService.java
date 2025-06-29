@@ -17,8 +17,7 @@ public interface AccountService {
 
     AccountDTO findAccountByEmail(String email);
 
-    // Optional: Cho phép lớp bên ngoài dùng chuyển đổi
-    Account dtoToEntity(AccountDTO dto);
+    AccountDTO toDTO(Account account);
 
-    AccountDTO entityToDto(Account entity);
+    Account toEntity(AccountDTO dto);
 }

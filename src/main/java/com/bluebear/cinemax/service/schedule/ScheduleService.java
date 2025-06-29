@@ -2,12 +2,11 @@ package com.bluebear.cinemax.service.schedule;
 
 import com.bluebear.cinemax.dto.ScheduleDTO;
 import com.bluebear.cinemax.entity.Schedule;
+import org.springframework.data.domain.Page;
 
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDateTime;
 
 public interface ScheduleService {
-    // --- CRUD ---
     ScheduleDTO createSchedule(ScheduleDTO dto);
 
     ScheduleDTO updateSchedule(ScheduleDTO dto);
@@ -16,12 +15,14 @@ public interface ScheduleService {
 
     ScheduleDTO getScheduleById(Integer scheduleID);
 
-    List<ScheduleDTO> getAllSchedules();
+    Page<ScheduleDTO> getScheduleByMovieIdAndDate(Integer movieID, LocalDateTime date);
 
-    // --- Custom ---
-    List<ScheduleDTO> getScheduleByMovieIdAndDate(Integer movieID, Date date);
+    Page<ScheduleDTO> getScheduleByMovieIdAndTheaterIdAndDateAndRoomType(Integer movieID, Integer theaterID, LocalDateTime date, String roomType);
 
-    // --- Mapping ---
+    Page<ScheduleDTO> getAllSchedules();
+
+    void calculateNumOfSeatLeft(ScheduleDTO scheduleDTO);
+
     ScheduleDTO toDTO(Schedule schedule);
 
     Schedule toEntity(ScheduleDTO dto);

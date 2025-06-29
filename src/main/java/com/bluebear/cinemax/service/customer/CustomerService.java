@@ -16,7 +16,7 @@ public interface CustomerService {
 
     CustomerDTO getUserByAccountID(Integer accountId);
 
-    CustomerDTO entityToDto(Customer customer);
+    CustomerDTO toDTO(Customer customer);
 
-    Customer dtoToEntity(CustomerDTO dto);
+    Customer toEntity(CustomerDTO dto);
 }

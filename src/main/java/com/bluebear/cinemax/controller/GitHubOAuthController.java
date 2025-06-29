@@ -110,7 +110,7 @@ public class GitHubOAuthController {
         AccountDTO account = accountService.findAccountByEmail(email);
         if (account == null) {
             String password = UUID.randomUUID().toString();
-            account = new AccountDTO(email, password, Role.Customer, Account_Status.Active);
+            account = AccountDTO.builder().email(email).password(password).role(Role.Customer).status(Account_Status.Active).build();
             accountService.save(account);
 
             account = accountService.findAccountByEmail(email);
@@ -133,7 +133,7 @@ public class GitHubOAuthController {
             case Admin:
                 return "redirect:/admin/dashboard";
             case Customer:
-                return "redirect:/home";
+                return "redirect:/";
             case Staff:
                 return "redirect:/staff/home";
             case Cashier:

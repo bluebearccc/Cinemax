@@ -14,8 +14,8 @@ public class RoomDTO {
     private Integer roomID;
     private Integer theaterID;
     private String name;
-    private int collumn;
-    private int row;
+    private Integer collumn;
+    private Integer row;
     private TypeOfRoom typeOfRoom;
     private Room_Status status;
 

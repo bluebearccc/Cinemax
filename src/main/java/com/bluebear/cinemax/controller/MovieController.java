@@ -9,8 +9,10 @@ import com.bluebear.cinemax.service.movie.MovieService;
 import com.bluebear.cinemax.service.theater.TheaterService;
 import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,7 +22,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import java.util.List;
 
 @Controller
-@RequestMapping
+@RequestMapping("/customer/movies")
 public class MovieController {
 
     @Autowired
@@ -33,10 +35,12 @@ public class MovieController {
     private TheaterService theaterService;
 
     private MovieDTO topMovie;
+    private TheaterDTO currentTheater;
 
-    List<MovieDTO> movies;
+    Page<MovieDTO> movies;
     List<GenreDTO> genres;
-    List<TheaterDTO> theaters;
+    Page<TheaterDTO> theaters;
+    String currentWebPage;
 
     @PostConstruct
     public void preInit() {
@@ -44,59 +48,36 @@ public class MovieController {
         theaters = theaterService.getAllTheaters();
     }
 
-    @GetMapping("/movies")
-    public String toString(Model model, @RequestParam(name = "movieGenre", required = false) Integer genreId, @RequestParam(name = "movieName", required = false) String movieName, @RequestParam(name = "page", required = false) Integer page, @RequestParam(name = "sortBy", required = false) String sort, @RequestParam(name = "isFirst", required = false) Boolean isFirst) {
+    @GetMapping
+    public String toString(Model model, @RequestParam(name = "movieGenre", required = false) Integer genreId, @RequestParam(name = "movieName", required = false) String movieName, @RequestParam(name = "page", required = false) Integer page, @RequestParam(name = "sortBy", required = false) String sort, @RequestParam(name = "isFirst", required = false) Boolean isFirst, @RequestParam(name = "selectedTheater", required = false) Integer theaterId) {
 
-        int totalPage = 0;
         int currentPage = page == null ? 1 : page;
         Pageable pageable = PageRequest.of(currentPage - 1, Constant.MOVIES_PER_PAGE);
         genres = genreService.getAllGenres();
-        if (genreId != null && movieName != null) {
-            if ("high-rate".equals(sort)) {
-                movies = movieService.findMoviesByGenreAndNameOrderByRateDesc(genreId, movieName.trim(), pageable);
-            } else {
-                movies = movieService.findMoviesByGenreAndName(genreId, movieName.trim(), pageable);
-            }
-            totalPage = movieService.countNumberOfPageByGenreAndByName(genreId, movieName.trim());
-        } else if (genreId != null) {
-            if ("high-rate".equals(sort)) {
-                movies = movieService.findMoviesByGenreOrderByRateDesc(genreId, pageable);
-            } else {
-                movies = movieService.findMoviesByGenre(genreId, pageable);
-            }
-            totalPage = movieService.countNumberOfPageByGenreId(genreId);
-        } else if (movieName != null) {
-            if ("high-rate".equals(sort)) {
-                movies = movieService.findMoviesByNameOrderByRateDesc(movieName.trim(), pageable);
-            } else {
-                movies = movieService.findMoviesByName(movieName.trim(), pageable);
-            }
-            totalPage = movieService.countNumberOfPageByName(movieName.trim());
+        movieName = movieName == null ? "" : movieName.trim();
+
+        if ("rating".equals(sort)) {
+            pageable = PageRequest.of(currentPage - 1, Constant.MOVIES_PER_PAGE, Sort.by("movieRate").descending());
+            movies = movieService.findMovies(theaterId, genreId, movieName, pageable);
         } else {
-            if ("high-rate".equals(sort)) {
-                movies = movieService.findAllByStatusOrderByMovieRateDesc(pageable);
-            } else {
-                movies = movieService.findAllByStatus(pageable);
-            }
-            totalPage = movieService.countNumberOfPage();
+            movies = movieService.findMovies(theaterId, genreId, movieName, pageable);
         }
 
-        System.out.println("sort: " + sort);
-
+        currentWebPage = "movies";
+        model.addAttribute("currentWebPage", currentWebPage);
         model.addAttribute("genreId", genreId);
         model.addAttribute("movieName", movieName);
         model.addAttribute("sortBy", sort);
         model.addAttribute("currentPage", currentPage);
-        model.addAttribute("TotalPage", totalPage);
         model.addAttribute("genres", genres);
         model.addAttribute("movies", movies);
         model.addAttribute("theaters", theaters);
         model.addAttribute(Constant.TOP_MOVIE, topMovie);
 
         if (isFirst == null) {
-            return "/customer/movie-list";
+            return "customer/movie-list";
         } else {
-            return "/customer/fragments/movie-list/list-movie :: list-movie";
+            return "customer/fragments/movie-list/list-movie :: list-movie";
         }
 
     }

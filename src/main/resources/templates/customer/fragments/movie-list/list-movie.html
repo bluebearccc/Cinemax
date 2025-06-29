@@ -1,90 +1,62 @@
-<div th:fragment="list-movie" class="container">
-    <div class="row flex-wrap-reverse justify-content-center">
-        <div class="col-lg-12 mb-50 mb-lg-0">
-            <div class="filter-tab tab">
-                <div class="filter-container">
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label class="filter-label">Sort By :</label>
-                            <select class="filter-select" id="sortBy" onchange="filmLoader(null)">
-                                <option value="none" th:selected="${sortBy == null || sortBy == 'none'}">None</option>
-                                <option value="high-rate" th:selected="${sortBy == 'high-rate'}">high rate</option>
-                            </select>
+<div class="filter-tab tab" th:fragment="list-movie" id="list-movie-wrapper">
+    <div class="empty-state" th:if="${#lists.isEmpty(movies.content)}">
+        <div class="empty-icon">😔</div>
+        <h3>No suitable movies found.</h3>
+        <p>Please try again with different search criteria.</p>
+    </div>
+    <div class="tab-area">
+        <div class="tab-item active">
+            <div class="row mb-10 justify-content-center">
+                <div th:each="movie : ${movies.content}" class="col-sm-6 col-lg-3">
+                    <div class="movie-grid">
+                        <div class="movie-thumb c-thumb">
+                            <a th:href="@{/customer/movie-detail(movieId=${movie.movieID})}">
+                                <img th:src="@{${movie.image}}" alt="movie"
+                                     style="width: 352px; height: 493.58px">
+                            </a>
                         </div>
-
-                        <div class="filter-group">
-                            <label class="filter-label">Genre :</label>
-                            <select class="filter-select" id="movieGenre" onchange="filmLoader(null)">
-                                <option value="0" th:selected="${genreId == null || genreId == 0}">All</option>
-                                <option th:each="genre : ${genres}"
-                                        th:value="${genre.genreID}"
-                                        th:text="${genre.genreName}"
-                                        th:selected="${genre.genreID == genreId}">
-                                </option>
-                            </select>
-                        </div>
-
-                        <div class="search-container">
-                            <div class="search-icon">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            <input name="movieName" type="text" class="search-input" placeholder="Search for Movies"
-                                   id="movieName"
-                                   onchange="filmLoader(null)"
-                                   th:value="${movieName}"/>
+                        <div class="movie-content bg-one">
+                            <h5 class="title m-0 movie-title-movie-list">
+                                <a th:href="@{/customer/movie-detail(movieId=${movie.movieID})}" th:text="${movie.movieName}"
+                                   style="font-size: 20px"></a>
+                            </h5>
+                            <ul class="movie-rating-percent">
+                                <li>
+                                    <div class="thumb">
+                                        <i class="fas fa-ticket-alt fa-2x"
+                                           style="color:#f5c518;"></i>
+                                    </div>
+                                    <span class="content"
+                                          th:text="${movie.ticketSold} + ' ticket' + (${movie.ticketSold > 1 ? 's' : ''}) + ' sold'">
+                                    </span>
+                                </li>
+                                <li>
+                                    <div class="thumb">
+                                        <i class="fas fa-clock"></i>
+                                    </div>
+                                    <span class="content" th:text="${movie.duration} + ' minutes'"></span>
+                                </li>
+                            </ul>
                         </div>
                     </div>
-                </div>
-                <div class="tab-area">
-                    <div class="tab-item active">
-                        <div class="row mb-10 justify-content-center">
-                            <div th:each="movie : ${movies}" class="col-sm-6 col-lg-3">
-                                <div class="movie-grid">
-                                    <div class="movie-thumb c-thumb">
-                                        <a href="movie-details.html">
-                                            <img th:src="@{${movie.image}}" alt="movie"
-                                                 style="width: 352px; height: 493.58px">
-                                        </a>
-                                    </div>
-                                    <div class="movie-content bg-one">
-                                        <h5 class="title m-0">
-                                            <a href="movie-details.html" th:text="${movie.movieName}"
-                                               style="font-size: 20px"></a>
-                                        </h5>
-                                        <ul class="movie-rating-percent">
-                                            <li>
-                                                <div class="thumb">
-                                                    <img th:src="@{/customer-static/images/movie/tomato.png}" alt="movie">
-                                                </div>
-                                                <span class="content">88%</span>
-                                            </li>
-                                            <li>
-                                                <div class="thumb">
-                                                    <img th:src="@{/customer-static/images/movie/cake.png}" alt="movie">
-                                                </div>
-                                                <span class="content">88%</span>
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="pagination-area text-center">
-                    <a href="" th:style="${currentPage == 1} ? 'display:none'" th:onclick="'filmLoader(' + ${currentPage - 1} + '); return false;'"><i
-                            class="fas fa-angle-double-left"></i><span>Prev</span></a>
-                    <a href="" th:each="i : ${#numbers.sequence(1, TotalPage, 1)}"
-                       th:class="${i == currentPage} ? 'active' : ''"
-                       th:text="${i}"
-                       th:onclick="'filmLoader(' + ${i} + '); return false;'"></a>
-                    <a href="" th:style="${currentPage >= TotalPage} ? 'display:none'"
-                       th:onclick="'filmLoader(' + ${currentPage + 1} + '); return false;'"><span>Next</span><i class="fas fa-angle-double-right"></i></a>
                 </div>
             </div>
         </div>
     </div>
+    <div class="pagination-area text-center">
+        <a href="" th:style="${movies.number + 1 == 1} ? 'display:none'"
+           th:onclick="'filmLoader(' + ${movies.number} + '); return false;'"><i
+                class="fas fa-angle-double-left"></i><span>Prev</span></a>
+        <a href="" th:each="i : ${#numbers.sequence(1, movies.getTotalPages(), 1)}"
+           th:class="${i == movies.number + 1} ? 'active' : ''"
+           th:text="${i}"
+           th:onclick="'filmLoader(' + ${i} + '); return false;'"></a>
+        <a href="" th:style="${movies.number + 1 >= movies.getTotalPages()} ? 'display:none'"
+           th:onclick="'filmLoader(' + ${movies.number + 1 + 1} + '); return false;'"><span>Next</span><i
+                class="fas fa-angle-double-right"></i></a>
+    </div>
 </div>
+
 
 
 

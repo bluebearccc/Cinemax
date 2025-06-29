@@ -15,15 +15,16 @@ public class VerifyToken {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "Id")
     private Integer id;
 
     @Column(nullable = false, unique = true, name = "Email")
     private String email;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, unique = true, name = "Token")
     private String token;
 
-    @Column(nullable = false)
+    @Column(nullable = false, name = "ExpiresAt")
     private Date expiresAt;
 
     @Column(nullable = false, name = "[Password]")

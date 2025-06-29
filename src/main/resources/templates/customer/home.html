@@ -15,8 +15,8 @@
     <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
-    <link rel="stylesheet" th:href="@{/customer-static/css/common/filter-area.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/home-page.css}">
 
 
@@ -34,56 +34,56 @@
     <i class="fas fa-angle-up"></i>
 </a>
 <!-- ==========Overlay========== -->
+<div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
 <!-- ==========Header-Section========== -->
 <header th:replace="common/fragments/header :: header-section">
 </header>
 <!-- ==========Header-Section========== -->
 
 <!-- ==========Banner-Section========== -->
-<section class="details-banner banner-slider">
-    <div th:each="topMovie : ${topMovies}"
-         th:class="'bg_img slide ' + (${topMovies[0] == topMovie} ? 'active' : '')"
-         th:style="'background-image:url(' + @{${topMovie.banner}} + ');'">
-        <div class="container">
-            <div class="details-banner-wrapper slide-content">
-                <div class="details-banner-content offset-lg-3" style="margin-left: 0%;">
-                    <h3 class="title" th:text="${topMovie.movieName}"></h3>
-                    <i class="far fa-clock"></i><span th:text="${topMovie.duration} + 'minutes' " style="padding-left: 5px"></span>
-                    <p style="max-width: 300px" th:text="${topMovie.description}"></p>
-                    <a href="#0" class="button" th:each="genreMovie : ${topMovie.genres}" th:text="${genreMovie.genreName}"></a>
-                    <div class="item">
-                        <div class="item-header" style="display: flex; gap: 3px">
-                            <i class="fas fa-star"></i><h5 class="title" th:text="${topMovie.movieRate}"></h5>
-                        </div>
-                        <div class="book-wrapper offset-lg-3" style="margin-right: 70px;">
-                            <a href="#0" class="custom-button">book tickets</a>
-                        </div>
-                    </div>
-
-                </div>
-
-            </div>
+<section class="hero" id="home">
+    <div class="hero-content">
+        <h1>The Ultimate Cinema Experience</h1>
+        <p>Book movie tickets online easily and quickly with thousands of screenings every day. Enjoy the latest
+            blockbuster movies with excellent picture and sound quality.</p>
+        <div class="hero-buttons">
+            <a href="#movies" class="btn-primary">🎟️ Book Now</a>
         </div>
-
     </div>
-    <div class="slider-nav">
-        <div class="nav-dot active" onclick="goToSlide(0)"></div>
-        <div class="nav-dot" onclick="goToSlide(1)"></div>
-        <div class="nav-dot" onclick="goToSlide(2)"></div>
+</section>
+
+<section class="featured-section-hot-film" id="movies">
+    <h2 class="section-title-hot-film">🔥 The Hottest</h2>
+    <div class="movies-grid-hot-film">
+        <div class="movie-card-hot-film" th:each="topMovie : ${topMovies.content}"
+             th:onclick="|window.location.href='/customer/movie-detail?movieId=${topMovie.movieID}'|">
+            <img class="movie-poster-hot-film" th:src="${topMovie.banner}">
+            <div class="movie-info-hot-film">
+                <h3 th:text="${topMovie.movieName}"></h3>
+                <p th:text="${topMovie.description}">Cuộc chiến epic giữa các siêu anh hùng để bảo vệ trái đất khỏi mối
+                    đe dọa từ không gian.</p>
+            </div>
+            <div class="movie-meta-hot-film">
+                <span class="rating-hot-film" th:text=" '⭐' + ${topMovie.movieRate}"></span>
+                <span class="genre-hot-film" th:text="${topMovie.genres.getFirst().genreName}"></span>
+            </div>
+            <button class="book-btn-hot-film">Đặt Vé Ngay</button>
+        </div>
     </div>
 </section>
 <!-- ==========Banner-Section========== -->
 
 <!-- ==========Sports-Section========== -->
 <section class="sports-section padding-top padding-bottom container">
-    <h1 class="page-title">Movies</h1>
     <div class="container">
         <div class="tab">
-            <div class="section-header-2">
-                <div class="left">
-                    <h2 class="title movie-carousel-title">now showing</h2>
-                </div>
-            </div>
+            <h2 class="section-title-hot-film">🎬 now showing</h2>
             <div class="tab-area mb-30-none">
                 <div class="container">
                     <div class="carouselMovie-wrapper">
@@ -91,14 +91,17 @@
                             <button class="nav-button prev prev-btn">‹</button>
                             <button class="nav-button next next-btn">›</button>
                             <div class="carouselMovie">
-                                <div class="movie-card" th:each="movie : ${currentMovies}" >
+                                <div class="movie-card" th:each="movie : ${currentMovies.content}"
+                                     th:onclick="|window.location.href='/customer/movie-detail?movieId=${movie.movieID}'|">
                                     <div class="movie-poster"
                                          th:style="'background-image:url(' + @{${movie.image}} + ');'">
                                         <div class="age-rating p" th:text="${movie.movieRate}"></div>
                                     </div>
                                     <div class="movie-info">
                                         <div class="movie-title" th:text="${movie.movieName}"></div>
-                                        <div class="movie-genre" th:each="movieGenre : ${movie.genres}" th:text="${movieGenre.genreName}"></div>
+                                        <div class="movie-release" th:text="${movie.duration} + ' minutes'"></div>
+                                        <div class="movie-genre" th:each="movieGenre : ${movie.genres}"
+                                             th:text="${movieGenre.genreName}"></div>
                                     </div>
                                 </div>
                             </div>
@@ -112,26 +115,27 @@
 <section class="sports-section padding-top padding-bottom">
     <div class="container">
         <div class="tab">
-            <div class="section-header-2">
-                <div class="left">
-                    <h2 class="title movie-carousel-title">coming soon</h2>
-                </div>
-            </div>
+            <h2 class="section-title-hot-film">🎬 coming soon</h2>
             <div class="tab-area mb-30-none">
                 <div class="container">
                     <div class="carouselMovie-wrapper">
                         <div class="carouselMovie-container">
-                            <button class="nav-button prev prev-btn" aria-label="Phim trước">‹</button>
-                            <button class="nav-button next next-btn" aria-label="Phim tiếp theo">›</button>
+                            <button class="nav-button prev prev-btn">‹</button>
+                            <button class="nav-button next next-btn">›</button>
                             <div class="carouselMovie">
-                                <div class="movie-card" th:each="movie : ${futureMovies}" >
+                                <div class="movie-card" th:each="movie : ${futureMovies.content}"
+                                     th:onclick="|window.location.href='/customer/movie-detail?movieId=${movie.movieID}'|">
                                     <div class="movie-poster"
                                          th:style="'background-image:url(' + @{${movie.image}} + ');'">
                                         <div class="age-rating p" th:text="${movie.movieRate}"></div>
                                     </div>
                                     <div class="movie-info">
                                         <div class="movie-title" th:text="${movie.movieName}"></div>
-                                        <div class="movie-genre" th:each="movieGenre : ${movie.genres}" th:text="${movieGenre.genreName}"></div>
+                                        <div class="movie-release" th:text="${movie.duration} + ' minutes'"></div>
+                                        <div class="movie-release"
+                                             th:text="'Release Date: ' + ${#temporals.format(movie.startDate, 'dd/MM/yyyy')}"></div>
+                                        <div class="movie-genre" th:each="movieGenre : ${movie.genres}"
+                                             th:text="${movieGenre.genreName}"></div>
                                     </div>
                                 </div>
                             </div>
@@ -152,7 +156,6 @@
 <!-- ==========Footer-Section========== -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script th:src="@{/customer-static/js/homepage.js}"></script>
-<script th:src="@{/customer-static/js/movie-listajax.js}"></script>
 <script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
 <script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
 <script th:src="@{/customer-static/js/plugins.js}"></script>

@@ -21,6 +21,5 @@ public class CustomerDTO {
 
     private String phone;
 
-    private List<MovieFeedbackDTO> movieFeedback;
 }
 

@@ -2,11 +2,9 @@ package com.bluebear.cinemax.service.room;
 
 import com.bluebear.cinemax.dto.RoomDTO;
 import com.bluebear.cinemax.entity.Room;
-
-import java.util.List;
+import org.springframework.data.domain.Page;
 
 public interface RoomService {
-    // --- CRUD ---
     RoomDTO createRoom(RoomDTO dto);
 
     RoomDTO updateRoom(Integer id, RoomDTO dto);
@@ -15,11 +13,10 @@ public interface RoomService {
 
     RoomDTO getRoomById(Integer id);
 
-    List<RoomDTO> getAllRooms();
+    Page<RoomDTO> getAllRooms();
 
-    List<RoomDTO> getRoomsByTheaterId(Integer theaterID);
+    Page<RoomDTO> getRoomsByTheaterId(Integer theaterID);
 
-    // --- Mapping ---
     RoomDTO toDTO(Room entity);
 
     Room toEntity(RoomDTO dto);

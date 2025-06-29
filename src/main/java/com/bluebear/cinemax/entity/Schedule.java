@@ -4,7 +4,9 @@ import com.bluebear.cinemax.enumtype.Schedule_Status;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDateTime;
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "Schedule")
@@ -20,10 +22,10 @@ public class Schedule {
     private Integer scheduleID;
 
     @Column(name = "StartTime", nullable = false)
-    private Date startTime;
+    private LocalDateTime startTime;
 
     @Column(name = "EndTime", nullable = false)
-    private Date endTime;
+    private LocalDateTime endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MovieID", nullable = false)
@@ -36,4 +38,7 @@ public class Schedule {
     @Column(name = "Status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
     private Schedule_Status status;
+
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<DetailSeat> detailSeatList;
 }

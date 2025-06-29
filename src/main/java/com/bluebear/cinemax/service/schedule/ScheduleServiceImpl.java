@@ -1,6 +1,9 @@
 package com.bluebear.cinemax.service.schedule;
 
+import com.bluebear.cinemax.repository.DetailSeatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.bluebear.cinemax.dto.ScheduleDTO;
 import com.bluebear.cinemax.entity.Movie;
@@ -11,10 +14,8 @@ import com.bluebear.cinemax.repository.MovieRepository;
 import com.bluebear.cinemax.repository.RoomRepository;
 import com.bluebear.cinemax.repository.ScheduleRepository;
 
-import java.util.Date;
-import java.util.List;
+import java.time.LocalDateTime;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
@@ -24,12 +25,13 @@ public class ScheduleServiceImpl implements ScheduleService {
     private MovieRepository movieRepository;
     @Autowired
     private RoomRepository roomRepository;
+    @Autowired
+    private DetailSeatRepository detailSeatRepository;
 
     public ScheduleDTO createSchedule(ScheduleDTO dto) {
         Schedule schedule = toEntity(dto);
         return toDTO(scheduleRepository.save(schedule));
     }
-
 
     public ScheduleDTO updateSchedule(ScheduleDTO dto) {
         Optional<Schedule> optional = scheduleRepository.findById(dto.getScheduleID());
@@ -39,8 +41,8 @@ public class ScheduleServiceImpl implements ScheduleService {
         if (optional.isPresent()) {
             Schedule schedule = optional.get();
             schedule.setScheduleID(dto.getScheduleID());
-            schedule.setMovie(optionalMovie.get());
-            schedule.setRoom(optionalRoom.get());
+            schedule.setMovie(optionalMovie.orElse(null));
+            schedule.setRoom(optionalRoom.orElse(null));
             schedule.setStatus(dto.getStatus());
             schedule.setStartTime(dto.getStartTime());
             schedule.setEndTime(dto.getEndTime());
@@ -49,26 +51,35 @@ public class ScheduleServiceImpl implements ScheduleService {
         return null;
     }
 
-
     public void deleteSchedule(Integer scheduleID) {
         scheduleRepository.deleteById(scheduleID);
     }
-
 
     public ScheduleDTO getScheduleById(Integer scheduleID) {
         Optional<Schedule> optional = scheduleRepository.findById(scheduleID);
         return optional.map(this::toDTO).orElse(null);
     }
 
-    public List<ScheduleDTO> getScheduleByMovieIdAndDate(Integer movieID, Date date) {
-        return scheduleRepository.findSchedulesByMovie_MovieIDInToday(movieID, date).stream().map(this::toDTO).collect(Collectors.toList());
+    public Page<ScheduleDTO> getScheduleByMovieIdAndDate(Integer movieID, LocalDateTime date) {
+        return scheduleRepository.findSchedulesByMovie_MovieIDInTodayAndStatus(movieID, date, Schedule_Status.Active, Pageable.unpaged()).map(this::toDTO);
     }
 
-    public List<ScheduleDTO> getAllSchedules() {
-        return scheduleRepository.findByStatus(Schedule_Status.Active)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    public Page<ScheduleDTO> getScheduleByMovieIdAndTheaterIdAndDateAndRoomType(Integer movieID, Integer theaterID, LocalDateTime date, String roomType) {
+        return scheduleRepository.findSchedulesByMovie_MovieIDAndTheaterAndDayAndRoomTypeStatus(movieID, theaterID, date, Schedule_Status.Active, roomType, Pageable.unpaged()).map(this::toDTO);
+    }
+
+    public Page<ScheduleDTO> getAllSchedules() {
+        return scheduleRepository.findByStatus(Schedule_Status.Active, Pageable.unpaged())
+                .map(this::toDTO);
+    }
+
+    public void calculateNumOfSeatLeft(ScheduleDTO scheduleDTO) {
+        Room room = roomRepository.findById(scheduleDTO.getRoomID()).orElse(null);
+        if (room != null) {
+            int totalSeat = room.getRow() * room.getCollumn();
+            int numOfSeatLeft = totalSeat - (int) detailSeatRepository.countBySchedule_ScheduleID(scheduleDTO.getScheduleID());
+            scheduleDTO.setNumberOfSeatsRemain(numOfSeatLeft < 0 ? 0 : numOfSeatLeft);
+        }
     }
 
     public ScheduleDTO toDTO(Schedule schedule) {
@@ -97,3 +108,4 @@ public class ScheduleServiceImpl implements ScheduleService {
         return schedule;
     }
 }
+

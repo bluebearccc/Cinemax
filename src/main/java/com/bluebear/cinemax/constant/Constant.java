@@ -6,5 +6,7 @@ public class Constant {
 
     public static final int FEEDBACK_PER_CELL = 2;
     public static final int FEEDBACK_PER_ROW = 4;
-    public static final int FEEDBACK_PER_PAGE = 8;
+    public static final int FEEDBACK_PER_PAGE = 5;
+
+    public static final int COMMENT_PER_FEEDBACK = 3;
 }
