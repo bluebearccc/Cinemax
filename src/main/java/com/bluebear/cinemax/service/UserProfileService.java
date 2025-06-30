@@ -31,50 +31,66 @@ public class UserProfileService {
     private DetailSeatRepository detailSeatRepository;
     @Autowired
     private TheaterRepository theaterRepository;
+    public CustomerDTO toDTO(Customer customer) {
+        return CustomerDTO.builder()
+                .id(customer.getID())
+                .accountID(customer.getAccount() != null ? customer.getAccount().getId() : null)
+                .fullName(customer.getFullName())
+                .phone(customer.getPhone())
+                .build();
+    }
+
+    public Customer toEntity(CustomerDTO dto) {
+        Customer customer = new Customer();
+        customer.setID(dto.getId());
+        customer.setFullName(dto.getFullName());
+        customer.setPhone(dto.getPhone());
+
+        if (dto.getAccountID() != null) {
+            accountRepository.findById(dto.getAccountID().longValue()).ifPresent(customer::setAccount);
+        }
+
+        return customer;
+    }
+
+    public AccountDTO toDTO(Account account) {
+        return AccountDTO.builder()
+                .id(account.getId())
+                .email(account.getEmail())
+                .password(account.getPassword())
+                .role(account.getRole())
+                .status(account.getStatus())
+                .build();
+    }
+
+    public Account toEntity(AccountDTO dto) {
+        return Account.builder()
+                .id(dto.getId())
+                .email(dto.getEmail())
+                .password(dto.getPassword())
+                .role(dto.getRole())
+                .status(dto.getStatus())
+                .build();
+    }
     public Account getAccountByEmail(String email) {
         return accountRepository.findByEmail(email);
     }
-    public void saveCustomer(CustomerDTO customerDTO) {
-        Customer customer = new Customer();
-        customer.setID(customerDTO.getId());
-        customer.setPhone(customerDTO.getPhone());
-
-        if (customerDTO.getAccountID() != null) {
-            Account account = accountRepository.findById(customerDTO.getAccountID().longValue()).orElse(null);
-            customer.setAccount(account);
-        }
-
-        // không gọi hàm `toEntity()` mà tạo trực tiếp như trên
+    public void saveCustomer(CustomerDTO dto) {
+        Customer customer = toEntity(dto);
         customerRepository.save(customer);
     }
 
 
-    public AccountDTO getAccountById(Long accountId) {
-        Account account = accountRepository.findById(accountId).orElse(null);
-        if (account == null) return null;
-
-        return new AccountDTO(
-                account.getId(),
-                account.getEmail(),
-                account.getPassword(),
-                account.getRole(),
-                account.getStatus()
-        );
+    public AccountDTO getAccountById(Long id) {
+        return accountRepository.findById(id).map(this::toDTO).orElse(null);
     }
 
     public boolean emailExists(String email) {
         return accountRepository.findByEmail(email) != null;
     }
 
-    public void saveAccount(AccountDTO accountDTO) {
-        Account account = new Account();
-
-        account.setId(accountDTO.getId());
-        account.setEmail(accountDTO.getEmail());
-        account.setPassword(accountDTO.getPassword());
-        account.setRole(accountDTO.getRole());
-        account.setStatus(accountDTO.getStatus());
-
+    public void saveAccount(AccountDTO dto) {
+        Account account = toEntity(dto);
         accountRepository.save(account);
     }
 
@@ -109,16 +125,8 @@ public class UserProfileService {
     }
 
 
-    public CustomerDTO getCustomerById(Integer customerId) {
-        Customer customer = customerRepository.findById(customerId).orElse(null);
-        if (customer == null) return null;
-
-        return CustomerDTO.builder()
-                .id(customer.getID())
-                .accountID(customer.getAccount().getId())
-                .fullName(customer.getFullName())
-                .phone(customer.getPhone())
-                .build();
+    public CustomerDTO getCustomerById(Integer id) {
+        return customerRepository.findById(id).map(this::toDTO).orElse(null);
     }
 
     public Theater getTheaterById(Integer theaterId) {
