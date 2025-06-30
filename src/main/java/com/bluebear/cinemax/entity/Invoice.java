@@ -1,5 +1,10 @@
 package com.bluebear.cinemax.entity;
 
+<<<<<<< HEAD
+=======
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
+import com.bluebear.cinemax.enumtype.PaymentMethod;
+>>>>>>> e7c59d5 (Hoàn tất merge và cập nhật các file cần thiết)
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -54,4 +59,15 @@ public class Invoice {
 
     @Column(name = "GuestEmail", nullable = true)
     private String guestEmail;
+<<<<<<< HEAD
 }
+=======
+
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_method", length = 20)
+    private PaymentMethod paymentMethod;
+
+    @Column(columnDefinition = "TEXT")
+    private String bookingDetails;
+}
+>>>>>>> e7c59d5 (Hoàn tất merge và cập nhật các file cần thiết)

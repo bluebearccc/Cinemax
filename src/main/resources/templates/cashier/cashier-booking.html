@@ -824,7 +824,6 @@
         }
 
     </style>
-
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom" th:fragment="navigation">
@@ -1131,7 +1130,7 @@
                                                      th:data-seat-type="${seat.seatType}"
                                                      th:classappend="${#lists.contains(bookedSeatIds, seat.seatID) ? 'occupied' : 'available'} +
         ${seat.isVIP ? ' vip' : ''} +
-        ${seat.seatType == T(com.bluebear.cinemax.enumtype.TypeOfSeat).Couple ? ' couple' : ''}"
+       ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
                                                      class="seat me-1 d-flex align-items-center justify-content-center"
                                                      style="width: 35px; height: 35px; border-radius: 5px; cursor: pointer;">
                                                     <span th:text="${#strings.substring(seat.position, 1)}"></span>

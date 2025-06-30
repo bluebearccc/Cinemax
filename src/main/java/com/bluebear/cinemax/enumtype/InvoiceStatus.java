@@ -1,7 +1,8 @@
 package com.bluebear.cinemax.enumtype;
 
 public enum InvoiceStatus {
-    Booked,
+    Booked, // Có thể đổi thành PAID
     Cancelled,
-    Pending,
+    Refunded,
+    Unpaid, //
 }

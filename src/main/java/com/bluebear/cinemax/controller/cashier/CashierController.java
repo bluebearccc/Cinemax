@@ -1,8 +1,11 @@
 package com.bluebear.cinemax.controller.cashier;
 
 import com.bluebear.cinemax.dto.*;
+import com.bluebear.cinemax.entity.Invoice;
 import com.bluebear.cinemax.enumtype.Movie_Status;
+import com.bluebear.cinemax.enumtype.PaymentMethod;
 import com.bluebear.cinemax.enumtype.Theater_Status;
+<<<<<<< HEAD:src/main/java/com/bluebear/cinemax/controller/cashier/CashierController.java
 import com.bluebear.cinemax.service.booking.BookingService;
 import com.bluebear.cinemax.service.detailseat.DetailSeatService;
 import com.bluebear.cinemax.service.genre.GenreService;
@@ -11,8 +14,13 @@ import com.bluebear.cinemax.service.promotion.PromotionService;
 import com.bluebear.cinemax.service.schedule.ScheduleService;
 import com.bluebear.cinemax.service.seat.SeatService;
 import com.bluebear.cinemax.service.theaterstock.TheaterStockService;
+=======
+import com.bluebear.cinemax.repository.InvoiceRepository;
+import com.bluebear.cinemax.service.*;
+>>>>>>> e7c59d5 (Hoàn tất merge và cập nhật các file cần thiết):src/main/java/com/bluebear/cinemax/controller/CashierController.java
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,6 +28,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.ModelAndView;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
@@ -59,6 +68,15 @@ public class CashierController {
 
     @Autowired
     private BookingService bookingService;
+
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+
+    @Value("${payment.sepay.bank}")
+    private String sepayBank;
+
+    @Value("${payment.sepay.account}")
+    private String sepayAccount;
 
     @GetMapping({"", "/", "/movie/"})
     public String getMovie(@RequestParam(required = false) String keyword,
@@ -320,7 +338,6 @@ public class CashierController {
         model.addAttribute("selectedMovie", selectedMovie);
         model.addAttribute("selectedSchedule", selectedSchedule);
         model.addAttribute("currentStep", 4);
-        // Add an empty bookingRequest object to avoid null pointer on first load
         if (!model.containsAttribute("bookingRequest")) {
             model.addAttribute("bookingRequest", new BookingRequestDTO());
         }
@@ -331,14 +348,27 @@ public class CashierController {
     @PostMapping("/confirm-booking")
     public String confirmBooking(BookingRequestDTO bookingRequest, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         try {
-            BookingResultDTO result = bookingService.createBooking(bookingRequest);
 
-            model.addAttribute("bookingResult", result);
-            session.setAttribute("bookingResult", result);
+            if ("bank".equalsIgnoreCase(bookingRequest.getPaymentMethod())) {
+                bookingRequest.setPaymentMethod(PaymentMethod.BANK_TRANSFER.name());
+                InvoiceDTO invoiceDto = bookingService.initiateBooking(bookingRequest);
+                if (invoiceDto == null) {
+                    redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi khởi tạo hoá đơn. Vui lòng thử lại.");
+                    return "redirect:/cashier/back-to-seats";
+                }
+                model.addAttribute("invoiceDto", invoiceDto);
+                model.addAttribute("sepayBank", sepayBank);
+                model.addAttribute("sepayAccount", sepayAccount);
 
-            model.addAttribute("currentStep", 5);
+                return "index";
+            } else {
+                BookingResultDTO result = bookingService.createBooking(bookingRequest);
+                model.addAttribute("bookingResult", result);
+                session.setAttribute("bookingResult", result);
+                model.addAttribute("currentStep", 5);
 
-            return "cashier/cashier-booking";
+                return "cashier/cashier-booking";
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -394,6 +424,27 @@ public class CashierController {
         }
     }
 
+    @PostMapping("/process-payment")
+    public ModelAndView processPayment(BookingRequestDTO bookingRequest) {
+        if (PaymentMethod.BANK_TRANSFER.name().equals(bookingRequest.getPaymentMethod())) {
+            InvoiceDTO invoiceDto = bookingService.initiateBooking(bookingRequest);
+            ModelAndView mav = new ModelAndView("payment-qr");
+            mav.addObject("invoiceDto", invoiceDto);
+            mav.addObject("sepayBank", sepayBank);
+            mav.addObject("sepayAccount", sepayAccount);
+            return mav;
+        }        return new ModelAndView("redirect:/cashier");
+    }
+
+    @GetMapping("/booking-success/{invoiceId}")
+    public ModelAndView showSuccessPage(@PathVariable Integer invoiceId) {
+        BookingResultDTO result = bookingService.getBookingResult(invoiceId);
+        ModelAndView mav = new ModelAndView("cashier-booking");
+        mav.addObject("currentStep", 5);
+        mav.addObject("bookingResult", result);
+        return mav;
+    }
+
     public static String normalizeSearchParam(String param) {
         if (param == null) return null;
         param = param.trim();
@@ -404,5 +455,28 @@ public class CashierController {
         session.removeAttribute("selectedMovie");
         session.removeAttribute("selectedSchedule");
         session.removeAttribute("selectedSeatIds");
+    }
+
+    // Dán phương thức này vào bên trong file CashierController.java
+
+    @PostMapping("/check-payment-status")
+    @ResponseBody // Annotation này RẤT QUAN TRỌNG, để đảm bảo trả về dữ liệu JSON
+    public Map<String, String> checkPaymentStatus(@RequestParam("order_id") Integer orderId) {
+        Map<String, String> response = new HashMap<>();
+        try {
+            // Tìm hóa đơn trong database theo ID được gửi lên
+            Invoice invoice = invoiceRepository.findById(orderId)
+                    .orElseThrow(() -> new IllegalArgumentException("Invalid Invoice ID"));
+
+            // Lấy trạng thái của hóa đơn (ví dụ: Unpaid, Booked) và đưa vào response
+            response.put("payment_status", invoice.getStatus().name());
+
+        } catch (Exception e) {
+            // Nếu có lỗi (ví dụ không tìm thấy hóa đơn), mặc định là chưa thanh toán
+            response.put("payment_status", "Unpaid");
+        }
+        // Trả về đối tượng Map, Spring sẽ tự động chuyển nó thành JSON
+        // Ví dụ: {"payment_status": "Booked"}
+        return response;
     }
 }
