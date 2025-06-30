@@ -1,16 +1,12 @@
 package com.bluebear.cinemax.entity;
 
-<<<<<<< HEAD
-=======
 import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import com.bluebear.cinemax.enumtype.PaymentMethod;
->>>>>>> e7c59d5 (Hoàn tất merge và cập nhật các file cần thiết)
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import com.bluebear.cinemax.enumtype.InvoiceStatus;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -59,9 +55,6 @@ public class Invoice {
 
     @Column(name = "GuestEmail", nullable = true)
     private String guestEmail;
-<<<<<<< HEAD
-}
-=======
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method", length = 20)
@@ -70,4 +63,3 @@ public class Invoice {
     @Column(columnDefinition = "TEXT")
     private String bookingDetails;
 }
->>>>>>> e7c59d5 (Hoàn tất merge và cập nhật các file cần thiết)

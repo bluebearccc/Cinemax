@@ -1,9 +1,4 @@
-<<<<<<< HEAD:src/main/java/com/bluebear/cinemax/service/booking/BookingService.java
 package com.bluebear.cinemax.service.booking;
-=======
-// src/main/java/com/bluebear/cinemax/service/BookingService.java
-package com.bluebear.cinemax.service;
->>>>>>> e7c59d5 (Hoàn tất merge và cập nhật các file cần thiết):src/main/java/com/bluebear/cinemax/service/BookingService.java
 
 import com.bluebear.cinemax.dto.BookingRequestDTO;
 import com.bluebear.cinemax.dto.BookingResultDTO;
@@ -39,8 +34,7 @@ public class BookingService {
     private final TheaterStockRepository theaterStockRepository;
     private final PromotionRepository promotionRepository;
     private final ScheduleRepository scheduleRepository;
-<<<<<<< HEAD:src/main/java/com/bluebear/cinemax/service/booking/BookingService.java
-=======
+
     private final TransactionRepository transactionRepository;
 
     @Transactional
@@ -86,7 +80,7 @@ public class BookingService {
             Invoice savedInvoice = invoiceRepository.save(invoice);
 
             return InvoiceDTO.builder()
-                    .id(savedInvoice.getInvoiceID())
+                    .invoiceID(savedInvoice.getInvoiceID())
                     .totalPrice(savedInvoice.getTotalPrice())
                     .build();
         } catch (Exception e) {
@@ -238,7 +232,6 @@ public class BookingService {
 
         return buildBookingResult(invoice, schedule, seats, foodItems, totalTicketPrice, totalFoodPrice);
     }
->>>>>>> e7c59d5 (Hoàn tất merge và cập nhật các file cần thiết):src/main/java/com/bluebear/cinemax/service/BookingService.java
 
     @Transactional
     public BookingResultDTO createBooking(BookingRequestDTO request) {

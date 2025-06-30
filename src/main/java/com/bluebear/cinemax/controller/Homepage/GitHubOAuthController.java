@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.controller;
+package com.bluebear.cinemax.controller.Homepage;
 
 import com.bluebear.cinemax.dto.AccountDTO;
 import com.bluebear.cinemax.dto.CustomerDTO;

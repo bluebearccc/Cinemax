@@ -1,8 +1,7 @@
-// src/main/java/com/bluebear/cinemax/controller/WebhookController.java
-package com.bluebear.cinemax.controller;
+package com.bluebear.cinemax.controller.cashier;
 
 import com.bluebear.cinemax.dto.SepayWebhookDTO;
-import com.bluebear.cinemax.service.BookingService;
+import com.bluebear.cinemax.service.booking.BookingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
