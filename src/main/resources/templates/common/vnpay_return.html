@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Kết quả thanh toán VNPAY</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/vnpay.css}">
+</head>
+<body class="container mt-5">
+<h2 class="mb-4 text-primary">Kết quả thanh toán VNPAY</h2>
+
+<div class="alert" th:classappend="${responseCode} == '00' ? 'alert-success' : 'alert-danger'">
+    <strong th:text="${message}">[Thông báo]</strong>
+</div>
+
+<table class="table table-bordered">
+    <tbody>
+    <tr>
+        <th>Mã hóa đơn</th>
+        <td th:text="${invoiceId}">[Invoice ID]</td>
+    </tr>
+    <tr>
+        <th>Số tiền</th>
+        <td th:text="${amount} + ' VND'">[Amount]</td>
+    </tr>
+    <tr>
+        <th>Mã phản hồi</th>
+        <td th:text="${responseCode ?: 'N/A'}">[Response Code]</td>
+    </tr>
+    <tr>
+        <th>Trạng thái giao dịch</th>
+        <td th:text="${transactionStatus}">[Transaction Status]</td>
+    </tr>
+    <tr>
+        <th>Ngân hàng thanh toán</th>
+        <td th:text="${bankCode}">[Bank Code]</td>
+    </tr>
+    </tbody>
+</table>
+
+<a href="/" class="btn btn-primary mt-3">Quay lại trang chủ</a>
+</body>
+</html>
+

@@ -1,60 +1,48 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Employee_Status;
+import com.bluebear.cinemax.enumtype.Role;
 import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
 
 @Entity
+@Table(name = "Employee")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Employee {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    private int id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "EmployeeID")
+    private Integer id;
 
-    @Column(name = "first_name")
-    private String first_name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Position", nullable = false, length = 50)
+    private Role position;
 
-    @Column(name = "last_name")
-    private String last_name;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status", nullable = false, length = 20)
+    private Employee_Status status;
 
-    @Column(name = "email")
-    private String email;
+    @OneToOne
+    @JoinColumn(name = "AccountID", nullable = false)
+    private Account account;
 
-    public Employee() {
-    }
+    @ManyToOne
+    @JoinColumn(name = "TheaterID", nullable = false)
+    private Theater theater;
 
-    public Employee(String first_name, String last_name, String email) {
-        this.first_name = first_name;
-        this.last_name = last_name;
-        this.email = email;
-    }
+    @ManyToOne
+    @JoinColumn(name = "AdminID")
+    private Employee admin;
 
-    public int getId() {
-        return id;
-    }
+    @Column(name = "FullName", nullable = false, length = 100)
+    private String fullName;
 
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public String getFirst_name() {
-        return first_name;
-    }
-
-    public void setFirst_name(String first_name) {
-        this.first_name = first_name;
-    }
-
-    public String getLast_name() {
-        return last_name;
-    }
-
-    public void setLast_name(String last_name) {
-        this.last_name = last_name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Invoice> invoiceList;
 }
