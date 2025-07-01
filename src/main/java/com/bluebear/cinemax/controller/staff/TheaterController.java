@@ -44,6 +44,7 @@ public class TheaterController {
         theModel.addAttribute("theater", theater);
         return "staff/theater_detail";
     }
+
     @GetMapping("/room_detail")
     public String roomDetail(@RequestParam("roomID") Integer roomID, Model theModel) {
         RoomDTO room = roomServiceImpl.getRoomById(roomID);
@@ -53,6 +54,7 @@ public class TheaterController {
         theModel.addAttribute("theater", theaterServiceImpl.getTheaterById(room.getTheaterID()));
         return "staff/room_detail";
     }
+
     @GetMapping("/filter_status")
     public String theaterList(@RequestParam(name = "status", required = false) String status, Model theModel) {
         // Gọi phương thức service đã được cập nhật với tham số status
@@ -62,6 +64,7 @@ public class TheaterController {
         theModel.addAttribute("currentStatus", status);
         return "staff/theater_list";
     }
+
     @GetMapping("/search")
     public String search(@RequestParam(name = "theaterName") String theaterName, Model theModel) {
         // Gọi phương thức findAllTheatersByName từ service với từ khóa tìm kiếm
@@ -73,32 +76,11 @@ public class TheaterController {
 
         return "staff/theater_list";
     }
+
     @GetMapping("/add_theater")
     public String showTheaterAddForm(Model theModel) {
         TheaterDTO theater = new TheaterDTO();
         theModel.addAttribute("theater", theater);
         return "staff/add_theater";
-    }
-    @PostMapping("/add_process")
-    public String addProcess(@ModelAttribute("theater") TheaterDTO theaterDTO,
-                             // --- THÊM required = false VÀO ĐÂY ---
-                             @RequestParam(name = "image", required = false) MultipartFile imageFile,
-                             RedirectAttributes redirectAttributes,
-                             Model model) {
-        try {
-            // Gọi service để thực hiện validation và lưu
-            theaterServiceImpl.addTheater(theaterDTO, imageFile);
-            // Nếu thành công, gửi thông báo thành công và chuyển hướng
-            redirectAttributes.addFlashAttribute("message", "Thêm rạp chiếu mới thành công!");
-            redirectAttributes.addFlashAttribute("messageType", "success");
-            return "redirect:/theater";
-        } catch (Exception e) {
-            // Nếu có lỗi validation hoặc lỗi khác
-            // Gửi thông báo lỗi và trả về form để người dùng sửa
-            model.addAttribute("message", e.getMessage());
-            model.addAttribute("messageType", "error");
-            model.addAttribute("theater", theaterDTO); // Gửi lại thông tin đã nhập để không phải gõ lại
-            return "staff/add_theater";
-        }
     }
 }

@@ -28,7 +28,7 @@ public class BookingService {
     private final SeatRepository seatRepository;
     private final TheaterStockRepository theaterStockRepository;
     private final PromotionRepository promotionRepository;
-    private final ScheduleRepository scheduleRepository; // Giả sử bạn đã có repository này
+    private final ScheduleRepository scheduleRepository;
 
     @Transactional
     public BookingResultDTO createBooking(BookingRequestDTO request) {

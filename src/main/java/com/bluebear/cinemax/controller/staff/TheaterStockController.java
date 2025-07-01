@@ -1,13 +1,8 @@
 package com.bluebear.cinemax.controller.staff;
 
 import com.bluebear.cinemax.dto.*;
-import com.bluebear.cinemax.entity.Detail_FD;
-import com.bluebear.cinemax.entity.Employee;
-import com.bluebear.cinemax.entity.Theater;
-import com.bluebear.cinemax.entity.TheaterStock;
 import com.bluebear.cinemax.enumtype.TheaterStock_Status;
 import com.bluebear.cinemax.service.staff.*;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -15,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.io.IOException;
@@ -23,12 +17,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import com.bluebear.cinemax.config.ExcelGeneratoForDetailItemSold;
+import java.util.Optional;
+
 @Controller
 @RequestMapping("/theater_stock")
 public class TheaterStockController {
@@ -49,38 +40,135 @@ public class TheaterStockController {
     @Autowired
     private DetailFD_ServiceImpl detailFD_ServiceImpl;
 
-    @GetMapping("/search")
-    public String searchTheaterStock(@RequestParam("itemName") String itemName, Model model) {
-        EmployeeDTO e = employeeService.getEmployeeById(2);
-        List<TheaterStockDTO> searchResults = theaterStockServiceImpl.findByItemName(itemName, e.getTheaterId() );
-        model.addAttribute("employee", e);
-        model.addAttribute("theaterStocks", searchResults);
-        return "staff/list";
-    }
-
     @PostMapping("/showFormForUpdate")
     public String showFormForUpdate(@RequestParam("id") Integer stockId, Model model) {
         TheaterStockDTO theaterStockDTO = theaterStockServiceImpl.findById(stockId);
         if (theaterStockDTO != null) {
-            EmployeeDTO e = employeeService.getEmployeeById(2);
-            model.addAttribute("employee", e);
+            List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters();
+
+            List<TheaterStockDTO> siblingItems = theaterStockServiceImpl.findAllByItemName(theaterStockDTO.getFoodName());
+            boolean isMultiTheaterItem = siblingItems.size() > 1;
+
             model.addAttribute("theaterStock", theaterStockDTO);
-            return "staff/add_edit";
+            model.addAttribute("allTheaters", allTheaters);
+            model.addAttribute("isMultiTheaterItem", isMultiTheaterItem); // Thêm cờ báo hiệu
+
+            return "staff/edit_stock";
         }
+        return "redirect:/theater_stock";
+    }
+    @PostMapping("/edit_stock")
+    public String processEditStock(@ModelAttribute("theaterStock") TheaterStockDTO stockInfo,
+                                   @RequestParam(value = "imageInput", required = false) MultipartFile newImage,
+                                   RedirectAttributes redirectAttributes) {
+        try {
+            stockInfo.setNewImageFile(newImage);
+
+            theaterStockServiceImpl.updateItemAcrossAllTheaters(stockInfo);
+
+            redirectAttributes.addFlashAttribute("message", "Item updated successfully across all relevant theaters.");
+        } catch (IllegalArgumentException e) {
+            redirectAttributes.addFlashAttribute("error", e.getMessage());
+            return "redirect:/theater_stock/edit/" + stockInfo.getTheaterStockId();
+        } catch (IOException e) {
+            redirectAttributes.addFlashAttribute("error", "Could not save new image.");
+            return "redirect:/theater_stock/edit/" + stockInfo.getTheaterStockId();
+        }
+
         return "redirect:/theater_stock";
     }
 
     @GetMapping("/add_stock")
     public String showForm(Model theModel) {
+        EmployeeDTO e = employeeService.getEmployeeById(2);
         boolean isAdd = true;
         List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters();
         theModel.addAttribute("allTheaters", allTheaters);
-        EmployeeDTO e = employeeService.getEmployeeById(2);
         theModel.addAttribute("employee", e);
         theModel.addAttribute("theaterStock", new TheaterStockDTO());
         theModel.addAttribute("add", isAdd);
-        return "staff/add_edit";
+        return "staff/add_stock";
     }
+
+
+    @PostMapping("/add_stock")
+    public String processAddStock(@ModelAttribute("theaterStock") TheaterStockDTO stockInfo,
+                                  @RequestParam(value = "imageInput", required = false) MultipartFile img,
+                                  @RequestParam("status") TheaterStock_Status status,
+                                  @RequestParam("theaterIds") List<Integer> theaterIds,
+                                  RedirectAttributes redirectAttributes) {
+
+        if (theaterIds == null || theaterIds.isEmpty()) {
+            redirectAttributes.addFlashAttribute("error", "Please select at least one theater.");
+            return "redirect:/theater_stock/add_stock";
+        }
+
+        Optional<TheaterStockDTO> existingItemOpt = theaterStockServiceImpl.findFirstByItemName(stockInfo.getFoodName());
+
+        if (existingItemOpt.isPresent()) {
+            TheaterStockDTO existingItem = existingItemOpt.get();
+            // Nếu sản phẩm đã tồn tại ở nơi khác, kiểm tra xem giá có khớp không
+            if (!stockInfo.getUnitPrice().equals(existingItem.getUnitPrice())) {
+                String errorMessage = String.format(
+                        "Item '%s' already exists with a price of %.2f. Please use the same price.",
+                        existingItem.getFoodName(),
+                        existingItem.getUnitPrice()
+                );
+                redirectAttributes.addFlashAttribute("error", errorMessage);
+                return "redirect:/theater_stock/add_stock";
+            }
+
+            // Nếu giá đã khớp, tự động sử dụng lại hình ảnh đã có nếu người dùng không upload ảnh mới
+            if (img == null || img.isEmpty()) {
+                stockInfo.setImage(existingItem.getImage());
+            }
+        }
+
+
+        // --- BƯỚC B: KIỂM TRA TRÙNG LẶP TRONG CÁC RẠP ĐƯỢC CHỌN ---
+        // Logic này vẫn cần thiết để tránh thêm sản phẩm vào rạp đã có nó
+        for (Integer theaterId : theaterIds) {
+            if (theaterStockServiceImpl.itemExistsInTheater(stockInfo.getFoodName(), theaterId)) {
+                TheaterDTO existingTheater = theaterServiceImpl.getTheaterById(theaterId);
+                String errorMessage = String.format("Item '%s' already exists in theater '%s'.",
+                        stockInfo.getFoodName(), existingTheater.getTheaterName());
+                redirectAttributes.addFlashAttribute("error", errorMessage);
+                return "redirect:/theater_stock/add_stock";
+            }
+        }
+
+        if (img != null && !img.isEmpty()) {
+            try {
+                String savedImagePath = theaterStockServiceImpl.saveImage(img);
+                stockInfo.setImage("/uploads/images/" + savedImagePath);
+            } catch (IOException e) {
+                redirectAttributes.addFlashAttribute("error", "Could not save image file.");
+                return "redirect:/theater_stock/add_stock";
+            }
+        }
+
+        // Nếu sản phẩm hoàn toàn mới và người dùng không upload ảnh, cần báo lỗi
+        if (stockInfo.getImage() == null || stockInfo.getImage().isEmpty()){
+            redirectAttributes.addFlashAttribute("error", "Please upload an image for the new item.");
+            return "redirect:/theater_stock/add_stock";
+        }
+
+        stockInfo.setStatus(String.valueOf(status));
+
+        // Vòng lặp để lưu
+        for (Integer theaterId : theaterIds) {
+            TheaterDTO theater = theaterServiceImpl.getTheaterById(theaterId);
+            if (theater != null) {
+                stockInfo.setTheater(theater);
+                theaterStockServiceImpl.saveTheaterStock(stockInfo);
+            }
+        }
+
+        redirectAttributes.addFlashAttribute("message", "Item(s) added successfully!");
+        return "redirect:/theater_stock";
+    }
+
+
 
     @PostMapping("/delete")
     public String delete(@RequestParam("id") Integer stockId, Model theModel,

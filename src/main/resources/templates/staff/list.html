@@ -75,6 +75,7 @@
                 <tr>
                     <th>NAME</th>
                     <th>Price</th>
+                    <th>Theater</th>
                     <th>Quantity in Stock</th>
                     <th>Image</th>
                     <th>STATUS</th>
@@ -86,6 +87,7 @@
                 <tr th:each="stock : ${theaterStocks}">
                     <td th:text="${stock.getFoodName()}"></td>
                     <td th:text="${#numbers.formatCurrency(stock.getUnitPrice())}"></td>
+                    <td th:text="${stock.theater.theaterName}"></td>
                     <td th:text="${stock.getQuantity()}"></td>
                     <td>
                         <img th:src="${stock.image}" style="width: 132px; height: 86px;" alt="Product Image">

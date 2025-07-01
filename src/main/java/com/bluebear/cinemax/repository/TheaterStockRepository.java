@@ -35,5 +35,8 @@ public interface TheaterStockRepository extends JpaRepository<TheaterStock, Inte
 
     Page<TheaterStock> findByTheater_TheaterID(Integer theaterId, Pageable pageable);
     Page<TheaterStock> findByItemNameContainingIgnoreCase(String itemName, Pageable pageable);
+    boolean existsByItemNameIgnoreCaseAndTheater_TheaterID(String itemName, Integer theaterId);
+    Optional<TheaterStock>  findFirstByItemNameIgnoreCase(String itemName);
+    List<TheaterStock> findByItemNameIgnoreCase(String itemName);
 
 }
