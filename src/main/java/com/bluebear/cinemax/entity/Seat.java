@@ -1,15 +1,15 @@
 package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "Seat")
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

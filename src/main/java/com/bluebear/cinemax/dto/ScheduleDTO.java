@@ -22,26 +22,26 @@ public class ScheduleDTO {
     private MovieDTO movie;
     private RoomDTO room;
 
-    public ScheduleDTO(Schedule schedule) {
-        this.scheduleID = schedule.getScheduleId();
-        this.startTime = schedule.getStartTime();
-        this.endTime = schedule.getEndTime();
-        this.movieID = schedule.getMovie().getMovieID();
-        this.roomID = schedule.getRoom().getRoomID();
-        this.status = schedule.getStatus();
-
-
-        if (schedule.getMovie() != null) {
-            this.movie = new MovieDTO();
-            this.movie.setMovieID(schedule.getMovie().getMovieID());
-            this.movie.setMovieName(schedule.getMovie().getMovieName());
-        }
-
-        if (schedule.getRoom() != null) {
-            this.room = new RoomDTO();
-            this.room.setRoomID(schedule.getRoom().getRoomID());
-            this.room.setName(schedule.getRoom().getName());
-        }
-    }
+//    public ScheduleDTO(Schedule schedule) {
+//        this.scheduleID = schedule.getScheduleId();
+//        this.startTime = schedule.getStartTime();
+//        this.endTime = schedule.getEndTime();
+//        this.movieID = schedule.getMovie().getMovieID();
+//        this.roomID = schedule.getRoom().getRoomID();
+//        this.status = schedule.getStatus();
+//
+//
+//        if (schedule.getMovie() != null) {
+//            this.movie = new MovieDTO();
+//            this.movie.setMovieID(schedule.getMovie().getMovieID());
+//            this.movie.setMovieName(schedule.getMovie().getMovieName());
+//        }
+//
+//        if (schedule.getRoom() != null) {
+//            this.room = new RoomDTO();
+//            this.room.setRoomID(schedule.getRoom().getRoomID());
+//            this.room.setName(schedule.getRoom().getName());
+//        }
+//    }
 
 }

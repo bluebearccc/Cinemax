@@ -1,8 +1,8 @@
 package com.bluebear.cinemax.controller;
 import com.bluebear.cinemax.dto.*;
-import com.bluebear.cinemax.enumtype.Theater_Status;
+
 import com.bluebear.cinemax.service.EmailService;
-import com.bluebear.cinemax.entity.*;
+
 import com.bluebear.cinemax.repository.*;
 import com.bluebear.cinemax.service.BookingService;
 import com.bluebear.cinemax.service.VnpayService;
@@ -84,7 +84,7 @@ public class BookingController {
             Double totalAmount = bookingService.calculateTotalAmount(scheduleId, seatIds, promotionCode);
 
             // Chuẩn bị dữ liệu cho bước 2
-            List<TheaterStockDTO> combos = theaterStockRepo.findByStatus(Theater_Status.Active).stream().map(TheaterStockDTO::new).collect(Collectors.toList());
+            List<TheaterStockDTO> combos = bookingService.getAvailableCombos();
 
             model.addAttribute("scheduleId", scheduleId);
             model.addAttribute("roomId", roomId);
@@ -111,40 +111,19 @@ public class BookingController {
                                      Model model,
                                      HttpSession session) {
         try {
-            Map<Integer, Integer> comboQuantities = extractComboQuantities(allParams);
-
-            ScheduleDTO schedule = new ScheduleDTO(scheduleRepository.findById(scheduleId).orElseThrow());
-            RoomDTO room = new RoomDTO(roomRepository.findById(roomId).orElseThrow());
-
-            List<SeatDTO> selectedSeats = seatRepository.findAllById(seatIds)
-                    .stream().map(SeatDTO::new).toList();
-
-            List<TheaterStockDTO> combos = theaterStockRepo.findAllById(comboQuantities.keySet())
-                    .stream().map(TheaterStockDTO::new).toList();
-
-            double totalSeatPrice = selectedSeats.stream().mapToDouble(SeatDTO::getUnitPrice).sum();
-
-            double totalComboPrice = 0;
-            for (TheaterStockDTO combo : combos) {
-                int qty = comboQuantities.get(combo.getTheaterStockID());
-                totalComboPrice += combo.getUnitPrice().doubleValue() * qty;
-            }
-
-            double total = totalSeatPrice + totalComboPrice;
-            PromotionDTO promo = promotionRepository.findByPromotionCode(promotionCode)
-                    .map(PromotionDTO::new).orElse(null);
-            double discount = (promo != null && promo.isValid()) ? promo.getDiscount() / 100.0 : 0.0;
-            double finalPrice = total * (1 - discount);
+            Map<Integer, Integer> comboQuantities = bookingService.extractComboQuantities(allParams);
+            BookingPreviewDTO previewData = bookingService.prepareBookingPreview(scheduleId, roomId, seatIds, promotionCode, comboQuantities);
 
 
-            model.addAttribute("schedule", schedule);
-            model.addAttribute("room", room);
-            model.addAttribute("selectedSeats", selectedSeats);
-            model.addAttribute("comboQuantities", comboQuantities);
-            model.addAttribute("comboList", combos);
-            model.addAttribute("totalPrice", total);
-            model.addAttribute("finalPrice", finalPrice);
-            model.addAttribute("promotion", promo);
+
+            model.addAttribute("schedule", previewData.getSchedule());
+            model.addAttribute("room", previewData.getRoom());
+            model.addAttribute("selectedSeats", previewData.getSelectedSeats());
+            model.addAttribute("comboQuantities", previewData.getComboQuantities());
+            model.addAttribute("comboList", previewData.getCombos());
+            model.addAttribute("totalPrice", previewData.getTotalPrice());
+            model.addAttribute("finalPrice", previewData.getFinalPrice());
+            model.addAttribute("promotion", previewData.getPromotion());
 
             return "common/preview";
         } catch (IllegalStateException e) {
@@ -204,21 +183,5 @@ public class BookingController {
                                               @RequestParam("totalAmount") Double totalAmount) {
         return bookingService.applyPromotionCode(code, totalAmount);
     }
-    private Map<Integer, Integer> extractComboQuantities(Map<String, String> allParams) {
-        Map<Integer, Integer> result = new HashMap<>();
-        for (Map.Entry<String, String> entry : allParams.entrySet()) {
-            String key = entry.getKey();
-            if (key.startsWith("comboQuantities[")) {
-                String idStr = key.substring(16, key.length() - 1);
-                try {
-                    Integer comboId = Integer.parseInt(idStr);
-                    Integer quantity = Integer.parseInt(entry.getValue());
-                    if (quantity > 0) {
-                        result.put(comboId, quantity);
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-        return result;
-    }
+
 }

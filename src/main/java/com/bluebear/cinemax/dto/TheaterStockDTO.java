@@ -19,15 +19,15 @@ public class TheaterStockDTO {
     private Theater_Status status;
 
     // Constructors
-    public TheaterStockDTO(TheaterStock stock) {
-        this.theaterStockID = stock.getTheaterStockID();
-        this.theater = stock.getTheater();
-        this.foodName = stock.getFoodName();
-        this.quantity = stock.getQuantity();
-        this.unitPrice = stock.getUnitPrice()*1000;
-        this.image = stock.getImage();
-        this.status = stock.getStatus();
-    }
+//    public TheaterStockDTO(TheaterStock stock) {
+//        this.theaterStockID = stock.getTheaterStockID();
+//        this.theater = stock.getTheater();
+//        this.foodName = stock.getFoodName();
+//        this.quantity = stock.getQuantity();
+//        this.unitPrice = stock.getUnitPrice()*1000;
+//        this.image = stock.getImage();
+//        this.status = stock.getStatus();
+//    }
 
 
 
