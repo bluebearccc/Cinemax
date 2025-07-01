@@ -201,6 +201,27 @@
             text-decoration: none;
         }
 
+        .btn-danger {
+            background: var(--danger-red);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-danger:hover {
+            background: #d33b2c;
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
         .detail-grid {
             display: grid;
             grid-template-columns: 2fr 1fr;
@@ -250,8 +271,11 @@
         .detail-label {
             font-size: 0.875rem;
             color: var(--text-secondary);
-            margin-bottom: 4px;
+            margin-bottom: 8px;
             font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .detail-value {
@@ -265,94 +289,115 @@
             font-weight: 700;
             color: var(--primary-blue);
             background: rgba(66, 133, 244, 0.1);
-            padding: 8px 16px;
+            padding: 12px 20px;
             border-radius: 8px;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
             text-align: center;
             border: 2px dashed var(--primary-blue);
+            letter-spacing: 2px;
+            text-transform: uppercase;
         }
 
         .discount-value {
-            font-size: 2rem;
+            font-size: 3rem;
             font-weight: 700;
             color: var(--success-green);
             text-align: center;
+            margin: 10px 0;
         }
 
         .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-size: 0.875rem;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
             font-weight: 600;
             text-align: center;
             display: inline-block;
             width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
-        .status-active {
+        .status-available {
             background: rgba(52, 168, 83, 0.2);
             color: var(--success-green);
-        }
-
-        .status-inactive {
-            background: rgba(234, 67, 53, 0.2);
-            color: var(--danger-red);
+            border: 2px solid var(--success-green);
         }
 
         .status-expired {
-            background: rgba(128, 128, 128, 0.2);
-            color: var(--text-muted);
+            background: rgba(234, 67, 53, 0.2);
+            color: var(--danger-red);
+            border: 2px solid var(--danger-red);
         }
 
         .quantity-display {
             text-align: center;
-            font-size: 1.5rem;
+            font-size: 2rem;
             font-weight: 700;
             color: var(--warning-orange);
+            margin: 10px 0;
         }
 
         .date-value {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px;
+            font-family: 'Courier New', monospace;
+        }
+
+        .date-main {
+            font-size: 1.2rem;
+            font-weight: 700;
             color: var(--text-primary);
-            font-weight: 500;
+            margin-bottom: 4px;
+        }
+
+        .date-time {
+            font-size: 1rem;
+            color: var(--primary-blue);
+            font-weight: 600;
         }
 
         .validity-indicator {
             background: var(--card-bg);
-            border: 1px solid var(--border-color);
+            border: 2px solid var(--border-color);
             border-radius: 12px;
-            padding: 20px;
+            padding: 24px;
             text-align: center;
             margin-top: 20px;
+            transition: all 0.3s ease;
         }
 
-        .validity-active {
+        .validity-available {
             border-color: var(--success-green);
             background: rgba(52, 168, 83, 0.05);
+            box-shadow: 0 0 20px rgba(52, 168, 83, 0.1);
         }
 
         .validity-expired {
             border-color: var(--danger-red);
             background: rgba(234, 67, 53, 0.05);
-        }
-
-        .validity-inactive {
-            border-color: var(--text-muted);
-            background: rgba(128, 128, 128, 0.05);
+            box-shadow: 0 0 20px rgba(234, 67, 53, 0.1);
         }
 
         .validity-icon {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 3rem;
+            margin-bottom: 12px;
         }
 
         .validity-text {
-            font-weight: 600;
-            margin-bottom: 4px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
         }
 
         .validity-desc {
-            font-size: 0.875rem;
+            font-size: 0.9rem;
             color: var(--text-secondary);
+            margin-bottom: 16px;
         }
 
         .alert {
@@ -370,6 +415,134 @@
             background: rgba(234, 67, 53, 0.1);
             border: 1px solid rgba(234, 67, 53, 0.3);
             color: var(--danger-red);
+        }
+
+        .usage-stats {
+            background: var(--darker-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .usage-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .usage-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .usage-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .usage-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-top: 8px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--success-green), var(--primary-blue));
+            transition: width 0.3s ease;
+        }
+
+        .info-box {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .info-box-title {
+            color: var(--primary-blue);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .voucher-preview {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voucher-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.1) 10px,
+                    rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .voucher-preview-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .voucher-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .voucher-code-preview {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .voucher-discount-preview {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         @media (max-width: 768px) {
@@ -394,6 +567,15 @@
 
             .action-buttons {
                 flex-direction: column;
+            }
+
+            .voucher-code {
+                font-size: 1.2rem;
+                letter-spacing: 1px;
+            }
+
+            .discount-value {
+                font-size: 2.5rem;
             }
         }
 
@@ -433,7 +615,6 @@
         <a class="nav-link" href="/admin/actors">
             <i class="fas fa-users"></i>Actors
         </a>
-        </a>
         <a class="nav-link active" href="/admin/vouchers">
             <i class="fas fa-ticket-alt"></i>Vouchers
         </a>
@@ -458,15 +639,15 @@
     <!-- Header -->
     <div class="header-section fade-in">
         <div class="header-content">
-            <h2>Voucher Details</h2>
+            <h2>Chi Tiết Voucher</h2>
             <p class="breadcrumb-text">Dashboard > Vouchers > <span th:text="${voucher.promotionCode}">SAVE20</span></p>
         </div>
         <div class="action-buttons">
             <a href="/admin/vouchers" class="btn-secondary">
-                <i class="fas fa-arrow-left"></i>Back to List
+                <i class="fas fa-arrow-left"></i>Quay Lại
             </a>
             <a th:href="@{/admin/vouchers/edit/{id}(id=${voucher.promotionId})}" class="btn-warning">
-                <i class="fas fa-edit"></i>Edit Voucher
+                <i class="fas fa-edit"></i>Chỉnh Sửa
             </a>
         </div>
     </div>
@@ -477,39 +658,89 @@
         <div class="detail-card">
             <h3 class="card-title">
                 <i class="fas fa-ticket-alt"></i>
-                Voucher Information
+                Thông Tin Voucher
             </h3>
 
             <div class="detail-item">
-                <div class="detail-label">Promotion Code</div>
+                <div class="detail-label">
+                    <i class="fas fa-barcode"></i>
+                    Mã Khuyến Mãi
+                </div>
                 <div class="voucher-code" th:text="${voucher.promotionCode}">SAVE20</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Discount Percentage</div>
+                <div class="detail-label">
+                    <i class="fas fa-percent"></i>
+                    Phần Trăm Giảm Giá
+                </div>
                 <div class="discount-value" th:text="${voucher.formattedDiscount}">20%</div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Start Date & Time</div>
-                <div class="date-value" th:text="${voucher.formattedStartTime}">Jan 15, 2024 10:00</div>
+                <div class="detail-label">
+                    <i class="fas fa-calendar-alt"></i>
+                    Ngày Bắt Đầu
+                </div>
+                <div class="date-value">
+                    <div class="date-main" th:text="${voucher.formattedStartDate}">15/01/2024</div>
+                    <div class="date-time" th:text="${'Lúc ' + voucher.formattedStartTimeOnly}">Lúc 10:00</div>
+                </div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">End Date & Time</div>
-                <div class="date-value" th:text="${voucher.formattedEndTime}">Apr 15, 2024 23:59</div>
+                <div class="detail-label">
+                    <i class="fas fa-calendar-times"></i>
+                    Ngày Kết Thúc
+                </div>
+                <div class="date-value">
+                    <div class="date-main" th:text="${voucher.formattedEndDate}">15/04/2024</div>
+                    <div class="date-time" th:text="${'Lúc ' + voucher.formattedEndTimeOnly}">Lúc 23:59</div>
+                </div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Available Quantity</div>
+                <div class="detail-label">
+                    <i class="fas fa-hashtag"></i>
+                    Số Lượng Còn Lại
+                </div>
                 <div class="quantity-display" th:text="${voucher.quantity}">100</div>
+                <div class="progress-bar">
+                    <div class="progress-fill" th:style="'width: ' + ${voucher.quantity > 0 ? (voucher.quantity * 100 / 100) : 0} + '%'"></div>
+                </div>
             </div>
 
             <div class="detail-item">
-                <div class="detail-label">Status</div>
-                <div th:class="${voucher.status == 'Active'} ? 'status-badge status-active' :
-                               (${voucher.expired} ? 'status-badge status-expired' : 'status-badge status-inactive')"
-                     th:text="${voucher.expired} ? 'Expired' : ${voucher.status}">Active</div>
+                <div class="detail-label">
+                    <i class="fas fa-toggle-on"></i>
+                    Trạng Thái
+                </div>
+                <div th:class="${voucher.status == 'Available'} ? 'status-badge status-available' : 'status-badge status-expired'"
+                     th:text="${voucher.status == 'Available'} ? 'Có Sẵn' : 'Hết Hạn'">Có Sẵn</div>
+            </div>
+
+            <!-- Usage Statistics -->
+            <div class="usage-stats">
+                <h5 style="color: var(--text-primary); margin-bottom: 12px;">
+                    <i class="fas fa-chart-bar"></i>
+                    Thống Kê Sử Dụng
+                </h5>
+                <div class="usage-item">
+                    <span class="usage-label">ID Voucher:</span>
+                    <span class="usage-value" th:text="${'#' + voucher.promotionId}">#001</span>
+                </div>
+                <div class="usage-item">
+                    <span class="usage-label">Thời Gian Còn Lại:</span>
+                    <span class="usage-value" th:if="${voucher.active}">Đang Hoạt Động</span>
+                    <span class="usage-value" th:if="${voucher.expired}" style="color: var(--danger-red);">Đã Hết Hạn</span>
+                    <span class="usage-value" th:if="${!voucher.active and !voucher.expired}" style="color: var(--warning-orange);">Chưa Bắt Đầu</span>
+                </div>
+                <div class="usage-item" th:if="${voucher.quantity != null}">
+                    <span class="usage-label">Tình Trạng:</span>
+                    <span class="usage-value" th:if="${voucher.quantity > 0}" style="color: var(--success-green);"
+                          th:text="${voucher.quantity + ' voucher còn lại'}">50 voucher còn lại</span>
+                    <span class="usage-value" th:if="${voucher.quantity == 0}" style="color: var(--danger-red);">Đã sử dụng hết</span>
+                </div>
             </div>
         </div>
 
@@ -517,59 +748,94 @@
         <div class="detail-card">
             <h3 class="card-title">
                 <i class="fas fa-info-circle"></i>
-                Validity Status
+                Trạng Thái Hiệu Lực
             </h3>
 
-            <div th:if="${voucher.active}" class="validity-indicator validity-active">
+            <!-- Validity Status for Available -->
+            <div th:if="${voucher.status == 'Available' and voucher.active}" class="validity-indicator validity-available">
                 <div class="validity-icon" style="color: var(--success-green);">
                     <i class="fas fa-check-circle"></i>
                 </div>
-                <div class="validity-text" style="color: var(--success-green);">Valid & Active</div>
-                <div class="validity-desc">This voucher is currently active and can be used</div>
+                <div class="validity-text" style="color: var(--success-green);">Có Sẵn & Hoạt Động</div>
+                <div class="validity-desc">Voucher này hiện có sẵn và có thể được sử dụng</div>
+                <div style="margin-top: 12px;">
+                    <span style="background: var(--success-green); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
+                        <i class="fas fa-thumbs-up"></i> Có Thể Sử Dụng
+                    </span>
+                </div>
             </div>
 
-            <div th:if="${voucher.expired}" class="validity-indicator validity-expired">
+            <!-- Validity Status for Expired -->
+            <div th:if="${voucher.status == 'Expired' or voucher.expired}" class="validity-indicator validity-expired">
                 <div class="validity-icon" style="color: var(--danger-red);">
                     <i class="fas fa-times-circle"></i>
                 </div>
-                <div class="validity-text" style="color: var(--danger-red);">Expired</div>
-                <div class="validity-desc">This voucher has expired and cannot be used</div>
+                <div class="validity-text" style="color: var(--danger-red);">Đã Hết Hạn</div>
+                <div class="validity-desc">Voucher này đã hết hạn và không thể sử dụng</div>
+                <div style="margin-top: 12px;">
+                    <span style="background: var(--danger-red); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
+                        <i class="fas fa-ban"></i> Không Thể Sử Dụng
+                    </span>
+                </div>
             </div>
 
-            <div th:if="${!voucher.active and !voucher.expired}" class="validity-indicator validity-inactive">
-                <div class="validity-icon" style="color: var(--text-muted);">
-                    <i class="fas fa-pause-circle"></i>
+            <!-- Validity Status for Available but not yet active -->
+            <div th:if="${voucher.status == 'Available' and !voucher.active and !voucher.expired}" class="validity-indicator validity-available">
+                <div class="validity-icon" style="color: var(--warning-orange);">
+                    <i class="fas fa-clock"></i>
                 </div>
-                <div class="validity-text" style="color: var(--text-muted);">Inactive</div>
-                <div class="validity-desc">This voucher is not currently active</div>
+                <div class="validity-text" style="color: var(--warning-orange);">Chưa Bắt Đầu</div>
+                <div class="validity-desc">Voucher này có sẵn nhưng chưa đến thời gian sử dụng</div>
+                <div style="margin-top: 12px;">
+                    <span style="background: var(--warning-orange); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
+                        <i class="fas fa-hourglass-half"></i> Chờ Kích Hoạt
+                    </span>
+                </div>
             </div>
 
-            <!-- Additional Info -->
-            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-                <div class="detail-item">
-                    <div class="detail-label">Voucher ID</div>
-                    <div class="detail-value" th:text="${voucher.promotionId}">#001</div>
+            <!-- Voucher Preview -->
+            <div class="voucher-preview">
+                <div class="voucher-preview-content">
+                    <div class="voucher-title">BlueBear Cinema</div>
+                    <div class="voucher-code-preview" th:text="${voucher.promotionCode}">SAVE20</div>
+                    <div class="voucher-discount-preview" th:text="${voucher.formattedDiscount}">20% OFF</div>
+                    <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">
+                        Áp dụng cho tất cả suất chiếu
+                    </div>
                 </div>
+            </div>
 
-                <div class="detail-item" th:if="${voucher.quantity != null and voucher.quantity == 0}">
-                    <div class="detail-label">Usage Status</div>
-                    <div class="detail-value" style="color: var(--danger-red);">All vouchers used</div>
+            <!-- Info Box -->
+            <div class="info-box">
+                <div class="info-box-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Hướng Dẫn Sử Dụng
                 </div>
-
-                <div class="detail-item" th:if="${voucher.quantity != null and voucher.quantity > 0}">
-                    <div class="detail-label">Remaining Uses</div>
-                    <div class="detail-value" th:text="${voucher.quantity} + ' remaining'">50 remaining</div>
+                <div class="info-box-content">
+                    • Nhập mã voucher khi thanh toán<br>
+                    • Giảm giá được áp dụng tự động<br>
+                    • Mỗi mã chỉ sử dụng được một lần<br>
+                    • Không áp dụng cùng với khuyến mãi khác
                 </div>
             </div>
 
             <!-- Quick Actions -->
             <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <h5 style="color: var(--text-primary); margin-bottom: 16px;">
+                    <i class="fas fa-bolt"></i>
+                    Thao Tác Nhanh
+                </h5>
                 <div class="d-grid gap-2">
-                    <button type="button" class="btn-primary w-100" th:onclick="|copyToClipboard('${voucher.promotionCode}')|">
-                        <i class="fas fa-copy"></i>Copy Voucher Code
+                    <button type="button" class="btn-primary w-100"
+                            th:data-voucher-code="${voucher.promotionCode}"
+                            onclick="copyToClipboard(this.getAttribute('data-voucher-code'))">
+                        <i class="fas fa-copy"></i>Sao Chép Mã Voucher
                     </button>
-                    <button type="button" class="btn-secondary w-100" th:onclick="|confirmDelete(${voucher.promotionId}, '${voucher.promotionCode}')|">
-                        <i class="fas fa-trash"></i>Delete Voucher
+                    <button type="button" class="btn-danger w-100"
+                            th:data-voucher-id="${voucher.promotionId}"
+                            th:data-voucher-code="${voucher.promotionCode}"
+                            onclick="confirmDelete(this.getAttribute('data-voucher-id'), this.getAttribute('data-voucher-code'))">
+                        <i class="fas fa-trash"></i>Xóa Voucher
                     </button>
                 </div>
             </div>
@@ -582,18 +848,87 @@
     <div class="modal-dialog">
         <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
             <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-                <h5 class="modal-title" style="color: var(--text-primary);">Confirm Delete</h5>
+                <h5 class="modal-title" style="color: var(--text-primary);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Xác Nhận Xóa
+                </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body" style="color: var(--text-primary);">
-                <p>Are you sure you want to delete voucher <strong id="deleteVoucherCode"></strong>?</p>
-                <p class="text-danger">This action cannot be undone.</p>
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-trash-alt" style="font-size: 3rem; color: var(--danger-red); margin-bottom: 16px;"></i>
+                    <h5>Bạn có chắc chắn muốn xóa voucher này?</h5>
+                </div>
+                <div style="background: var(--darker-bg); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <strong>Mã Voucher: <span id="deleteVoucherCode" style="color: var(--primary-blue);"></span></strong>
+                </div>
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác!
+                </p>
+                <ul style="color: var(--text-secondary); font-size: 0.9rem;">
+                    <li>Voucher sẽ bị xóa vĩnh viễn khỏi hệ thống</li>
+                    <li>Khách hàng sẽ không thể sử dụng mã này nữa</li>
+                    <li>Dữ liệu thống kê liên quan sẽ bị mất</li>
+                </ul>
             </div>
             <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>Hủy Bỏ
+                </button>
                 <form id="deleteForm" method="post" style="display: inline;">
-                    <button type="submit" class="btn btn-danger">Delete</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i>Xác Nhận Xóa
+                    </button>
                 </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Share Modal -->
+<div class="modal fade" id="shareModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" style="color: var(--text-primary);">
+                    <i class="fas fa-share-alt"></i>
+                    Chia Sẻ Voucher
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="color: var(--text-primary);">
+                <div class="text-center mb-3">
+                    <div class="voucher-preview" style="margin: 0;">
+                        <div class="voucher-preview-content">
+                            <div class="voucher-title">BlueBear Cinema</div>
+                            <div class="voucher-code-preview" th:text="${voucher.promotionCode}">SAVE20</div>
+                            <div class="voucher-discount-preview" th:text="${voucher.formattedDiscount}">20% OFF</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button class="btn btn-primary w-100" onclick="shareToFacebook()">
+                            <i class="fab fa-facebook"></i> Facebook
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-info w-100" onclick="shareToTwitter()">
+                            <i class="fab fa-twitter"></i> Twitter
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-success w-100" onclick="shareToWhatsApp()">
+                            <i class="fab fa-whatsapp"></i> WhatsApp
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-warning w-100" onclick="copyShareLink()">
+                            <i class="fas fa-link"></i> Copy Link
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -604,11 +939,11 @@
     <div id="copyToast" class="toast" role="alert">
         <div class="toast-header" style="background: var(--card-bg); border-bottom: 1px solid var(--border-color);">
             <i class="fas fa-check-circle text-success me-2"></i>
-            <strong class="me-auto" style="color: var(--text-primary);">Success</strong>
+            <strong class="me-auto" style="color: var(--text-primary);">Thành Công</strong>
             <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
         </div>
         <div class="toast-body" style="background: var(--card-bg); color: var(--text-primary);">
-            Voucher code copied to clipboard!
+            Đã sao chép mã voucher vào clipboard!
         </div>
     </div>
 </div>
@@ -647,6 +982,20 @@
             toast.show();
         }).catch(function(err) {
             console.error('Could not copy text: ', err);
+            // Fallback method
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+                toast.show();
+            } catch (err) {
+                console.error('Fallback: Could not copy text: ', err);
+            }
+            document.body.removeChild(textArea);
         });
     }
 

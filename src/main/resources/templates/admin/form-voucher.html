@@ -159,7 +159,7 @@
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 32px;
-            max-width: 800px;
+            max-width: 900px;
             margin: 0 auto;
         }
 
@@ -220,6 +220,23 @@
         .form-control.is-invalid {
             border-color: var(--danger-red);
             box-shadow: 0 0 0 0.2rem rgba(234, 67, 53, 0.25);
+        }
+
+        .date-time-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            align-items: end;
+        }
+
+        .date-input {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+        }
+
+        .time-input {
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
         }
 
         .form-select {
@@ -349,6 +366,80 @@
             color: var(--danger-red);
         }
 
+        .voucher-preview {
+            margin-top: 24px;
+            padding: 24px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voucher-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.1) 10px,
+                    rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .voucher-preview-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .voucher-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .voucher-code-preview {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .voucher-discount-preview {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .voucher-period-preview {
+            font-size: 0.9rem;
+            margin-top: 10px;
+            opacity: 0.9;
+        }
+
+        .voucher-quantity-preview {
+            font-size: 0.9rem;
+            margin-top: 5px;
+            opacity: 0.8;
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -372,6 +463,10 @@
             .col-md-6 {
                 flex: 0 0 100%;
                 max-width: 100%;
+            }
+
+            .date-time-group {
+                grid-template-columns: 1fr;
             }
 
             .btn-group {
@@ -415,7 +510,6 @@
         <a class="nav-link" href="/admin/actors">
             <i class="fas fa-users"></i>Actors
         </a>
-
         <a class="nav-link active" href="/admin/vouchers">
             <i class="fas fa-ticket-alt"></i>Vouchers
         </a>
@@ -440,11 +534,11 @@
     <!-- Header -->
     <div class="header-section fade-in">
         <div class="header-content">
-            <h2 th:text="${isEdit} ? 'Edit Voucher' : 'Add New Voucher'">Add New Voucher</h2>
-            <p class="breadcrumb-text">Dashboard > Vouchers > <span th:text="${isEdit} ? 'Edit' : 'Add'">Add</span></p>
+            <h2 th:text="${isEdit} ? 'Chỉnh Sửa Voucher' : 'Thêm Voucher Mới'">Thêm Voucher Mới</h2>
+            <p class="breadcrumb-text">Dashboard > Vouchers > <span th:text="${isEdit} ? 'Chỉnh Sửa' : 'Thêm Mới'">Thêm Mới</span></p>
         </div>
         <a href="/admin/vouchers" class="btn-secondary">
-            <i class="fas fa-arrow-left"></i>Back to List
+            <i class="fas fa-arrow-left"></i>Quay Lại
         </a>
     </div>
 
@@ -452,7 +546,7 @@
     <div class="form-container fade-in">
         <h3 class="form-title">
             <i th:class="${isEdit} ? 'fas fa-edit' : 'fas fa-plus'"></i>
-            <span th:text="${isEdit} ? 'Edit Voucher Information' : 'Create New Voucher'">Create New Voucher</span>
+            <span th:text="${isEdit} ? 'Chỉnh Sửa Thông Tin Voucher' : 'Tạo Voucher Mới'">Tạo Voucher Mới</span>
         </h3>
 
         <form th:action="${isEdit} ? @{/admin/vouchers/edit/{id}(id=${voucher.promotionId})} : @{/admin/vouchers/add}"
@@ -461,16 +555,16 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label required" for="promotionCode">Promotion Code</label>
+                        <label class="form-label required" for="promotionCode">Mã Khuyến Mãi</label>
                         <input type="text"
                                class="form-control"
                                id="promotionCode"
                                th:field="*{promotionCode}"
-                               placeholder="e.g., SAVE20, WELCOME10"
+                               placeholder="Ví dụ: SAVE20, WELCOME10"
                                maxlength="10"
                                required>
                         <div class="form-help">
-                            Maximum 10 characters. Must be unique.
+                            Tối đa 10 ký tự. Mã phải là duy nhất.
                         </div>
                         <div class="invalid-feedback" id="promotionCodeError"></div>
                     </div>
@@ -478,7 +572,7 @@
 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label required" for="discount">Discount Percentage</label>
+                        <label class="form-label required" for="discount">Phần Trăm Giảm Giá</label>
                         <div class="input-group">
                             <input type="number"
                                    class="form-control"
@@ -491,7 +585,7 @@
                             <span class="input-group-text">%</span>
                         </div>
                         <div class="form-help">
-                            Enter a value between 1% and 100%
+                            Nhập giá trị từ 1% đến 100%
                         </div>
                         <div class="invalid-feedback" id="discountError"></div>
                     </div>
@@ -501,31 +595,51 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label required" for="startTime">Start Date & Time</label>
-                        <input type="datetime-local"
-                               class="form-control"
-                               id="startTime"
-                               th:field="*{formattedStartTime}"
-                               required>
-                        <div class="form-help">
-                            When the voucher becomes active
+                        <label class="form-label required">Ngày & Giờ Bắt Đầu</label>
+                        <div class="date-time-group">
+                            <div>
+                                <input type="text"
+                                       class="form-control date-input"
+                                       id="startDate"
+                                       placeholder="dd/MM/yyyy"
+                                       maxlength="10">
+                                <div class="form-help">Để trống nếu không thay đổi</div>
+                            </div>
+                            <div>
+                                <input type="text"
+                                       class="form-control time-input"
+                                       id="startTime"
+                                       placeholder="HH:mm"
+                                       maxlength="5">
+                                <div class="form-help">Để trống nếu không thay đổi</div>
+                            </div>
                         </div>
-                        <div class="invalid-feedback" id="startTimeError"></div>
+                        <div class="invalid-feedback" id="startDateTimeError"></div>
                     </div>
                 </div>
 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label required" for="endTime">End Date & Time</label>
-                        <input type="datetime-local"
-                               class="form-control"
-                               id="endTime"
-                               th:field="*{formattedEndTime}"
-                               required>
-                        <div class="form-help">
-                            When the voucher expires
+                        <label class="form-label required">Ngày & Giờ Kết Thúc</label>
+                        <div class="date-time-group">
+                            <div>
+                                <input type="text"
+                                       class="form-control date-input"
+                                       id="endDate"
+                                       placeholder="dd/MM/yyyy"
+                                       maxlength="10">
+                                <div class="form-help">Để trống nếu không thay đổi</div>
+                            </div>
+                            <div>
+                                <input type="text"
+                                       class="form-control time-input"
+                                       id="endTime"
+                                       placeholder="HH:mm"
+                                       maxlength="5">
+                                <div class="form-help">Để trống nếu không thay đổi</div>
+                            </div>
                         </div>
-                        <div class="invalid-feedback" id="endTimeError"></div>
+                        <div class="invalid-feedback" id="endDateTimeError"></div>
                     </div>
                 </div>
             </div>
@@ -533,7 +647,7 @@
             <div class="row">
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label required" for="quantity">Available Quantity</label>
+                        <label class="form-label required" for="quantity">Số Lượng Có Sẵn</label>
                         <input type="number"
                                class="form-control"
                                id="quantity"
@@ -542,7 +656,7 @@
                                min="1"
                                required>
                         <div class="form-help">
-                            Number of times this voucher can be used
+                            Số lần voucher này có thể được sử dụng
                         </div>
                         <div class="invalid-feedback" id="quantityError"></div>
                     </div>
@@ -550,37 +664,33 @@
 
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label required" for="status">Status</label>
+                        <label class="form-label required" for="status">Trạng Thái</label>
                         <select class="form-select" id="status" th:field="*{status}" required>
-                            <option value="">Select Status</option>
-                            <option value="Active">Active</option>
-                            <option value="Inactive">Inactive</option>
+                            <option value="">Chọn Trạng Thái</option>
+                            <option value="Available">Available</option>
+                            <option value="Expired">Expired</option>
                         </select>
                         <div class="form-help">
-                            Current status of the voucher
+                            Trạng thái hiện tại của voucher
                         </div>
                         <div class="invalid-feedback" id="statusError"></div>
                     </div>
                 </div>
             </div>
 
+            <!-- Hidden fields for backend -->
+            <input type="hidden" id="hiddenStartTime" th:field="*{startTime}">
+            <input type="hidden" id="hiddenEndTime" th:field="*{endTime}">
+
             <!-- Preview Section -->
-            <div id="voucherPreview" style="display: none; margin-top: 24px; padding: 20px; background: rgba(66, 133, 244, 0.05); border: 1px solid rgba(66, 133, 244, 0.2); border-radius: 8px;">
-                <h5 style="color: var(--primary-blue); margin-bottom: 16px;">
-                    <i class="fas fa-eye"></i> Voucher Preview
-                </h5>
-                <div style="background: var(--card-bg); padding: 16px; border-radius: 8px; text-align: center;">
-                    <div style="font-family: 'Courier New', monospace; font-size: 1.2rem; font-weight: 700; color: var(--primary-blue); margin-bottom: 8px;" id="previewCode">
-                        -
-                    </div>
-                    <div style="font-size: 1.5rem; font-weight: 700; color: var(--success-green); margin-bottom: 8px;" id="previewDiscount">
-                        -
-                    </div>
-                    <div style="font-size: 0.875rem; color: var(--text-secondary);" id="previewPeriod">
-                        Valid Period: -
-                    </div>
-                    <div style="font-size: 0.875rem; color: var(--warning-orange); margin-top: 4px;" id="previewQuantity">
-                        -
+            <div id="voucherPreview" style="display: none;">
+                <div class="voucher-preview">
+                    <div class="voucher-preview-content">
+                        <div class="voucher-title">BlueBear Cinema</div>
+                        <div class="voucher-code-preview" id="previewCode">VOUCHER</div>
+                        <div class="voucher-discount-preview" id="previewDiscount">0% OFF</div>
+                        <div class="voucher-period-preview" id="previewPeriod">Thời gian: -</div>
+                        <div class="voucher-quantity-preview" id="previewQuantity">Còn lại: -</div>
                     </div>
                 </div>
             </div>
@@ -589,11 +699,11 @@
             <div class="btn-group">
                 <button type="submit" class="btn-primary">
                     <i th:class="${isEdit} ? 'fas fa-save' : 'fas fa-plus'"></i>
-                    <span th:text="${isEdit} ? 'Update Voucher' : 'Create Voucher'">Create Voucher</span>
+                    <span th:text="${isEdit} ? 'Cập Nhật Voucher' : 'Tạo Voucher'">Tạo Voucher</span>
                 </button>
                 <a href="/admin/vouchers" class="btn-outline">
                     <i class="fas fa-times"></i>
-                    Cancel
+                    Hủy Bỏ
                 </a>
             </div>
         </form>
@@ -609,10 +719,16 @@
         // Form elements
         const promotionCodeInput = document.getElementById('promotionCode');
         const discountInput = document.getElementById('discount');
+        const startDateInput = document.getElementById('startDate');
         const startTimeInput = document.getElementById('startTime');
+        const endDateInput = document.getElementById('endDate');
         const endTimeInput = document.getElementById('endTime');
         const quantityInput = document.getElementById('quantity');
         const statusInput = document.getElementById('status');
+
+        // Hidden fields for backend
+        const hiddenStartTime = document.getElementById('hiddenStartTime');
+        const hiddenEndTime = document.getElementById('hiddenEndTime');
 
         // Preview elements
         const previewCode = document.getElementById('previewCode');
@@ -620,37 +736,184 @@
         const previewPeriod = document.getElementById('previewPeriod');
         const previewQuantity = document.getElementById('previewQuantity');
 
+        // Date formatting functions
+        function formatDateForInput(dateTimeString) {
+            if (!dateTimeString) return { date: '', time: '' };
+
+            const date = new Date(dateTimeString);
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+
+            return {
+                date: `${day}/${month}/${year}`,
+                time: `${hours}:${minutes}`
+            };
+        }
+
+        function parseDateTime(dateStr, timeStr) {
+            if (!dateStr || !timeStr) return null;
+
+            const [day, month, year] = dateStr.split('/');
+            const [hours, minutes] = timeStr.split(':');
+
+            if (!day || !month || !year || !hours || !minutes) return null;
+
+            return new Date(year, month - 1, day, hours, minutes);
+        }
+
+        // Initialize form with existing data (for edit mode)
+        function initializeForm() {
+            // Chỉ hiển thị giá trị hiện tại, user có thể để trống để không thay đổi
+            const startTimeValue = hiddenStartTime.value;
+            const endTimeValue = hiddenEndTime.value;
+
+            // Không tự động fill, để user quyết định có muốn thay đổi hay không
+            if (startTimeValue && document.querySelector('[th\\:field="*{promotionId}"]')) {
+                // Chỉ hiển thị placeholder với giá trị hiện tại
+                const startDateTime = formatDateForInput(startTimeValue);
+                startDateInput.placeholder = `Hiện tại: ${startDateTime.date}`;
+                startTimeInput.placeholder = `Hiện tại: ${startDateTime.time}`;
+            }
+
+            if (endTimeValue && document.querySelector('[th\\:field="*{promotionId}"]')) {
+                const endDateTime = formatDateForInput(endTimeValue);
+                endDateInput.placeholder = `Hiện tại: ${endDateTime.date}`;
+                endTimeInput.placeholder = `Hiện tại: ${endDateTime.time}`;
+            }
+        }
+
+        // Update hidden fields
+        function updateHiddenFields() {
+            // Chỉ cập nhật nếu user có nhập giá trị mới
+            const startDateTime = parseDateTime(startDateInput.value, startTimeInput.value);
+            const endDateTime = parseDateTime(endDateInput.value, endTimeInput.value);
+
+            // Nếu có giá trị mới thì cập nhật, nếu không thì giữ nguyên giá trị cũ
+            if (startDateTime) {
+                hiddenStartTime.value = startDateTime.toISOString().slice(0, 19);
+            }
+            // Không xóa giá trị cũ nếu user để trống
+
+            if (endDateTime) {
+                hiddenEndTime.value = endDateTime.toISOString().slice(0, 19);
+            }
+            // Không xóa giá trị cũ nếu user để trống
+        }
+
         // Update preview
         function updatePreview() {
             const code = promotionCodeInput.value || 'VOUCHER';
             const discount = discountInput.value || '0';
-            const startTime = startTimeInput.value;
-            const endTime = endTimeInput.value;
+            const startDate = startDateInput.value;
+            const endDate = endDateInput.value;
             const quantity = quantityInput.value || '0';
 
             previewCode.textContent = code;
             previewDiscount.textContent = discount + '% OFF';
 
-            if (startTime && endTime) {
-                const start = new Date(startTime).toLocaleDateString();
-                const end = new Date(endTime).toLocaleDateString();
-                previewPeriod.textContent = `Valid Period: ${start} - ${end}`;
+            if (startDate && endDate) {
+                previewPeriod.textContent = `Thời gian: ${startDate} - ${endDate}`;
             } else {
-                previewPeriod.textContent = 'Valid Period: -';
+                previewPeriod.textContent = 'Thời gian: -';
             }
 
-            previewQuantity.textContent = `${quantity} uses available`;
+            previewQuantity.textContent = `Còn lại: ${quantity} lượt`;
 
             // Show preview if any field has value
-            if (code !== 'VOUCHER' || discount !== '0' || startTime || endTime || quantity !== '0') {
+            if (code !== 'VOUCHER' || discount !== '0' || startDate || endDate || quantity !== '0') {
                 previewSection.style.display = 'block';
             } else {
                 previewSection.style.display = 'none';
             }
         }
 
+        // Input formatting
+        function formatDateInput(input) {
+            let value = input.value.replace(/\D/g, '');
+
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + '/' + value.substring(2);
+            }
+            if (value.length >= 5) {
+                value = value.substring(0, 5) + '/' + value.substring(5, 9);
+            }
+
+            input.value = value;
+        }
+
+        function formatTimeInput(input) {
+            let value = input.value.replace(/\D/g, '');
+
+            if (value.length >= 2) {
+                value = value.substring(0, 2) + ':' + value.substring(2, 4);
+            }
+
+            input.value = value;
+        }
+
+        // Validation functions
+        function isValidDate(dateStr) {
+            const regex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+            const match = dateStr.match(regex);
+
+            if (!match) return false;
+
+            const day = parseInt(match[1], 10);
+            const month = parseInt(match[2], 10);
+            const year = parseInt(match[3], 10);
+
+            if (month < 1 || month > 12) return false;
+            if (day < 1 || day > 31) return false;
+            if (year < 2024 || year > 2030) return false;
+
+            const date = new Date(year, month - 1, day);
+            return date.getFullYear() === year &&
+                date.getMonth() === month - 1 &&
+                date.getDate() === day;
+        }
+
+        function isValidTime(timeStr) {
+            const regex = /^(\d{2}):(\d{2})$/;
+            const match = timeStr.match(regex);
+
+            if (!match) return false;
+
+            const hours = parseInt(match[1], 10);
+            const minutes = parseInt(match[2], 10);
+
+            return hours >= 0 && hours <= 23 && minutes >= 0 && minutes <= 59;
+        }
+
+        // Event listeners for formatting
+        startDateInput.addEventListener('input', function() {
+            formatDateInput(this);
+            updateHiddenFields();
+            updatePreview();
+        });
+
+        startTimeInput.addEventListener('input', function() {
+            formatTimeInput(this);
+            updateHiddenFields();
+            updatePreview();
+        });
+
+        endDateInput.addEventListener('input', function() {
+            formatDateInput(this);
+            updateHiddenFields();
+            updatePreview();
+        });
+
+        endTimeInput.addEventListener('input', function() {
+            formatTimeInput(this);
+            updateHiddenFields();
+            updatePreview();
+        });
+
         // Add event listeners for preview
-        [promotionCodeInput, discountInput, startTimeInput, endTimeInput, quantityInput].forEach(input => {
+        [promotionCodeInput, discountInput, quantityInput].forEach(input => {
             input.addEventListener('input', updatePreview);
         });
 
@@ -669,57 +932,100 @@
             // Validate promotion code
             const promotionCode = promotionCodeInput.value.trim();
             if (!promotionCode) {
-                showError('promotionCode', 'Promotion code is required');
+                showError('promotionCode', 'Mã khuyến mãi là bắt buộc');
                 isValid = false;
             } else if (promotionCode.length < 3) {
-                showError('promotionCode', 'Promotion code must be at least 3 characters');
+                showError('promotionCode', 'Mã khuyến mãi phải có ít nhất 3 ký tự');
                 isValid = false;
             } else if (promotionCode.length > 10) {
-                showError('promotionCode', 'Promotion code must not exceed 10 characters');
+                showError('promotionCode', 'Mã khuyến mãi không được vượt quá 10 ký tự');
                 isValid = false;
             } else if (!/^[A-Z0-9]+$/.test(promotionCode)) {
-                showError('promotionCode', 'Promotion code must contain only uppercase letters and numbers');
+                showError('promotionCode', 'Mã khuyến mãi chỉ được chứa chữ hoa và số');
                 isValid = false;
             }
 
             // Validate discount
             const discount = parseInt(discountInput.value);
             if (!discount || discount < 1 || discount > 100) {
-                showError('discount', 'Discount must be between 1% and 100%');
+                showError('discount', 'Phần trăm giảm giá phải từ 1% đến 100%');
                 isValid = false;
             }
 
-            // Validate dates
-            const startTime = new Date(startTimeInput.value);
-            const endTime = new Date(endTimeInput.value);
-            const now = new Date();
+            // Validate start date and time (chỉ validate nếu user có nhập)
+            const startDate = startDateInput.value;
+            const startTime = startTimeInput.value;
+            const isEditMode = hiddenStartTime.value !== ''; // Có giá trị cũ là edit mode
 
-            if (!startTimeInput.value) {
-                showError('startTime', 'Start date and time is required');
-                isValid = false;
-            } else if (startTime < now) {
-                showError('startTime', 'Start time cannot be in the past');
-                isValid = false;
+            // Nếu là create mode hoặc user có nhập giá trị mới
+            if (!isEditMode || startDate || startTime) {
+                if (!startDate) {
+                    showError('startDateTime', 'Ngày bắt đầu là bắt buộc');
+                    isValid = false;
+                } else if (!isValidDate(startDate)) {
+                    showError('startDateTime', 'Ngày bắt đầu không hợp lệ (dd/MM/yyyy)');
+                    isValid = false;
+                }
+
+                if (!startTime) {
+                    showError('startDateTime', 'Giờ bắt đầu là bắt buộc');
+                    isValid = false;
+                } else if (!isValidTime(startTime)) {
+                    showError('startDateTime', 'Giờ bắt đầu không hợp lệ (HH:mm)');
+                    isValid = false;
+                }
             }
 
-            if (!endTimeInput.value) {
-                showError('endTime', 'End date and time is required');
-                isValid = false;
-            } else if (endTime <= startTime) {
-                showError('endTime', 'End time must be after start time');
-                isValid = false;
+            // Validate end date and time (chỉ validate nếu user có nhập)
+            const endDate = endDateInput.value;
+            const endTime = endTimeInput.value;
+
+            // Nếu là create mode hoặc user có nhập giá trị mới
+            if (!isEditMode || endDate || endTime) {
+                if (!endDate) {
+                    showError('endDateTime', 'Ngày kết thúc là bắt buộc');
+                    isValid = false;
+                } else if (!isValidDate(endDate)) {
+                    showError('endDateTime', 'Ngày kết thúc không hợp lệ (dd/MM/yyyy)');
+                    isValid = false;
+                }
+
+                if (!endTime) {
+                    showError('endDateTime', 'Giờ kết thúc là bắt buộc');
+                    isValid = false;
+                } else if (!isValidTime(endTime)) {
+                    showError('endDateTime', 'Giờ kết thúc không hợp lệ (HH:mm)');
+                    isValid = false;
+                }
+            }
+
+            // Validate date range (chỉ khi cả 2 đều có giá trị mới)
+            if (isValid && startDate && startTime && endDate && endTime) {
+                const startDateTime = parseDateTime(startDate, startTime);
+                const endDateTime = parseDateTime(endDate, endTime);
+                const now = new Date();
+
+                if (startDateTime < now) {
+                    showError('startDateTime', 'Thời gian bắt đầu không thể ở quá khứ');
+                    isValid = false;
+                }
+
+                if (endDateTime <= startDateTime) {
+                    showError('endDateTime', 'Thời gian kết thúc phải sau thời gian bắt đầu');
+                    isValid = false;
+                }
             }
 
             // Validate quantity
             const quantity = parseInt(quantityInput.value);
             if (!quantity || quantity < 1) {
-                showError('quantity', 'Quantity must be at least 1');
+                showError('quantity', 'Số lượng phải ít nhất là 1');
                 isValid = false;
             }
 
             // Validate status
             if (!statusInput.value) {
-                showError('status', 'Status is required');
+                showError('status', 'Trạng thái là bắt buộc');
                 isValid = false;
             }
 
@@ -727,10 +1033,24 @@
         }
 
         function showError(fieldName, message) {
-            const field = document.getElementById(fieldName);
-            const errorDiv = document.getElementById(fieldName + 'Error');
+            let field, errorDiv;
 
-            field.classList.add('is-invalid');
+            if (fieldName === 'startDateTime') {
+                field = startDateInput;
+                errorDiv = document.getElementById('startDateTimeError');
+                startDateInput.classList.add('is-invalid');
+                startTimeInput.classList.add('is-invalid');
+            } else if (fieldName === 'endDateTime') {
+                field = endDateInput;
+                errorDiv = document.getElementById('endDateTimeError');
+                endDateInput.classList.add('is-invalid');
+                endTimeInput.classList.add('is-invalid');
+            } else {
+                field = document.getElementById(fieldName);
+                errorDiv = document.getElementById(fieldName + 'Error');
+                field.classList.add('is-invalid');
+            }
+
             errorDiv.textContent = message;
         }
 
@@ -741,6 +1061,8 @@
 
         // Form submission
         form.addEventListener('submit', function(e) {
+            updateHiddenFields();
+
             if (!validateForm()) {
                 e.preventDefault();
 
@@ -753,25 +1075,8 @@
             }
         });
 
-        // Set minimum date to today for new vouchers
-        const today = new Date();
-        const minDateTime = today.toISOString().slice(0, 16);
-
-        if (!startTimeInput.value) {
-            startTimeInput.min = minDateTime;
-        }
-
-        endTimeInput.min = minDateTime;
-
-        // Update end time minimum when start time changes
-        startTimeInput.addEventListener('change', function() {
-            endTimeInput.min = this.value;
-            if (endTimeInput.value && endTimeInput.value <= this.value) {
-                endTimeInput.value = '';
-            }
-        });
-
-        // Initialize preview
+        // Initialize form and preview
+        initializeForm();
         updatePreview();
 
         // Add fade-in animation on scroll

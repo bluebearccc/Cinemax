@@ -375,19 +375,14 @@
             font-weight: 600;
         }
 
-        .status-active {
+        .status-available {
             background: rgba(52, 168, 83, 0.2);
             color: var(--success-green);
         }
 
-        .status-inactive {
+        .status-expired {
             background: rgba(234, 67, 53, 0.2);
             color: var(--danger-red);
-        }
-
-        .status-expired {
-            background: rgba(128, 128, 128, 0.2);
-            color: var(--text-muted);
         }
 
         .action-buttons {
@@ -410,24 +405,6 @@
 
         .btn-view:hover {
             background: var(--primary-dark);
-            transform: translateY(-1px);
-        }
-
-        .btn-edit {
-            background: var(--warning-orange);
-        }
-
-        .btn-edit:hover {
-            background: #e8a317;
-            transform: translateY(-1px);
-        }
-
-        .btn-delete {
-            background: var(--danger-red);
-        }
-
-        .btn-delete:hover {
-            background: #d33b2c;
             transform: translateY(-1px);
         }
 
@@ -512,7 +489,7 @@
     </div>
 
     <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin">
+        <a class="nav-link" href="/admin/">
             <i class="fas fa-home"></i>Dashboard
         </a>
         <a class="nav-link" href="/admin/movies">
@@ -523,6 +500,9 @@
         </a>
         <a class="nav-link active" href="/admin/vouchers">
             <i class="fas fa-ticket-alt"></i>Vouchers
+        </a>
+        <a class="nav-link" href="/admin/accounts">
+            <i class="fas fa-user-circle"></i>Accounts
         </a>
     </nav>
 </div>
@@ -558,7 +538,7 @@
         </div>
         <div class="stat-card">
             <div class="stat-number" th:text="${stats.activeVouchers}">0</div>
-            <div class="stat-label">Active Vouchers</div>
+            <div class="stat-label">Available Vouchers</div>
         </div>
         <div class="stat-card">
             <div class="stat-number" th:text="${stats.expiredVouchers}">0</div>
@@ -589,8 +569,8 @@
                 <div class="col-md-3">
                     <select class="form-select" name="status">
                         <option value="">All Status</option>
-                        <option value="Active" th:selected="${selectedStatus == 'Active'}">Active</option>
-                        <option value="Inactive" th:selected="${selectedStatus == 'Inactive'}">Inactive</option>
+                        <option value="Available" th:selected="${selectedStatus == 'Available'}">Available</option>
+                        <option value="Expired" th:selected="${selectedStatus == 'Expired'}">Expired</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -663,18 +643,17 @@
                         <span class="discount-badge" th:text="${voucher.formattedDiscount}">20%</span>
                     </td>
                     <td>
-                        <div th:text="${voucher.formattedStartTime}">Jan 15, 2024 10:00</div>
+                        <div th:text="${voucher.formattedStartTime}">15/01/2024 10:00</div>
                     </td>
                     <td>
-                        <div th:text="${voucher.formattedEndTime}">Apr 15, 2024 23:59</div>
+                        <div th:text="${voucher.formattedEndTime}">15/04/2024 23:59</div>
                     </td>
                     <td>
                         <span class="quantity-badge" th:text="${voucher.quantity}">100</span>
                     </td>
                     <td>
-                        <span th:class="${voucher.status == 'Active'} ? 'status-badge status-active' :
-                                        (${voucher.expired} ? 'status-badge status-expired' : 'status-badge status-inactive')"
-                              th:text="${voucher.expired} ? 'Expired' : ${voucher.status}">Active</span>
+                        <span th:class="${voucher.status == 'Available'} ? 'status-badge status-available' : 'status-badge status-expired'"
+                              th:text="${voucher.status}">Available</span>
                     </td>
                     <td>
                         <div class="action-buttons">
@@ -682,15 +661,6 @@
                                class="btn-action btn-view" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a th:href="@{/admin/vouchers/edit/{id}(id=${voucher.promotionId})}"
-                               class="btn-action btn-edit" title="Edit Voucher">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <button type="button" class="btn-action btn-delete"
-                                    th:onclick="|confirmDelete(${voucher.promotionId}, '${voucher.promotionCode}')|"
-                                    title="Delete Voucher">
-                                <i class="fas fa-trash"></i>
-                            </button>
                         </div>
                     </td>
                 </tr>
@@ -708,28 +678,7 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
-            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-                <h5 class="modal-title" style="color: var(--text-primary);">Confirm Delete</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="color: var(--text-primary);">
-                <p>Are you sure you want to delete voucher <strong id="deleteVoucherCode"></strong>?</p>
-                <p class="text-danger">This action cannot be undone.</p>
-            </div>
-            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                <form id="deleteForm" method="post" style="display: inline;">
-                    <button type="submit" class="btn btn-danger">Delete</button>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
+<!-- JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
     // Auto-submit form when status changes
@@ -766,13 +715,6 @@
             observer.observe(el);
         });
     });
-
-    // Delete confirmation
-    function confirmDelete(voucherId, voucherCode) {
-        document.getElementById('deleteVoucherCode').textContent = voucherCode;
-        document.getElementById('deleteForm').action = '/admin/vouchers/delete/' + voucherId;
-        new bootstrap.Modal(document.getElementById('deleteModal')).show();
-    }
 </script>
 </body>
 </html>

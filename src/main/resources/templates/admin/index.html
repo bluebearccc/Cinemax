@@ -374,8 +374,8 @@
       <a class="nav-link" href="/admin/vouchers">
         <i class="fas fa-ticket-alt"></i>Vouchers
       </a>
-      <a class="nav-link" href="/admin/charts">
-        <i class="fas fa-chart-area"></i>Account
+      <a class="nav-link" href="/admin/accounts">
+        <i class="fas fa-user-circle"></i>Accounts
       </a>
       <a class="nav-link" href="/admin/tables">
         <i class="fas fa-table"></i>Tables
@@ -441,14 +441,14 @@
         </div>
 
         <div class="col-lg-6 mb-4">
-          <div class="feature-card" onclick="window.location.href='/admin/charts'">
+          <div class="feature-card" onclick="window.location.href='/admin/accounts'">
             <div class="feature-icon">
-              <i class="fas fa-chart-line"></i>
+              <i class="fas fa-user-circle"></i>
             </div>
             <h6>Account Management</h6>
             <p>Quản lý Account - User account administration, permissions, and detailed analytics reporting.</p>
-            <a href="/admin/charts" class="btn-feature">
-              <i class="fas fa-arrow-right"></i>View Reports
+            <a href="/admin/accounts" class="btn-feature">
+              <i class="fas fa-arrow-right"></i>Manage Accounts
             </a>
           </div>
         </div>
@@ -469,7 +469,7 @@
       <i class="fas fa-star stat-icon"></i>
       <div class="stat-number" th:text="${averageRating ?: '4.8'}">4.8</div>
       <div class="stat-label">Average Rating</div>
-      <a href="/admin/charts" class="btn-stat">View Reports</a>
+      <a href="/admin/tables" class="btn-stat">View Reports</a>
     </div>
 
     <div class="stat-card">
@@ -480,10 +480,10 @@
     </div>
 
     <div class="stat-card">
-      <i class="fas fa-film stat-icon"></i>
-      <div class="stat-number" th:text="${totalMovies ?: 0}">0</div>
-      <div class="stat-label">Total Movies</div>
-      <a href="/admin/movies" class="btn-stat">Manage Movies</a>
+      <i class="fas fa-user-circle stat-icon"></i>
+      <div class="stat-number" th:text="${totalAccounts ?: 0}">0</div>
+      <div class="stat-label">Total Accounts</div>
+      <a href="/admin/accounts" class="btn-stat">Manage Accounts</a>
     </div>
   </div>
 </div>
@@ -514,8 +514,6 @@
       card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
       observer.observe(card);
     });
-
-    // Add click effect to feature cards - this is handled by onclick attributes now
   });
 </script>
 </body>

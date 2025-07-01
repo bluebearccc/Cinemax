@@ -1,10 +1,1087 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Account Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .breadcrumb-text {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-warning {
+            background: var(--warning-orange);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-warning:hover {
+            background: #e8a317;
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-danger:hover {
+            background: #d33b2c;
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .detail-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary-blue);
+        }
+
+        .detail-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .account-id-display {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.4rem;
+            text-align: center;
+            border: 2px dashed var(--primary-blue);
+            letter-spacing: 2px;
+            text-transform: uppercase;
+        }
+
+        .email-display {
+            font-size: 1.2rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            background: rgba(52, 168, 83, 0.1);
+            padding: 12px 16px;
+            border-radius: 8px;
+            border-left: 4px solid var(--success-green);
+            word-break: break-all;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .role-display {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .role-admin {
+            background: rgba(234, 67, 53, 0.2);
+            color: var(--danger-red);
+            border: 2px solid var(--danger-red);
+        }
+
+        .role-customer {
+            background: rgba(52, 168, 83, 0.2);
+            color: var(--success-green);
+            border: 2px solid var(--success-green);
+        }
+
+        .role-staff {
+            background: rgba(251, 188, 4, 0.2);
+            color: var(--warning-orange);
+            border: 2px solid var(--warning-orange);
+        }
+
+        .role-cashier {
+            background: rgba(156, 39, 176, 0.2);
+            color: #9c27b0;
+            border: 2px solid #9c27b0;
+        }
+
+        .role-officer {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196f3;
+            border: 2px solid #2196f3;
+        }
+
+        .status-badge {
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            text-align: center;
+            display: inline-block;
+            width: 100%;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .status-active {
+            background: rgba(52, 168, 83, 0.2);
+            color: var(--success-green);
+            border: 2px solid var(--success-green);
+        }
+
+        .status-banned {
+            background: rgba(234, 67, 53, 0.2);
+            color: var(--danger-red);
+            border: 2px solid var(--danger-red);
+        }
+
+        .status-pending {
+            background: rgba(251, 188, 4, 0.2);
+            color: var(--warning-orange);
+            border: 2px solid var(--warning-orange);
+        }
+
+        .password-display {
+            font-family: 'Courier New', monospace;
+            font-size: 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 15px;
+            letter-spacing: 3px;
+        }
+
+        .validity-indicator {
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            text-align: center;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .validity-active {
+            border-color: var(--success-green);
+            background: rgba(52, 168, 83, 0.05);
+            box-shadow: 0 0 20px rgba(52, 168, 83, 0.1);
+        }
+
+        .validity-banned {
+            border-color: var(--danger-red);
+            background: rgba(234, 67, 53, 0.05);
+            box-shadow: 0 0 20px rgba(234, 67, 53, 0.1);
+        }
+
+        .validity-pending {
+            border-color: var(--warning-orange);
+            background: rgba(251, 188, 4, 0.05);
+            box-shadow: 0 0 20px rgba(251, 188, 4, 0.1);
+        }
+
+        .validity-icon {
+            font-size: 3rem;
+            margin-bottom: 12px;
+        }
+
+        .validity-text {
+            font-weight: 700;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .validity-desc {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        .account-stats {
+            background: var(--darker-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .stat-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .info-box-title {
+            color: var(--primary-blue);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .account-preview {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .account-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.1) 10px,
+                    rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .account-preview-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .account-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .account-id-preview {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .account-role-preview {
+            font-size: 2rem;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .account-id-display {
+                font-size: 1.2rem;
+                letter-spacing: 1px;
+            }
+
+            .role-display {
+                font-size: 1.5rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
 </head>
 <body>
-$END$
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a class="nav-link" href="/admin">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link" href="/admin/movies">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        <a class="nav-link" href="/admin/vouchers">
+            <i class="fas fa-ticket-alt"></i>Vouchers
+        </a>
+        <a class="nav-link active" href="/admin/accounts">
+            <i class="fas fa-user-circle"></i>Accounts
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="header-section fade-in">
+        <div class="header-content">
+            <h2>Account Details</h2>
+            <p class="breadcrumb-text">Dashboard > Accounts > <span th:text="${account.accountId}">ACC001</span></p>
+        </div>
+        <div class="action-buttons">
+            <a href="/admin/accounts" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i>Back to Accounts
+            </a>
+            <a th:href="@{/admin/accounts/{id}/edit(id=${account.accountId})}" class="btn-warning">
+                <i class="fas fa-edit"></i>Edit Account
+            </a>
+        </div>
+    </div>
+
+    <!-- Account Details -->
+    <div class="detail-grid fade-in">
+        <!-- Main Information -->
+        <div class="detail-card">
+            <h3 class="card-title">
+                <i class="fas fa-user-circle"></i>
+                Account Information
+            </h3>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-id-card"></i>
+                    Account ID
+                </div>
+                <div class="account-id-display" th:text="${account.accountId}">ACC001</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-envelope"></i>
+                    Email Address
+                </div>
+                <div class="email-display" th:text="${account.email}">user@example.com</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-user-tag"></i>
+                    Role
+                </div>
+                <div th:class="${'role-display ' + account.role?.toLowerCase()}" th:text="${account.role}">Customer</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-lock"></i>
+                    Password
+                </div>
+                <div class="password-display" th:text="${account.maskedPassword}">••••••••</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-toggle-on"></i>
+                    Status
+                </div>
+                <div th:class="${account.statusBadgeClass.replace('status-badge ', 'status-badge ')}"
+                     th:text="${account.status}">Active</div>
+            </div>
+
+            <!-- Account Statistics -->
+            <div class="account-stats">
+                <h5 style="color: var(--text-primary); margin-bottom: 12px;">
+                    <i class="fas fa-chart-bar"></i>
+                    Account Statistics
+                </h5>
+                <div class="stat-item">
+                    <span class="stat-label">Account ID:</span>
+                    <span class="stat-value" th:text="${account.accountId}">ACC001</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Role Level:</span>
+                    <span class="stat-value" th:text="${account.role}">Customer</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Account Status:</span>
+                    <span class="stat-value" th:if="${account.status == 'Active'}" style="color: var(--success-green);">Active & Operational</span>
+                    <span class="stat-value" th:if="${account.status == 'Banned'}" style="color: var(--danger-red);">Banned</span>
+                    <span class="stat-value" th:if="${account.status == 'Pending'}" style="color: var(--warning-orange);">Pending Verification</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Access Level:</span>
+                    <span class="stat-value" th:if="${account.role == 'Admin'}" style="color: var(--danger-red);">Full System Access</span>
+                    <span class="stat-value" th:if="${account.role == 'Staff'}" style="color: var(--warning-orange);">Staff Operations</span>
+                    <span class="stat-value" th:if="${account.role == 'Customer'}" style="color: var(--success-green);">Customer Portal</span>
+                    <span class="stat-value" th:if="${account.role == 'Cashier'}" style="color: var(--primary-blue);">POS System</span>
+                    <span class="stat-value" th:if="${account.role == 'Customer_Officer'}" style="color: var(--accent-blue);">Customer Service</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status & Actions -->
+        <div class="detail-card">
+            <h3 class="card-title">
+                <i class="fas fa-info-circle"></i>
+                Account Status & Actions
+            </h3>
+
+            <!-- Status Indicator for Active -->
+            <div th:if="${account.status == 'Active'}" class="validity-indicator validity-active">
+                <div class="validity-icon" style="color: var(--success-green);">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="validity-text" style="color: var(--success-green);">Account Active</div>
+                <div class="validity-desc">This account is active and has full access to the system</div>
+                <div style="margin-top: 12px;">
+                    <span style="background: var(--success-green); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
+                        <i class="fas fa-thumbs-up"></i> Full Access
+                    </span>
+                </div>
+            </div>
+
+            <!-- Status Indicator for Banned -->
+            <div th:if="${account.status == 'Banned'}" class="validity-indicator validity-banned">
+                <div class="validity-icon" style="color: var(--danger-red);">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <div class="validity-text" style="color: var(--danger-red);">Account Banned</div>
+                <div class="validity-desc">This account has been banned and cannot access the system</div>
+                <div style="margin-top: 12px;">
+                    <span style="background: var(--danger-red); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
+                        <i class="fas fa-times-circle"></i> Access Denied
+                    </span>
+                </div>
+            </div>
+
+            <!-- Status Indicator for Pending -->
+            <div th:if="${account.status == 'Pending'}" class="validity-indicator validity-pending">
+                <div class="validity-icon" style="color: var(--warning-orange);">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="validity-text" style="color: var(--warning-orange);">Account Pending</div>
+                <div class="validity-desc">This account is pending verification and has limited access</div>
+                <div style="margin-top: 12px;">
+                    <span style="background: var(--warning-orange); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
+                        <i class="fas fa-hourglass-half"></i> Limited Access
+                    </span>
+                </div>
+            </div>
+
+            <!-- Account Preview -->
+            <div class="account-preview">
+                <div class="account-preview-content">
+                    <div class="account-title">BlueBear Cinema Account</div>
+                    <div class="account-id-preview" th:text="${account.accountId}">ACC001</div>
+                    <div style="font-size: 1.1rem; margin: 10px 0;" th:text="${account.email}">user@example.com</div>
+                    <div class="account-role-preview" th:text="${account.role}">Customer</div>
+                    <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">
+                        BlueBear Cinema Management System
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <div class="info-box-title">
+                    <i class="fas fa-lightbulb"></i>
+                    Account Guidelines
+                </div>
+                <div class="info-box-content">
+                    • Keep login credentials secure<br>
+                    • Follow system usage policies<br>
+                    • Report suspicious activities<br>
+                    • Update profile information regularly
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <h5 style="color: var(--text-primary); margin-bottom: 16px;">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </h5>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn-primary w-100"
+                            th:data-account-email="${account.email}"
+                            onclick="copyToClipboard(this.getAttribute('data-account-email'))">
+                        <i class="fas fa-copy"></i>Copy Email Address
+                    </button>
+
+                    <!-- Ban/Unban Button -->
+                    <form th:if="${account.status == 'Active'}"
+                          th:action="@{/admin/accounts/{id}/ban(id=${account.accountId})}"
+                          method="post" style="display: inline;">
+                        <button type="submit" class="btn-warning w-100"
+                                onclick="return confirm('Are you sure you want to ban this account?')">
+                            <i class="fas fa-ban"></i>Ban Account
+                        </button>
+                    </form>
+
+                    <form th:if="${account.status == 'Banned'}"
+                          th:action="@{/admin/accounts/{id}/unban(id=${account.accountId})}"
+                          method="post" style="display: inline;">
+                        <button type="submit" class="btn-primary w-100"
+                                onclick="return confirm('Are you sure you want to unban this account?')">
+                            <i class="fas fa-check-circle"></i>Unban Account
+                        </button>
+                    </form>
+
+                    <button type="button" class="btn-danger w-100"
+                            th:data-account-id="${account.accountId}"
+                            th:data-account-email="${account.email}"
+                            onclick="confirmDelete(this.getAttribute('data-account-id'), this.getAttribute('data-account-email'))">
+                        <i class="fas fa-trash"></i>Delete Account
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" style="color: var(--text-primary);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Confirm Account Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="color: var(--text-primary);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-user-times" style="font-size: 3rem; color: var(--danger-red); margin-bottom: 16px;"></i>
+                    <h5>Are you sure you want to delete this account?</h5>
+                </div>
+                <div style="background: var(--darker-bg); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <strong>Account ID: <span id="deleteAccountId" style="color: var(--primary-blue);"></span></strong><br>
+                    <strong>Email: <span id="deleteAccountEmail" style="color: var(--success-green);"></span></strong>
+                </div>
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Warning:</strong> This action cannot be undone!
+                </p>
+                <ul style="color: var(--text-secondary); font-size: 0.9rem;">
+                    <li>Account will be permanently deleted from the system</li>
+                    <li>User will lose access to all services</li>
+                    <li>Associated data may be affected</li>
+                    <li>This action is irreversible</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>Cancel
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i>Confirm Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Account Actions Modal -->
+<div class="modal fade" id="actionsModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" style="color: var(--text-primary);">
+                    <i class="fas fa-cogs"></i>
+                    Account Actions
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="color: var(--text-primary);">
+                <div class="text-center mb-3">
+                    <div class="account-preview" style="margin: 0;">
+                        <div class="account-preview-content">
+                            <div class="account-title">BlueBear Cinema</div>
+                            <div class="account-id-preview" th:text="${account.accountId}">ACC001</div>
+                            <div class="account-role-preview" th:text="${account.role}">Customer</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row g-2">
+                    <div class="col-6">
+                        <button class="btn btn-primary w-100" onclick="resetPassword()">
+                            <i class="fas fa-key"></i> Reset Password
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-info w-100" onclick="sendNotification()">
+                            <i class="fas fa-bell"></i> Send Notification
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-success w-100" onclick="generateReport()">
+                            <i class="fas fa-file-alt"></i> Generate Report
+                        </button>
+                    </div>
+                    <div class="col-6">
+                        <button class="btn btn-warning w-100" onclick="copyAccountInfo()">
+                            <i class="fas fa-copy"></i> Copy Info
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="copyToast" class="toast" role="alert">
+        <div class="toast-header" style="background: var(--card-bg); border-bottom: 1px solid var(--border-color);">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            <strong class="me-auto" style="color: var(--text-primary);">Success</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" style="background: var(--card-bg); color: var(--text-primary);">
+            Email address copied to clipboard!
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    });
+
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+            toast.show();
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+            // Fallback method
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+                toast.show();
+            } catch (err) {
+                console.error('Fallback: Could not copy text: ', err);
+            }
+            document.body.removeChild(textArea);
+        });
+    }
+
+    // Delete confirmation
+    function confirmDelete(accountId, accountEmail) {
+        document.getElementById('deleteAccountId').textContent = accountId;
+        document.getElementById('deleteAccountEmail').textContent = accountEmail;
+        document.getElementById('deleteForm').action = '/admin/accounts/' + accountId + '/delete';
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+
+    // Additional action functions
+    function resetPassword() {
+        alert('Password reset functionality would be implemented here');
+        // Implementation for password reset
+    }
+
+    function sendNotification() {
+        alert('Notification sending functionality would be implemented here');
+        // Implementation for sending notifications
+    }
+
+    function generateReport() {
+        alert('Report generation functionality would be implemented here');
+        // Implementation for generating account reports
+    }
+
+    function copyAccountInfo() {
+        const accountId = '[[${account.accountId}]]';
+        const email = '[[${account.email}]]';
+        const role = '[[${account.role}]]';
+        const status = '[[${account.status}]]';
+
+        const accountInfo = `Account Information:
+ID: ${accountId}
+Email: ${email}
+Role: ${role}
+Status: ${status}`;
+
+        copyToClipboard(accountInfo);
+    }
+
+    // Show actions modal
+    function showActionsModal() {
+        new bootstrap.Modal(document.getElementById('actionsModal')).show();
+    }
+</script>
 </body>
 </html>

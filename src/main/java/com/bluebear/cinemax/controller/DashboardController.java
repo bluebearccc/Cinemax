@@ -6,6 +6,7 @@ import com.bluebear.cinemax.service.MovieService;
 import com.bluebear.cinemax.service.GenreService;
 import com.bluebear.cinemax.service.ActorService;
 import com.bluebear.cinemax.service.VoucherService;
+import com.bluebear.cinemax.service.AccountService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import java.util.List;
+import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
@@ -29,6 +31,9 @@ public class DashboardController {
 
     @Autowired(required = false) // Optional để tránh lỗi nếu VoucherService chưa được inject
     private VoucherService voucherService;
+
+    @Autowired(required = false) // Optional để tránh lỗi nếu AccountService chưa được inject
+    private AccountService accountService;
 
     /**
      * Trang Dashboard chính - Hiển thị thống kê tổng quan
@@ -60,6 +65,24 @@ public class DashboardController {
                 }
             }
 
+            // Thống kê account (nếu service có sẵn)
+            long totalAccounts = 0;
+            long activeAccounts = 0;
+            long bannedAccounts = 0;
+            long totalCustomers = 0;
+            if (accountService != null) {
+                try {
+                    Map<String, Object> accountStats = accountService.getAccountStatistics();
+                    totalAccounts = (Long) accountStats.getOrDefault("totalAccounts", 0L);
+                    activeAccounts = (Long) accountStats.getOrDefault("activeAccounts", 0L);
+                    bannedAccounts = (Long) accountStats.getOrDefault("bannedAccounts", 0L);
+                    totalCustomers = (Long) accountStats.getOrDefault("totalCustomers", 0L);
+                } catch (Exception e) {
+                    // Log error but continue with default values
+                    e.printStackTrace();
+                }
+            }
+
             // Lấy danh sách phim mới nhất để hiển thị
             List<MovieDTO> recentMovies = movieService.getRecentMovies(5);
             List<Genre> genres = genreService.getAllGenres();
@@ -73,6 +96,10 @@ public class DashboardController {
             model.addAttribute("totalVouchers", totalVouchers);
             model.addAttribute("activeVouchers", activeVouchers);
             model.addAttribute("averageDiscount", String.format("%.1f%%", averageDiscount));
+            model.addAttribute("totalAccounts", totalAccounts);
+            model.addAttribute("activeAccounts", activeAccounts);
+            model.addAttribute("bannedAccounts", bannedAccounts);
+            model.addAttribute("totalCustomers", totalCustomers);
             model.addAttribute("recentMovies", recentMovies);
             model.addAttribute("genres", genres);
             model.addAttribute("pageTitle", "Dashboard - BlueBear Cinema");
@@ -88,6 +115,10 @@ public class DashboardController {
             model.addAttribute("totalVouchers", 0L);
             model.addAttribute("activeVouchers", 0L);
             model.addAttribute("averageDiscount", "0.0%");
+            model.addAttribute("totalAccounts", 0L);
+            model.addAttribute("activeAccounts", 0L);
+            model.addAttribute("bannedAccounts", 0L);
+            model.addAttribute("totalCustomers", 0L);
             model.addAttribute("pageTitle", "Dashboard - BlueBear Cinema");
             e.printStackTrace(); // Log error for debugging
         }

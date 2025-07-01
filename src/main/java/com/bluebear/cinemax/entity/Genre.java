@@ -1,11 +1,19 @@
 package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
 
 import java.util.Set;
 
 @Entity
 @Table(name = "Genre")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"movieGenres"}) // Avoid circular reference in toString
 public class Genre {
 
     @Id
@@ -19,43 +27,23 @@ public class Genre {
     @OneToMany(mappedBy = "genre", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<MovieGenre> movieGenres;
 
-    // Constructors
-    public Genre() {}
-
+    // Constructor without movieGenres for basic creation
     public Genre(String genreName) {
         this.genreName = genreName;
     }
 
-    // Getters and Setters
-    public Integer getGenreId() {
-        return genreId;
-    }
+    // Override equals and hashCode to use only genreId for entity comparison
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Genre)) return false;
 
-    public void setGenreId(Integer genreId) {
-        this.genreId = genreId;
-    }
-
-    public String getGenreName() {
-        return genreName;
-    }
-
-    public void setGenreName(String genreName) {
-        this.genreName = genreName;
-    }
-
-    public Set<MovieGenre> getMovieGenres() {
-        return movieGenres;
-    }
-
-    public void setMovieGenres(Set<MovieGenre> movieGenres) {
-        this.movieGenres = movieGenres;
+        Genre genre = (Genre) o;
+        return genreId != null ? genreId.equals(genre.genreId) : genre.genreId == null;
     }
 
     @Override
-    public String toString() {
-        return "Genre{" +
-                "genreId=" + genreId +
-                ", genreName='" + genreName + '\'' +
-                '}';
+    public int hashCode() {
+        return genreId != null ? genreId.hashCode() : 0;
     }
 }

@@ -1,11 +1,18 @@
 package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Entity
 @Table(name = "Promotion")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Voucher {
 
     @Id
@@ -31,9 +38,7 @@ public class Voucher {
     @Column(name = "Status", length = 20, nullable = false)
     private String status;
 
-    // Constructors
-    public Voucher() {}
-
+    // Constructor without ID for creation
     public Voucher(String promotionCode, Integer discount, LocalDateTime startTime,
                    LocalDateTime endTime, Integer quantity, String status) {
         this.promotionCode = promotionCode;
@@ -44,79 +49,40 @@ public class Voucher {
         this.status = status;
     }
 
-    // Getters and Setters
-    public Integer getPromotionId() {
-        return promotionId;
-    }
-
-    public void setPromotionId(Integer promotionId) {
-        this.promotionId = promotionId;
-    }
-
-    public String getPromotionCode() {
-        return promotionCode;
-    }
-
-    public void setPromotionCode(String promotionCode) {
-        this.promotionCode = promotionCode;
-    }
-
-    public Integer getDiscount() {
-        return discount;
-    }
-
-    public void setDiscount(Integer discount) {
-        this.discount = discount;
-    }
-
-    public LocalDateTime getStartTime() {
-        return startTime;
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        this.startTime = startTime;
-    }
-
-    public LocalDateTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalDateTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public Integer getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity) {
-        this.quantity = quantity;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    // Helper methods for display
+    // Helper methods for display - Updated date format
     public String getFormattedStartTime() {
-        return startTime != null ? startTime.format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")) : "";
+        return startTime != null ? startTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
     }
 
     public String getFormattedEndTime() {
-        return endTime != null ? endTime.format(DateTimeFormatter.ofPattern("MMM dd, yyyy HH:mm")) : "";
+        return endTime != null ? endTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")) : "";
+    }
+
+    // Additional date format methods
+    public String getFormattedStartDate() {
+        return startTime != null ? startTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
+    }
+
+    public String getFormattedEndDate() {
+        return endTime != null ? endTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy")) : "";
+    }
+
+    public String getFormattedStartTimeOnly() {
+        return startTime != null ? startTime.format(DateTimeFormatter.ofPattern("HH:mm")) : "";
+    }
+
+    public String getFormattedEndTimeOnly() {
+        return endTime != null ? endTime.format(DateTimeFormatter.ofPattern("HH:mm")) : "";
     }
 
     public String getFormattedDiscount() {
         return discount != null ? discount + "%" : "0%";
     }
 
+    // Updated logic for Available/Expired status
     public boolean isActive() {
         LocalDateTime now = LocalDateTime.now();
-        return "Active".equals(status) &&
+        return "Available".equals(status) &&
                 startTime != null && endTime != null &&
                 now.isAfter(startTime) && now.isBefore(endTime) &&
                 quantity != null && quantity > 0;
@@ -124,6 +90,13 @@ public class Voucher {
 
     public boolean isExpired() {
         LocalDateTime now = LocalDateTime.now();
-        return endTime != null && now.isAfter(endTime);
+        // Expired if status is "Expired" OR if end time has passed
+        return "Expired".equals(status) ||
+                (endTime != null && now.isAfter(endTime));
+    }
+
+    // Helper method to check if voucher is usable
+    public boolean isUsable() {
+        return isActive() && !isExpired();
     }
 }

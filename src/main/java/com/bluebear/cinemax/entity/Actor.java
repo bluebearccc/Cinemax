@@ -1,9 +1,19 @@
 package com.bluebear.cinemax.entity;
+
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.util.Set;
 
 @Entity
 @Table(name = "Actor")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"movieActors"}) // Avoid circular reference in toString
 public class Actor {
 
     @Id
@@ -20,53 +30,9 @@ public class Actor {
     @OneToMany(mappedBy = "actor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<MovieActor> movieActors;
 
-    // Constructors
-    public Actor() {}
-
+    // Constructor without movieActors for basic creation
     public Actor(String actorName, String image) {
         this.actorName = actorName;
         this.image = image;
-    }
-
-    // Getters and Setters
-    public Integer getActorId() {
-        return actorId;
-    }
-
-    public void setActorId(Integer actorId) {
-        this.actorId = actorId;
-    }
-
-    public String getActorName() {
-        return actorName;
-    }
-
-    public void setActorName(String actorName) {
-        this.actorName = actorName;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public Set<MovieActor> getMovieActors() {
-        return movieActors;
-    }
-
-    public void setMovieActors(Set<MovieActor> movieActors) {
-        this.movieActors = movieActors;
-    }
-
-    @Override
-    public String toString() {
-        return "Actor{" +
-                "actorId=" + actorId +
-                ", actorName='" + actorName + '\'' +
-                ", image='" + image + '\'' +
-                '}';
     }
 }

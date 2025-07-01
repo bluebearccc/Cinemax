@@ -1,11 +1,21 @@
 package com.bluebear.cinemax.entity;
+
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
 @Table(name = "Movie")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+@ToString(exclude = {"movieGenres", "movieActors"}) // Avoid circular reference in toString
 public class Movie {
 
     @Id
@@ -58,9 +68,7 @@ public class Movie {
         Active, Removed
     }
 
-    // Constructors
-    public Movie() {}
-
+    // Constructor without relationships for basic creation
     public Movie(String movieName, String image, String banner, Integer duration,
                  String trailer, LocalDate startDate, LocalDate endDate, MovieStatus status) {
         this.movieName = movieName;
@@ -71,130 +79,5 @@ public class Movie {
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
-    }
-
-    // Getters and Setters
-    public Integer getMovieId() {
-        return movieId;
-    }
-
-    public void setMovieId(Integer movieId) {
-        this.movieId = movieId;
-    }
-
-    public String getMovieName() {
-        return movieName;
-    }
-
-    public void setMovieName(String movieName) {
-        this.movieName = movieName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getBanner() {
-        return banner;
-    }
-
-    public void setBanner(String banner) {
-        this.banner = banner;
-    }
-
-    public String getStudio() {
-        return studio;
-    }
-
-    public void setStudio(String studio) {
-        this.studio = studio;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public String getTrailer() {
-        return trailer;
-    }
-
-    public void setTrailer(String trailer) {
-        this.trailer = trailer;
-    }
-
-    public BigDecimal getMovieRate() {
-        return movieRate;
-    }
-
-    public void setMovieRate(BigDecimal movieRate) {
-        this.movieRate = movieRate;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public MovieStatus getStatus() {
-        return status;
-    }
-
-    public void setStatus(MovieStatus status) {
-        this.status = status;
-    }
-
-    public Set<MovieGenre> getMovieGenres() {
-        return movieGenres;
-    }
-
-    public void setMovieGenres(Set<MovieGenre> movieGenres) {
-        this.movieGenres = movieGenres;
-    }
-
-    public Set<MovieActor> getMovieActors() {
-        return movieActors;
-    }
-
-    public void setMovieActors(Set<MovieActor> movieActors) {
-        this.movieActors = movieActors;
-    }
-
-    @Override
-    public String toString() {
-        return "Movie{" +
-                "movieId=" + movieId +
-                ", movieName='" + movieName + '\'' +
-                ", description='" + description + '\'' +
-                ", duration=" + duration +
-                ", movieRate=" + movieRate +
-                ", status=" + status +
-                '}';
     }
 }

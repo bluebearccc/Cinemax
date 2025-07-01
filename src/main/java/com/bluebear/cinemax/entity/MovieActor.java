@@ -1,12 +1,15 @@
 package com.bluebear.cinemax.entity;
 
-
 import jakarta.persistence.*;
-
-
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(name = "Movie_Actor")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MovieActor {
 
     @Id
@@ -22,37 +25,30 @@ public class MovieActor {
     @JoinColumn(name = "MovieID", nullable = false)
     private Movie movie;
 
-    // Constructors
-    public MovieActor() {}
-
+    // Constructor without ID for creation
     public MovieActor(Actor actor, Movie movie) {
         this.actor = actor;
         this.movie = movie;
     }
 
-    // Getters and Setters
-    public Integer getId() {
-        return id;
+    // Override equals and hashCode based on ActorID and MovieID for entity comparison
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof MovieActor)) return false;
+
+        MovieActor that = (MovieActor) o;
+
+        if (actor != null ? !actor.getActorId().equals(that.actor != null ? that.actor.getActorId() : null) : that.actor != null)
+            return false;
+        return movie != null ? movie.getMovieId().equals(that.movie != null ? that.movie.getMovieId() : null) : that.movie == null;
     }
 
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    public Actor getActor() {
-        return actor;
-    }
-
-    public void setActor(Actor actor) {
-        this.actor = actor;
-    }
-
-    public Movie getMovie() {
-        return movie;
-    }
-
-    public void setMovie(Movie movie) {
-        this.movie = movie;
+    @Override
+    public int hashCode() {
+        int result = actor != null ? actor.getActorId().hashCode() : 0;
+        result = 31 * result + (movie != null ? movie.getMovieId().hashCode() : 0);
+        return result;
     }
 
     @Override

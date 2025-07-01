@@ -43,7 +43,7 @@ public class VoucherService {
         return voucherRepository.findByStatus(status);
     }
 
-    // Get active vouchers
+    // Get active vouchers (Available and currently active)
     public List<Voucher> getActiveVouchers() {
         return voucherRepository.findActiveVouchers(LocalDateTime.now());
     }
@@ -81,24 +81,39 @@ public class VoucherService {
             throw new IllegalArgumentException("Voucher not found");
         }
 
-        if (!voucherDTO.isValid()) {
-            throw new IllegalArgumentException("Invalid voucher data");
-        }
-
         Voucher voucher = existingVoucher.get();
 
         // Check if promotion code is being changed and if new code already exists
-        if (!voucher.getPromotionCode().equals(voucherDTO.getPromotionCode()) &&
+        if (voucherDTO.getPromotionCode() != null &&
+                !voucher.getPromotionCode().equals(voucherDTO.getPromotionCode()) &&
                 voucherRepository.existsByPromotionCode(voucherDTO.getPromotionCode())) {
             throw new IllegalArgumentException("Promotion code already exists");
         }
 
-        voucher.setPromotionCode(voucherDTO.getPromotionCode());
-        voucher.setDiscount(voucherDTO.getDiscount());
-        voucher.setStartTime(voucherDTO.getStartTime());
-        voucher.setEndTime(voucherDTO.getEndTime());
-        voucher.setQuantity(voucherDTO.getQuantity());
-        voucher.setStatus(voucherDTO.getStatus());
+        // Update only fields that are provided in DTO (not null/empty)
+        if (voucherDTO.getPromotionCode() != null && !voucherDTO.getPromotionCode().trim().isEmpty()) {
+            voucher.setPromotionCode(voucherDTO.getPromotionCode());
+        }
+
+        if (voucherDTO.getDiscount() != null) {
+            voucher.setDiscount(voucherDTO.getDiscount());
+        }
+
+        if (voucherDTO.getStartTime() != null) {
+            voucher.setStartTime(voucherDTO.getStartTime());
+        }
+
+        if (voucherDTO.getEndTime() != null) {
+            voucher.setEndTime(voucherDTO.getEndTime());
+        }
+
+        if (voucherDTO.getQuantity() != null) {
+            voucher.setQuantity(voucherDTO.getQuantity());
+        }
+
+        if (voucherDTO.getStatus() != null && !voucherDTO.getStatus().trim().isEmpty()) {
+            voucher.setStatus(voucherDTO.getStatus());
+        }
 
         return voucherRepository.save(voucher);
     }
@@ -117,7 +132,7 @@ public class VoucherService {
         if (!voucher.isPresent()) {
             return false;
         }
-        return voucher.get().isActive();
+        return voucher.get().isUsable(); // Use new isUsable() method
     }
 
     // Use voucher (decrease quantity)
@@ -128,7 +143,7 @@ public class VoucherService {
         }
 
         Voucher voucher = voucherOpt.get();
-        if (!voucher.isActive()) {
+        if (!voucher.isUsable()) { // Use new isUsable() method
             return false;
         }
 
@@ -137,38 +152,41 @@ public class VoucherService {
         return true;
     }
 
-    // Get voucher statistics
+    // Get voucher statistics - Updated for Available/Expired
     public VoucherStats getVoucherStats() {
         long totalVouchers = voucherRepository.count();
-        long activeVouchers = voucherRepository.countByStatus("Active");
-        long expiredVouchers = voucherRepository.findExpiredVouchers(LocalDateTime.now()).size();
+        long availableVouchers = voucherRepository.countByStatus("Available"); // Changed from "Active"
+        long expiredVouchers = voucherRepository.countByStatus("Expired"); // Direct count instead of findExpiredVouchers
         Double avgDiscount = voucherRepository.getAverageDiscount();
 
-        return new VoucherStats(totalVouchers, activeVouchers, expiredVouchers,
+        return new VoucherStats(totalVouchers, availableVouchers, expiredVouchers,
                 avgDiscount != null ? avgDiscount : 0.0);
     }
 
-    // Inner class for statistics
+    // Inner class for statistics - Updated naming
     public static class VoucherStats {
         private long totalVouchers;
-        private long activeVouchers;
+        private long availableVouchers; // Changed from activeVouchers
         private long expiredVouchers;
         private double averageDiscount;
 
-        public VoucherStats(long totalVouchers, long activeVouchers, long expiredVouchers, double averageDiscount) {
+        public VoucherStats(long totalVouchers, long availableVouchers, long expiredVouchers, double averageDiscount) {
             this.totalVouchers = totalVouchers;
-            this.activeVouchers = activeVouchers;
+            this.availableVouchers = availableVouchers;
             this.expiredVouchers = expiredVouchers;
             this.averageDiscount = averageDiscount;
         }
 
-        // Getters
+        // Getters - Updated naming
         public long getTotalVouchers() { return totalVouchers; }
-        public long getActiveVouchers() { return activeVouchers; }
+        public long getAvailableVouchers() { return availableVouchers; } // Changed from getActiveVouchers
         public long getExpiredVouchers() { return expiredVouchers; }
         public double getAverageDiscount() { return averageDiscount; }
         public String getFormattedAverageDiscount() {
             return String.format("%.1f%%", averageDiscount);
         }
+
+        // Backward compatibility
+        public long getActiveVouchers() { return availableVouchers; } // For templates that still use activeVouchers
     }
 }

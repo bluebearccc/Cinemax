@@ -1,10 +1,17 @@
 package com.bluebear.cinemax.dto;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MovieDTO {
     private Integer movieId;
     private String movieName;
@@ -21,9 +28,7 @@ public class MovieDTO {
     private List<String> genres;
     private List<String> actors;
 
-    // Constructors
-    public MovieDTO() {}
-
+    // Constructor without lists for basic movie creation
     public MovieDTO(Integer movieId, String movieName, String description, String image,
                     String banner, String studio, Integer duration, String trailer,
                     BigDecimal movieRate, LocalDate startDate, LocalDate endDate, String status) {
@@ -39,119 +44,6 @@ public class MovieDTO {
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = status;
-    }
-
-    // Getters and Setters
-    public Integer getMovieId() {
-        return movieId;
-    }
-
-    public void setMovieId(Integer movieId) {
-        this.movieId = movieId;
-    }
-
-    public String getMovieName() {
-        return movieName;
-    }
-
-    public void setMovieName(String movieName) {
-        this.movieName = movieName;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public void setDescription(String description) {
-        this.description = description;
-    }
-
-    public String getImage() {
-        return image;
-    }
-
-    public void setImage(String image) {
-        this.image = image;
-    }
-
-    public String getBanner() {
-        return banner;
-    }
-
-    public void setBanner(String banner) {
-        this.banner = banner;
-    }
-
-    public String getStudio() {
-        return studio;
-    }
-
-    public void setStudio(String studio) {
-        this.studio = studio;
-    }
-
-    public Integer getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Integer duration) {
-        this.duration = duration;
-    }
-
-    public String getTrailer() {
-        return trailer;
-    }
-
-    public void setTrailer(String trailer) {
-        this.trailer = trailer;
-    }
-
-    public BigDecimal getMovieRate() {
-        return movieRate;
-    }
-
-    public void setMovieRate(BigDecimal movieRate) {
-        this.movieRate = movieRate;
-    }
-
-    public LocalDate getStartDate() {
-        return startDate;
-    }
-
-    public void setStartDate(LocalDate startDate) {
-        this.startDate = startDate;
-    }
-
-    public LocalDate getEndDate() {
-        return endDate;
-    }
-
-    public void setEndDate(LocalDate endDate) {
-        this.endDate = endDate;
-    }
-
-    public String getStatus() {
-        return status;
-    }
-
-    public void setStatus(String status) {
-        this.status = status;
-    }
-
-    public List<String> getGenres() {
-        return genres;
-    }
-
-    public void setGenres(List<String> genres) {
-        this.genres = genres;
-    }
-
-    public List<String> getActors() {
-        return actors;
-    }
-
-    public void setActors(List<String> actors) {
-        this.actors = actors;
     }
 
     // Helper methods
@@ -191,7 +83,7 @@ public class MovieDTO {
         return String.join(", ", actors);
     }
 
-    // Kiểm tra trạng thái phim
+    // Status check methods
     public boolean isNowShowing() {
         LocalDate now = LocalDate.now();
         return "Active".equals(status) &&
@@ -211,16 +103,5 @@ public class MovieDTO {
     public boolean isExpired() {
         LocalDate now = LocalDate.now();
         return endDate != null && endDate.isBefore(now);
-    }
-
-    @Override
-    public String toString() {
-        return "MovieDTO{" +
-                "movieId=" + movieId +
-                ", movieName='" + movieName + '\'' +
-                ", status='" + status + '\'' +
-                ", duration=" + duration +
-                ", movieRate=" + movieRate +
-                '}';
     }
 }

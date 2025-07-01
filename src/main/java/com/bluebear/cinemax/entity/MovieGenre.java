@@ -1,16 +1,21 @@
-// MovieGenre.java - Fixed Entity class
 package com.bluebear.cinemax.entity;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "Movie_Genre") // Đảm bảo tên bảng chính xác
+@Table(name = "Movie_Genre")
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class MovieGenre {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "Id") // Chính xác theo database
-    private Integer id; // Đổi tên field cho rõ ràng
+    @Column(name = "Id")
+    private Integer id;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "MovieID", nullable = false)
@@ -20,24 +25,13 @@ public class MovieGenre {
     @JoinColumn(name = "GenreID", nullable = false)
     private Genre genre;
 
-    // Constructors
-    public MovieGenre() {}
-
+    // Constructor without ID for creation
     public MovieGenre(Movie movie, Genre genre) {
         this.movie = movie;
         this.genre = genre;
     }
 
-    // Getters and Setters
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
-
-    // Backward compatibility - giữ method cũ
+    // Backward compatibility - maintain old method names
     public Integer getMovieGenreId() {
         return id;
     }
@@ -46,23 +40,7 @@ public class MovieGenre {
         this.id = movieGenreId;
     }
 
-    public Movie getMovie() {
-        return movie;
-    }
-
-    public void setMovie(Movie movie) {
-        this.movie = movie;
-    }
-
-    public Genre getGenre() {
-        return genre;
-    }
-
-    public void setGenre(Genre genre) {
-        this.genre = genre;
-    }
-
-    // Equals and HashCode (dựa trên MovieID và GenreID)
+    // Override equals and hashCode based on MovieID and GenreID for entity comparison
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
