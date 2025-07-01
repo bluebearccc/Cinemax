@@ -141,31 +141,25 @@ public class TheaterServiceImpl implements TheaterService {
     }
     @Override
     public TheaterDTO addTheater(TheaterDTO theaterDTO, MultipartFile imageFile) throws Exception {
-        // Validation 1: Tên rạp phải bắt đầu bằng "CGV" (không phân biệt hoa/thường)
         if (!theaterDTO.getTheaterName().trim().toLowerCase().startsWith("cgv")) {
             throw new Exception("Tên rạp chiếu phải bắt đầu bằng 'CGV'.");
         }
 
-        // Validation 2: Tên rạp không được trùng
         if (theaterRepository.existsByTheaterNameIgnoreCase(theaterDTO.getTheaterName().trim())) {
             throw new Exception("Tên rạp chiếu đã tồn tại. Vui lòng chọn tên khác.");
         }
 
-        // Validation 3: Địa chỉ không được trùng
         if (theaterRepository.existsByAddressIgnoreCase(theaterDTO.getAddress().trim())) {
             throw new Exception("Địa chỉ rạp chiếu đã tồn tại. Vui lòng kiểm tra lại.");
         }
 
         Theater theater = convertToEntity(theaterDTO);
 
-        // Xử lý upload ảnh nếu có
         if (imageFile != null && !imageFile.isEmpty()) {
             String fileName = saveImage(imageFile);
-            // Lưu đường dẫn tương đối để truy cập từ web
             theater.setImage("/uploads/theaters/" + fileName);
         }
 
-        // Thiết lập giá trị mặc định cho rạp mới
         theater.setStatus(Theater_Status.Active); // Mặc định là Active
         theater.setRoomQuantity(0); // Số phòng ban đầu là 0
 
@@ -173,15 +167,12 @@ public class TheaterServiceImpl implements TheaterService {
         return convertToDTO(savedTheater);
     }
 
-    // Phương thức private để lưu ảnh và trả về tên file
     private String saveImage(MultipartFile imageFile) throws IOException {
-        // Bây giờ Paths.get() sẽ hoạt động chính xác với biến UPLOAD_DIR kiểu String
         Path uploadPath = Paths.get(UPLOAD_DIR);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        // Tạo tên file duy nhất để tránh trùng lặp
         String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
         Path filePath = uploadPath.resolve(fileName);
         Files.copy(imageFile.getInputStream(), filePath);

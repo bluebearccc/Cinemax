@@ -83,4 +83,25 @@ public class TheaterController {
         theModel.addAttribute("theater", theater);
         return "staff/add_theater";
     }
+
+    @PostMapping("/add_theater")
+    public String addTheater(
+            @ModelAttribute("theater") TheaterDTO theaterDTO,
+            @RequestParam("imageInput") MultipartFile imageFile,
+            RedirectAttributes redirectAttributes,
+            Model model) {
+        try {
+            theaterServiceImpl.addTheater(theaterDTO, imageFile);
+            redirectAttributes.addFlashAttribute("messageType", "success");
+            redirectAttributes.addFlashAttribute("message", "Theater added successfully!");
+            return "redirect:/theater";
+
+        } catch (Exception e) {
+            model.addAttribute("messageType", "error");
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("theater", theaterDTO);
+            return "staff/add_theater";
+        }
+    }
+
 }
