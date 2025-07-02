@@ -9,8 +9,8 @@
     <style>
             /* Additional styles specific for theater list */
         .theater-image {
-            width: 100px;
-            height: 60px;
+            width: auto;
+            height: auto;
             object-fit: cover;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
@@ -232,8 +232,6 @@
 
         /* Enhanced Add Theater Link */
         .navbar-brand {
-            background: linear-gradient(135deg, #fd7e14 0%, #e83e8c 100%);
-            color: white !important;
             padding: 12px 24px;
             border-radius: 25px;
             text-decoration: none;
@@ -424,7 +422,7 @@
         <div class="sidebar-icon">📅</div>
         <div class="sidebar-text">Set Schedule</div>
     </a>
-    <a th:href="@{/theaer}" class="sidebar-item  active">
+    <a th:href="@{/theater}" class="sidebar-item  active">
         <div class="sidebar-icon">🎬</div>
         <div class="sidebar-text">Manage Theater</div>
     </a>
@@ -506,7 +504,7 @@
                             <button type="submit" class="action-btn btn-edit" title="Theater Detail">👁️ View Detail</button>
                         </form>
 
-                        <form class="edit-form" method="POST" th:action="@{/theater/showFormForUpdate}" style="display: inline;">
+                        <form class="edit-form" method="get" th:action="@{/theater/showFormForUpdate}" style="display: inline;">
                             <input type="hidden" name="id" th:value="${theater.theaterID}" />
                             <button type="submit" class="action-btn btn-edit" title="Edit Theater">✏️ Edit</button>
                         </form>

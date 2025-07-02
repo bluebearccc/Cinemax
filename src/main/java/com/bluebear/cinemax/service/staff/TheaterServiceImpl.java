@@ -14,6 +14,7 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -53,7 +54,6 @@ public class TheaterServiceImpl implements TheaterService {
                 .status(theater.getStatus())
                 .build();
     }
-
 
     @Override
     public TheaterDTO getTheaterById(Integer id) {
@@ -102,7 +102,6 @@ public class TheaterServiceImpl implements TheaterService {
                 .collect(Collectors.toList());
     }
 
-
     public TheaterDTO saveTheater(TheaterDTO theaterDTO) {
         Theater theaterToSave = convertToEntity(theaterDTO);
         Theater savedTheater = theaterRepository.save(theaterToSave);
@@ -126,7 +125,6 @@ public class TheaterServiceImpl implements TheaterService {
         return null;
     }
 
-
     public boolean deleteTheater(Integer id) {
         try {
             theaterRepository.deleteById(id);
@@ -139,44 +137,59 @@ public class TheaterServiceImpl implements TheaterService {
             return false;
         }
     }
+
     @Override
     public TheaterDTO addTheater(TheaterDTO theaterDTO, MultipartFile imageFile) throws Exception {
         if (!theaterDTO.getTheaterName().trim().toLowerCase().startsWith("cgv")) {
-            throw new Exception("Tên rạp chiếu phải bắt đầu bằng 'CGV'.");
+            throw new Exception("Theater name must start with 'CGV'.");
         }
 
         if (theaterRepository.existsByTheaterNameIgnoreCase(theaterDTO.getTheaterName().trim())) {
-            throw new Exception("Tên rạp chiếu đã tồn tại. Vui lòng chọn tên khác.");
+            throw new Exception("Theater name already existed please select another name.");
         }
 
         if (theaterRepository.existsByAddressIgnoreCase(theaterDTO.getAddress().trim())) {
-            throw new Exception("Địa chỉ rạp chiếu đã tồn tại. Vui lòng kiểm tra lại.");
+            throw new Exception("This address is already existed please select another address.");
         }
 
         Theater theater = convertToEntity(theaterDTO);
 
         if (imageFile != null && !imageFile.isEmpty()) {
             String fileName = saveImage(imageFile);
-            theater.setImage("/uploads/theaters/" + fileName);
+            theater.setImage("/uploads/theaters_images/" + fileName);
         }
 
-        theater.setStatus(Theater_Status.Active); // Mặc định là Active
+        theater.setStatus(theater.getStatus());
         theater.setRoomQuantity(0); // Số phòng ban đầu là 0
 
         Theater savedTheater = theaterRepository.save(theater);
         return convertToDTO(savedTheater);
     }
+    public String saveImage(MultipartFile img) throws IOException {
+        String uploadDir = "uploads/theaters_images";
+        Path uploadPath = Paths.get(uploadDir);
 
-    private String saveImage(MultipartFile imageFile) throws IOException {
-        Path uploadPath = Paths.get(UPLOAD_DIR);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
 
-        String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
-        Path filePath = uploadPath.resolve(fileName);
-        Files.copy(imageFile.getInputStream(), filePath);
+        String filename = img.getOriginalFilename();
+        filename = org.springframework.util.StringUtils.cleanPath(filename);
+        Path filePath = uploadPath.resolve(filename);
+        if (Files.exists(filePath)) {
+            int counter = 1;
+            String nameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
+            String extension = filename.substring(filename.lastIndexOf('.'));
+            while (Files.exists(filePath)) {
+                filename = nameWithoutExtension + "(" + counter + ")" + extension;
+                filePath = uploadPath.resolve(filename);
+                counter++;
+            }
+        }
 
-        return fileName;
+        Files.copy(img.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+        return filename; // Chỉ trả về tên file
     }
+
 }

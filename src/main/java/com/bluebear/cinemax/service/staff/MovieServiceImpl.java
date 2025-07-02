@@ -13,9 +13,15 @@ import com.bluebear.cinemax.repository.MovieRepository; // Assuming this is your
 import com.bluebear.cinemax.repository.ScheduleRepository; // Assuming you have a ScheduleRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional; // Import Transactional
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -166,5 +172,22 @@ public class MovieServiceImpl implements MovieService {
         return movieOptional.map(this::convertToDTO).orElse(null);
     }
 
+    public Page<MovieDTO> findShowingMoviesWithFilters(String name, Integer genreId, String startDateStr, String endDateStr, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
 
+        LocalDate startDateVal = (startDateStr != null && !startDateStr.isEmpty()) ? LocalDate.parse(startDateStr) : null;
+        LocalDate endDateVal = (endDateStr != null && !endDateStr.isEmpty()) ? LocalDate.parse(endDateStr) : null;
+
+        LocalDateTime startDateTime = (startDateVal != null) ? startDateVal.atStartOfDay() : null;
+        LocalDateTime endDateTime = (endDateVal != null) ? endDateVal.atTime(LocalTime.MAX) : null;
+
+        // ✅ THAY ĐỔI Ở ĐÂY
+        LocalDateTime currentDate = LocalDateTime.now();
+
+        Page<Movie> moviePage = movieRepository.findShowingMoviesWithFilters(
+                currentDate, name, genreId, startDateTime, endDateTime, pageable
+        );
+
+        return moviePage.map(this::convertToDTO);
+    }
 }

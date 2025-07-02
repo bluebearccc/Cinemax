@@ -2,7 +2,7 @@ package com.bluebear.cinemax.service.staff;
 
 import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.dto.TheaterStockDTO;
-import com.bluebear.cinemax.entity.Theater; // Assuming you have a Theater entity
+import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.entity.TheaterStock;
 import com.bluebear.cinemax.enumtype.TheaterStock_Status;
 import com.bluebear.cinemax.repository.TheaterRepository;
@@ -40,37 +40,29 @@ public class TheaterStockServiceImpl implements TheaterStockService {
         }
 
         TheaterStock.TheaterStockBuilder builder = TheaterStock.builder()
-                .stockID(theaterStockDTO.getTheaterStockId()) // Gán ID nếu đây là trường hợp cập nhật
-                .itemName(theaterStockDTO.getFoodName())      // Ánh xạ foodName (DTO) -> itemName (Entity)
+                .stockID(theaterStockDTO.getTheaterStockId())
+                .itemName(theaterStockDTO.getFoodName())
                 .image(theaterStockDTO.getImage())
                 .quantity(theaterStockDTO.getQuantity())
-                .price(theaterStockDTO.getUnitPrice());     // Ánh xạ unitPrice (DTO) -> price (Entity)
+                .price(theaterStockDTO.getUnitPrice());
 
         if (theaterStockDTO.getStatus() != null && !theaterStockDTO.getStatus().isEmpty()) {
             try {
-                // Chuyển sang chữ hoa để khớp với tên của Enum
                 builder.status(TheaterStock_Status.valueOf(theaterStockDTO.getStatus()));
             } catch (IllegalArgumentException e) {
                 System.err.println("Giá trị status không hợp lệ: " + theaterStockDTO.getStatus());
             }
         }
 
-        // --- SỬA LỖI LOGIC QUAN TRỌNG ---
-        // Lấy Theater từ DB dựa trên theaterID trong TheaterDTO lồng nhau
         if (theaterStockDTO.getTheater() != null && theaterStockDTO.getTheater().getTheaterID() != null) {
             theaterRepository.findById(theaterStockDTO.getTheater().getTheaterID())
-                    .ifPresent(builder::theater); // Gán theater tìm thấy cho builder
+                    .ifPresent(builder::theater);
         }
 
         return builder.build();
     }
 
-    /**
-     * Chuyển đổi từ TheaterStock (Entity) sang TheaterStockDTO.
-     *
-     * @param theaterStock Đối tượng Entity đầu vào.
-     * @return Đối tượng DTO.
-     */
+
     private TheaterStockDTO convertToDTO(TheaterStock theaterStock) {
         if (theaterStock == null) {
             return null;
@@ -78,12 +70,12 @@ public class TheaterStockServiceImpl implements TheaterStockService {
 
         return TheaterStockDTO.builder()
                 .theaterStockId(theaterStock.getStockID())
-                .theater(convertToTheaterDTO(theaterStock.getTheater())) // Gọi hàm helper để chuyển đổi Theater
+                .theater(convertToTheaterDTO(theaterStock.getTheater()))
                 .foodName(theaterStock.getItemName())
                 .image(theaterStock.getImage())
                 .quantity(theaterStock.getQuantity())
                 .unitPrice(theaterStock.getPrice())
-                .status(theaterStock.getStatus().name()) // Chuyển Enum thành String an toàn
+                .status(theaterStock.getStatus().name())
                 .build();
     }
 
@@ -100,7 +92,6 @@ public class TheaterStockServiceImpl implements TheaterStockService {
                 .image(theater.getImage())
                 .roomQuantity(theater.getRoomQuantity())
                 .status(theater.getStatus())
-                // Cố ý không set 'rooms' và 'theaterStockS' để tránh lỗi lặp vô hạn
                 .build();
     }
 
@@ -121,10 +112,8 @@ public class TheaterStockServiceImpl implements TheaterStockService {
     }
 
     @Override
-    @Transactional // Ensures database operations are atomic
+    @Transactional
     public void saveTheaterStock(TheaterStockDTO theaterStockDTO) {
-        // This method now handles both creation and update based on if DTO has an ID
-        // If DTO has an ID, it will update; otherwise, it will create.
         TheaterStock theaterStockToSave = convertToEntity(theaterStockDTO);
         theaterStockRepository.save(theaterStockToSave);
     }
@@ -206,14 +195,24 @@ public class TheaterStockServiceImpl implements TheaterStockService {
                 .collect(Collectors.toList());
     }
 
-    @Transactional // Rất quan trọng để đảm bảo tất cả các update thành công hoặc không có gì cả
+    @Transactional
     @Override
     public void updateItemAcrossAllTheaters(TheaterStockDTO formData) throws IOException {
+        TheaterStock ts = convertToEntity(formData);
         TheaterStock originalItem = theaterStockRepository.findById(formData.getTheaterStockId())
                 .orElseThrow(() -> new IllegalArgumentException("Item not found with ID: " + formData.getTheaterStockId()));
 
         String originalItemName = originalItem.getItemName();
-
+        Integer newTheaterId = formData.getTheater().getTheaterID();
+        String theaterName = theaterRepository.findById(newTheaterId).get().getTheaterName();
+        Integer originalTheaterId = originalItem.getTheater().getTheaterID();
+        if (!originalTheaterId.equals(newTheaterId)) {
+            if (theaterStockRepository.existsByItemNameIgnoreCaseAndTheater_TheaterID(originalItemName, newTheaterId)) {
+                TheaterDTO newTheater = convertToTheaterDTO(theaterRepository.findById(newTheaterId).get());
+                throw new IllegalArgumentException
+                        ("Cannot move. This item name already exists in " + theaterName + " theater ");
+            }
+        }
         if (!originalItemName.equalsIgnoreCase(formData.getFoodName())) {
             if (theaterStockRepository.findFirstByItemNameIgnoreCase(formData.getFoodName()).isPresent()) {
                 throw new IllegalArgumentException("Item name '" + formData.getFoodName() + "' already exists.");
@@ -225,18 +224,22 @@ public class TheaterStockServiceImpl implements TheaterStockService {
         MultipartFile newImageFile = formData.getNewImageFile();
         if (newImageFile != null && !newImageFile.isEmpty()) {
             String newFileName = saveImage(newImageFile);
-            imagePathToSet = "/uploads/images/" + newFileName;
+            imagePathToSet = "/uploads/theater_stocks_images/" + newFileName;
         }
         for (TheaterStock item : itemsToUpdate) {
             item.setItemName(formData.getFoodName());
             item.setPrice(formData.getUnitPrice());
             item.setImage(imagePathToSet);
         }
+        if (!originalTheaterId.equals(newTheaterId)) {
+            Theater newTheater = theaterRepository.findById(newTheaterId).get();
+            originalItem.setTheater(newTheater);
+        }
         originalItem.setQuantity(formData.getQuantity());
         originalItem.setStatus(TheaterStock_Status.valueOf(formData.getStatus()));
     }
     public String saveImage(MultipartFile img) throws IOException {
-        String uploadDir = "uploads/images";
+        String uploadDir = "uploads/theater_stocks_images";
         Path uploadPath = Paths.get(uploadDir);
 
         if (!Files.exists(uploadPath)) {
@@ -259,8 +262,9 @@ public class TheaterStockServiceImpl implements TheaterStockService {
 
         Files.copy(img.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return filename; // Chỉ trả về tên file
+        return filename;
     }
+
     @Override
     public Page<TheaterStockDTO> findByTheaterId(Integer theaterId, Pageable pageable) {
         return theaterStockRepository.findByTheater_TheaterID(theaterId, pageable).map(this::convertToDTO);

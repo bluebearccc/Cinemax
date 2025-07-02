@@ -47,8 +47,8 @@
         <div class="controls">
             <div class="filter-box">
                 <form th:action="@{/theater_stock}" method="get" id="theaterFilterForm">
-                    <input type="hidden" name="itemName" th:value="${itemName}">
-                    <select name="theaterId" onchange="document.getElementById('theaterFilterForm').submit()">
+                    <input type="hidden" name="itemName" id="hiddenItemNameInFilterForm">
+                    <select name="theaterId" onchange="submitFilterForm()">
                         <option value="">All Theaters</option>
                         <option th:each="theater : ${allTheaters}"
                                 th:value="${theater.theaterID}"
@@ -62,7 +62,7 @@
             <div class="search-box">
                 <form th:action="@{/theater_stock}" method="get">
                     <input type="hidden" name="theaterId" th:value="${selectedTheaterId}">
-                    <input type="text" name="itemName" class="search-input" placeholder="Search for items's name" th:value="${itemName}">
+                    <input type="text" name="itemName" id="itemName" class="search-input" placeholder="Search for items's name" th:value="${itemName}">
                     <button type="submit">Search</button>
                 </form>
             </div>
@@ -95,7 +95,7 @@
                     <td th:text="${stock.getStatus()}"></td>
                     <td>
                         <div class="action-buttons">
-                            <form class="edit-form" method="POST" th:action="@{/theater_stock/showFormForUpdate}">
+                            <form class="edit-form" method="get" th:action="@{/theater_stock/showFormForUpdate}">
                                 <input type="hidden" name="id" th:value="${stock.getTheaterStockId()}" />
                                 <button type="submit" class="action-btn btn-edit">Edit</button>
                             </form>
@@ -137,7 +137,13 @@
     <script>
         function confirmDelete() {
             return confirm('Are you sure you want to delete this item?');
+        }function submitFilterForm() {
+            const currentSearchValue = document.getElementById('itemName').value;
+
+            document.getElementById('hiddenItemNameInFilterForm').value = currentSearchValue;
+            document.getElementById('theaterFilterForm').submit();
         }
+
     </script>
 
     </body>

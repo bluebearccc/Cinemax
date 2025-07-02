@@ -3,10 +3,12 @@ package com.bluebear.cinemax.controller.staff;
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.enumtype.Schedule_Status;
+import com.bluebear.cinemax.service.GenreService;
 import com.bluebear.cinemax.service.staff.*;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +22,7 @@ import java.util.*;
 
 @Controller
 @RequestMapping("/movie_schedule")
-public class MovieScheduleController {
+public class    MovieScheduleController {
 
     @Autowired
     TheaterServiceImpl theaterServiceImpl;
@@ -37,15 +39,36 @@ public class MovieScheduleController {
     @Autowired
     MovieServiceImpl movieServiceImpl;
 
+    @Autowired
+    GenreService genreServiceImpl;
     @GetMapping
-    public String getMovieSchedulePage(Model model) {
+    public String getMovieSchedulePage(
+            @RequestParam(value = "name", required = false) String name,
+            @RequestParam(value = "genre", required = false) Integer genreId,
+            @RequestParam(value = "start_date", required = false) String startDate,
+            @RequestParam(value = "end_date", required = false) String endDate,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size,
+            Model model) {
 
-        List<MovieDTO> movies = movieServiceImpl.findAllShowingMovies();
+        Page<MovieDTO> moviePage = movieServiceImpl.findShowingMoviesWithFilters(name, genreId, startDate, endDate, page, size);
 
-        model.addAttribute("movies", movies);
+        model.addAttribute("movies", moviePage);
+        model.addAttribute("genres", genreServiceImpl.getAllGenres());
+
+        // Thông tin phân trang
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", moviePage.getTotalPages());
+
+        // Giữ lại các giá trị filter để hiển thị lại trên form
+        model.addAttribute("name", name);
+        model.addAttribute("genre", genreId);
+        model.addAttribute("start_date", startDate);
+        model.addAttribute("end_date", endDate);
 
         return "staff/movie_schedule";
     }
+
 
     @GetMapping("/search")
     public String searchMovieByName(@RequestParam("name") String name, Model model) {
@@ -193,19 +216,17 @@ public class MovieScheduleController {
         return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
     }
 
-    @PostMapping("/delete_schedule") // Đổi từ GET sang POST
-    @ResponseBody // Trả về JSON cho AJAX
+    @PostMapping("/delete_schedule")
+    @ResponseBody
     public Map<String, Object> deleteSchedule(@RequestParam(value ="scheduleId") Integer scheduleId){
         Map<String, Object> response = new HashMap<>();
 
-        // Kiểm tra xem lịch trình có tồn tại trong detailseat không
         if (scheduleServiceImpl.isExisted(scheduleId)) {
             response.put("success", false);
             response.put("message", "Cannot delete schedule. It has associated bookings.");
             return response;
         }
 
-        // Nếu không có trong detailseat, tiến hành xóa
         if (scheduleServiceImpl.deleteSchedule(scheduleId)) {
             response.put("success", true);
             response.put("message", "Schedule deleted successfully!");
@@ -217,7 +238,7 @@ public class MovieScheduleController {
     }
 
     @GetMapping("/get_schedule_details")
-    @ResponseBody // Đảm bảo trả về JSON
+    @ResponseBody
     public Map<String, Object> getScheduleDetails(@RequestParam("scheduleID") Integer scheduleId) {
         Map<String, Object> response = new HashMap<>();
         try {
@@ -267,19 +288,16 @@ public class MovieScheduleController {
                                  @RequestParam(value = "statusUpdate") String status,
                                  RedirectAttributes redirectAttributes) {
 
-        // --- Validation 1: Kiểm tra đã có người đặt vé chưa (giữ nguyên) ---
         if (scheduleServiceImpl.isExisted(scheduleId)) {
             redirectAttributes.addFlashAttribute("message", "Cannot edit this schedule. It has associated bookings.");
             return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
         }
 
-        // --- Validation 2: Kiểm tra roomId có được chọn không ---
         if (roomId == null) {
             redirectAttributes.addFlashAttribute("message", "Please select a room!");
             return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
         }
 
-        // --- Chuyển đổi thời gian ---
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
         LocalDate date = LocalDate.parse(date_raw, dateFormatter);
@@ -288,7 +306,6 @@ public class MovieScheduleController {
         LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
         LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
 
-        // --- VALIDATION 3 (MỚI): KIỂM TRA PHÒNG CÓ BỊ TRÙNG LỊCH KHÁC KHÔNG ---
         ScheduleDTO conflictingSchedule = scheduleServiceImpl.isRoomAvailableForUpdate(roomId, actualStartTime, actualEndTime, scheduleId);
 
         if (conflictingSchedule != null) {
@@ -339,21 +356,18 @@ public class MovieScheduleController {
 
         Map<String, Object> response = new HashMap<>();
 
-        // --- Validation 1: Kiểm tra đã có người đặt vé chưa ---
         if (scheduleServiceImpl.isExisted(scheduleId)) {
             response.put("success", false);
             response.put("message", "Cannot edit this schedule. It has associated bookings.");
             return response;
         }
 
-        // --- Validation 2: Kiểm tra roomId có được chọn không ---
         if (roomId == null) {
             response.put("success", false);
             response.put("message", "Please select a room!");
             return response;
         }
 
-        // --- Chuyển đổi thời gian ---
         try {
             DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
             DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
@@ -363,11 +377,9 @@ public class MovieScheduleController {
             LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
             LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
 
-            // --- VALIDATION 3: KIỂM TRA PHÒNG CÓ BỊ TRÙNG LỊCH KHÁC KHÔNG ---
             ScheduleDTO conflictingSchedule = scheduleServiceImpl.isRoomAvailableForUpdate(roomId, actualStartTime, actualEndTime, scheduleId);
 
             if (conflictingSchedule != null) {
-                // Nếu có xung đột, xây dựng thông báo lỗi và trả về JSON
                 String errorMessage = String.format(
                         "The selected room '%s' in theater '%s' is unavailable. It is already scheduled for the movie '%s' from %s to %s.",
                         conflictingSchedule.getRoomName(),
@@ -381,7 +393,6 @@ public class MovieScheduleController {
                 return response;
             }
 
-            // --- Logic cập nhật ---
             ScheduleDTO existingSchedule = scheduleServiceImpl.getScheduleById(scheduleId);
             if (existingSchedule == null) {
                 response.put("success", false);
@@ -400,7 +411,6 @@ public class MovieScheduleController {
             response.put("message", "Schedule updated successfully!");
 
         } catch (Exception e) {
-            // Bắt các lỗi khác (ví dụ: định dạng ngày giờ sai)
             response.put("success", false);
             response.put("message", "An error occurred: " + e.getMessage());
         }
@@ -409,18 +419,15 @@ public class MovieScheduleController {
     }
     @GetMapping("/get_rooms_for_edit")
     public String getRoomsForEditFragment(@RequestParam("theaterId") Integer theaterId,
-                                          // Đổi tên phương thức cho rõ ràng (tùy chọn nhưng khuyến khích)
                                           @RequestParam("startTime") String startTime_raw,
                                           @RequestParam("date") String date_raw,
                                           @RequestParam("movieId") Integer movieId,
                                           @RequestParam("scheduleId") Integer scheduleId,
                                           Model model) {
 
-        // THAY ĐỔI LOGIC: Lấy tất cả các phòng của rạp
         List<RoomDTO> allRoomsInTheater = roomServiceImpl.findAllRoomsByTheaterId(theaterId);
         model.addAttribute("availableRooms", allRoomsInTheater);
 
-        // Lấy ID phòng đã được chọn của lịch trình hiện tại để check radio button
         ScheduleDTO currentSchedule = scheduleServiceImpl.getScheduleById(scheduleId);
         if (currentSchedule != null) {
             model.addAttribute("selectedRoomId", currentSchedule.getRoomID());

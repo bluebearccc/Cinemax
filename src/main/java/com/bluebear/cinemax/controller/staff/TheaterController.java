@@ -103,5 +103,12 @@ public class TheaterController {
             return "staff/add_theater";
         }
     }
-
+    @GetMapping("/showFormForUpdate")
+    public String showUpdate(
+            @RequestParam("id") Integer theaterId,
+            Model model){
+        TheaterDTO theaterDTO = theaterServiceImpl.getTheaterById(theaterId);
+        model.addAttribute("theater", theaterDTO);
+        return "staff/edit_theater";
+    }
 }

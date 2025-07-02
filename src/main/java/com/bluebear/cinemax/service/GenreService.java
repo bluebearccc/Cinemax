@@ -23,12 +23,10 @@ public class GenreService {
     }
 
     private GenreDTO convertToDTO(Genre genre) {
-        // Assuming GenreDTO has similar fields to Genre entity
-        // You'll need to implement this conversion based on your GenreDTO structure
+
         GenreDTO dto = new GenreDTO();
         dto.setGenreID(genre.getGenreID());
         dto.setGenreName(genre.getGenreName());
-        // Add other field mappings as needed
         return dto;
     }
 }

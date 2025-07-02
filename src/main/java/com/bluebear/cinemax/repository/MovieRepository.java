@@ -115,5 +115,20 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
-
+    @Query("""
+        SELECT DISTINCT m FROM Movie m LEFT JOIN m.genres g
+        WHERE (m.endDate >= :currentDate AND m.startDate <= :currentDate)
+        AND (:name IS NULL OR m.movieName LIKE %:name%)
+        AND (:genreId IS NULL OR g.genreID = :genreId)
+        AND (:startDate IS NULL OR m.endDate >= :startDate)
+        AND (:endDate IS NULL OR m.startDate <= :endDate)
+    """)
+    Page<Movie> findShowingMoviesWithFilters(
+            @Param("currentDate") LocalDateTime currentDate,
+            @Param("name") String name,
+            @Param("genreId") Integer genreId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
 }

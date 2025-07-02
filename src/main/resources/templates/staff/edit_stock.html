@@ -88,6 +88,9 @@
   </div>
   <!-- Form Container -->
   <div class="form-container">
+    <div th:if="${error}" class="alert alert-error">
+      <span th:text="${error}"></span>
+    </div>
     <div th:if="${isMultiTheaterItem}" class="alert alert-warning">
       <strong>⚠️ Warning:</strong> This product exists in multiple theaters. Any changes to Name, Price, and Image will be applied to all theaters that have this product.
     </div>
@@ -216,7 +219,30 @@
     </form>
   </div>
 </div>
-<script>function validateForm() {
+<script>
+  function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        input.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  function validateForm() {
   let isValid = true;
   // Xóa các thông báo lỗi cũ
   document.querySelectorAll('.error-message').forEach(el => el.textContent = '');

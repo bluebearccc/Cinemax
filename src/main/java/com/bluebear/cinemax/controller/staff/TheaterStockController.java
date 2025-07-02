@@ -40,7 +40,7 @@ public class TheaterStockController {
     @Autowired
     private DetailFD_ServiceImpl detailFD_ServiceImpl;
 
-    @PostMapping("/showFormForUpdate")
+    @GetMapping("/showFormForUpdate")
     public String showFormForUpdate(@RequestParam("id") Integer stockId, Model model) {
         TheaterStockDTO theaterStockDTO = theaterStockServiceImpl.findById(stockId);
         if (theaterStockDTO != null) {
@@ -69,10 +69,10 @@ public class TheaterStockController {
             redirectAttributes.addFlashAttribute("message", "Item updated successfully across all relevant theaters.");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/theater_stock/edit/" + stockInfo.getTheaterStockId();
+            return "redirect:/theater_stock/showFormForUpdate?id=" + stockInfo.getTheaterStockId();
         } catch (IOException e) {
             redirectAttributes.addFlashAttribute("error", "Could not save new image.");
-            return "redirect:/theater_stock/edit/" + stockInfo.getTheaterStockId();
+            return "redirect:/theater_stock/showFormForUpdate?id=" + stockInfo.getTheaterStockId();
         }
 
         return "redirect:/theater_stock";
@@ -107,7 +107,6 @@ public class TheaterStockController {
 
         if (existingItemOpt.isPresent()) {
             TheaterStockDTO existingItem = existingItemOpt.get();
-            // Nếu sản phẩm đã tồn tại ở nơi khác, kiểm tra xem giá có khớp không
             if (!stockInfo.getUnitPrice().equals(existingItem.getUnitPrice())) {
                 String errorMessage = String.format(
                         "Item '%s' already exists with a price of %.2f. Please use the same price.",
@@ -118,15 +117,11 @@ public class TheaterStockController {
                 return "redirect:/theater_stock/add_stock";
             }
 
-            // Nếu giá đã khớp, tự động sử dụng lại hình ảnh đã có nếu người dùng không upload ảnh mới
             if (img == null || img.isEmpty()) {
                 stockInfo.setImage(existingItem.getImage());
             }
         }
 
-
-        // --- BƯỚC B: KIỂM TRA TRÙNG LẶP TRONG CÁC RẠP ĐƯỢC CHỌN ---
-        // Logic này vẫn cần thiết để tránh thêm sản phẩm vào rạp đã có nó
         for (Integer theaterId : theaterIds) {
             if (theaterStockServiceImpl.itemExistsInTheater(stockInfo.getFoodName(), theaterId)) {
                 TheaterDTO existingTheater = theaterServiceImpl.getTheaterById(theaterId);
@@ -140,14 +135,13 @@ public class TheaterStockController {
         if (img != null && !img.isEmpty()) {
             try {
                 String savedImagePath = theaterStockServiceImpl.saveImage(img);
-                stockInfo.setImage("/uploads/images/" + savedImagePath);
+                stockInfo.setImage("/uploads/theater_stocks_images/" + savedImagePath);
             } catch (IOException e) {
                 redirectAttributes.addFlashAttribute("error", "Could not save image file.");
                 return "redirect:/theater_stock/add_stock";
             }
         }
 
-        // Nếu sản phẩm hoàn toàn mới và người dùng không upload ảnh, cần báo lỗi
         if (stockInfo.getImage() == null || stockInfo.getImage().isEmpty()){
             redirectAttributes.addFlashAttribute("error", "Please upload an image for the new item.");
             return "redirect:/theater_stock/add_stock";
@@ -155,7 +149,6 @@ public class TheaterStockController {
 
         stockInfo.setStatus(String.valueOf(status));
 
-        // Vòng lặp để lưu
         for (Integer theaterId : theaterIds) {
             TheaterDTO theater = theaterServiceImpl.getTheaterById(theaterId);
             if (theater != null) {
@@ -243,15 +236,12 @@ public class TheaterStockController {
         Pageable pageable = PageRequest.of(page, size);
         Page<TheaterStockDTO> theaterStockPage;
 
-        // Kịch bản 1: Tìm kiếm có tên VÀ có lọc theo rạp
         if (theaterId != null && itemName != null && !itemName.trim().isEmpty()) {
             theaterStockPage = theaterStockServiceImpl.findByTheaterIdAndItemName(theaterId, itemName.trim(), pageable);
         }
-        // Kịch bản 2: Chỉ tìm kiếm theo tên (trên tất cả các rạp)
         else if (itemName != null && !itemName.trim().isEmpty()) {
             theaterStockPage = theaterStockServiceImpl.findByItemName(itemName.trim(), pageable);
         }
-        // Kịch bản 3: Chỉ lọc theo rạp (không tìm kiếm tên)
         else if (theaterId != null) {
             theaterStockPage = theaterStockServiceImpl.findByTheaterId(theaterId, pageable);
         }
@@ -260,7 +250,6 @@ public class TheaterStockController {
             theaterStockPage = theaterStockServiceImpl.getAllTheaterStock(pageable);
         }
 
-        // Lấy danh sách tất cả các rạp để hiển thị trên dropdown
         List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters(); // Bạn cần có phương thức này trong TheaterService
 
         // Thêm các thuộc tính vào model để view có thể sử dụng
