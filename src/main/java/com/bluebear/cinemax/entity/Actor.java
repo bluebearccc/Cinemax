@@ -1,38 +1,38 @@
 package com.bluebear.cinemax.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
-import java.util.Set;
+import java.util.Collection;
+import java.util.List;
 
 @Entity
 @Table(name = "Actor")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"movieActors"}) // Avoid circular reference in toString
+@Builder
 public class Actor {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ActorID")
-    private Integer actorId;
+    private Integer actorID;
 
-    @Column(name = "ActorName", nullable = false)
+    @Column(name = "ActorName", nullable = false, length = 255)
     private String actorName;
 
-    @Column(name = "Image", nullable = false)
+    @Column(name = "Image", nullable = false, length = 255)
     private String image;
 
-    @OneToMany(mappedBy = "actor", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<MovieActor> movieActors;
+    @JsonIgnore
+    @ManyToMany(mappedBy = "actors")
+    private List<Movie> movies;
 
-    // Constructor without movieActors for basic creation
-    public Actor(String actorName, String image) {
-        this.actorName = actorName;
-        this.image = image;
+    public Object getActorId() {
+        return actorID;
     }
+
+
 }

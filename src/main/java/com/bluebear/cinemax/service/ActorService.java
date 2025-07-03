@@ -59,7 +59,7 @@ public class ActorService {
         if (actor == null) return null;
 
         ActorDTO dto = new ActorDTO();
-        dto.setActorId(actor.getActorId());
+        dto.setActorId((Integer) actor.getActorId());
         dto.setActorName(actor.getActorName());
         dto.setImage(actor.getImage());
 

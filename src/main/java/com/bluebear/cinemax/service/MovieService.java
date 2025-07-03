@@ -3,6 +3,7 @@ package com.bluebear.cinemax.service;
 import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.repository.*;
+import com.bluebear.cinemax.enumtype.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -56,7 +57,7 @@ public class MovieService {
      * Lấy tất cả phim active (cho public)
      */
     public List<MovieDTO> getAllActiveMovies() {
-        return movieRepository.findByStatus(Movie.MovieStatus.Active).stream()
+        return movieRepository.findByStatus(Movie.Movie_Status.Active).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -65,7 +66,7 @@ public class MovieService {
      * Lấy tất cả phim đã xóa (Removed)
      */
     public List<MovieDTO> getAllRemovedMovies() {
-        return movieRepository.findByStatus(Movie.MovieStatus.Removed).stream()
+        return movieRepository.findByStatus(Movie.Movie_Status.Removed).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -76,7 +77,7 @@ public class MovieService {
     public Page<MovieDTO> getAllActiveMoviesWithPaging(PageRequest pageRequest) {
         Page<Movie> moviePage = movieRepository.findAll(pageRequest);
         List<MovieDTO> movieDTOs = moviePage.getContent().stream()
-                .filter(movie -> movie.getStatus() == Movie.MovieStatus.Active)
+                .filter(movie -> movie.getStatus() == Movie.Movie_Status.Active)
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
 
@@ -105,7 +106,7 @@ public class MovieService {
      * Lấy phim mới nhất
      */
     public List<MovieDTO> getRecentMovies(int limit) {
-        List<Movie> movies = movieRepository.findByStatus(Movie.MovieStatus.Active);
+        List<Movie> movies = movieRepository.findByStatus(Movie.Movie_Status.Active);
         return movies.stream()
                 .sorted((m1, m2) -> m2.getStartDate().compareTo(m1.getStartDate()))
                 .limit(limit)

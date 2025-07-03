@@ -1,83 +1,90 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Age_Limit;
+import com.bluebear.cinemax.enumtype.Movie_Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "Movie")
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(exclude = {"movieGenres", "movieActors"}) // Avoid circular reference in toString
+@Builder
 public class Movie {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "MovieID")
-    private Integer movieId;
+    private Integer movieID;
 
-    @Column(name = "MovieName", nullable = false)
+    @Column(name = "MovieName", nullable = false, length = 255)
     private String movieName;
 
-    @Column(name = "Description", columnDefinition = "nvarchar(MAX)")
+    @Column(name = "Age_limit", length = 10)
+    @Enumerated(EnumType.STRING)
+    private Age_Limit ageLimit;
+
+    @Column(name = "Description", length = 1000)
     private String description;
 
-    @Column(name = "Image", nullable = false)
+    @Column(name = "Image", nullable = false, length = 255)
     private String image;
 
-    @Column(name = "Banner", nullable = false)
+    @Column(name = "Banner", nullable = false, length = 255)
     private String banner;
 
-    @Column(name = "Studio")
+    @Column(name = "Studio", length = 100)
     private String studio;
 
     @Column(name = "Duration", nullable = false)
     private Integer duration;
 
-    @Column(name = "Trailer", nullable = false)
+    @Column(name = "Trailer", nullable = false, length = 255)
     private String trailer;
 
-    @Column(name = "MovieRate", precision = 3, scale = 1)
-    private BigDecimal movieRate;
+    @Column(name = "MovieRate", nullable = true)
+    private Double movieRate;
 
     @Column(name = "StartDate", nullable = false)
-    private LocalDate startDate;
+    private LocalDateTime startDate;
 
     @Column(name = "EndDate", nullable = false)
-    private LocalDate endDate;
+    private LocalDateTime endDate;
 
+    @Column(name = "Status", nullable = false, length = 10)
     @Enumerated(EnumType.STRING)
-    @Column(name = "Status", nullable = false)
-    private MovieStatus status;
+    private Movie_Status status;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<MovieGenre> movieGenres;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "Movie_Genre",
+            joinColumns = @JoinColumn(name = "MovieID"),
+            inverseJoinColumns = @JoinColumn(name = "GenreID")
+    )
+    private List<Genre> genres;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Set<MovieActor> movieActors;
+    @ManyToMany
+    @JoinTable(
+            name = "Movie_Actor",
+            joinColumns = @JoinColumn(name = "MovieID"),
+            inverseJoinColumns = @JoinColumn(name = "ActorID")
+    )
+    private List<Actor> actors;
 
-    // Enum for Status
-    public enum MovieStatus {
-        Active, Removed
-    }
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<MovieFeedback> feedbackList;
 
-    // Constructor without relationships for basic creation
-    public Movie(String movieName, String image, String banner, Integer duration,
-                 String trailer, LocalDate startDate, LocalDate endDate, MovieStatus status) {
-        this.movieName = movieName;
-        this.image = image;
-        this.banner = banner;
-        this.duration = duration;
-        this.trailer = trailer;
-        this.startDate = startDate;
-        this.endDate = endDate;
-        this.status = status;
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Schedule> scheduleList;
+
+    public Object getMovieId() {
+        return movieID;
     }
 }
