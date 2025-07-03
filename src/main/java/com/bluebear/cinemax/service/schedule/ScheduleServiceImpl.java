@@ -91,6 +91,12 @@ public class ScheduleServiceImpl implements ScheduleService {
         dto.setMovieID(schedule.getMovie().getMovieID());
         dto.setRoomID(schedule.getRoom().getRoomID());
         dto.setStatus(schedule.getStatus());
+
+        if (schedule.getRoom() != null) {
+            dto.setRoomName(schedule.getRoom().getName());
+            dto.setRoomType(schedule.getRoom().getTypeOfRoom().name());
+        }
+
         return dto;
     }
 

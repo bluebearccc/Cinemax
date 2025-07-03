@@ -15,9 +15,9 @@
                     <h5 class="mb-0">Quét mã QR để thanh toán</h5>
                 </div>
                 <div class="card-body">
-                    <img th:src="@{'https://qr.sepay.vn/img?bank=' + ${sepayBank} + '&acc=' + ${sepayAccount} + '&template=compact&amount=' + ${invoiceDto.totalPrice} + '&des=DH' + ${invoiceDto.id}}">
+                    <img th:src="@{'https://qr.sepay.vn/img?bank=' + ${sepayBank} + '&acc=' + ${sepayAccount} + '&template=compact&amount=' + ${invoiceDto.totalPrice} + '&des=DH' + ${invoiceDto.invoiceID}}">
                     <div class="alert alert-info">
-                        <p class="mb-1">Nội dung chuyển khoản: <strong th:text="'DH' + ${invoiceDto.id}"></strong></p>
+                        <p class="mb-1">Nội dung chuyển khoản: <strong th:text="'DH' + ${invoiceDto.invoiceID}"></strong></p>
                         <p class="mb-0">Số tiền: <strong class="text-warning" th:text="${#numbers.formatDecimal(invoiceDto.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong></p>
                     </div>
 
@@ -43,7 +43,7 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
     var pay_status = 'Unpaid';
-    var order_id = /*[[${invoiceDto.id}]]*/ '0';
+    var order_id = /*[[${invoiceDto.invoiceID}]]*/ '0';
 
     function check_payment_status() {
         if (pay_status == 'Unpaid') {

@@ -21,34 +21,25 @@ public class WebhookController {
     @PostMapping("/sepay")
     public ResponseEntity<String> handleSepayPaymentWebhook(@RequestBody SepayWebhookDTO payload) {
         log.info("Received SePay webhook with raw content: {}", payload.getContent());
-
         try {
-            // Bước 1: Vẫn lưu lại giao dịch gốc
             bookingService.saveTransactionFromWebhook(payload);
-
             String transactionContent = payload.getContent();
             if (transactionContent == null || transactionContent.isBlank()) {
                 log.warn("Webhook received with empty content.");
                 return ResponseEntity.ok("Webhook received but content is empty.");
             }
-
-            // Bước 2: Tìm vị trí của chuỗi "DH" (không phân biệt hoa thường)
             String upperCaseContent = transactionContent.toUpperCase();
             int startIndex = upperCaseContent.indexOf("DH");
-
             if (startIndex == -1) {
                 log.warn("Webhook content does not contain invoice prefix 'DH': {}", transactionContent);
                 return ResponseEntity.ok("Webhook received but no DH prefix found.");
             }
-
-            // Bước 3: Tách chuỗi số ID hóa đơn từ sau "DH"
             String remainingString = transactionContent.substring(startIndex + 2);
             StringBuilder invoiceIdBuilder = new StringBuilder();
             for (char c : remainingString.toCharArray()) {
                 if (Character.isDigit(c)) {
                     invoiceIdBuilder.append(c);
                 } else {
-                    // Dừng lại khi gặp ký tự không phải là số (ví dụ: dấu gạch ngang '-')
                     break;
                 }
             }

@@ -28,4 +28,6 @@ public interface TheaterStockRepository extends JpaRepository<TheaterStock, Inte
 
     Page<TheaterStock> findByTheater_TheaterIDAndItemNameContainingIgnoreCaseAndStatus(
             Integer theaterId, String itemName, TheaterStock_Status status, Pageable pageable);
+
+    List<TheaterStock> findByStatus(TheaterStock_Status theaterStockStatus);
 }

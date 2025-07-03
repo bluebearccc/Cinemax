@@ -7,10 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Locale;
+import java.util.Optional;
 
 public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 
     @Query("SELECT p FROM Promotion p WHERE p.status = :status AND p.startTime <= :now AND p.endTime >= :now")
     List<Promotion> findActivePromotions(@Param("status") Promotion_Status status, @Param("now") LocalDateTime now);
 
+    Optional<Promotion> findByPromotionCode(String code);
 }

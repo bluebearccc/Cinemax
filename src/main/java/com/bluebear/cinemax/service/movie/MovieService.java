@@ -2,6 +2,7 @@ package com.bluebear.cinemax.service.movie;
 
 import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.entity.Movie;
+import com.bluebear.cinemax.enumtype.Age_Limit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.enumtype.Theater_Status;
 import org.springframework.data.domain.Page;
@@ -48,6 +49,7 @@ public interface MovieService {
 
     Page<MovieDTO> findMoviesByScheduleAndTheaterAndRoomType(LocalDateTime schedule, int theaterId, String roomType);
 
+
     Page<MovieDTO> findMovies(Integer theaterId, Integer genreId, String movieName, Pageable pageable);
 
     Page<MovieDTO> findMoviesThatHaveFeedback(Pageable pageable);
@@ -56,30 +58,34 @@ public interface MovieService {
 
     Movie toEntity(MovieDTO dto);
 
-    public List<MovieDTO> findAllShowingMovies();
+    List<MovieDTO> findAllShowingMovies();
 
-    public List<MovieDTO> searchExistingMovieByName(String name);
+    List<MovieDTO> searchExistingMovieByName(String name);
 
     Page<MovieDTO> findMoviesByTheaterAndGenreAndKeywordAndDateRange(Integer theaterId, Integer genreId,
                                                                      String keyword, Movie_Status status,
                                                                      Theater_Status theaterStatus,
                                                                      LocalDateTime startDate, LocalDateTime endDate,
+                                                                     Age_Limit ageLimit,
                                                                      Pageable pageable);
 
     Page<MovieDTO> findMoviesByTheaterAndKeywordAndDateRange(Integer theaterId, String keyword,
                                                              Movie_Status status, Theater_Status theaterStatus,
                                                              LocalDateTime startDate, LocalDateTime endDate,
+                                                             Age_Limit ageLimit,
                                                              Pageable pageable);
 
-    public Page<MovieDTO> findMoviesByTheaterAndGenreAndDateRange(Integer theaterId, Integer genreId,
-                                                                  Movie_Status status, Theater_Status theaterStatus,
-                                                                  LocalDateTime startDate, LocalDateTime endDate,
-                                                                  Pageable pageable);
+    Page<MovieDTO> findMoviesByTheaterAndGenreAndDateRange(Integer theaterId, Integer genreId,
+                                                           Movie_Status status, Theater_Status theaterStatus,
+                                                           LocalDateTime startDate, LocalDateTime endDate,
+                                                           Age_Limit ageLimit,
+                                                           Pageable pageable);
 
-    public Page<MovieDTO> findMoviesByTheaterAndDateRange(Integer theaterId, Movie_Status status,
-                                                          Theater_Status theaterStatus,
-                                                          LocalDateTime startDate, LocalDateTime endDate,
-                                                          Pageable pageable);
+    Page<MovieDTO> findMoviesByTheaterAndDateRange(Integer theaterId, Movie_Status status,
+                                                   Theater_Status theaterStatus,
+                                                   LocalDateTime startDate, LocalDateTime endDate,
+                                                   Age_Limit ageLimit,
+                                                   Pageable pageable);
 
     MovieDTO findById(Integer movieID);
 }

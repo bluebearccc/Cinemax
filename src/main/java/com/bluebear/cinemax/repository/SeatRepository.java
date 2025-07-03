@@ -24,4 +24,6 @@ public interface SeatRepository extends JpaRepository<Seat, Integer> {
 
     @Query("SELECT s FROM Seat s WHERE s.room.roomID = :roomId")
     List<Seat> findByRoom_RoomID(Integer roomId);
+
+    List<Seat> findByRoomRoomID(Integer roomId);
 }

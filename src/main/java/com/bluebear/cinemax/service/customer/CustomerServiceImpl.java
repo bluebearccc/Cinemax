@@ -27,6 +27,7 @@ public class CustomerServiceImpl implements CustomerService {
         dto.setAccountID(customer.getAccount() != null ? customer.getAccount().getId() : null);
         dto.setFullName(customer.getFullName());
         dto.setPhone(customer.getPhone());
+        dto.setPoint(customer.getPoint());
         return dto;
     }
 
@@ -41,7 +42,7 @@ public class CustomerServiceImpl implements CustomerService {
             Optional<Account> optional = accountRepository.findById(dto.getAccountID());
             optional.ifPresent(customer::setAccount);
         }
-
+        customer.setPoint(dto.getPoint());
         return customer;
     }
 

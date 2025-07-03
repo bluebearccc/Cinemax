@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.repository;
 
+import com.bluebear.cinemax.dto.RoomDTO;
 import com.bluebear.cinemax.entity.Room;
 import com.bluebear.cinemax.enumtype.Room_Status;
 import org.springframework.data.domain.Page;
@@ -20,4 +21,5 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
 
     List<Room> findByTheater_TheaterIDAndStatus(Integer theaterID, Room_Status status);
 
+    RoomDTO getRoomsByRoomID(Integer roomID);
 }

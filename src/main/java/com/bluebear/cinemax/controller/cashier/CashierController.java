@@ -2,6 +2,7 @@ package com.bluebear.cinemax.controller.cashier;
 
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.Invoice;
+import com.bluebear.cinemax.enumtype.Age_Limit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.enumtype.PaymentMethod;
 import com.bluebear.cinemax.enumtype.Theater_Status;
@@ -39,7 +40,7 @@ public class CashierController {
     private final LocalDateTime currentDate = LocalDateTime.now();
     private final LocalDateTime sevenDate = currentDate.plusDays(7);
 
-    private final Integer theaterId = 1;
+    private Integer theaterId = 1;
 
     @Autowired
     private MovieService movieService;
@@ -78,11 +79,14 @@ public class CashierController {
     public String getMovie(@RequestParam(required = false) String keyword,
                            @RequestParam(required = false) Integer genreId,
                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime date,
+                           @RequestParam(required = false) Age_Limit ageLimit,
                            @RequestParam(defaultValue = "0") Integer page,
                            @RequestParam(defaultValue = "6") Integer pageSize,
                            HttpSession session,
                            Model model) {
         clearSessionData(session);
+//        EmployeeDTO employee = (EmployeeDTO) session.getAttribute("employee");
+//        Integer theaterId = employee.getTheaterId();
         session.setAttribute("theaterId", theaterId);
         try {
 
@@ -100,23 +104,25 @@ public class CashierController {
             }
 
             Pageable pageable = PageRequest.of(page, pageSize);
+            Page<MovieDTO> moviesPage;
 
-            Page<MovieDTO> moviesPage = movieService.findMoviesByTheaterAndDateRange(
-                    theaterId, Movie_Status.Active, Theater_Status.Active,
-                    startDate, endDate, pageable);
-
+            // Cập nhật logic gọi service để truyền vào ageLimit
             if (normalizedKeyword != null && genreId != null) {
                 moviesPage = movieService.findMoviesByTheaterAndGenreAndKeywordAndDateRange(
                         theaterId, genreId, keyword, Movie_Status.Active, Theater_Status.Active,
-                        startDate, endDate, pageable);
+                        startDate, endDate, ageLimit, pageable);
             } else if (normalizedKeyword != null) {
                 moviesPage = movieService.findMoviesByTheaterAndKeywordAndDateRange(
                         theaterId, keyword, Movie_Status.Active, Theater_Status.Active,
-                        startDate, endDate, pageable);
+                        startDate, endDate, ageLimit, pageable);
             } else if (genreId != null) {
                 moviesPage = movieService.findMoviesByTheaterAndGenreAndDateRange(
                         theaterId, genreId, Movie_Status.Active, Theater_Status.Active,
-                        startDate, endDate, pageable);
+                        startDate, endDate, ageLimit, pageable);
+            } else {
+                moviesPage = movieService.findMoviesByTheaterAndDateRange(
+                        theaterId, Movie_Status.Active, Theater_Status.Active,
+                        startDate, endDate, ageLimit, pageable);
             }
 
             List<GenreDTO> availableGenres = genreService.getAllGenres();
@@ -131,8 +137,10 @@ public class CashierController {
             model.addAttribute("keyword", normalizedKeyword);
             model.addAttribute("availableGenres", availableGenres);
             model.addAttribute("availableDates", availableDates);
+            model.addAttribute("availableAgeLimits", Age_Limit.values()); // Đưa danh sách giới hạn tuổi vào model
             model.addAttribute("selectedGenreId", genreId);
             model.addAttribute("selectedDate", date);
+            model.addAttribute("selectedAgeLimit", ageLimit); // Đưa giới hạn tuổi đã chọn vào model
             model.addAttribute("currentDate", currentDate);
             model.addAttribute("sevenDate", sevenDate);
             session.setAttribute("theaterID", theaterId);
@@ -141,7 +149,8 @@ public class CashierController {
 
             boolean hasSearchCriteria = (normalizedKeyword != null && !normalizedKeyword.isEmpty())
                     || genreId != null
-                    || date != null;
+                    || date != null
+                    || ageLimit != null; // Cập nhật điều kiện hiển thị filter
             model.addAttribute("hasSearchCriteria", hasSearchCriteria);
 
         } catch (Exception e) {
@@ -150,8 +159,10 @@ public class CashierController {
             model.addAttribute("moviesPage", Page.empty());
             model.addAttribute("availableGenres", new ArrayList<>());
             model.addAttribute("availableDates", new ArrayList<>());
+            model.addAttribute("availableAgeLimits", Age_Limit.values());
             model.addAttribute("selectedGenreId", null);
             model.addAttribute("selectedDate", null);
+            model.addAttribute("selectedAgeLimit", null);
             model.addAttribute("keyword", "");
             model.addAttribute("theaterId", theaterId);
             model.addAttribute("currentStep", 1);
@@ -433,11 +444,17 @@ public class CashierController {
     }
 
     @GetMapping("/booking-success/{invoiceId}")
-    public ModelAndView showSuccessPage(@PathVariable Integer invoiceId) {
-        BookingResultDTO result = bookingService.getBookingResult(invoiceId);
-        ModelAndView mav = new ModelAndView("cashier-booking");
-        mav.addObject("currentStep", 5);
-        mav.addObject("bookingResult", result);
+    public ModelAndView showSuccessPage(@PathVariable Integer invoiceId, HttpSession session) {
+        ModelAndView mav = new ModelAndView("cashier/cashier-booking");
+        try {
+            BookingResultDTO result = bookingService.getBookingResult(invoiceId);
+            mav.addObject("currentStep", 5);
+            mav.addObject("bookingResult", result);
+            session.setAttribute("bookingResult", result);
+        } catch (Exception e) {
+            mav.addObject("currentStep", 5);
+            mav.addObject("bookingResult", null);
+        }
         return mav;
     }
 
@@ -453,26 +470,19 @@ public class CashierController {
         session.removeAttribute("selectedSeatIds");
     }
 
-    // Dán phương thức này vào bên trong file CashierController.java
-
     @PostMapping("/check-payment-status")
-    @ResponseBody // Annotation này RẤT QUAN TRỌNG, để đảm bảo trả về dữ liệu JSON
+    @ResponseBody
     public Map<String, String> checkPaymentStatus(@RequestParam("order_id") Integer orderId) {
         Map<String, String> response = new HashMap<>();
         try {
-            // Tìm hóa đơn trong database theo ID được gửi lên
             Invoice invoice = invoiceRepository.findById(orderId)
                     .orElseThrow(() -> new IllegalArgumentException("Invalid Invoice ID"));
 
-            // Lấy trạng thái của hóa đơn (ví dụ: Unpaid, Booked) và đưa vào response
             response.put("payment_status", invoice.getStatus().name());
 
         } catch (Exception e) {
-            // Nếu có lỗi (ví dụ không tìm thấy hóa đơn), mặc định là chưa thanh toán
             response.put("payment_status", "Unpaid");
         }
-        // Trả về đối tượng Map, Spring sẽ tự động chuyển nó thành JSON
-        // Ví dụ: {"payment_status": "Booked"}
         return response;
     }
 }

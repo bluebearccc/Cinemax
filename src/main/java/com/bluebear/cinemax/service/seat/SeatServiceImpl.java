@@ -74,6 +74,7 @@ public class SeatServiceImpl implements SeatService {
         dto.setIsVIP(entity.getIsVIP());
         dto.setUnitPrice(entity.getUnitPrice());
         dto.setStatus(entity.getStatus());
+
         return dto;
     }
 

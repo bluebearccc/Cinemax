@@ -1,8 +1,10 @@
 package com.bluebear.cinemax.repository;
 
+import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
 import com.bluebear.cinemax.entity.Schedule;
+import com.bluebear.cinemax.enumtype.Age_Limit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.enumtype.Theater_Status;
 import org.springframework.data.domain.Page;
@@ -39,7 +41,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     Page<Movie> findMoviesByStartDateAfter(LocalDateTime currentDate, Pageable pageable);
 
     //=========================================cashier
-    // 1. Lấy theo theaterId + status + theaterStatus + khoảng ngày
+    // 1. Lấy theo theaterId + status + theaterStatus + khoảng ngày + ageLimit
     @Query("""
     SELECT DISTINCT m FROM Movie m
     JOIN m.scheduleList s
@@ -49,6 +51,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     AND m.status = :status
     AND t.status = :theaterStatus
     AND s.startTime BETWEEN :startDate AND :endDate
+    AND (:ageLimit IS NULL OR m.ageLimit = :ageLimit)
     """)
     Page<Movie> findByTheaterIdAndDateRange(
             @Param("theaterId") Integer theaterId,
@@ -56,12 +59,13 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("theaterStatus") Theater_Status theaterStatus,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
+            @Param("ageLimit") Age_Limit ageLimit,
             Pageable pageable
     );
     @Query("SELECT DISTINCT s.movie FROM Schedule s WHERE CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
     Page<Movie> findMoviesWithScheduleToday(LocalDateTime today, Pageable pageable);
 
-    // 2. Lọc theo genre + theater + khoảng ngày
+    // 2. Lọc theo genre + theater + khoảng ngày + ageLimit
     @Query("""
         SELECT DISTINCT m FROM Movie m
         JOIN m.genres g
@@ -73,6 +77,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
         AND m.status = :status
         AND t.status = :theaterStatus
         AND s.startTime BETWEEN :startDate AND :endDate
+        AND (:ageLimit IS NULL OR m.ageLimit = :ageLimit)
     """)
     Page<Movie> findByTheaterIdAndGenreIdAndDateRange(
             @Param("theaterId") Integer theaterId,
@@ -81,12 +86,13 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("theaterStatus") Theater_Status theaterStatus,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
+            @Param("ageLimit") Age_Limit ageLimit,
             Pageable pageable
     );
     @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND LOWER(r.typeOfRoom) = LOWER(:roomType) AND CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
     Page<Movie> findMoviesWithScheduleTodayWithTheaterAndRoomType(int theaterId, LocalDateTime today, String roomType, Pageable pageable);
 
-    // 3. Lọc theo keyword + theater + khoảng ngày
+    // 3. Lọc theo keyword + theater + khoảng ngày + ageLimit
     @Query("""
         SELECT DISTINCT m FROM Movie m
         JOIN m.scheduleList s
@@ -97,6 +103,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
         AND m.status = :status
         AND t.status = :theaterStatus
         AND s.startTime BETWEEN :startDate AND :endDate
+        AND (:ageLimit IS NULL OR m.ageLimit = :ageLimit)
     """)
     Page<Movie> findByTheaterIdAndKeywordAndDateRange(
             @Param("theaterId") Integer theaterId,
@@ -105,26 +112,28 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("theaterStatus") Theater_Status theaterStatus,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
+            @Param("ageLimit") Age_Limit ageLimit,
             Pageable pageable
     );
     //Movie-Controller-Filter
     @Query("SELECT m FROM Movie m WHERE LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%')) AND m.status = :status")
     Page<Movie> findMoviesByMovieNameAndStatus(String movieName, Movie_Status status, Pageable pageable);
 
-    // 4. Lọc theo genre + keyword + theater + khoảng ngày
+    // 4. Lọc theo genre + keyword + theater + khoảng ngày + ageLimit
     @Query("""
-                SELECT DISTINCT m FROM Movie m
-                JOIN m.genres g
-                JOIN m.scheduleList s
-                JOIN s.room r
-                JOIN r.theater t
-                WHERE g.genreID = :genreId
-                AND t.theaterID = :theaterId
-                AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :keyword, '%'))
-                AND m.status = :status
-                AND t.status = :theaterStatus
-                AND s.startTime BETWEEN :startDate AND :endDate
-            """)
+        SELECT DISTINCT m FROM Movie m
+        JOIN m.genres g
+        JOIN m.scheduleList s
+        JOIN s.room r
+        JOIN r.theater t
+        WHERE g.genreID = :genreId
+        AND t.theaterID = :theaterId
+        AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        AND m.status = :status
+        AND t.status = :theaterStatus
+        AND s.startTime BETWEEN :startDate AND :endDate
+        AND (:ageLimit IS NULL OR m.ageLimit = :ageLimit)
+    """)
     Page<Movie> findByTheaterIdAndGenreIdAndKeywordAndDateRange(
             @Param("theaterId") Integer theaterId,
             @Param("genreId") Integer genreId,
@@ -133,6 +142,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("theaterStatus") Theater_Status theaterStatus,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
+            @Param("ageLimit") Age_Limit ageLimit,
             Pageable pageable
     );
     @Query("SELECT DISTINCT m FROM Movie m JOIN m.scheduleList s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%')) AND s.startTime > :now AND m.status = :status")
@@ -146,6 +156,10 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     @Query("SELECT DISTINCT m FROM Movie m JOIN m.feedbackList mf WHERE m.status = :status")
     Page<Movie> findMoviesThatHaveFeedback(Movie_Status status, Pageable pageable);
-    //find all
+
     Page<Movie> findAllByStatus(Movie_Status status, Pageable pageable);
+
+    List<Movie> findByMovieNameContaining(String keyword);
+
+    MovieDTO getMovieByMovieID(Integer movieID);
 }

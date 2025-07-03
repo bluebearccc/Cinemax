@@ -16,7 +16,7 @@ import java.util.List;
 public class PromotionDTO {
     private Integer promotionID;
     private String promotionCode;
-    private Integer discount;
+    private Double discount;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer quantity;

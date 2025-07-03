@@ -27,7 +27,7 @@ public class Promotion {
     private String promotionCode;
 
     @Column(name = "Discount", nullable = false)
-    private Integer discount; // Giá trị giảm giá (ví dụ: phần trăm hoặc số tiền cố định)
+    private Double discount; // Giá trị giảm giá (ví dụ: phần trăm hoặc số tiền cố định)
 
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;

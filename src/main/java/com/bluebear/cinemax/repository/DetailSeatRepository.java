@@ -22,4 +22,6 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
 
     @Query("SELECT ds FROM DetailSeat ds WHERE ds.invoice = :invoice")
     List<DetailSeat> findByInvoice(Invoice invoice);
+
+    boolean existsBySeatSeatIDAndScheduleScheduleID(Integer seatID, Integer scheduleId);
 }

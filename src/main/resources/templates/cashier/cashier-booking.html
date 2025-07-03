@@ -71,32 +71,51 @@
             color: #dc3545 !important;
         }
 
-        /* Step Indicator */
+        /* Step Indicator - CORRECTED */
         .step-indicator {
-            background: rgba(42, 42, 42, 0.9);
-            border-radius: 15px;
-            padding: 1.5rem;
-            margin-bottom: 2rem;
-            border: 1px solid #444;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Align items at the start of the cross axis */
+            position: relative;
+            width: 100%;
+            margin: 2rem 0;
+            padding: 0;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 17px; /* Position the line in the middle of the step-number */
+            left: 0;
+            right: 0;
+            height: 4px;
+            background-color: #444;
+            z-index: 1;
+        }
+
+        .progress-line {
+            position: absolute;
+            top: 17px; /* Match the ::before pseudo-element */
+            left: 0;
+            height: 4px;
+            background: linear-gradient(135deg, #dc3545, #b02a37);
+            z-index: 2;
+            transition: width 0.5s ease-in-out;
         }
 
         .step {
             display: flex;
+            flex-direction: column;
             align-items: center;
+            text-align: center;
+            position: relative;
+            z-index: 3;
             color: #666;
             transition: all 0.3s ease;
+            width: 80px; /* Give each step a fixed width for alignment */
         }
 
-        .step.active {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .step.completed {
-            color: #28a745;
-        }
-
-        .step-number {
+        .step .step-number {
             width: 35px;
             height: 35px;
             border-radius: 50%;
@@ -105,14 +124,28 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            margin-right: 10px;
             font-weight: bold;
             transition: all 0.3s ease;
+            margin-bottom: 8px; /* Space between number and text */
+            border: 3px solid #1a1a1a; /* Create separation from the line */
+        }
+
+        .step small {
+            font-weight: 500;
+        }
+
+        .step.active {
+            color: #dc3545;
+            font-weight: bold;
         }
 
         .step.active .step-number {
             background: #dc3545;
             box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
+        }
+
+        .step.completed {
+            color: #28a745;
         }
 
         .step.completed .step-number {
@@ -297,7 +330,7 @@
             box-shadow: 0 8px 20px rgba(23, 162, 184, 0.3);
         }
 
-        /* Seat Styling */
+        /* Seat Styling - CORRECTED */
         .seats-container {
             background: rgba(0, 0, 0, 0.7);
             border-radius: 15px;
@@ -307,10 +340,13 @@
         }
 
         .seat {
+            width: 35px;
+            height: 35px;
+            border-radius: 5px;
+            cursor: pointer;
             background: #2a2a2a;
             border: 2px solid #555;
             color: #ffffff;
-            cursor: pointer;
             transition: all 0.3s ease;
             font-weight: 600;
             font-size: 11px;
@@ -368,7 +404,7 @@
             border-color: #f06292;
             color: #ffffff;
             box-shadow: 0 0 8px rgba(233, 30, 99, 0.3);
-            width: 60px !important;
+            width: 72px; /* Set width for couple seat (35px * 2 + 2px margin) */
         }
 
         .seat.couple.available:hover {
@@ -381,6 +417,7 @@
             border-color: #ffeb3b;
             color: #000;
             box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+            width: 72px;
         }
 
         .seat.couple.occupied {
@@ -389,6 +426,7 @@
             color: #ffffff;
             cursor: not-allowed;
             box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
+            width: 72px;
         }
 
         /* Selected Seats */
@@ -632,8 +670,10 @@
                 font-size: 9px;
             }
 
-            .seat.couple.available {
-                width: 50px !important;
+            .seat.couple.available,
+            .seat.couple.selected,
+            .seat.couple.occupied {
+                width: 52px !important; /* 25px * 2 + 2px margin */
             }
 
             .seats-container {
@@ -846,7 +886,7 @@
 
 <div class="container-fluid py-4">
     <div class="step-indicator" th:fragment="step-indicator">
-        <div class="progress-line" th:style="'width:' + (${currentStep} - 1) * 25 + '%'"></div>
+        <div class="progress-line" th:style="'width:' + (${currentStep} > 1 ? ((${currentStep} - 1) / 4 * 100) : 0) + '%;'"></div>
 
         <div class="step" th:classappend="${currentStep == 1} ? 'active' : (${currentStep > 1} ? 'completed' : '')">
             <div class="step-number">1</div>
@@ -864,7 +904,7 @@
             <div class="step-number">4</div>
             <small>Thông Tin</small>
         </div>
-        <div class="step" th:classappend="${currentStep == 5} ? 'active' : (${currentStep > 5} ? 'completed' : '')">
+        <div class="step" th:classappend="${currentStep == 5} ? 'active' : ''">
             <div class="step-number">5</div>
             <small>Thanh Toán</small>
         </div>
@@ -875,12 +915,12 @@
             <div class="card card-custom mb-4" th:if="${currentStep == 1}">
                 <div class="card-header">
                     <div class="row align-items-center">
-                        <div class="col-md-4">
+                        <div class="col-md-3">
                             <h5 class="mb-0">
                                 <i class="fas fa-film me-2"></i>Đang Chiếu Trong Bảy Ngày Tới
                             </h5>
                         </div>
-                        <div class="col-md-8">
+                        <div class="col-md-9">
                             <form th:action="@{/cashier/movie/}" method="get" class="d-flex gap-2">
                                 <div class="flex-grow-1">
                                     <div class="input-group">
@@ -891,7 +931,7 @@
                                         </button>
                                     </div>
                                 </div>
-                                <div style="min-width: 200px;">
+                                <div style="min-width: 150px;">
                                     <select name="genreId" class="form-select" onchange="this.form.submit()">
                                         <option value="">Tất cả thể loại</option>
                                         <option th:each="genre : ${availableGenres}"
@@ -901,7 +941,7 @@
                                         </option>
                                     </select>
                                 </div>
-                                <div style="min-width: 200px;">
+                                <div style="min-width: 180px;">
                                     <select name="date" class="form-select" onchange="this.form.submit()">
                                         <option value="">Tất cả ngày</option>
                                         <option th:each="dateTime : ${availableDates}"
@@ -911,9 +951,19 @@
                                         </option>
                                     </select>
                                 </div>
+                                <div style="min-width: 160px;">
+                                    <select name="ageLimit" class="form-select" onchange="this.form.submit()">
+                                        <option value="">Giới hạn tuổi</option>
+                                        <option th:each="limit : ${availableAgeLimits}"
+                                                th:value="${limit}"
+                                                th:text="${limit.name()}"
+                                                th:selected="${limit == selectedAgeLimit}">
+                                        </option>
+                                    </select>
+                                </div>
                                 <div th:if="${hasSearchCriteria}">
                                     <a th:href="@{/cashier/movie/}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i><span>Delete Filter</span>
+                                        <i class="fas fa-times me-1"></i><span>Xóa Lọc</span>
                                     </a>
                                 </div>
                             </form>
@@ -924,11 +974,17 @@
                         <small class="text-muted">
                             <i class="fas fa-filter me-1"></i>Đang lọc:
                             <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge bg-info me-1">
-                                    Từ khóa: "<span th:text="${keyword}"></span>"
-                                </span>
-                            <span th:if="${selectedGenreId != null}" class="badge bg-success">
-                                    Thể loại: <span th:text="${availableGenres[selectedGenreId - 1]}"></span>
-                                </span>
+                    Từ khóa: "<span th:text="${keyword}"></span>"
+                </span>
+                            <span th:if="${selectedGenreId != null}" class="badge bg-success me-1">
+                    Thể loại: <span th:text="${availableGenres.stream().filter(g -> g.genreID == selectedGenreId).findFirst().get().genreName}"></span>
+                </span>
+                            <span th:if="${selectedDate != null}" class="badge bg-warning text-dark me-1">
+                    Ngày: <span th:text="${#temporals.format(selectedDate, 'dd/MM/yyyy')}"></span>
+                </span>
+                            <span th:if="${selectedAgeLimit != null}" class="badge bg-danger me-1">
+                    Tuổi: <span th:text="${selectedAgeLimit.name()}"></span>
+                </span>
                         </small>
                     </div>
 
@@ -958,7 +1014,7 @@
                                                   th:text="${movie.genres[0].genreName}"></span>
                                             <span
                                                     th:unless="${movie.genres != null and !movie.genres.isEmpty()}">Chưa
-                                                    phân loại</span>
+                                        phân loại</span>
                                         </p>
                                     </div>
                                 </div>
@@ -987,18 +1043,18 @@
                             <ul class="pagination">
                                 <li class="page-item" th:classappend="${moviesPage.first} ? 'disabled'">
                                     <a class="page-link"
-                                       th:href="@{/cashier/movie/(page=${moviesPage.number - 1}, keyword=${keyword}, genreId=${selectedGenreId}, date=${selectedDate != null ? #temporals.format(selectedDate, 'yyyy-MM-dd''T''HH:mm') : ''})}">Previous</a>
+                                       th:href="@{/cashier/movie/(page=${moviesPage.number - 1}, keyword=${keyword}, genreId=${selectedGenreId}, date=${selectedDate != null ? #temporals.format(selectedDate, 'yyyy-MM-dd''T''HH:mm') : ''}, ageLimit=${selectedAgeLimit})}">Previous</a>
                                 </li>
                                 <li class="page-item"
                                     th:each="i : ${#numbers.sequence(0, moviesPage.totalPages - 1)}"
                                     th:classappend="${i == moviesPage.number} ? 'active'">
                                     <a class="page-link"
-                                       th:href="@{/cashier/movie/(page=${i}, keyword=${keyword}, genreId=${selectedGenreId}, date=${selectedDate != null ? #temporals.format(selectedDate, 'yyyy-MM-dd''T''HH:mm') : ''})}"
+                                       th:href="@{/cashier/movie/(page=${i}, keyword=${keyword}, genreId=${selectedGenreId}, date=${selectedDate != null ? #temporals.format(selectedDate, 'yyyy-MM-dd''T''HH:mm') : ''}, ageLimit=${selectedAgeLimit})}"
                                        th:text="${i + 1}"></a>
                                 </li>
                                 <li class="page-item" th:classappend="${moviesPage.last} ? 'disabled'">
                                     <a class="page-link"
-                                       th:href="@{/cashier/movie/(page=${moviesPage.number + 1}, keyword=${keyword}, genreId=${selectedGenreId}, date=${selectedDate != null ? #temporals.format(selectedDate, 'yyyy-MM-dd''T''HH:mm') : ''})}">Next</a>
+                                       th:href="@{/cashier/movie/(page=${moviesPage.number + 1}, keyword=${keyword}, genreId=${selectedGenreId}, date=${selectedDate != null ? #temporals.format(selectedDate, 'yyyy-MM-dd''T''HH:mm') : ''}, ageLimit=${selectedAgeLimit})}">Next</a>
                                 </li>
                             </ul>
                         </nav>
@@ -1129,10 +1185,9 @@
                                                      th:data-seat-price="${seat.unitPrice}"
                                                      th:data-seat-type="${seat.seatType}"
                                                      th:classappend="${#lists.contains(bookedSeatIds, seat.seatID) ? 'occupied' : 'available'} +
-        ${seat.isVIP ? ' vip' : ''} +
-       ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
-                                                     class="seat me-1 d-flex align-items-center justify-content-center"
-                                                     style="width: 35px; height: 35px; border-radius: 5px; cursor: pointer;">
+                                                            ${seat.isVIP ? ' vip' : ''} +
+                                                            ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
+                                                     class="seat me-1 d-flex align-items-center justify-content-center">
                                                     <span th:text="${#strings.substring(seat.position, 1)}"></span>
                                                 </div>
                                             </div>

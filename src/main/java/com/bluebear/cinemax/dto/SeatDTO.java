@@ -18,4 +18,5 @@ public class SeatDTO {
     private Boolean isVIP;
     private Double unitPrice;
     private Seat_Status status;
+    private boolean isBooked;
 }

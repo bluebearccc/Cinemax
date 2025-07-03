@@ -62,4 +62,7 @@ public class Invoice {
 
     @Column(columnDefinition = "TEXT")
     private String bookingDetails;
+
+    @OneToMany(mappedBy = "invoice")
+    private List<DetailSeat> detailSeats;
 }
