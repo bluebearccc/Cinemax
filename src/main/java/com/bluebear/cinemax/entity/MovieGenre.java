@@ -48,15 +48,15 @@ public class MovieGenre {
 
         MovieGenre that = (MovieGenre) o;
 
-        if (movie != null ? !movie.getMovieId().equals(that.movie != null ? that.movie.getMovieId() : null) : that.movie != null)
+        if (movie != null ? !movie.getMovieID().equals(that.movie != null ? that.movie.getMovieID() : null) : that.movie != null)
             return false;
-        return genre != null ? genre.getGenreId().equals(that.genre != null ? that.genre.getGenreId() : null) : that.genre == null;
+        return genre != null ? genre.getGenreID().equals(that.genre != null ? that.genre.getGenreID() : null) : that.genre == null;
     }
 
     @Override
     public int hashCode() {
-        int result = movie != null ? movie.getMovieId().hashCode() : 0;
-        result = 31 * result + (genre != null ? genre.getGenreId().hashCode() : 0);
+        int result = movie != null ? movie.getMovieID().hashCode() : 0;
+        result = 31 * result + (genre != null ? genre.getGenreID().hashCode() : 0);
         return result;
     }
 
@@ -64,8 +64,8 @@ public class MovieGenre {
     public String toString() {
         return "MovieGenre{" +
                 "id=" + id +
-                ", movieId=" + (movie != null ? movie.getMovieId() : null) +
-                ", genreId=" + (genre != null ? genre.getGenreId() : null) +
+                ", movieId=" + (movie != null ? movie.getMovieID() : null) +
+                ", genreId=" + (genre != null ? genre.getGenreID() : null) +
                 '}';
     }
 }

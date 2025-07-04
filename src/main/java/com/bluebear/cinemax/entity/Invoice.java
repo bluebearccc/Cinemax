@@ -32,7 +32,7 @@ public class Invoice {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "PromotionID", referencedColumnName = "PromotionID")
-    private Promotion promotion;
+    private Voucher promotion;
 
     @Column(name = "BookingDate")
     private LocalDateTime bookingDate;

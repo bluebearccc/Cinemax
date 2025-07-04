@@ -13,97 +13,97 @@ import java.util.List;
 @Repository
 public interface MovieActorRepository extends JpaRepository<MovieActor, Integer> {
 
-    // Tìm tất cả MovieActor theo movieId
-    @Query("SELECT ma FROM MovieActor ma WHERE ma.movie.movieId = :movieId")
-    List<MovieActor> findByMovieId(@Param("movieId") Integer movieId);
+    // Tìm tất cả MovieActor theo movieID
+    @Query("SELECT ma FROM MovieActor ma WHERE ma.movie.movieID = :movieID")
+    List<MovieActor> findBymovieID(@Param("movieID") Integer movieID);
 
-    // Tìm tất cả MovieActor theo actorId
-    @Query("SELECT ma FROM MovieActor ma WHERE ma.actor.actorId = :actorId")
-    List<MovieActor> findByActorId(@Param("actorId") Integer actorId);
+    // Tìm tất cả MovieActor theo actorID
+    @Query("SELECT ma FROM MovieActor ma WHERE ma.actor.actorID = :actorID")
+    List<MovieActor> findByactorID(@Param("actorID") Integer actorID);
 
-    // Tìm MovieActor theo movieId và actorId
-    @Query("SELECT ma FROM MovieActor ma WHERE ma.movie.movieId = :movieId AND ma.actor.actorId = :actorId")
-    MovieActor findByMovieIdAndActorId(@Param("movieId") Integer movieId, @Param("actorId") Integer actorId);
+    // Tìm MovieActor theo movieID và actorID
+    @Query("SELECT ma FROM MovieActor ma WHERE ma.movie.movieID = :movieID AND ma.actor.actorID = :actorID")
+    MovieActor findBymovieIDAndactorID(@Param("movieID") Integer movieID, @Param("actorID") Integer actorID);
 
-    // Kiểm tra tồn tại MovieActor theo movieId và actorId
-    @Query("SELECT COUNT(ma) > 0 FROM MovieActor ma WHERE ma.movie.movieId = :movieId AND ma.actor.actorId = :actorId")
-    boolean existsByMovieIdAndActorId(@Param("movieId") Integer movieId, @Param("actorId") Integer actorId);
+    // Kiểm tra tồn tại MovieActor theo movieID và actorID
+    @Query("SELECT COUNT(ma) > 0 FROM MovieActor ma WHERE ma.movie.movieID = :movieID AND ma.actor.actorID = :actorID")
+    boolean existsBymovieIDAndactorID(@Param("movieID") Integer movieID, @Param("actorID") Integer actorID);
 
-    // Xóa tất cả MovieActor theo movieId
+    // Xóa tất cả MovieActor theo movieID
     @Modifying
     @Transactional
-    @Query("DELETE FROM MovieActor ma WHERE ma.movie.movieId = :movieId")
-    void deleteByMovieId(@Param("movieId") Integer movieId);
+    @Query("DELETE FROM MovieActor ma WHERE ma.movie.movieID = :movieID")
+    void deleteBymovieID(@Param("movieID") Integer movieID);
 
-    // Xóa MovieActor theo movieId và actorId
+    // Xóa MovieActor theo movieID và actorID
     @Modifying
     @Transactional
-    @Query("DELETE FROM MovieActor ma WHERE ma.movie.movieId = :movieId AND ma.actor.actorId = :actorId")
-    void deleteByMovieIdAndActorId(@Param("movieId") Integer movieId, @Param("actorId") Integer actorId);
+    @Query("DELETE FROM MovieActor ma WHERE ma.movie.movieID = :movieID AND ma.actor.actorID = :actorID")
+    void deleteBymovieIDAndactorID(@Param("movieID") Integer movieID, @Param("actorID") Integer actorID);
 
-    // Xóa tất cả MovieActor theo actorId
+    // Xóa tất cả MovieActor theo actorID
     @Modifying
     @Transactional
-    @Query("DELETE FROM MovieActor ma WHERE ma.actor.actorId = :actorId")
-    void deleteByActorId(@Param("actorId") Integer actorId);
+    @Query("DELETE FROM MovieActor ma WHERE ma.actor.actorID = :actorID")
+    void deleteByactorID(@Param("actorID") Integer actorID);
 
-    // Đếm số phim theo actorId
-    @Query("SELECT COUNT(DISTINCT ma.movie.movieId) FROM MovieActor ma WHERE ma.actor.actorId = :actorId")
-    long countByActorId(@Param("actorId") Integer actorId);
+    // Đếm số phim theo actorID
+    @Query("SELECT COUNT(DISTINCT ma.movie.movieID) FROM MovieActor ma WHERE ma.actor.actorID = :actorID")
+    long countByactorID(@Param("actorID") Integer actorID);
 
-    // Đếm số actor theo movieId
-    @Query("SELECT COUNT(ma) FROM MovieActor ma WHERE ma.movie.movieId = :movieId")
-    long countByMovieId(@Param("movieId") Integer movieId);
+    // Đếm số actor theo movieID
+    @Query("SELECT COUNT(ma) FROM MovieActor ma WHERE ma.movie.movieID = :movieID")
+    long countBymovieID(@Param("movieID") Integer movieID);
 
-    // Lấy tất cả movieId theo actorId
-    @Query("SELECT DISTINCT ma.movie.movieId FROM MovieActor ma WHERE ma.actor.actorId = :actorId")
-    List<Integer> findMovieIdsByActorId(@Param("actorId") Integer actorId);
+    // Lấy tất cả movieID theo actorID
+    @Query("SELECT DISTINCT ma.movie.movieID FROM MovieActor ma WHERE ma.actor.actorID = :actorID")
+    List<Integer> findmovieIDsByactorID(@Param("actorID") Integer actorID);
 
-    // Lấy tất cả actorId theo movieId
-    @Query("SELECT DISTINCT ma.actor.actorId FROM MovieActor ma WHERE ma.movie.movieId = :movieId")
-    List<Integer> findActorIdsByMovieId(@Param("movieId") Integer movieId);
+    // Lấy tất cả actorID theo movieID
+    @Query("SELECT DISTINCT ma.actor.actorID FROM MovieActor ma WHERE ma.movie.movieID = :movieID")
+    List<Integer> findactorIDsBymovieID(@Param("movieID") Integer movieID);
 
     // Tìm các phim có cùng actor với phim cho trước (trừ chính nó)
-    @Query("SELECT DISTINCT ma2.movie.movieId FROM MovieActor ma1 " +
-            "JOIN MovieActor ma2 ON ma1.actor.actorId = ma2.actor.actorId " +
-            "WHERE ma1.movie.movieId = :movieId AND ma2.movie.movieId != :movieId")
-    List<Integer> findRelatedMovieIdsByActor(@Param("movieId") Integer movieId);
+    @Query("SELECT DISTINCT ma2.movie.movieID FROM MovieActor ma1 " +
+            "JOIN MovieActor ma2 ON ma1.actor.actorID = ma2.actor.actorID " +
+            "WHERE ma1.movie.movieID = :movieID AND ma2.movie.movieID != :movieID")
+    List<Integer> findRelatedmovieIDsByActor(@Param("movieID") Integer movieID);
 
     // Tìm actor phổ biến nhất (tham gia nhiều phim nhất)
-    @Query("SELECT ma.actor.actorId, COUNT(ma.movie.movieId) as movieCount " +
+    @Query("SELECT ma.actor.actorID, COUNT(ma.movie.movieID) as movieCount " +
             "FROM MovieActor ma " +
-            "GROUP BY ma.actor.actorId " +
+            "GROUP BY ma.actor.actorID " +
             "ORDER BY movieCount DESC")
     List<Object[]> findMostActiveActors();
 
     // Kiểm tra phim có actor nào không
-    @Query("SELECT COUNT(ma) > 0 FROM MovieActor ma WHERE ma.movie.movieId = :movieId")
-    boolean movieHasAnyActor(@Param("movieId") Integer movieId);
+    @Query("SELECT COUNT(ma) > 0 FROM MovieActor ma WHERE ma.movie.movieID = :movieID")
+    boolean movieHasAnyActor(@Param("movieID") Integer movieID);
 
     // Lấy danh sách phim không có actor nào
-    @Query("SELECT m.movieId FROM Movie m WHERE m.movieId NOT IN " +
-            "(SELECT DISTINCT ma.movie.movieId FROM MovieActor ma)")
+    @Query("SELECT m.movieID FROM Movie m WHERE m.movieID NOT IN " +
+            "(SELECT DISTINCT ma.movie.movieID FROM MovieActor ma)")
     List<Integer> findMoviesWithoutActors();
 
     // Thống kê số lượng phim theo từng actor
-    @Query("SELECT a.actorName, COUNT(ma.movie.movieId) " +
-            "FROM Actor a LEFT JOIN MovieActor ma ON a.actorId = ma.actor.actorId " +
-            "GROUP BY a.actorId, a.actorName " +
-            "ORDER BY COUNT(ma.movie.movieId) DESC")
+    @Query("SELECT a.actorName, COUNT(ma.movie.movieID) " +
+            "FROM Actor a LEFT JOIN MovieActor ma ON a.actorID = ma.actor.actorID " +
+            "GROUP BY a.actorID, a.actorName " +
+            "ORDER BY COUNT(ma.movie.movieID) DESC")
     List<Object[]> getActorStatistics();
 
     // Tìm cặp actor thường xuyên đóng chung phim
-    @Query("SELECT ma1.actor.actorId, ma2.actor.actorId, COUNT(ma1.movie.movieId) as movieCount " +
+    @Query("SELECT ma1.actor.actorID, ma2.actor.actorID, COUNT(ma1.movie.movieID) as movieCount " +
             "FROM MovieActor ma1 " +
-            "JOIN MovieActor ma2 ON ma1.movie.movieId = ma2.movie.movieId " +
-            "WHERE ma1.actor.actorId < ma2.actor.actorId " +
-            "GROUP BY ma1.actor.actorId, ma2.actor.actorId " +
-            "HAVING COUNT(ma1.movie.movieId) > 1 " +
+            "JOIN MovieActor ma2 ON ma1.movie.movieID = ma2.movie.movieID " +
+            "WHERE ma1.actor.actorID < ma2.actor.actorID " +
+            "GROUP BY ma1.actor.actorID, ma2.actor.actorID " +
+            "HAVING COUNT(ma1.movie.movieID) > 1 " +
             "ORDER BY movieCount DESC")
     List<Object[]> findFrequentActorPairs();
 
     // Lấy top actors theo số lượng phim active
-    @Query("SELECT ma.actor, COUNT(ma.movie.movieId) as movieCount " +
+    @Query("SELECT ma.actor, COUNT(ma.movie.movieID) as movieCount " +
             "FROM MovieActor ma " +
             "WHERE ma.movie.status = 'Active' " +
             "GROUP BY ma.actor " +

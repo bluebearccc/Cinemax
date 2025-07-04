@@ -41,13 +41,13 @@ public class MovieActor {
 
         if (actor != null ? !actor.getActorId().equals(that.actor != null ? that.actor.getActorId() : null) : that.actor != null)
             return false;
-        return movie != null ? movie.getMovieId().equals(that.movie != null ? that.movie.getMovieId() : null) : that.movie == null;
+        return movie != null ? movie.getMovieID().equals(that.movie != null ? that.movie.getMovieID() : null) : that.movie == null;
     }
 
     @Override
     public int hashCode() {
         int result = actor != null ? actor.getActorId().hashCode() : 0;
-        result = 31 * result + (movie != null ? movie.getMovieId().hashCode() : 0);
+        result = 31 * result + (movie != null ? movie.getMovieID().hashCode() : 0);
         return result;
     }
 

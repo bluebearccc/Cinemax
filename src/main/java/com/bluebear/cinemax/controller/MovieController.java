@@ -4,6 +4,7 @@ import com.bluebear.cinemax.dto.ActorDTO;
 import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
+import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.service.ActorService;
 import com.bluebear.cinemax.service.GenreService;
 import com.bluebear.cinemax.service.MovieService;
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
 import java.util.List;
@@ -245,7 +247,7 @@ public class MovieController {
     // ==================== MOVIE EDIT FUNCTIONALITY ====================
 
     /**
-     * Hiển thị form chỉnh sửa phim
+     * Hiển thị form chỉnh sửa phim - FIXED
      */
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
@@ -264,9 +266,9 @@ public class MovieController {
             List<Genre> allGenres = genreService.getAllGenres();
             System.out.println("Total genres available: " + allGenres.size());
 
-            // Lấy các genre IDs hiện tại của phim
+            // Lấy các genre IDs hiện tại của phim - FIXED
             List<Integer> movieGenreIds = genreService.getGenresByMovie(id).stream()
-                    .map(Genre::getGenreId)
+                    .map(Genre::getGenreID) // Fixed: use getGenreID() instead of getGenreId()
                     .collect(Collectors.toList());
             System.out.println("Current movie genres: " + movieGenreIds);
 
@@ -360,18 +362,15 @@ public class MovieController {
             }
 
             // Validate và parse movie rate (optional) - FIXED VERSION
-            BigDecimal movieRate = null;
+            Double movieRate = null; // Changed to Double to match entity
             String movieRateStr = allParams.get("movieRate");
             if (movieRateStr != null && !movieRateStr.trim().isEmpty()) {
                 try {
-                    // ⚠️ FIX: Sử dụng setScale ngay khi tạo BigDecimal
-                    movieRate = new BigDecimal(movieRateStr.trim())
-                            .setScale(1, RoundingMode.HALF_UP);
+                    movieRate = Double.parseDouble(movieRateStr.trim());
 
                     System.out.println("Controller: Parsed rating = " + movieRate);
 
-                    if (movieRate.compareTo(BigDecimal.ZERO) < 0 ||
-                            movieRate.compareTo(new BigDecimal("5.0")) > 0) {
+                    if (movieRate < 0.0 || movieRate > 5.0) {
                         System.out.println("ERROR: Invalid movie rate: " + movieRate);
                         redirectAttributes.addFlashAttribute("error", "Đánh giá phim phải từ 0-5");
                         return "redirect:/movies/" + id + "/edit";
@@ -383,7 +382,7 @@ public class MovieController {
                 }
             }
 
-            // Validate và parse dates
+            // Validate và parse dates - Convert to LocalDateTime
             LocalDate startDate, endDate;
             try {
                 if (startDateStr == null || startDateStr.trim().isEmpty()) {
@@ -407,9 +406,9 @@ public class MovieController {
                 return "redirect:/movies/" + id + "/edit";
             }
 
-            // Tạo Movie object để cập nhật
+            // Tạo Movie object để cập nhật - FIXED
             Movie movieToUpdate = new Movie();
-            movieToUpdate.setMovieId(id);
+            movieToUpdate.setMovieID(id); // Fixed: use setMovieID
             movieToUpdate.setMovieName(movieName.trim());
             movieToUpdate.setDescription(description != null && !description.trim().isEmpty() ? description.trim() : null);
             movieToUpdate.setImage(image != null && !image.trim().isEmpty() ? image.trim() : null);
@@ -418,18 +417,19 @@ public class MovieController {
             movieToUpdate.setDuration(duration);
             movieToUpdate.setTrailer(trailer != null && !trailer.trim().isEmpty() ? trailer.trim() : null);
 
-            // ⚠️ CRITICAL: Set rating với proper debugging
+            // Set rating - use Double instead of BigDecimal
             movieToUpdate.setMovieRate(movieRate);
             System.out.println("Controller: Setting movieToUpdate rating = " + movieToUpdate.getMovieRate());
 
-            movieToUpdate.setStartDate(startDate);
-            movieToUpdate.setEndDate(endDate);
+            // Convert LocalDate to LocalDateTime for entity
+            movieToUpdate.setStartDate(startDate.atStartOfDay()); // Convert to LocalDateTime
+            movieToUpdate.setEndDate(endDate.atTime(23, 59, 59)); // Convert to LocalDateTime
 
-            // Set status
+            // Set status - FIXED to use proper enum
             if ("Active".equals(status)) {
-                movieToUpdate.setStatus(Movie.MovieStatus.Active);
+                movieToUpdate.setStatus(Movie_Status.Active);
             } else {
-                movieToUpdate.setStatus(Movie.MovieStatus.Removed);
+                movieToUpdate.setStatus(Movie_Status.Removed);
             }
 
             System.out.println("=== MOVIE UPDATE DATA ===");
@@ -559,7 +559,7 @@ public class MovieController {
     // ==================== DEBUG AND API ENDPOINTS ====================
 
     /**
-     * API endpoint để kiểm tra thông tin phim và genres
+     * API endpoint để kiểm tra thông tin phim và genres - FIXED
      */
     @GetMapping("/{id}/debug")
     @ResponseBody
@@ -571,7 +571,7 @@ public class MovieController {
             List<Genre> allGenres = genreService.getAllGenres();
             List<Genre> movieGenres = genreService.getGenresByMovie(id);
             List<Integer> movieGenreIds = movieGenres.stream()
-                    .map(Genre::getGenreId)
+                    .map(Genre::getGenreID) // Fixed: use getGenreID()
                     .collect(Collectors.toList());
 
             result.put("success", true);
@@ -685,11 +685,10 @@ public class MovieController {
             System.out.println("Movie ID: " + id);
             System.out.println("Input rating string: '" + ratingStr + "'");
 
-            // Parse rating như trong controller
-            BigDecimal testRating = null;
+            // Parse rating như trong controller - use Double instead of BigDecimal
+            Double testRating = null;
             if (ratingStr != null && !ratingStr.trim().isEmpty()) {
-                testRating = new BigDecimal(ratingStr.trim())
-                        .setScale(1, RoundingMode.HALF_UP);
+                testRating = Double.parseDouble(ratingStr.trim());
             }
 
             System.out.println("Parsed rating: " + testRating);
@@ -707,7 +706,7 @@ public class MovieController {
             result.put("inputRatingString", ratingStr);
             result.put("parsedRating", testRating);
             result.put("currentMovieRating", currentMovie.getMovieRate());
-            result.put("ratingWillChange", !testRating.equals(currentMovie.getMovieRate()));
+            result.put("ratingWillChange", testRating != null && !testRating.equals(currentMovie.getMovieRate()));
             result.put("timestamp", java.time.LocalDateTime.now());
 
             System.out.println("Test completed successfully");
@@ -721,7 +720,7 @@ public class MovieController {
         return result;
     }
 
-    // Thêm các phương thức này vào MovieController.java
+    // ==================== ADD MOVIE FUNCTIONALITY - FIXED ====================
 
     /**
      * Hiển thị form thêm phim mới
@@ -745,7 +744,7 @@ public class MovieController {
     }
 
     /**
-     * Xử lý thêm phim mới - RELAXED VERSION
+     * Xử lý thêm phim mới - FIXED VERSION
      */
     @PostMapping("/add")
     public String addMovie(@RequestParam Map<String, String> allParams,
@@ -811,18 +810,16 @@ public class MovieController {
                 }
             }
 
-            // Parse movie rate - CHO PHÉP NULL
-            BigDecimal movieRate = null;
+            // Parse movie rate - CHO PHÉP NULL - FIXED to use Double
+            Double movieRate = null;
             String movieRateStr = getParameterOrNull(allParams, "movieRate");
             if (movieRateStr != null && !movieRateStr.trim().isEmpty()) {
                 try {
-                    movieRate = new BigDecimal(movieRateStr.trim())
-                            .setScale(1, RoundingMode.HALF_UP);
+                    movieRate = Double.parseDouble(movieRateStr.trim());
 
                     System.out.println("Controller: Parsed rating = " + movieRate);
 
-                    if (movieRate.compareTo(BigDecimal.ZERO) < 0 ||
-                            movieRate.compareTo(new BigDecimal("5.0")) > 0) {
+                    if (movieRate < 0.0 || movieRate > 5.0) {
                         System.out.println("ERROR: Invalid movie rate: " + movieRate);
                         redirectAttributes.addFlashAttribute("error", "Đánh giá phim phải từ 0-5");
                         return "redirect:/movies/add";
@@ -896,7 +893,7 @@ public class MovieController {
                 }
             }
 
-            // Tạo Movie object
+            // Tạo Movie object - FIXED
             Movie newMovie = new Movie();
             newMovie.setMovieName(movieName.trim());
             newMovie.setDescription(description); // có thể null
@@ -905,15 +902,21 @@ public class MovieController {
             newMovie.setStudio(studio); // có thể null
             newMovie.setDuration(duration); // có thể null - sẽ được set default
             newMovie.setTrailer(trailer); // có thể null
-            newMovie.setMovieRate(movieRate); // có thể null - sẽ được set default
-            newMovie.setStartDate(startDate); // có thể null - sẽ được set default
-            newMovie.setEndDate(endDate); // có thể null - sẽ được set default
+            newMovie.setMovieRate(movieRate); // Double type - có thể null
 
-            // Set status
+            // Convert LocalDate to LocalDateTime for entity
+            if (startDate != null) {
+                newMovie.setStartDate(startDate.atStartOfDay());
+            }
+            if (endDate != null) {
+                newMovie.setEndDate(endDate.atTime(23, 59, 59));
+            }
+
+            // Set status - FIXED to use proper enum
             if ("Active".equals(status)) {
-                newMovie.setStatus(Movie.MovieStatus.Active);
+                newMovie.setStatus(Movie_Status.Active);
             } else if ("Removed".equals(status)) {
-                newMovie.setStatus(Movie.MovieStatus.Removed);
+                newMovie.setStatus(Movie_Status.Removed);
             } else {
                 newMovie.setStatus(null); // sẽ được set default
             }
@@ -930,7 +933,8 @@ public class MovieController {
 
             // Thực hiện thêm phim mới
             System.out.println("Calling movieService.addMovie...");
-            MovieDTO addedMovie = movieService.addMovie(newMovie, genreIds, actorIds);
+            MovieDTO addedMovie = movieService
+                    .addMovie(newMovie, genreIds, actorIds);
 
             if (addedMovie != null) {
                 System.out.println("SUCCESS: Movie added successfully with ID: " + addedMovie.getMovieId());
@@ -968,7 +972,7 @@ public class MovieController {
         return value.trim();
     }
 
-    // Thêm các method này vào MovieController.java
+    // ==================== DELETE FUNCTIONALITY - FIXED ====================
 
     /**
      * Xóa vĩnh viễn phim khỏi database (chỉ cho phim có status "Removed")

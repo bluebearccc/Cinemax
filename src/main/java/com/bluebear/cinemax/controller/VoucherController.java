@@ -91,7 +91,7 @@ public class VoucherController {
         }
     }
 
-    // Show edit voucher form
+    // Show edit voucher form - FIXED VERSION
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Voucher> voucherOpt = voucherService.getVoucherById(id);
@@ -102,13 +102,13 @@ public class VoucherController {
 
         Voucher voucher = voucherOpt.get();
         VoucherDTO voucherDTO = new VoucherDTO(
-                voucher.getPromotionId(),
+                voucher.getPromotionID(),
                 voucher.getPromotionCode(),
                 voucher.getDiscount(),
                 voucher.getStartTime(),
                 voucher.getEndTime(),
                 voucher.getQuantity(),
-                voucher.getStatus()
+                voucher.getStatus().toString() // FIXED: Convert enum to String
         );
 
         model.addAttribute("voucher", voucherDTO);
