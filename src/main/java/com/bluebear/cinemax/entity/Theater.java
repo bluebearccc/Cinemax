@@ -38,6 +38,6 @@ public class Theater {
     @Enumerated(EnumType.STRING)
     private Theater_Status status;
 
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL)
     private List<Room> rooms;
 }

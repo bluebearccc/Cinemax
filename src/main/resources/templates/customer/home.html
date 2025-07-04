@@ -17,6 +17,7 @@
     <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/chatbot.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/home-page.css}">
 
 
@@ -53,7 +54,7 @@
         <p>Book movie tickets online easily and quickly with thousands of screenings every day. Enjoy the latest
             blockbuster movies with excellent picture and sound quality.</p>
         <div class="hero-buttons">
-            <a href="#movies" class="btn-primary">🎟️ Book Now</a>
+            <a href="#book-movie-area" class="btn-primary">🎟️ Book Now</a>
         </div>
     </div>
 </section>
@@ -99,7 +100,13 @@
                                     </div>
                                     <div class="movie-info">
                                         <div class="movie-title" th:text="${movie.movieName}"></div>
-                                        <div class="movie-release" th:text="${movie.duration} + ' minutes'"></div>
+                                        <div class="movie-release">
+                                            <span th:text="${movie.duration} + ' minutes'"></span>
+                                            <span th:if="${movie.ageLimit == T(com.bluebear.cinemax.enumtype.AgeLimit).AGE_18_PLUS}" th:text="'Age: 18+'"></span>
+                                            <span th:if="${movie.ageLimit == T(com.bluebear.cinemax.enumtype.AgeLimit).AGE_16_PLUS}" th:text="'Age: 16+'"></span>
+                                            <span th:if="${movie.ageLimit == T(com.bluebear.cinemax.enumtype.AgeLimit).AGE_13_PLUS}" th:text="'Age: 13+'"></span>
+                                            <span th:if="${movie.ageLimit == T(com.bluebear.cinemax.enumtype.AgeLimit).AGE_P}" th:text="'Age: P'"></span>
+                                        </div>
                                         <div class="movie-genre" th:each="movieGenre : ${movie.genres}"
                                              th:text="${movieGenre.genreName}"></div>
                                     </div>
@@ -131,7 +138,13 @@
                                     </div>
                                     <div class="movie-info">
                                         <div class="movie-title" th:text="${movie.movieName}"></div>
-                                        <div class="movie-release" th:text="${movie.duration} + ' minutes'"></div>
+                                        <div class="movie-release">
+                                            <span th:text="${movie.duration} + ' minutes'"></span>
+                                            <span th:if="${movie.ageLimit == T(com.bluebear.cinemax.enumtype.AgeLimit).AGE_18_PLUS}" th:text="'Age: 18+'"></span>
+                                            <span th:if="${movie.ageLimit == T(com.bluebear.cinemax.enumtype.AgeLimit).AGE_16_PLUS}" th:text="'Age: 16+'"></span>
+                                            <span th:if="${movie.ageLimit == T(com.bluebear.cinemax.enumtype.AgeLimit).AGE_13_PLUS}" th:text="'Age: 13+'"></span>
+                                            <span th:if="${movie.ageLimit == T(com.bluebear.cinemax.enumtype.AgeLimit).AGE_P}" th:text="'Age: P'"></span>
+                                        </div>
                                         <div class="movie-release"
                                              th:text="'Release Date: ' + ${#temporals.format(movie.startDate, 'dd/MM/yyyy')}"></div>
                                         <div class="movie-genre" th:each="movieGenre : ${movie.genres}"
@@ -146,15 +159,20 @@
         </div>
     </div>
 </section>
-<div class="container book-movie-area" th:replace="customer/fragments/homepage/book-area :: book-movie-area">
+<div class="container book-movie-area" th:replace="customer/fragments/homepage/book-area :: book-movie-area"
+     id="book-movie-area">
 </div>
 <div class="container feedback-area" th:replace="customer/fragments/homepage/feedback-area :: feedback-area">
 </div>
+<!-- ==========ChatBot-Section========== -->
+<div class="chatbot-container" th:replace="common/fragments/chatbot :: chatbot"></div>
+<!-- ==========ChatBot-Section========== -->
 <!-- ==========Footer-Section========== -->
 <footer class="footer-section" th:replace="common/fragments/footer :: footer">
 </footer>
 <!-- ==========Footer-Section========== -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/customer-static/js/chatbot.js}"></script>
 <script th:src="@{/customer-static/js/homepage.js}"></script>
 <script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
 <script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>

@@ -15,7 +15,7 @@
             </div>
             <p class="comment-text-movie-detail" th:text="${comment.content}">
             </p>
-            <div class="comment-actions-movie-detail">
+            <div class="comment-actions-movie-detail" th:if="${session.customer != null}">
                 <a href="#" class="reply-btn-movie-detail" th:data-author-id="${comment.authorCustomerId}">Reply</a>
             </div>
         </div>

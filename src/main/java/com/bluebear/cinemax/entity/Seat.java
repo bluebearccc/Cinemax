@@ -42,6 +42,6 @@ public class Seat {
     @Enumerated(EnumType.STRING)
     private Seat_Status status;
 
-    @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "seat", cascade = CascadeType.ALL)
     private List<DetailSeat> detailSeatList;
 }

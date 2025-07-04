@@ -55,6 +55,7 @@ public class HomeController {
 
     @PostConstruct public void init() {
         genres = genreService.getAllGenres();
+        theaters = theaterService.getAllTheaters();
         maximumFeedback = movieFeedbackService.countDistinctMovieByFeedBack();
     }
 
@@ -71,7 +72,6 @@ public class HomeController {
 
         currentWebPage = "home";
         currentNumberOfFeedback = movieFeedbacks.size();
-        theaters = theaterService.getAllTheaters();
         currentTheater = theaters.getContent().getFirst();
         futureMovies = movieService.findAllMoviesWillShow();
         topMovies = movieService.findTop3MoviesHighestRate();

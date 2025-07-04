@@ -18,6 +18,7 @@
     <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/theater-detail.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/chatbot.css}">
 
     <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
     <title th:text="${currentTheater.theaterName}"></title>
@@ -169,13 +170,16 @@
         </div>
     </div>
 </div>
-
+<!-- ==========ChatBot-Section========== -->
+<div class="chatbot-container" th:replace="common/fragments/chatbot :: chatbot"></div>
+<!-- ==========ChatBot-Section========== -->
 <!-- ==========Footer-Section========== -->
 <footer class="footer-section" th:replace="common/fragments/footer :: footer">
 </footer>
 <!-- ==========Footer-Section========== -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script th:src="@{/customer-static/js/theater-detail.js}"></script>
+<script th:src="@{/customer-static/js/chatbot.js}"></script>
 <script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
 <script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
 <script th:src="@{/customer-static/js/plugins.js}"></script>

@@ -1,0 +1,26 @@
+<!-- Chatbot -->
+<div class="chatbot-container" th:fragment="chatbot">
+    <button class="chatbot-button" onclick="toggleChat()">
+        🤖
+    </button>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <h3>🤖 Trợ lý AI CineMagic</h3>
+            <button class="close-chat" onclick="toggleChat()">×</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                Xin chào! Tôi là trợ lý AI của CineMagic. Tôi có thể giúp bạn:
+                <br>• Tìm phim phù hợp
+                <br>• Đặt vé xem phim
+                <br>• Tư vấn suất chiếu
+                <br>• Giải đáp thắc mắc
+                <br><br>Bạn cần hỗ trợ gì hôm nay?
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Nhập tin nhắn..." onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="sendMessage()">Gửi</button>
+        </div>
+    </div>
+</div>

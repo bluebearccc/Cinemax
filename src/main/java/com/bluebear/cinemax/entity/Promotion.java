@@ -39,6 +39,6 @@ public class Promotion {
     @Enumerated(EnumType.STRING)
     private Promotion_Status status;
 
-    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Invoice> invoices;
 }

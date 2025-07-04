@@ -35,6 +35,6 @@ public class MovieFeedback {
     @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
 
-    @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MovieFeedbackComment> comments;
 }

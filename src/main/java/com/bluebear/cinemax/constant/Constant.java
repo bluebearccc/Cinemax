@@ -9,4 +9,6 @@ public class Constant {
     public static final int FEEDBACK_PER_PAGE = 5;
 
     public static final int COMMENT_PER_FEEDBACK = 3;
+
+    public static final int BLOGS_PER_PAGE = 8;
 }

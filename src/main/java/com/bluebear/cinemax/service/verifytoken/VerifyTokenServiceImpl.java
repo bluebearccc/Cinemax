@@ -15,7 +15,6 @@ public class VerifyTokenServiceImpl implements VerifyTokenService {
     @Autowired
     private VerifyTokenRepository verifyTokenRepository;
 
-    // Convert Entity to DTO
     public VerifyTokenDTO toDTO(VerifyToken entity) {
         if (entity == null) return null;
         return VerifyTokenDTO.builder()
@@ -28,7 +27,6 @@ public class VerifyTokenServiceImpl implements VerifyTokenService {
                 .build();
     }
 
-    // Convert DTO to Entity
     public VerifyToken toEntity(VerifyTokenDTO dto) {
         if (dto == null) return null;
         return VerifyToken.builder()
@@ -41,7 +39,6 @@ public class VerifyTokenServiceImpl implements VerifyTokenService {
                 .build();
     }
 
-    // Create new VerifyToken
     @Transactional
     public VerifyTokenDTO create(VerifyTokenDTO dto) {
         VerifyToken entity = toEntity(dto);
@@ -50,7 +47,6 @@ public class VerifyTokenServiceImpl implements VerifyTokenService {
         return toDTO(saved);
     }
 
-    // Update existing VerifyToken
     @Transactional
     public VerifyTokenDTO update(VerifyTokenDTO dto) {
         if (dto.getId() == null) {
@@ -73,7 +69,6 @@ public class VerifyTokenServiceImpl implements VerifyTokenService {
         return toDTO(updated);
     }
 
-    // Delete VerifyToken by id
     @Transactional
     public void delete(Integer id) {
         if (!verifyTokenRepository.existsById(id)) {
@@ -82,14 +77,12 @@ public class VerifyTokenServiceImpl implements VerifyTokenService {
         verifyTokenRepository.deleteById(id);
     }
 
-    // Get VerifyToken by id
     @Transactional
     public VerifyTokenDTO getById(Integer id) {
         Optional<VerifyToken> optional = verifyTokenRepository.findById(id);
         return optional.map(this::toDTO).orElse(null);
     }
 
-    // Get token by email
     @Transactional
     public VerifyTokenDTO getTokenByEmail(String email) {
         return verifyTokenRepository.findByEmail(email)
@@ -97,13 +90,11 @@ public class VerifyTokenServiceImpl implements VerifyTokenService {
                 .orElse(null);
     }
 
-    // Delete token by email
     @Transactional
     public void deleteTokenByEmail(String email) {
         verifyTokenRepository.deleteByEmail(email);
     }
 
-    // Get by token string
     @Transactional
     public VerifyTokenDTO findByToken(String token) {
         return verifyTokenRepository.findByToken(token)

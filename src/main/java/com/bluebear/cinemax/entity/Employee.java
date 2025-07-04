@@ -43,6 +43,6 @@ public class Employee {
     @Column(name = "FullName", nullable = false, length = 100)
     private String fullName;
 
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL)
     private List<Invoice> invoiceList;
 }

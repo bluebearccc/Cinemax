@@ -42,9 +42,9 @@ public class Room {
     @Enumerated(EnumType.STRING)
     private Room_Status status;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<Seat> seats;
 
-    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "room", cascade = CascadeType.ALL)
     private List<Schedule> schedules;
 }

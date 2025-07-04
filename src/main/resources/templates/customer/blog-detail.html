@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" th:href="@{/customer-static/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/odometer.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/chatbot.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/blog-detail.css}">
+
+
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <title th:text="${blog.title}"></title>
+</head>
+<body>
+<!-- ==========Preloader========== -->
+<div th:replace="common/fragments/preloader :: preloader">
+</div>
+<!-- ==========Preloader========== -->
+<!-- ==========Overlay========== -->
+<a href="#0" class="scrollToTop">
+    <i class="fas fa-angle-up"></i>
+</a>
+<!-- ==========Overlay========== -->
+<!-- ==========Header-Section========== -->
+<header th:replace="common/fragments/header :: header-section">
+</header>
+<!-- ==========Header-Section========== -->
+
+<div class="container-blog-detail main-wrapper">
+    <input type="hidden" id="blogId" th:value="${blog.blogID}">
+    <main>
+        <div class="hero-image" th:style="'background-image:url(' + @{${blog.image}} + ');'">
+            <div class="hero-content">
+                <h1 th:text="${blog.title}"></h1>
+            </div>
+        </div>
+        <div th:if="${session.customer != null}">
+            <input type="hidden" id="customerId" th:value="${session.customer.id}">
+        </div>
+        <div class="article-meta">
+            <div class="meta-info">
+                <div class="author-info">
+                    <div class="author-avatar"><i class="fas fa-user"></i></div>
+                    <div class="author-details">
+                        <h4 class="author-name" th:text="${blog.authorName}"></h4>
+                    </div>
+                </div>
+                <div class="post-date" th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy')}"></div>
+                <div class="category-tag" th:each="category : ${blog.categories}"
+                     th:text="${category.categoryName}"></div>
+            </div>
+
+            <div class="engagement-stats">
+                <div id="likeSection" th:class="${isLiked ? 'like-section liked' : 'like-section'}">
+                    <span class="heart-icon" th:text="${isLiked ? '♥' : '♡'}"></span>
+                    <span id="likeCount" th:text="${blog.likeCount}"></span>
+                    <span th:text="'like' + ${(blog.likeCount > 1) ? 's' : ''}"></span>
+                </div>
+                <div style="color: #718096; margin-top: 8px">
+                    <span th:text="'👁 ' + ${blog.viewCount}"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <article class="article-content">
+                <div class="intro-section">
+                    <p th:text="${blog.content}"></p>
+                </div>
+                <div class="content-section" th:each="section : ${blog.sections}">
+                    <h2 th:text="${section.sectionTitle}"></h2>
+                    <div class="content-image" th:if="${section.sectionOrder == 2}">
+                        <img th:src="@{${blog.image}}" class="content-image-blog">
+                    </div>
+                    <p th:text="${section.sectionContent}"></p>
+                </div>
+            </article>
+        </div>
+    </main>
+
+    <aside class="sidebar">
+        <section class="related-posts">
+            <h3 class="related-title">Bài viết liên quan</h3>
+            <div class="related-grid">
+                <div class="related-card" th:each="sameCate : ${sameCateBlogs}"
+                     th:onclick="|window.location.href='/customer/blog-detail?blogId=${sameCate.blogID}'|">
+                    <div class="related-card-image">
+                        <img th:src="@{${sameCate.image}}" class="related-card-blog" alt="">
+                    </div>
+                    <div class="related-card-content">
+                        <h4 th:text="${sameCate.title}"></h4>
+                        <p th:text="${sameCate.content}"></p>
+                        <div class="related-card-meta">
+                            <span th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy')}"></span>
+                            <span class="related-category"
+                                  th:text="${sameCate.categories.getFirst().categoryName}"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </aside>
+</div>
+<!-- ==========ChatBot-Section========== -->
+<div class="chatbot-container" th:replace="common/fragments/chatbot :: chatbot"></div>
+<!-- ==========ChatBot-Section========== -->
+<!-- ==========Footer-Section========== -->
+<footer class="footer-section" th:replace="common/fragments/footer :: footer">
+</footer>
+<!-- ==========Footer-Section========== -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/customer-static/js/blog-detail.js}"></script>
+<script th:src="@{/customer-static/js/chatbot.js}"></script>
+<script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
+<script th:src="@{/customer-static/js/plugins.js}"></script>
+<script th:src="@{/customer-static/js/bootstrap.min.js}"></script>
+<script th:src="@{/customer-static/js/isotope.pkgd.min.js}"></script>
+<script th:src="@{/customer-static/js/magnific-popup.min.js}"></script>
+<script th:src="@{/customer-static/js/owl.carousel.min.js}"></script>
+<script th:src="@{/customer-static/js/wow.min.js}"></script>
+<script th:src="@{/customer-static/js/countdown.min.js}"></script>
+<script th:src="@{/customer-static/js/odometer.min.js}"></script>
+<script th:src="@{/customer-static/js/viewport.jquery.js}"></script>
+<script th:src="@{/customer-static/js/main.js}"></script>
+</body>
+
+</html>
