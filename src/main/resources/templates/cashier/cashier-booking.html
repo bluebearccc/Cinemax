@@ -8,861 +8,312 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* Base Styling */
-        body {
-            background: linear-gradient(135deg, #1a1a1a 0%, #2d1b1b 100%);
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            min-height: 100vh;
-        }
-
-        .container-fluid {
-            background: transparent;
-        }
-
-        /* Card Styling */
-        .card-custom {
-            background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
-            border: 1px solid #444;
-            border-radius: 15px;
-            box-shadow: 0 8px 32px rgba(220, 53, 69, 0.1);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s ease;
-        }
-
-        .card-custom:hover {
-            box-shadow: 0 12px 40px rgba(220, 53, 69, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #dc3545, #b02a37);
-            border-bottom: 1px solid #444;
-            color: #ffffff;
-            border-radius: 15px 15px 0 0 !important;
-            padding: 1.5rem;
-        }
-
-        .card-body {
-            background: rgba(42, 42, 42, 0.9);
-            color: #ffffff;
-            padding: 2rem;
-        }
-
-        /* Navigation */
-        .navbar {
-            background: linear-gradient(135deg, #000000, #1a1a1a) !important;
-            border-bottom: 2px solid #dc3545;
-            backdrop-filter: blur(10px);
-        }
-
-        .navbar-brand {
-            color: #dc3545 !important;
-            font-weight: bold;
-            font-size: 1.5rem;
-        }
-
-        .nav-link {
-            color: #ffffff !important;
-            transition: color 0.3s ease;
-        }
-
-        .nav-link:hover {
-            color: #dc3545 !important;
-        }
-
-        /* Step Indicator - CORRECTED */
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start; /* Align items at the start of the cross axis */
-            position: relative;
-            width: 100%;
-            margin: 2rem 0;
+        /* ========== GLOBAL STYLES ========== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
             padding: 0;
         }
 
-        .step-indicator::before {
-            content: '';
-            position: absolute;
-            top: 17px; /* Position the line in the middle of the step-number */
-            left: 0;
-            right: 0;
-            height: 4px;
-            background-color: #444;
+        :root {
+            --primary-color: #1a1a2e;
+            --secondary-color: #16213e;
+            --accent-color: #e94560;
+            --accent-hover: #d63851;
+            --gold-color: #ffd700;
+            --text-light: #ffffff;
+            --text-gray: #a0a0a0;
+            --background-dark: #0f0f23;
+            --card-bg: #1e1e3f;
+            --border-color: #333366;
+            --success-color: #4caf50;
+            --warning-color: #ff9800;
+            --error-color: #f44336;
+            --couple-seat-color: #e91e63;
+            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --gradient-gold: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
+            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
+            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.15);
+            --shadow-heavy: 0 15px 40px rgba(0, 0, 0, 0.2);
+            --border-radius: 12px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--background-dark);
+            color: var(--text-light);
+            line-height: 1.6;
+            min-height: 100vh;
+            background-image: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        /* ========== GENERAL FIXES & CUSTOMS ========== */
+        .card-custom {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-custom .card-header, .card-custom .card-footer {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border-color);
+            border-top: 1px solid var(--border-color);
+        }
+
+        .card-custom, .card-custom .text-dark, .card-custom h1, .card-custom h2, .card-custom h3, .card-custom h4, .card-custom h5, .card-custom h6 {
+            color: var(--text-light);
+        }
+
+        .card-custom .text-muted {
+            color: var(--text-gray) !important;
+        }
+
+        .form-control, .form-select {
+            background-color: var(--secondary-color);
+            color: var(--text-light);
+            border: 1px solid var(--border-color);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background-color: var(--secondary-color);
+            color: var(--text-light);
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.25rem rgba(233, 69, 96, 0.25);
+        }
+
+        select.form-select option {
+            background: var(--background-dark);
+            color: var(--text-light);
+        }
+
+        .pagination .page-link {
+            background-color: var(--card-bg);
+            border-color: var(--border-color);
+            color: var(--text-light);
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .pagination .page-item.disabled .page-link {
+            background-color: var(--secondary-color);
+            border-color: var(--border-color);
+        }
+
+        .navbar-custom {
+            background-color: var(--card-bg) !important;
+        }
+
+        /* ========== STEP INDICATOR ========== */
+        /* NOTE: The existing HTML structure for step indicator is kept. The CSS below styles it. */
+        .step-indicator {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px 0;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            position: relative;
+        }
+
+        .step-indicator .step {
+            text-align: center;
+            color: var(--text-gray);
+            position: relative;
             z-index: 1;
+        }
+
+        .step-indicator .step .step-number {
+            width: 40px;
+            height: 40px;
+            line-height: 36px;
+            border: 2px solid var(--border-color);
+            display: inline-block;
+            border-radius: 50%;
+            margin-bottom: 10px;
+            background-color: var(--secondary-color);
+            transition: var(--transition);
+        }
+
+        .step-indicator .step.active {
+            color: var(--accent-color);
+            font-weight: bold;
+        }
+
+        .step-indicator .step.active .step-number {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
+            color: var(--text-light);
+            transform: scale(1.1);
+        }
+
+        .step-indicator .step.completed .step-number {
+            background-color: var(--success-color);
+            border-color: var(--success-color);
+            color: var(--text-light);
+        }
+
+        .step-indicator .step.completed {
+            color: var(--success-color);
         }
 
         .progress-line {
             position: absolute;
-            top: 17px; /* Match the ::before pseudo-element */
-            left: 0;
-            height: 4px;
-            background: linear-gradient(135deg, #dc3545, #b02a37);
-            z-index: 2;
-            transition: width 0.5s ease-in-out;
+            height: 2px;
+            background-color: var(--success-color);
+            top: 40px; /* Vertically center with the step numbers */
+            left: 10%;
+            z-index: 0;
+            transition: width 0.5s ease;
         }
 
-        .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            text-align: center;
-            position: relative;
-            z-index: 3;
-            color: #666;
-            transition: all 0.3s ease;
-            width: 80px; /* Give each step a fixed width for alignment */
-        }
-
-        .step .step-number {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: #444;
-            color: #fff;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            transition: all 0.3s ease;
-            margin-bottom: 8px; /* Space between number and text */
-            border: 3px solid #1a1a1a; /* Create separation from the line */
-        }
-
-        .step small {
-            font-weight: 500;
-        }
-
-        .step.active {
-            color: #dc3545;
-            font-weight: bold;
-        }
-
-        .step.active .step-number {
-            background: #dc3545;
-            box-shadow: 0 0 15px rgba(220, 53, 69, 0.5);
-        }
-
-        .step.completed {
-            color: #28a745;
-        }
-
-        .step.completed .step-number {
-            background: #28a745;
-        }
-
-        /* Movie Cards */
+        /* ========== MOVIE CARDS ========== */
         .movie-card {
-            background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
-            border: 1px solid #444;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-            overflow: hidden;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            transition: var(--transition);
+            height: 100%;
         }
-
         .movie-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(220, 53, 69, 0.3);
-            border-color: #dc3545;
+            box-shadow: var(--shadow-medium);
+            border-color: var(--accent-color);
         }
 
-        .movie-card .card-body {
-            background: rgba(42, 42, 42, 0.95);
-            padding: 1.5rem;
-        }
-
-        .movie-card .card-title {
-            color: #ffffff !important;
+        /* ========== SEAT SELECTION ========== */
+        .screen {
+            background: var(--gradient-primary);
+            color: var(--text-light);
+            text-align: center;
+            padding: 10px;
+            border-radius: 5px;
+            margin: 0 auto 30px auto;
+            max-width: 50%;
             font-weight: 600;
-            font-size: 1.1rem;
-        }
-
-        .movie-card .card-text {
-            color: #cccccc !important;
-        }
-
-        /* Form Controls */
-        .form-control {
-            background: rgba(42, 42, 42, 0.9);
-            border: 1px solid #555;
-            color: #ffffff;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            background: rgba(42, 42, 42, 1);
-            border-color: #dc3545;
-            color: #ffffff;
-            box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
-        }
-
-        .form-control::placeholder {
-            color: #888;
-        }
-
-        .form-select {
-            background: rgba(42, 42, 42, 0.9);
-            border: 1px solid #555;
-            color: #ffffff;
-            border-radius: 8px;
-        }
-
-        .form-select:focus {
-            border-color: #dc3545;
-            box-shadow: 0 0 10px rgba(220, 53, 69, 0.3);
-        }
-
-        .form-label {
-            color: #ffffff;
-            font-weight: 500;
-        }
-
-        /* Buttons */
-        .btn-warning {
-            background: linear-gradient(135deg, #ffc107, #e0a800);
-            border: none;
-            color: #000;
-            font-weight: 600;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #e0a800, #cc9900);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(255, 193, 7, 0.3);
-        }
-
-        .btn-outline-warning {
-            border: 2px solid #ffc107;
-            color: #ffc107;
-            background: transparent;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-warning:hover {
-            background: #ffc107;
-            color: #000;
-            transform: translateY(-2px);
-        }
-
-        .btn-outline-primary {
-            border: 2px solid #dc3545;
-            color: #dc3545;
-            background: transparent;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-primary:hover {
-            background: #dc3545;
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-
-        .btn-outline-secondary {
-            border: 2px solid #666;
-            color: #cccccc;
-            background: transparent;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-secondary:hover {
-            background: #666;
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-
-        .btn-outline-danger {
-            border: 2px solid #e91e63;
-            color: #e91e63;
-            background: transparent;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-outline-danger:hover {
-            background: #e91e63;
-            color: #ffffff;
-            transform: translateY(-2px);
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, #dc3545, #b02a37);
-            border: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #b02a37, #8e1e2a);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(220, 53, 69, 0.3);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, #28a745, #1e7e34);
-            border: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-success:hover {
-            background: linear-gradient(135deg, #1e7e34, #155724);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-info {
-            background: linear-gradient(135deg, #17a2b8, #117a8b);
-            border: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .btn-info:hover {
-            background: linear-gradient(135deg, #117a8b, #0c5460);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(23, 162, 184, 0.3);
-        }
-
-        /* Seat Styling - CORRECTED */
-        .seats-container {
-            background: rgba(0, 0, 0, 0.7);
-            border-radius: 15px;
-            padding: 2rem;
-            margin: 2rem 0;
-            border: 1px solid #444;
         }
 
         .seat {
             width: 35px;
             height: 35px;
-            border-radius: 5px;
+            border-radius: 8px;
             cursor: pointer;
-            background: #2a2a2a;
-            border: 2px solid #555;
-            color: #ffffff;
-            transition: all 0.3s ease;
-            font-weight: 600;
-            font-size: 11px;
-            position: relative;
+            transition: var(--transition);
+            background-color: var(--success-color); /* Available by default */
+            border: 1px solid rgba(0, 0, 0, 0.2);
+        }
+
+        .seat.vip {
+            background: var(--gradient-gold);
+        }
+
+        /* 'occupied' from HTML is treated as 'booked' */
+        .seat.occupied {
+            background: var(--error-color);
+            cursor: not-allowed;
+        }
+
+        .seat.couple {
+            width: 78px; /* 35px * 2 + 8px gap */
+            background-color: var(--couple-seat-color);
+        }
+
+        .seat.selected {
+            background: var(--accent-color);
+            transform: scale(1.1);
+            box-shadow: 0 0 15px rgba(233, 69, 96, 0.5);
         }
 
         .seat:hover:not(.occupied) {
             transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(255, 255, 255, 0.2);
         }
 
-        /* Available Seats */
-        .seat.available {
-            background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
-            border-color: #666;
-            color: #ffffff;
+        /* Fix the legend to use variables from CSS */
+        .seat-legend .seat-example[style*="#28a745"] {
+            background-color: var(--success-color) !important;
         }
 
-        .seat.available:hover {
-            background: linear-gradient(135deg, #6a6a6a, #4a4a4a);
-            border-color: #888;
+        /* Trống */
+        .seat-legend .seat-example[style*="#ffc107"] {
+            background-color: var(--accent-color) !important;
         }
 
-        /* VIP Seats */
-        .seat.vip.available {
-            background: linear-gradient(135deg, #6f42c1, #5a2d91);
-            border-color: #8b5cf6;
-            color: #ffffff;
-            box-shadow: 0 0 8px rgba(111, 66, 193, 0.3);
+        /* Đang chọn */
+        .seat-legend .seat-example[style*="#dc3545"] {
+            background-color: var(--error-color) !important;
         }
 
-        .seat.vip.available:hover {
-            background: linear-gradient(135deg, #8b5cf6, #6f42c1);
-            box-shadow: 0 0 15px rgba(111, 66, 193, 0.5);
+        /* Đã bán */
+        .seat-legend .seat-example[style*="#6f42c1"] {
+            background: var(--gradient-gold) !important;
         }
 
-        .seat.vip.selected {
-            background: linear-gradient(135deg, #ffc107, #e0a800);
-            border-color: #ffeb3b;
-            color: #000;
-            box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
+        /* VIP */
+        .seat-legend .seat-example[style*="#e91e63"] {
+            background-color: var(--couple-seat-color) !important;
         }
 
-        .seat.vip.occupied {
-            background: linear-gradient(135deg, #dc3545, #b02a37);
-            border-color: #ff6b6b;
-            color: #ffffff;
-            cursor: not-allowed;
-            box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
+        /* Ghế đôi */
+
+        .booking-summary {
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
         }
 
-        /* Couple Seats */
-        .seat.couple.available {
-            background: linear-gradient(135deg, #e91e63, #c2185b);
-            border-color: #f06292;
-            color: #ffffff;
-            box-shadow: 0 0 8px rgba(233, 30, 99, 0.3);
-            width: 72px; /* Set width for couple seat (35px * 2 + 2px margin) */
+        .booking-summary hr {
+            border-top: 1px solid var(--border-color);
         }
 
-        .seat.couple.available:hover {
-            background: linear-gradient(135deg, #f06292, #e91e63);
-            box-shadow: 0 0 15px rgba(233, 30, 99, 0.5);
-        }
-
-        .seat.couple.selected {
-            background: linear-gradient(135deg, #ffc107, #e0a800);
-            border-color: #ffeb3b;
-            color: #000;
-            box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
-            width: 72px;
-        }
-
-        .seat.couple.occupied {
-            background: linear-gradient(135deg, #dc3545, #b02a37);
-            border-color: #ff6b6b;
-            color: #ffffff;
-            cursor: not-allowed;
-            box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
-            width: 72px;
-        }
-
-        /* Selected Seats */
-        .seat.selected {
-            background: linear-gradient(135deg, #ffc107, #e0a800);
-            border-color: #ffeb3b;
-            color: #000;
-            box-shadow: 0 0 15px rgba(255, 193, 7, 0.6);
-            transform: scale(1.1);
-        }
-
-        /* Occupied Seats */
-        .seat.occupied {
-            background: linear-gradient(135deg, #dc3545, #b02a37);
-            border-color: #ff6b6b;
-            color: #ffffff;
-            cursor: not-allowed;
-            box-shadow: 0 0 8px rgba(220, 53, 69, 0.3);
-        }
-
-        /* Row Labels */
-        .row-label {
-            color: #dc3545;
+        #selected-seats-list .d-flex span:last-child {
+            color: var(--gold-color);
             font-weight: bold;
-            font-size: 1.1rem;
-            text-shadow: 0 0 5px rgba(220, 53, 69, 0.5);
         }
 
-        /* Screen */
-        .screen {
-            background: linear-gradient(135deg, #333, #111);
-            border: 2px solid #dc3545;
-            box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+        /* ========== FOOD & DRINKS ========== */
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* Seat Legend */
-        .seat-legend {
-            background: rgba(42, 42, 42, 0.9);
-            border-radius: 10px;
-            padding: 1rem;
-            border: 1px solid #444;
+        .quantity-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: var(--accent-color);
+            color: var(--text-light);
+            border: none;
+            cursor: pointer;
         }
 
-        .legend-item {
-            color: #ffffff;
+        /* ========== CUSTOMER INFO FORM ========== */
+        .form-check-input:checked {
+            background-color: var(--accent-color);
+            border-color: var(--accent-color);
         }
 
-        .legend-item small {
-            font-weight: 500;
-        }
-
-        /* Alerts */
-        .alert-danger {
-            background: rgba(220, 53, 69, 0.1);
-            border: 1px solid #dc3545;
-            color: #ffffff;
-            border-radius: 10px;
-        }
-
-        .alert-info {
-            background: rgba(23, 162, 184, 0.1);
-            border: 1px solid #17a2b8;
-            color: #ffffff;
-            border-radius: 10px;
-        }
-
-        .alert-success {
-            background: rgba(40, 167, 69, 0.1);
-            border: 1px solid #28a745;
-            color: #ffffff;
-            border-radius: 10px;
-        }
-
-        /* Badges */
-        .badge {
-            font-size: 0.8rem;
-            padding: 0.5rem 0.8rem;
-            font-weight: 500;
-        }
-
-        .badge.bg-warning {
-            background: linear-gradient(135deg, #ffc107, #e0a800) !important;
-            color: #000 !important;
-        }
-
-        .badge.bg-primary {
-            background: linear-gradient(135deg, #dc3545, #b02a37) !important;
-        }
-
-        .badge.bg-danger {
-            background: linear-gradient(135deg, #e91e63, #c2185b) !important;
-        }
-
-        .badge.bg-info {
-            background: linear-gradient(135deg, #17a2b8, #117a8b) !important;
-        }
-
-        .badge.bg-success {
-            background: linear-gradient(135deg, #28a745, #1e7e34) !important;
-        }
-
-        /* Tables */
-        .table {
-            color: #ffffff;
-        }
-
-        .table-light {
-            background: rgba(66, 66, 66, 0.9) !important;
-            color: #ffffff !important;
-        }
-
-        .table th {
-            border-color: #555;
-            color: #ffffff;
-        }
-
-        .table td {
-            border-color: #444;
-            color: #ffffff;
-        }
-
-        /* Pagination */
-        .pagination .page-link {
-            background: rgba(42, 42, 42, 0.9);
-            border: 1px solid #555;
-            color: #ffffff;
-            border-radius: 5px;
-            margin: 0 2px;
-        }
-
-        .pagination .page-link:hover {
-            background: #dc3545;
-            border-color: #dc3545;
-            color: #ffffff;
-        }
-
-        .pagination .page-item.active .page-link {
-            background: #dc3545;
-            border-color: #dc3545;
-        }
-
-        .pagination .page-item.disabled .page-link {
-            background: rgba(42, 42, 42, 0.5);
-            border-color: #333;
-            color: #666;
-        }
-
-        /* Food Cards */
-        .card h-100 {
-            background: linear-gradient(145deg, #2a2a2a, #1f1f1f);
-            border: 1px solid #444;
-            border-radius: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .card h-100:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 10px 25px rgba(220, 53, 69, 0.2);
-            border-color: #dc3545;
-        }
-
-        .card h-100 .card-body {
-            color: #ffffff;
-        }
-
-        .card h-100 h6 {
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        /* Input Groups */
-        .input-group .btn {
-            border-radius: 0;
-        }
-
-        .input-group .btn:first-child {
-            border-radius: 5px 0 0 5px;
-        }
-
-        .input-group .btn:last-child {
-            border-radius: 0 5px 5px 0;
-        }
-
-        /* Text Colors */
-        .text-muted {
-            color: #cccccc !important;
-        }
-
-        .text-success {
-            color: #28a745 !important;
+        /* Final Invoice/Ticket */
+        .text-primary {
+            color: var(--accent-color) !important;
         }
 
         .text-warning {
-            color: #ffc107 !important;
+            color: var(--gold-color) !important;
         }
 
-        .text-danger {
-            color: #dc3545 !important;
+        .bg-primary {
+            background-color: var(--accent-color) !important;
         }
 
-        .text-info {
-            color: #17a2b8 !important;
+        .bg-warning {
+            background-color: var(--gold-color) !important;
         }
-
-        /* Success/Error States */
-        .success-icon i {
-            text-shadow: 0 0 20px rgba(40, 167, 69, 0.5);
-        }
-
-        .error-icon i {
-            text-shadow: 0 0 20px rgba(220, 53, 69, 0.5);
-        }
-
-        /* Invoice Styling */
-        .invoice-header {
-            background: rgba(42, 42, 42, 0.7);
-            border-radius: 10px;
-            padding: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .total-summary .card {
-            background: rgba(42, 42, 42, 0.9) !important;
-            border: 1px solid #555;
-        }
-
-        .total-summary .card .card-body {
-            background: transparent;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
-            .card-body {
-                padding: 1rem;
-            }
-
-            .seat {
-                width: 25px !important;
-                height: 25px !important;
-                font-size: 9px;
-            }
-
-            .seat.couple.available,
-            .seat.couple.selected,
-            .seat.couple.occupied {
-                width: 52px !important; /* 25px * 2 + 2px margin */
-            }
-
-            .seats-container {
-                padding: 1rem;
-            }
-        }
-
-        /* Animation Effects */
-        @keyframes pulse {
-            0% {
-                transform: scale(1);
-            }
-
-            50% {
-                transform: scale(1.05);
-            }
-
-            100% {
-                transform: scale(1);
-            }
-        }
-
-        .btn:active {
-            animation: pulse 0.2s;
-        }
-
-        .seat.selected {
-            animation: pulse 1s infinite;
-        }
-
-        /* Scrollbar Styling */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #1a1a1a;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #dc3545;
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #b02a37;
-        }
-
-        .food-info {
-            background: rgba(42, 42, 42, 0.9) !important;
-            border-radius: 15px;
-            padding: 1.5rem;
-            border: 1px solid #444;
-            box-shadow: 0 8px 32px rgba(220, 53, 69, 0.1);
-            transition: all 0.3s ease;
-            color: #ffffff !important;
-        }
-
-        .food-info:hover {
-            box-shadow: 0 12px 40px rgba(220, 53, 69, 0.2);
-            transform: translateY(-2px);
-        }
-
-        .food-info h6 {
-            color: #ffffff;
-            font-weight: 600;
-            font-size: 1.1rem;
-            border-bottom: 2px solid #dc3545 !important;
-            padding-bottom: 0.75rem;
-            margin-bottom: 1rem;
-        }
-
-        .food-info h6 i {
-            color: #dc3545;
-            text-shadow: 0 0 10px rgba(220, 53, 69, 0.5);
-        }
-
-        /* Food Table Styling */
-        .food-info .table {
-            color: #ffffff !important;
-            background: transparent !important;
-            margin-bottom: 0;
-            border-collapse: separate;
-            border-spacing: 0;
-        }
-
-        .food-info .table-responsive {
-            background: rgba(0, 0, 0, 0.3) !important;
-            border-radius: 10px;
-            border: 1px solid #555;
-            overflow: hidden;
-        }
-
-        /* Override Bootstrap table styles */
-        .food-info .table > :not(caption) > * > * {
-            padding: 0.75rem !important;
-            background-color: transparent !important;
-            border-bottom-width: 1px !important;
-            box-shadow: none !important;
-        }
-
-        /* Table Headers */
-        .food-info .table thead {
-            background: linear-gradient(135deg, #dc3545, #b02a37) !important;
-        }
-
-        .food-info .table thead th {
-            color: #ffffff !important;
-            font-weight: 600;
-            border: none !important;
-            padding: 1rem 0.75rem !important;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            background: transparent !important;
-        }
-
-        /* Table Body */
-        .food-info .table tbody td {
-            color: #ffffff !important;
-            border-color: #444 !important;
-            padding: 0.75rem !important;
-            background: rgba(42, 42, 42, 0.7) !important;
-            transition: all 0.3s ease;
-        }
-
-        .food-info .table tbody tr:hover td {
-            background: rgba(42, 42, 42, 0.9) !important;
-            color: #ffc107 !important;
-        }
-
-        /* Table Footer */
-        .food-info .table tfoot {
-            background: linear-gradient(135deg, #2a2a2a, #1f1f1f) !important;
-        }
-
-        .food-info .table tfoot th {
-            color: #ffffff !important;
-            font-weight: 700;
-            border: none !important;
-            padding: 1rem 0.75rem !important;
-            font-size: 1rem;
-            background: transparent !important;
-        }
-
-        .food-info .table tfoot .text-success {
-            color: #28a745 !important;
-            font-size: 1.1rem;
-            text-shadow: 0 0 10px rgba(40, 167, 69, 0.5);
-        }
-
-        /* Table Borders */
-        .food-info .table th,
-        .food-info .table td {
-            border-color: #444;
-            vertical-align: middle;
-        }
-
-        /* Responsive Design */
-        .food-info .table-responsive {
-            border-radius: 10px;
-        }
-
-        /* Text Alignment Classes */
-        .food-info .text-center {
-            text-align: center;
-        }
-
-        .food-info .text-end {
-            text-align: right;
-        }
-
-        /* Quantity Styling */
-        .food-info .table tbody td:nth-child(2) {
-            font-weight: 600;
-            color: #ffc107;
-        }
-
-        /* Price Styling */
-        .food-info .table tbody td:nth-child(3),
-        .food-info .table tbody td:nth-child(4) {
-            font-weight: 600;
-            color: #17a2b8;
-        }
-
-        .container-fluid > .row {
-            justify-content: center;
-        }
-
     </style>
 </head>
 <body>
@@ -977,7 +428,8 @@
                     Từ khóa: "<span th:text="${keyword}"></span>"
                 </span>
                             <span th:if="${selectedGenreId != null}" class="badge bg-success me-1">
-                    Thể loại: <span th:text="${availableGenres.stream().filter(g -> g.genreID == selectedGenreId).findFirst().get().genreName}"></span>
+                     Thể loại: <span th:text="${selectedGenreName}"></span>
+                            </span>
                 </span>
                             <span th:if="${selectedDate != null}" class="badge bg-warning text-dark me-1">
                     Ngày: <span th:text="${#temporals.format(selectedDate, 'dd/MM/yyyy')}"></span>

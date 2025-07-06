@@ -57,7 +57,6 @@
                         pay_status = 'Paid';
                         $("#checkout_box").hide();
                         $("#success_pay_box").show();
-                        // Chuyển hướng sau 2 giây
                         setTimeout(function() {
                             window.location.href = "/cashier/booking-success/" + order_id;
                         }, 2000);

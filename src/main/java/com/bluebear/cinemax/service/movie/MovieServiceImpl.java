@@ -228,13 +228,15 @@ public class MovieServiceImpl implements MovieService {
         return movieRepository.findMoviesThatHaveFeedback(Movie_Status.Active, pageable).map(this::toDTO);
     }
 
+    // ==================== [PHẦN ĐƯỢC SỬA] - Bắt đầu ====================
+    // Cập nhật các phương thức để chấp nhận List<Age_Limit>
     @Override
     public Page<MovieDTO> findMoviesByTheaterAndDateRange(Integer theaterId, Movie_Status status,
                                                           Theater_Status theaterStatus,
                                                           LocalDateTime startDate, LocalDateTime endDate,
-                                                          Age_Limit ageLimit, Pageable pageable) {
+                                                          List<Age_Limit> ageLimits, Pageable pageable) {
         Page<Movie> moviesPage = movieRepository.findByTheaterIdAndDateRange(
-                theaterId, status, theaterStatus, startDate, endDate, ageLimit, pageable);
+                theaterId, status, theaterStatus, startDate, endDate, ageLimits, pageable);
 
         List<MovieDTO> movieDTOs = moviesPage.getContent().stream()
                 .map(this::toDTO)
@@ -253,9 +255,9 @@ public class MovieServiceImpl implements MovieService {
     public Page<MovieDTO> findMoviesByTheaterAndGenreAndDateRange(Integer theaterId, Integer genreId,
                                                                   Movie_Status status, Theater_Status theaterStatus,
                                                                   LocalDateTime startDate, LocalDateTime endDate,
-                                                                  Age_Limit ageLimit, Pageable pageable) {
+                                                                  List<Age_Limit> ageLimits, Pageable pageable) {
         Page<Movie> moviesPage = movieRepository.findByTheaterIdAndGenreIdAndDateRange(
-                theaterId, genreId, status, theaterStatus, startDate, endDate, ageLimit, pageable);
+                theaterId, genreId, status, theaterStatus, startDate, endDate, ageLimits, pageable);
 
         List<MovieDTO> movieDTOs = moviesPage.getContent().stream()
                 .map(this::toDTO)
@@ -268,9 +270,9 @@ public class MovieServiceImpl implements MovieService {
     public Page<MovieDTO> findMoviesByTheaterAndKeywordAndDateRange(Integer theaterId, String keyword,
                                                                     Movie_Status status, Theater_Status theaterStatus,
                                                                     LocalDateTime startDate, LocalDateTime endDate,
-                                                                    Age_Limit ageLimit, Pageable pageable) {
+                                                                    List<Age_Limit> ageLimits, Pageable pageable) {
         Page<Movie> moviesPage = movieRepository.findByTheaterIdAndKeywordAndDateRange(
-                theaterId, keyword, status, theaterStatus, startDate, endDate, ageLimit, pageable);
+                theaterId, keyword, status, theaterStatus, startDate, endDate, ageLimits, pageable);
 
         List<MovieDTO> movieDTOs = moviesPage.getContent().stream()
                 .map(this::toDTO)
@@ -284,9 +286,9 @@ public class MovieServiceImpl implements MovieService {
                                                                             String keyword, Movie_Status status,
                                                                             Theater_Status theaterStatus,
                                                                             LocalDateTime startDate, LocalDateTime endDate,
-                                                                            Age_Limit ageLimit, Pageable pageable) {
+                                                                            List<Age_Limit> ageLimits, Pageable pageable) {
         Page<Movie> moviesPage = movieRepository.findByTheaterIdAndGenreIdAndKeywordAndDateRange(
-                theaterId, genreId, keyword, status, theaterStatus, startDate, endDate, ageLimit, pageable);
+                theaterId, genreId, keyword, status, theaterStatus, startDate, endDate, ageLimits, pageable);
 
         List<MovieDTO> movieDTOs = moviesPage.getContent().stream()
                 .map(this::toDTO)
@@ -294,6 +296,7 @@ public class MovieServiceImpl implements MovieService {
 
         return new PageImpl<>(movieDTOs, pageable, moviesPage.getTotalElements());
     }
+    // ==================== [PHẦN ĐƯỢC SỬA] - Kết thúc ====================
 
     @Override
     public List<MovieDTO> findAllShowingMovies() {

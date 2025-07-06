@@ -103,29 +103,54 @@ public class CashierController {
                 endDate = sevenDate;
             }
 
+            List<Age_Limit> applicableAgeLimits = null;
+            if (ageLimit != null) {
+                applicableAgeLimits = new ArrayList<>();
+                switch (ageLimit) {
+                    case AGE_18_PLUS:
+                        applicableAgeLimits.add(Age_Limit.AGE_18_PLUS);
+                    case AGE_16_PLUS:
+                        applicableAgeLimits.add(Age_Limit.AGE_16_PLUS);
+                    case AGE_13_PLUS:
+                        applicableAgeLimits.add(Age_Limit.AGE_13_PLUS);
+                    case AGE_P:
+                        applicableAgeLimits.add(Age_Limit.AGE_P);
+                        break;
+                }
+            }
+
             Pageable pageable = PageRequest.of(page, pageSize);
             Page<MovieDTO> moviesPage;
 
-            // Cập nhật logic gọi service để truyền vào ageLimit
             if (normalizedKeyword != null && genreId != null) {
                 moviesPage = movieService.findMoviesByTheaterAndGenreAndKeywordAndDateRange(
                         theaterId, genreId, keyword, Movie_Status.Active, Theater_Status.Active,
-                        startDate, endDate, ageLimit, pageable);
+                        startDate, endDate, applicableAgeLimits, pageable);
             } else if (normalizedKeyword != null) {
                 moviesPage = movieService.findMoviesByTheaterAndKeywordAndDateRange(
                         theaterId, keyword, Movie_Status.Active, Theater_Status.Active,
-                        startDate, endDate, ageLimit, pageable);
+                        startDate, endDate, applicableAgeLimits, pageable);
             } else if (genreId != null) {
                 moviesPage = movieService.findMoviesByTheaterAndGenreAndDateRange(
                         theaterId, genreId, Movie_Status.Active, Theater_Status.Active,
-                        startDate, endDate, ageLimit, pageable);
+                        startDate, endDate, applicableAgeLimits, pageable);
             } else {
                 moviesPage = movieService.findMoviesByTheaterAndDateRange(
                         theaterId, Movie_Status.Active, Theater_Status.Active,
-                        startDate, endDate, ageLimit, pageable);
+                        startDate, endDate, applicableAgeLimits, pageable);
             }
 
             List<GenreDTO> availableGenres = genreService.getAllGenres();
+
+            String selectedGenreName = null;
+            if (genreId != null) {
+                selectedGenreName = availableGenres.stream()
+                        .filter(g -> genreId.equals(g.getGenreID()))
+                        .map(GenreDTO::getGenreName)
+                        .findFirst()
+                        .orElse(null); // Dùng orElse để tránh lỗi
+            }
+            model.addAttribute("selectedGenreName", selectedGenreName);
 
             List<LocalDateTime> availableDates = new ArrayList<>();
             for (int i = 0; i < 7; i++) {
@@ -137,10 +162,10 @@ public class CashierController {
             model.addAttribute("keyword", normalizedKeyword);
             model.addAttribute("availableGenres", availableGenres);
             model.addAttribute("availableDates", availableDates);
-            model.addAttribute("availableAgeLimits", Age_Limit.values()); // Đưa danh sách giới hạn tuổi vào model
+            model.addAttribute("availableAgeLimits", Age_Limit.values());
             model.addAttribute("selectedGenreId", genreId);
             model.addAttribute("selectedDate", date);
-            model.addAttribute("selectedAgeLimit", ageLimit); // Đưa giới hạn tuổi đã chọn vào model
+            model.addAttribute("selectedAgeLimit", ageLimit);
             model.addAttribute("currentDate", currentDate);
             model.addAttribute("sevenDate", sevenDate);
             session.setAttribute("theaterID", theaterId);
@@ -150,7 +175,7 @@ public class CashierController {
             boolean hasSearchCriteria = (normalizedKeyword != null && !normalizedKeyword.isEmpty())
                     || genreId != null
                     || date != null
-                    || ageLimit != null; // Cập nhật điều kiện hiển thị filter
+                    || ageLimit != null;
             model.addAttribute("hasSearchCriteria", hasSearchCriteria);
 
         } catch (Exception e) {

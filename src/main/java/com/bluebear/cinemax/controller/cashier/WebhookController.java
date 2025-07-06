@@ -25,13 +25,11 @@ public class WebhookController {
             bookingService.saveTransactionFromWebhook(payload);
             String transactionContent = payload.getContent();
             if (transactionContent == null || transactionContent.isBlank()) {
-                log.warn("Webhook received with empty content.");
                 return ResponseEntity.ok("Webhook received but content is empty.");
             }
             String upperCaseContent = transactionContent.toUpperCase();
             int startIndex = upperCaseContent.indexOf("DH");
             if (startIndex == -1) {
-                log.warn("Webhook content does not contain invoice prefix 'DH': {}", transactionContent);
                 return ResponseEntity.ok("Webhook received but no DH prefix found.");
             }
             String remainingString = transactionContent.substring(startIndex + 2);
@@ -43,25 +41,17 @@ public class WebhookController {
                     break;
                 }
             }
-
             if (invoiceIdBuilder.length() == 0) {
-                log.warn("'DH' prefix found but no invoice number followed: {}", transactionContent);
                 return ResponseEntity.ok("Webhook received but invoice ID is missing after prefix.");
             }
 
             Integer invoiceId = Integer.parseInt(invoiceIdBuilder.toString());
-
-            log.info("Extracted Invoice ID: {}. Proceeding to finalize booking.", invoiceId);
             bookingService.finalizeBooking(invoiceId); // Hoàn tất đơn hàng
-
-            log.info("Successfully finalized booking for Invoice ID: {}", invoiceId);
             return ResponseEntity.ok("Webhook processed successfully.");
 
         } catch (NumberFormatException e) {
-            log.error("Could not parse Invoice ID from content: '{}'", payload.getContent(), e);
             return ResponseEntity.badRequest().body("Invalid invoice ID format.");
         } catch (Exception e) {
-            log.error("Error processing webhook for content: '{}'", payload.getContent(), e);
             return ResponseEntity.internalServerError().body("An internal error occurred.");
         }
     }
