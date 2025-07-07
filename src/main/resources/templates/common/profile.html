@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Hồ sơ người dùng - Cinema</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <link rel="stylesheet" th:href="@{/css/profile.css}">
+</head>
+<body>
+
+<div class="profile-container">
+  <!-- Header -->
+  <div class="profile-header">
+    <h1><i class="fas fa-user-circle me-3"></i>Hồ sơ thành viên</h1>
+    <p class="subtitle">Quản lý thông tin cá nhân và lịch sử xem phim</p>
+  </div>
+
+  <!-- Main Content Grid -->
+  <div class="grid-layout">
+    <!-- Account Information -->
+    <div class="profile-card">
+      <div class="card-header-custom">
+        <i class="fas fa-id-card"></i>
+        Thông tin tài khoản
+      </div>
+      <div class="card-body-custom">
+        <div class="info-row">
+          <div class="info-label">
+            <i class="fas fa-envelope"></i>
+            Email
+          </div>
+          <div class="info-value" th:text="${account.email}">example@gmail.com</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">
+            <i class="fas fa-check-circle"></i>
+            Trạng thái
+          </div>
+          <div class="info-value">
+            <span class="status-badge status-active" th:text="${account.status}">Hoạt động</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="profile-card">
+      <div class="card-header-custom">
+        <i class="fas fa-user"></i>
+        Thông tin cá nhân
+      </div>
+      <div class="card-body-custom">
+        <div class="info-row">
+          <div class="info-label">
+            <i class="fas fa-signature"></i>
+            Họ tên
+          </div>
+          <div class="info-value" th:text="${customer.fullName}">Nguyễn Văn A</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">
+            <i class="fas fa-phone"></i>
+            Số điện thoại
+          </div>
+          <div class="info-value" th:text="${customer.phone}">0901234567</div>
+        </div>
+        <div class="info-row">
+          <div class="info-label">
+            <i class="fas fa-star"></i>
+            Điểm tích lũy
+          </div>
+          <div class="info-value">
+            <span class="points-display" th:text="${customer.point} + ' điểm'">150 điểm</span>
+          </div>
+        </div>
+        <div class="mt-4">
+          <a th:href="@{/user/profile/edit(customerId=${customer.id})}" class="btn btn-primary btn-edit">
+            <i class="fas fa-edit me-2"></i>Chỉnh sửa thông tin
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Movie History -->
+
+  <!-- Movie History Section - Thay thế phần cũ -->
+  <div class="profile-card">
+    <div class="card-header-custom">
+      <i class="fas fa-film"></i>
+      Lịch sử xem phim
+    </div>
+    <div class="card-body-custom">
+      <div th:if="${watchedMovies.isEmpty()}" class="empty-state">
+        <i class="fas fa-ticket-alt"></i>
+        <h5>Chưa có lịch sử xem phim</h5>
+        <p>Bạn chưa xem bộ phim nào tại rạp của chúng tôi.</p>
+      </div>
+
+      <div th:if="${!watchedMovies.isEmpty()}" class="movie-history-grid">
+        <div class="movie-item" th:each="items : ${watchedMovies}">
+          <div class="movie-card-layout">
+            <!-- Movie Poster -->
+            <div class="movie-poster">
+              <img th:src="${items.movie.image}" alt="Poster phim" th:alt="${items.movie.movieName}">
+            </div>
+
+            <!-- Movie Content -->
+            <div class="movie-content">
+              <h3 class="movie-title" th:text="${items.movie.movieName}">Dune: Hành Trình Cát - Phần 2</h3>
+
+              <div class="movie-meta">
+                <div class="movie-detail">
+                  <i class="fas fa-clock"></i>
+                  <span th:text="${items.movie.duration} + ' phút'">120 phút</span>
+                </div>
+                <div class="movie-detail">
+                  <i class="fas fa-building"></i>
+                  <span th:text="${items.movie.studio}">Studio</span>
+                </div>
+                <div class="movie-detail">
+                  <i class="fas fa-map-marker-alt"></i>
+                  <span th:text="${items.theater.theaterName}">Quận 1</span>
+                </div>
+              </div>
+
+              <!-- Theater Badge -->
+              <div class="theater-badge" th:text="'Rạp ' + ${items.theater.theaterName}">
+                Rạp Quận 1
+              </div>
+
+              <!-- Date and Time -->
+              <div class="movie-datetime">
+                25/08/2025 | 19:30 - 22:15
+              </div>
+
+              <!-- Rating -->
+              <div class="movie-rating">
+                <div class="rating-display">
+                  <span class="rating-stars">★★★★★</span>
+                  <span class="rating-value" th:text="${#numbers.formatDecimal(items.movie.movieRate, 1, 1)} + '/5'">4.5/5</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Feedback Form -->
+          <div class="movie-feedback">
+            <form th:action="@{/feedback/submit}" method="post" class="feedback-form">
+              <input type="hidden" name="customerId" th:value="${customer.id}" />
+              <input type="hidden" name="theaterId" th:value="${items.theater.theaterId}" />
+
+              <textarea name="content" rows="2" class="form-control" placeholder="Góp ý về dịch vụ rạp..."></textarea>
+
+              <div class="input-group">
+                <label class="input-group-text">
+                  <i class="fas fa-star text-warning"></i> Đánh giá
+                </label>
+                <select class="form-select" name="serviceRate">
+                  <option value="5">Rất tốt</option>
+                  <option value="4">Tốt</option>
+                  <option value="3">Bình thường</option>
+                  <option value="2">Tệ</option>
+                  <option value="1">Rất tệ</option>
+                </select>
+              </div>
+
+              <button class="btn btn-outline-primary btn-sm" type="submit">
+                <i class="fas fa-paper-plane me-1"></i>Gửi đánh giá
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

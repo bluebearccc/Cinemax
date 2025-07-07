@@ -41,4 +41,13 @@ public class ScheduleDTO {
     public String getShowDateKey() {
         return startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
+
+
+    public void setRoom(RoomDTO roomDTO) {
+        setRoomID(roomDTO.getRoomID());
+    }
+
+    public void setMovie(MovieDTO movieDTO) {
+        setMovieID(movieDTO.getMovieID());
+    }
 }
