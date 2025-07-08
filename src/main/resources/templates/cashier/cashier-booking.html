@@ -8,12 +8,36 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        /* ========== GLOBAL STYLES ========== */
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
         }
+
+        .container-fluid > .row {
+            justify-content: center;
+        }
+
+        .step-indicator .step {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 90px;
+            text-align: center;
+        }
+
+
+        .step-indicator .step .step-number {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            line-height: 1;
+        }
+
+        .progress-line {
+            top: 20px;
+        }
+
 
         :root {
             --primary-color: #1a1a2e;
@@ -314,6 +338,84 @@
         .bg-warning {
             background-color: var(--gold-color) !important;
         }
+
+        exit-front {
+            position: absolute;
+            top: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .exit-back {
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .exit-left {
+            position: absolute;
+            left: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 10px 5px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        .exit-right {
+            position: absolute;
+            right: -50px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #ff4444;
+            color: white;
+            padding: 10px 5px;
+            border-radius: 5px;
+            font-size: 10px;
+            font-weight: bold;
+            text-align: center;
+            writing-mode: vertical-lr;
+            text-orientation: mixed;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
+        }
+
     </style>
 </head>
 <body>
@@ -457,7 +559,7 @@
                                     <img th:src="@{${movie.image}}" class="card-img-top" alt="Ảnh phim"
                                          style="height: 300px; object-fit: cover;">
                                     <div class="card-body">
-                                        <h5 class="card-title text-dark" th:text="${movie.movieName}"></h5>
+                                        <h5 class="card-title" th:text="${movie.movieName}"></h5>
                                         <p class="card-text text-muted">
                                             <i class="fas fa-clock me-1"></i><span
                                                 th:text="${movie.duration + ' phút'}"></span><br>
@@ -623,12 +725,30 @@
                             <div class="row">
                                 <div class="col-12 text-center">
                                     <div class="screen mb-3">Màn hình</div>
-                                    <div class="seat-map-container mb-4">
+                                    <div class="seat-map-container mb-4" style="position: relative;">
+
+                                        <!-- Lối thoát phía trước -->
+                                        <div class="exit-front">
+                                            <i class="fas fa-running"></i> THOÁT HIỂM
+                                        </div>
+
+                                        <!-- Lối thoát bên trái -->
+                                        <div class="exit-left">
+                                            <i class="fas fa-door-open"></i><br>
+                                            LốiRa/LôiVào
+                                        </div>
+
+                                        <!-- Lối thoát bên phải -->
+                                        <div class="exit-right">
+                                            <i class="fas fa-door-open"></i><br>
+                                            LốiRa/LôiVào
+                                        </div>
+
                                         <div th:each="rowEntry : ${seatsByRow}"
                                              class="seat-row d-flex justify-content-center align-items-center mb-2">
-                                            <span class="row-label me-3 fw-bold text-muted"
-                                                  style="width: 30px; text-align: center;"
-                                                  th:text="${rowEntry.key}"></span>
+                                <span class="row-label me-3 fw-bold text-muted"
+                                      style="width: 30px; text-align: center;"
+                                      th:text="${rowEntry.key}"></span>
                                             <div class="d-flex justify-content-center">
                                                 <div th:each="seat, iterStat : ${rowEntry.value}"
                                                      th:id="'seat-' + ${seat.seatID}"
@@ -637,8 +757,8 @@
                                                      th:data-seat-price="${seat.unitPrice}"
                                                      th:data-seat-type="${seat.seatType}"
                                                      th:classappend="${#lists.contains(bookedSeatIds, seat.seatID) ? 'occupied' : 'available'} +
-                                                            ${seat.isVIP ? ' vip' : ''} +
-                                                            ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
+                                                ${seat.isVIP ? ' vip' : ''} +
+                                                ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
                                                      class="seat me-1 d-flex align-items-center justify-content-center">
                                                     <span th:text="${#strings.substring(seat.position, 1)}"></span>
                                                 </div>
@@ -647,6 +767,11 @@
                                             <span class="row-label ms-3 fw-bold text-muted"
                                                   style="width: 30px; text-align: center;"
                                                   th:text="${rowEntry.key}"></span>
+                                        </div>
+
+                                        <!-- Lối thoát phía sau -->
+                                        <div class="exit-back">
+                                            <i class="fas fa-running"></i> THOÁT HIỂM
                                         </div>
 
                                         <div class="seat-legend d-flex justify-content-center mt-4">
@@ -670,10 +795,15 @@
                                                      style="width: 20px; height: 20px; background: #6f42c1; border-radius: 3px; margin-right: 5px;"></div>
                                                 <small>VIP</small>
                                             </div>
-                                            <div class="d-flex align-items-center">
+                                            <div class="d-flex align-items-center me-3">
                                                 <div class="seat-example"
                                                      style="width: 30px; height: 20px; background: #e91e63; border-radius: 3px; margin-right: 5px;"></div>
                                                 <small>Ghế đôi</small>
+                                            </div>
+                                            <div class="d-flex align-items-center">
+                                                <div class="seat-example"
+                                                     style="width: 20px; height: 20px; background: #ff4444; border-radius: 3px; margin-right: 5px;"></div>
+                                                <small>Thoát hiểm</small>
                                             </div>
                                         </div>
                                     </div>
@@ -719,8 +849,9 @@
                     </a>
                 </div>
                 <div class="card-body">
-                    <form id="customerInfoForm" action="/cashier/confirm-booking" method="post">
-                        <input type="hidden" name="selectedSeats" th:value="${#strings.listJoin(session.selectedSeatIds, ',')}">
+                    <form id="customerInfoForm" action="/cashier/booking/confirm" method="post"><input type="hidden"
+                                                                                                       name="selectedSeats"
+                                                                                                       th:value="${#strings.listJoin(session.selectedSeatIds, ',')}">
                         <input type="hidden" name="scheduleId" th:value="${selectedSchedule.scheduleID}">
 
                         <div class="mb-4">
@@ -1051,11 +1182,17 @@
                             <div class="card-body">
                                 <div class="d-grid gap-3">
                                     <button class="btn btn-primary btn-lg"
-                                            th:onclick="'window.open(\'' + @{/cashier/print-ticket/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=400,height=600\');'">
-                                        <i class="fas fa-print me-2"></i>In hóa đơn
+                                            th:onclick="'window.open(\'' + @{/cashier/print/invoice/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=500,height=800\');'">
+                                        <i class="fas fa-receipt me-2"></i>In Hóa Đơn Chính
                                     </button>
 
-                                    <a href="/cashier" class="btn btn-outline-primary btn-lg">
+                                    <button th:if="${bookingResult.totalFoodPrice != null && bookingResult.totalFoodPrice.doubleValue() > 0}"
+                                            class="btn btn-info btn-lg"
+                                            th:onclick="'window.open(\'' + @{/cashier/print/food-receipt/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=400,height=600\');'">
+                                        <i class="fas fa-utensils me-2"></i>In Hóa Đơn Đồ Ăn
+                                    </button>
+
+                                    <a href="/cashier" class="btn btn-outline-success btn-lg">
                                         <i class="fas fa-plus me-2"></i>Đặt vé mới
                                     </a>
                                 </div>
@@ -1090,24 +1227,26 @@
                             </div>
                         </div>
                     </div>
+
+                </div>
                 </div>
 
-                <div th:unless="${bookingResult != null}" class="row">
-                    <div class="col-12">
-                        <div class="card card-custom border-danger">
-                            <div class="card-body text-center">
-                                <div class="error-icon mb-3">
-                                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>
-                                </div>
-                                <h4 class="text-danger mb-2">Có lỗi xảy ra!</h4>
-                                <p class="text-muted mb-3">Không thể tải thông tin hóa đơn. Vui lòng thử lại.</p>
-                                <a href="/cashier" class="btn btn-primary">
-                                    <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+<!--                <div th:unless="${bookingResult != null}" class="row">-->
+<!--                    <div class="col-12">-->
+<!--                        <div class="card card-custom border-danger">-->
+<!--                            <div class="card-body text-center">-->
+<!--                                <div class="error-icon mb-3">-->
+<!--                                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>-->
+<!--                                </div>-->
+<!--                                <h4 class="text-danger mb-2">Có lỗi xảy ra!</h4>-->
+<!--                                <p class="text-muted mb-3">Không thể tải thông tin hóa đơn. Vui lòng thử lại.</p>-->
+<!--                                <a href="/cashier" class="btn btn-primary">-->
+<!--                                    <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ-->
+<!--                                </a>-->
+<!--                            </div>-->
+<!--                        </div>-->
+<!--                    </div>-->
+<!--                </div>-->
             </div>
         </div>
     </div>

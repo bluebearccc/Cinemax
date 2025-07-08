@@ -44,10 +44,8 @@ public class BookingService {
             Promotion promotion = request.getPromotionId() != null ?
                     promotionRepository.findById(request.getPromotionId()).orElse(null) : null;
 
-            // Tính tiền vé
             double totalTicketPrice = seats.stream().mapToDouble(Seat::getUnitPrice).sum();
 
-            // Tính tiền đồ ăn
             double totalFoodPrice = 0.0;
             if (request.getFoodQuantities() != null) {
                 for (Map.Entry<Integer, Integer> entry : request.getFoodQuantities().entrySet()) {
@@ -59,7 +57,6 @@ public class BookingService {
                 }
             }
 
-            // Tính giảm giá
             double discount = promotion != null ? (totalTicketPrice * promotion.getDiscount() / 100) : 0.0;
             double finalTotalPrice = totalTicketPrice + totalFoodPrice - discount;
 
@@ -98,15 +95,12 @@ public class BookingService {
         }
 
         try {
-            // Đọc lại chi tiết đơn hàng từ chuỗi JSON đã lưu
             BookingRequestDTO originalRequest = objectMapper.readValue(invoice.getBookingDetails(), BookingRequestDTO.class);
 
-            // --- Bắt đầu logic đặt vé thực sự ---
             Schedule schedule = scheduleRepository.findById(originalRequest.getScheduleId())
                     .orElseThrow(() -> new RuntimeException("Schedule not found"));
             List<Seat> seats = seatRepository.findAllById(originalRequest.getSelectedSeats());
 
-            // Tạo chi tiết ghế
             double totalTicketPrice = 0.0;
             for (Seat seat : seats) {
                 DetailSeat detailSeat = DetailSeat.builder()
@@ -119,7 +113,6 @@ public class BookingService {
                 totalTicketPrice += seat.getUnitPrice();
             }
 
-            // Tạo chi tiết đồ ăn và trừ kho
             double totalFoodPrice = 0.0;
             List<BookingResultDTO.FoodItemDTO> foodItemsDTO = new ArrayList<>();
             if (originalRequest.getFoodQuantities() != null) {
@@ -140,7 +133,7 @@ public class BookingService {
                                 .theaterStock(stockItem)
                                 .quantity(quantity)
                                 .totalPrice(itemTotalPrice)
-                                .status(InvoiceStatus.Booked) // Hoặc Paid
+                                .status(InvoiceStatus.Booked)
                                 .build();
                         detailFDRepository.save(detailFd);
                         totalFoodPrice += itemTotalPrice;
@@ -154,7 +147,6 @@ public class BookingService {
                 }
             }
 
-            // Cập nhật trạng thái hóa đơn
             invoice.setStatus(InvoiceStatus.Booked);
             invoiceRepository.save(invoice);
 
@@ -192,20 +184,34 @@ public class BookingService {
         DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
 
+        double subTotalPrice = totalTicketPrice + totalFoodPrice;
+        double discountAmount = 0.0;
+        String promotionName = null;
+        if (invoice.getPromotion() != null) {
+            discountAmount = subTotalPrice * invoice.getPromotion().getDiscount() / 100;
+            promotionName = invoice.getPromotion().getPromotionCode();
+        }
+        double unitTicketPrice = seats.isEmpty() ? 0 : seats.get(0).getUnitPrice();
+
+
         return BookingResultDTO.builder()
                 .invoiceId(invoice.getInvoiceID())
-                .bookingDate(invoice.getBookingDate().format(dateFormatter))
+                .bookingDate(invoice.getBookingDate())
                 .customerName(invoice.getGuestName())
                 .customerPhone(invoice.getGuestPhone())
-                .totalPrice(BigDecimal.valueOf(invoice.getTotalPrice()))
-                .totalTicketPrice(BigDecimal.valueOf(totalTicketPrice))
-                .totalFoodPrice(BigDecimal.valueOf(totalFoodPrice))
+                .totalPrice(invoice.getTotalPrice())
+                .totalTicketPrice(totalTicketPrice)
+                .totalFoodPrice(totalFoodPrice)
                 .movieName(schedule.getMovie().getMovieName())
                 .movieDuration(String.valueOf(schedule.getMovie().getDuration()))
                 .scheduleTime(schedule.getStartTime().format(timeFormatter))
                 .roomName(schedule.getRoom().getName())
                 .seatPositions(seats.stream().map(Seat::getPosition).collect(Collectors.toList()))
                 .foodItems(foodItems)
+                .subTotalPrice(subTotalPrice)
+                .promotionName(promotionName)
+                .discountAmount(discountAmount)
+                .unitTicketPrice(unitTicketPrice)
                 .build();
     }
 
