@@ -16,4 +16,6 @@ public interface TheaterRepository extends JpaRepository<Theater, Integer> {
 
     // Kiểm tra xem địa chỉ đã tồn tại chưa (không phân biệt chữ hoa/thường)
     boolean existsByAddressIgnoreCase(String address);
+    boolean existsByTheaterNameIgnoreCaseAndTheaterIDNot(String theaterName, Integer theaterID);
+
 }

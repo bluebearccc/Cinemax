@@ -33,10 +33,10 @@ public class MovieServiceImpl implements MovieService {
     private MovieRepository movieRepository;
 
     @Autowired
-    private GenreRepository genreRepository; // Inject GenreRepository
+    private GenreRepository genreRepository;
 
     @Autowired
-    private ScheduleRepository scheduleRepository; // Inject ScheduleRepository
+    private ScheduleRepository scheduleRepository;
 
     private MovieDTO convertToDTO(Movie movie) {
         if (movie == null) {
@@ -97,7 +97,6 @@ public class MovieServiceImpl implements MovieService {
         movie.setEndDate(movieDTO.getEndDate());
         movie.setStatus(movieDTO.getStatus());
 
-        // Handle genres: Fetch existing genres from DB if they exist by ID
         if (movieDTO.getGenres() != null && !movieDTO.getGenres().isEmpty()) {
             List<Genre> genres = movieDTO.getGenres().stream()
                     .map(genreDTO -> genreRepository.findById(genreDTO.getGenreID()))
@@ -181,7 +180,6 @@ public class MovieServiceImpl implements MovieService {
         LocalDateTime startDateTime = (startDateVal != null) ? startDateVal.atStartOfDay() : null;
         LocalDateTime endDateTime = (endDateVal != null) ? endDateVal.atTime(LocalTime.MAX) : null;
 
-        // ✅ THAY ĐỔI Ở ĐÂY
         LocalDateTime currentDate = LocalDateTime.now();
 
         Page<Movie> moviePage = movieRepository.findShowingMoviesWithFilters(

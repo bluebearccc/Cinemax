@@ -19,13 +19,9 @@ import java.util.stream.Collectors;
 public class PromotionServiceImpl implements PromotionService {
 
     @Autowired
-    private PromotionRepository promotionRepository; // Inject PromotionRepository
+    private PromotionRepository promotionRepository;
 
-    /**
-     * Chuyển đổi Promotion entity thành PromotionDTO.
-     * @param promotion Entity Promotion.
-     * @return PromotionDTO tương ứng.
-     */
+
     private PromotionDTO convertToDTO(Promotion promotion) {
         if (promotion == null) {
             return null;
@@ -41,11 +37,6 @@ public class PromotionServiceImpl implements PromotionService {
                 .build();
     }
 
-    /**
-     * Chuyển đổi PromotionDTO thành Promotion entity.
-     * @param promotionDTO DTO Promotion.
-     * @return Promotion entity tương ứng.
-     */
     private Promotion convertToEntity(PromotionDTO promotionDTO) {
         if (promotionDTO == null) {
             return null;

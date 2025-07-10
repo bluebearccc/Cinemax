@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Order;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -17,6 +19,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -231,11 +234,15 @@ public class TheaterStockController {
                                    @RequestParam(defaultValue = "0") int page,
                                    @RequestParam(defaultValue = "10") int size,
                                    @RequestParam(name = "itemName", required = false) String itemName,
-                                   @RequestParam(name = "theaterId", required = false) Integer theaterId) {
+                                   @RequestParam(name = "theaterId", required = false) Integer theaterId,
+                                   @RequestParam(name = "sortField", defaultValue = "price") String sortField,
+                                   @RequestParam(name = "sortDir", defaultValue = "asc") String sortDirection) {
 
-        Pageable pageable = PageRequest.of(page, size);
         Page<TheaterStockDTO> theaterStockPage;
-
+        Sort sort = sortDirection.equalsIgnoreCase(Sort.Direction.ASC.name())
+                ? Sort.by(sortField).ascending()
+                : Sort.by(sortField).descending();
+        Pageable pageable = PageRequest.of(page, size, sort);
         if (theaterId != null && itemName != null && !itemName.trim().isEmpty()) {
             theaterStockPage = theaterStockServiceImpl.findByTheaterIdAndItemName(theaterId, itemName.trim(), pageable);
         }
@@ -245,14 +252,11 @@ public class TheaterStockController {
         else if (theaterId != null) {
             theaterStockPage = theaterStockServiceImpl.findByTheaterId(theaterId, pageable);
         }
-        // Kịch bản 4: Mặc định, không tìm kiếm, không lọc rạp -> Lấy tất cả
         else {
             theaterStockPage = theaterStockServiceImpl.getAllTheaterStock(pageable);
         }
-
-        List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters(); // Bạn cần có phương thức này trong TheaterService
-
-        // Thêm các thuộc tính vào model để view có thể sử dụng
+        List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters();
+        theModel.addAttribute("reverseSortDir", sortDirection.equals("asc") ? "desc" : "asc");
         theModel.addAttribute("employee", employeeService.getEmployeeById(1));
         theModel.addAttribute("theaterStocks", theaterStockPage);
         theModel.addAttribute("currentPage", pageable.getPageNumber());
@@ -260,7 +264,8 @@ public class TheaterStockController {
         theModel.addAttribute("totalPages", theaterStockPage.getTotalPages());
         theModel.addAttribute("selectedTheaterId", theaterId);
         theModel.addAttribute("itemName", itemName);
-
+        theModel.addAttribute("sortField", sortField);
+        theModel.addAttribute("sortDir", sortDirection);
         return "staff/list";
     }
 
@@ -305,15 +310,12 @@ public String getTheaterFilterPage(Model theModel,
 
     Pageable pageable = PageRequest.of(page, size);
 
-    // Gọi service để lấy dữ liệu đã lọc và phân trang
     Page<TheaterStockDTO> resultPage = theaterStockServiceImpl.findByTheaterIdAndItemName(theaterID, itemName, pageable);
 
-    // Thêm các thuộc tính vào model để view có thể sử dụng
     theModel.addAttribute("page", resultPage);
     theModel.addAttribute("selectedTheaterId", theaterID);
     theModel.addAttribute("itemName", itemName);
 
-    // Lấy danh sách rạp để hiển thị lại dropdown
     List<TheaterDTO> allTheaters = theaterServiceImpl.findAllTheaters();
     theModel.addAttribute("allTheaters", allTheaters);
 

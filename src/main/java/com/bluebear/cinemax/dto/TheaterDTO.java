@@ -2,6 +2,7 @@ package com.bluebear.cinemax.dto;
 
 import com.bluebear.cinemax.enumtype.Theater_Status;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -16,7 +17,7 @@ public class TheaterDTO {
     private String image;
     private Integer roomQuantity;
     private Theater_Status status;
-
+    private MultipartFile newImage;
     private List<RoomDTO> rooms;
     private List<TheaterStockDTO> theaterStockS;
 }

@@ -4,6 +4,7 @@ import com.bluebear.cinemax.entity.Seat;
 import com.bluebear.cinemax.enumtype.Seat_Status;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -20,4 +21,6 @@ public interface SeatRepository extends JpaRepository<Seat, Integer> {
 
     @Query("SELECT s FROM Seat s WHERE s.room.roomID = :roomId")
     List<Seat> findByRoom_RoomID(Integer roomId);
+    @Query("SELECT s FROM Seat s WHERE s.room.roomID = :roomId ORDER BY SUBSTRING(s.position, 1, 1), CAST(SUBSTRING(s.position, 2) AS int)")
+    List<Seat> findByRoom_RoomIDOrderByPositionAsc(@Param("roomId") Integer roomId);
 }

@@ -136,14 +136,11 @@ public class ScheduleServiceImpl implements ScheduleService {
             System.err.println("Cannot delete Schedule with ID " + id + " due to data integrity violation: " + e.getMessage());
             return false;
         } catch (Exception e) {
-            // Xử lý các loại lỗi khác
             System.err.println("An error occurred while deleting Schedule with ID " + id + ": " + e.getMessage());
             return false;
         }
     }
 
-    //nếu có tồn tại ở trong detailseat thi return true
-    // nếu không thì  false
     @Override
     public boolean isExisted(Integer scheduleId) {
         List<Schedule> schedules = scheduleRepository.findSchedulesByDetailSeat(scheduleId);
@@ -157,18 +154,14 @@ public class ScheduleServiceImpl implements ScheduleService {
     public ScheduleDTO isRoomAvailableForUpdate(Integer roomId, LocalDateTime startTime, LocalDateTime endTime, Integer scheduleId) {
         List<Schedule> conflictingSchedules = scheduleRepository.findConflictingSchedules(roomId, startTime, endTime, scheduleId);
 
-        // 2. Nếu danh sách rỗng, tức là không có xung đột -> phòng trống
         if (conflictingSchedules.isEmpty()) {
-            return null; // Trả về null để báo hiệu phòng trống
+            return null;
         }
-
-        // 3. Nếu có xung đột, lấy lịch trình đầu tiên và tạo một DTO chứa đầy đủ thông tin chi tiết
         Schedule conflict = conflictingSchedules.get(0);
         Room room = conflict.getRoom();
         Movie movie = conflict.getMovie();
         Theater theater = (room != null) ? room.getTheater() : null;
 
-        // Xây dựng một DTO với đầy đủ thông tin để hiển thị cho người dùng
         return ScheduleDTO.builder()
                 .scheduleID(conflict.getScheduleID())
                 .startTime(conflict.getStartTime())

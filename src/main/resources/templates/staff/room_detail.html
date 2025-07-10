@@ -618,10 +618,10 @@
                                              th:attr="data-seat-id=${seat.seatID}">
                                             <span th:text="${seat.position}"></span>
                                             <div class="seat-tooltip">
-                                                <div><strong>Vị trí:</strong> <span th:text="${seat.position}"></span></div>
-                                                <div><strong>Loại:</strong> <span th:text="${seat.seatType}"></span></div>
-                                                <div><strong>Giá:</strong> $<span th:text="${#numbers.formatDecimal(seat.unitPrice, 1, 'COMMA', 2, 'POINT')}"></span></div>
-                                                <div><strong>Trạng thái:</strong> <span th:text="${seat.status}"></span></div>
+                                                <div><strong>Position:</strong> <span th:text="${seat.position}"></span></div>
+                                                <div><strong>Type:</strong> <span th:text="${seat.seatType}"></span></div>
+                                                <div><strong>Price:</strong> $<span th:text="${#numbers.formatDecimal(seat.unitPrice, 1, 'COMMA', 2, 'POINT')}"></span></div>
+                                                <div><strong>Status</strong> <span th:text="${seat.status}"></span></div>
                                                 <div th:if="${seat.isVIP}"><strong>⭐ Ghế VIP</strong></div>
                                             </div>
                                         </div>

@@ -104,17 +104,10 @@
     <div class="header">
 
         <div class="header-left">
-
             <div class="breadcrumb">
-
                 <a  th:href="@{/theater}">Manage Theater</a> >
-
-                <span> Edit Theater theater</span>
-
+                <span> Edit Theater</span>
             </div>
-
-
-
         </div>
 
     </div>
@@ -126,12 +119,14 @@
         <div class="form-header">
             <p class="form-subtitle">Complete the item information</p>
         </div>
-        <form th:action="@{/theater/add_theater}"
+        <form th:action="@{/theater/edit_theater}"
               th:object="${theater}"
               method="post"
               enctype="multipart/form-data"
               id="stockForm"
               onsubmit="return validateForm()">
+            <input type="hidden" th:field="*{roomQuantity} " th:value="${theater.roomQuantity}" />
+            <input type="hidden" th:field="*{theaterID}" th:value="${theater.theaterID}" />
             <div class="form-row">
                 <!-- Left Column - General Information -->
                 <div class="form-column">

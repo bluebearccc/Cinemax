@@ -45,13 +45,6 @@ public class InvoiceServiceImpl implements InvoiceService {
     @Autowired
     private TheaterStockRepository theaterStockRepository; // Để lấy itemName cho Detail_FDDTO
 
-    /**
-     * Chuyển đổi một Invoice entity thành InvoiceDTO.
-     * Bao gồm việc chuyển đổi danh sách Detail_FD liên quan sang Detail_FDDTOs.
-     *
-     * @param invoice Entity Invoice cần chuyển đổi.
-     * @return InvoiceDTO đã chuyển đổi.
-     */
     private InvoiceDTO convertToDTO(Invoice invoice) {
         if (invoice == null) {
             return null;
@@ -76,13 +69,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         return invoiceDTO;
     }
 
-    /**
-     * Chuyển đổi một InvoiceDTO thành Invoice entity.
-     * Không xử lý danh sách Detail_FD ở đây, chúng sẽ được quản lý bởi InvoiceService riêng.
-     *
-     * @param invoiceDTO DTO Invoice cần chuyển đổi.
-     * @return Invoice entity đã chuyển đổi.
-     */
     private Invoice convertToEntity(InvoiceDTO invoiceDTO) {
         if (invoiceDTO == null) {
             return null;
@@ -93,7 +79,6 @@ public class InvoiceServiceImpl implements InvoiceService {
         invoice.setBookingDate(invoiceDTO.getBookingDate());
         invoice.setTotalPrice(invoiceDTO.getTotalPrice());
 
-        // Set Customer
         if (invoiceDTO.getCustomerID() != null) {
             customerRepository.findById(invoiceDTO.getCustomerID())
                     .ifPresent(invoice::setCustomer);
@@ -101,7 +86,6 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setCustomer(null);
         }
 
-        // Set Employee
         if (invoiceDTO.getEmployeeID() != null) {
             employeeRepository.findById(invoiceDTO.getEmployeeID())
                     .ifPresent(invoice::setEmployee);
@@ -109,28 +93,15 @@ public class InvoiceServiceImpl implements InvoiceService {
             invoice.setEmployee(null);
         }
 
-        // Set Promotion
         if (invoiceDTO.getPromotionID() != null) {
             promotionRepository.findById(invoiceDTO.getPromotionID())
                     .ifPresent(invoice::setPromotion);
         } else {
             invoice.setPromotion(null);
         }
-
-        // Quan trọng: Đối với danh sách Detail_FD, thường bạn sẽ không cập nhật chúng trực tiếp
-        // thông qua InvoiceService khi chuyển đổi DTO sang Entity.
-        // Thay vào đó, chúng sẽ được quản lý bởi DetailFD_Service riêng biệt.
-        // Nếu bạn muốn lưu/cập nhật Detail_FD cùng lúc, bạn sẽ cần logic phức tạp hơn ở đây
-        // để xử lý các đối tượng con.
-
         return invoice;
     }
 
-    /**
-     * Helper method to convert Detail_FD entity to Detail_FDDTO.
-     * Populates itemName and bookingDate for the DTO.
-     * This might be a simplified version depending on your actual Detail_FD entity and needs.
-     */
     private Detail_FDDTO convertDetailFDToDTO(Detail_FD detail_FD) {
         if (detail_FD == null) {
             return null;
@@ -138,13 +109,11 @@ public class InvoiceServiceImpl implements InvoiceService {
 
         String itemName = null;
         if (detail_FD.getTheaterStock() != null) {
-            // Fetch item name from associated TheaterStock entity
             itemName = detail_FD.getTheaterStock().getItemName();
         }
 
         LocalDateTime bookingDate = null;
         if (detail_FD.getInvoice() != null) {
-            // Fetch booking date from associated Invoice entity (this will be the parent invoice)
             bookingDate = detail_FD.getInvoice().getBookingDate();
         }
 
@@ -154,8 +123,8 @@ public class InvoiceServiceImpl implements InvoiceService {
                 .theaterStockId(detail_FD.getTheaterStock() != null ? detail_FD.getTheaterStock().getStockID() : null)
                 .quantity(detail_FD.getQuantity())
                 .totalPrice(detail_FD.getTotalPrice())
-                .itemName(itemName) // Set the item name
-                .bookingDate(bookingDate) // Set the booking date
+                .itemName(itemName)
+                .bookingDate(bookingDate)
                 .build();
     }
 

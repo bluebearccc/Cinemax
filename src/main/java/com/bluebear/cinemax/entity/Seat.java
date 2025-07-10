@@ -31,6 +31,10 @@ public class Seat {
     @Column(name = "Position", nullable = false, length = 10)
     private String position;
 
+    // Thêm trường name vào đây
+    @Column(name = "Name", length = 50)
+    private String name;
+
     @Column(name = "IsVIP", nullable = false)
     private boolean isVIP;
 

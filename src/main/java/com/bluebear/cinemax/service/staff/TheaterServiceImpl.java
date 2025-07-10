@@ -4,6 +4,7 @@ import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.enumtype.Theater_Status;
 import com.bluebear.cinemax.repository.TheaterRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -103,26 +104,38 @@ public class TheaterServiceImpl implements TheaterService {
     }
 
     public TheaterDTO saveTheater(TheaterDTO theaterDTO) {
+        if (theaterRepository.existsByTheaterNameIgnoreCase(theaterDTO.getTheaterName())) {
+            throw new IllegalArgumentException("Theater with name '" + theaterDTO.getTheaterName() + "' already exists.");
+        }
+
+         if (theaterRepository.existsByAddressIgnoreCase(theaterDTO.getAddress())) {
+             throw new IllegalArgumentException("Another theater with this address already exists.");
+         }
+
         Theater theaterToSave = convertToEntity(theaterDTO);
         Theater savedTheater = theaterRepository.save(theaterToSave);
         return convertToDTO(savedTheater);
     }
 
-    public TheaterDTO updateTheater(Integer id, TheaterDTO theaterDTO) {
-        Optional<Theater> existingTheaterOptional = theaterRepository.findById(id);
-        if (existingTheaterOptional.isPresent()) {
-            Theater existingTheater = existingTheaterOptional.get();
+    @Transactional
+    public void updateTheater(TheaterDTO theaterDTO) throws IOException {
+        Theater theaterToUpdate = theaterRepository.findById(theaterDTO.getTheaterID())
+                .orElseThrow(() -> new IllegalArgumentException("Theater not found with ID: " + theaterDTO.getTheaterID()));
 
-            existingTheater.setTheaterName(theaterDTO.getTheaterName());
-            existingTheater.setAddress(theaterDTO.getAddress());
-            existingTheater.setImage(theaterDTO.getImage());
-            existingTheater.setRoomQuantity(theaterDTO.getRoomQuantity());
-            existingTheater.setStatus(theaterDTO.getStatus());
-
-            Theater updatedTheater = theaterRepository.save(existingTheater);
-            return convertToDTO(updatedTheater);
+        if (theaterRepository.existsByTheaterNameIgnoreCaseAndTheaterIDNot(theaterDTO.getTheaterName(), theaterDTO.getTheaterID())) {
+            throw new IllegalArgumentException("Another theater with the name '" + theaterDTO.getTheaterName() + "' already exists.");
         }
-        return null;
+
+        theaterToUpdate.setTheaterName(theaterDTO.getTheaterName());
+        theaterToUpdate.setAddress(theaterDTO.getAddress());
+        theaterToUpdate.setRoomQuantity(theaterDTO.getRoomQuantity());
+        theaterToUpdate.setStatus(theaterDTO.getStatus());
+        MultipartFile newImageFile = theaterDTO.getNewImage();
+        if (newImageFile != null && !newImageFile.isEmpty()) {
+            String newFileName = saveImage(newImageFile);
+            theaterToUpdate.setImage("/uploads/theaters_images/" + newFileName);
+        }
+
     }
 
     public boolean deleteTheater(Integer id) {
@@ -189,7 +202,7 @@ public class TheaterServiceImpl implements TheaterService {
 
         Files.copy(img.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-        return filename; // Chỉ trả về tên file
+        return filename;
     }
 
 }

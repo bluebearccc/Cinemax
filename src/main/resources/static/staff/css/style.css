@@ -274,7 +274,7 @@ a.navbar-brand u, .add-new-item {
 .search-input { width: 100%; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px; }
 .table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
 .table { width: 100%; border-collapse: collapse; }
-.table th, .table td { padding: 16px; text-align: left; border-bottom: 1px solid #f1f5f9; }
+.table th, .table td { padding: 16px; text-align: center; border-bottom: 1px solid #f1f5f9; }
 .table th { background-color: #f8fafc; }
 .action-buttons { display: flex; gap: 8px; }
 .action-btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
@@ -528,4 +528,42 @@ a.navbar-brand u, .add-new-item {
     flex-wrap: wrap; /* Cho phép các mục xuống dòng nếu không đủ chỗ */
     align-items: flex-start; /* Quan trọng: Ngăn các mục tự kéo dài chiều cao */
     gap: 15px; /* Tạo khoảng cách giữa các mục cho đẹp hơn */
+}
+.movie-start-time,
+.movie-end-time {
+    padding: 8px 15px;
+    font-size: 13px;
+    color: #666;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+.movie-start-time {
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Style the date spans inside start/end time */
+.movie-start-time span,
+.movie-end-time span {
+    font-weight: 600;
+    color: #333;
+    background: #e3f2fd;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Different colors for start and end dates */
+.movie-start-time span {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.movie-end-time span {
+    background: #fff3e0;
+    color: #f57c00;
 }

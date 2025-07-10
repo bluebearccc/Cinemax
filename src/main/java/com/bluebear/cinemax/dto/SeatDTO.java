@@ -15,6 +15,7 @@ public class SeatDTO {
     private Integer roomID;
     private TypeOfSeat seatType;
     private String position;
+    private String name; // Thêm dòng này
     private Boolean isVIP;
     private Double unitPrice;
     private Seat_Status status;

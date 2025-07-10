@@ -147,8 +147,8 @@
 }
 
 .image-preview img {
-    max-width: 200px;
-    max-height: 200px;
+    max-width: 500px;
+    max-height: 500px;
     border-radius: 8px;
     object-fit: cover;
 }

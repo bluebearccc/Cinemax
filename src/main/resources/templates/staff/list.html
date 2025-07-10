@@ -1,50 +1,253 @@
-    <!DOCTYPE html>
-    <html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
 
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>Food And Drink</title>
-        <link rel="stylesheet" th:href="@{/staff/css/style.css}">
-        <link rel="stylesheet" th:href="@{/staff/css/paging.css}">
-    </head>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Food And Drink</title>
+    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <link rel="stylesheet" th:href="@{/staff/css/paging.css}">
+    <style>
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
 
-    <body>
-    <div class="sidebar">
-        <div class="user-info">
-            <div class="user-avatar" >M</div>
-            <div class="user-name" >Mary Johnson</div>
-        </div>
+        .left-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
 
-        <a href="#" class="sidebar-item">
-            <div class="sidebar-icon">🏠</div>
-            <div class="sidebar-text">Home</div>
-        </a>
-        <a th:href="@{/theater_stock}" class="sidebar-item active">
-            <div class="sidebar-icon">🍿</div>
-            <div class="sidebar-text">Food and Drinks</div>
-        </a>
-        <a th:href="@{/movie_schedule}" class="sidebar-item ">
-            <div class="sidebar-icon">📅</div>
-            <div class="sidebar-text">Set Schedule</div>
-        </a>
-        <a th:href="@{/theater}" class="sidebar-item ">
-            <div class="sidebar-icon">🎬</div>
-            <div class="sidebar-text">Manage Theater</div>
-        </a>
+        .search-box .search-form {
+            display: flex;
+            align-items: center;
+        }
+
+        /* Đồng bộ chiều cao cho tất cả các filter elements */
+        .filter-box select,
+        .search-input,
+        .search-btn {
+            height: 40px; /* Chiều cao cố định */
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            box-sizing: border-box;
+        }
+
+        .filter-box select {
+            min-width: 150px;
+            background-color: white;
+            cursor: pointer;
+        }
+
+        .search-input {
+            min-width: 200px;
+            margin-right: 5px;
+        }
+
+        .search-btn {
+            background-color: #007bff;
+            color: white;
+            border: 1px solid #007bff;
+            cursor: pointer;
+            font-weight: 500;
+            transition: background-color 0.3s ease;
+        }
+
+        .search-btn:hover {
+            background-color: #0056b3;
+            border-color: #0056b3;
+        }
+
+        .add-item-btn {
+            display: inline-block;
+            padding: 10px 15px;
+            background-color: #007bff;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+            transition: background-color 0.3s ease;
+            height: 40px;
+            box-sizing: border-box;
+            line-height: 20px;
+        }
+
+        .add-item-btn:hover {
+            background-color: #0056b3;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .left-controls {
+                justify-content: center;
+            }
+
+            .filter-box select,
+            .search-input {
+                min-width: auto;
+                width: 100%;
+            }
+        }
+        table.table thead th {
+            position: relative;
+            transition: background-color 0.3s ease;
+        }
+
+        table.table thead th:hover {
+            background-color: #f8f9fa;
+        }
+
+        table.table thead th a {
+            text-decoration: none;
+            color: #333;
+            display: block;
+            padding: 12px 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            font-weight: 600;
+        }
+
+        table.table thead th a:hover {
+            color: #007bff;
+            text-decoration: none;
+            background-color: #e3f2fd;
+            border-radius: 4px;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+        }
+
+        /* Sorting arrow styling */
+        table.table thead th a span {
+            font-size: 12px;
+            margin-left: 5px;
+            opacity: 0.7;
+            transition: opacity 0.3s ease;
+        }
+
+        table.table thead th a:hover span {
+            opacity: 1;
+        }
+
+        /* Active sort column styling */
+        table.table thead th.active-sort {
+            background-color: #e3f2fd;
+        }
+
+        table.table thead th.active-sort a {
+            color: #007bff;
+            font-weight: 700;
+        }
+
+        table.table thead th.active-sort a span {
+            opacity: 1;
+            color: #007bff;
+        }
+
+        /* Sortable indicator */
+        table.table thead th a::after {
+            content: '⇅';
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            font-size: 12px;
+            color: #007bff;
+        }
+
+        table.table thead th a:hover::after {
+            opacity: 0.5;
+        }
+
+        /* Hide the sort indicator when there's already a sort arrow */
+        table.table thead th a:has(span)::after {
+            display: none;
+        }
+
+        /* Non-sortable columns */
+        table.table thead th:not(:has(a)) {
+            color: #666;
+            font-weight: 600;
+            padding: 12px 8px;
+        }
+
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .left-controls {
+                justify-content: center;
+            }
+
+            .filter-box select,
+            .search-input {
+                min-width: auto;
+                width: 100%;
+            }
+
+            table.table thead th a {
+                padding: 8px 4px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+<div class="sidebar">
+    <div class="user-info">
+        <div class="user-avatar">M</div>
+        <div class="user-name">Mary Johnson</div>
     </div>
-    <div class="main-content">
-        <div class="header">
-            <div class="header-left">
-                <h1>List of food and drinks</h1>
-            </div>
-        </div>
 
-        <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'success' : (${messageType == 'error'} ? 'error' : 'warning')">
-            <span th:text="${message}"></span>
-        </div>
+    <a href="#" class="sidebar-item">
+        <div class="sidebar-icon">🏠</div>
+        <div class="sidebar-text">Home</div>
+    </a>
+    <a th:href="@{/theater_stock}" class="sidebar-item active">
+        <div class="sidebar-icon">🍿</div>
+        <div class="sidebar-text">Food and Drinks</div>
+    </a>
+    <a th:href="@{/movie_schedule}" class="sidebar-item">
+        <div class="sidebar-icon">📅</div>
+        <div class="sidebar-text">Set Schedule</div>
+    </a>
+    <a th:href="@{/theater}" class="sidebar-item">
+        <div class="sidebar-icon">🎬</div>
+        <div class="sidebar-text">Manage Theater</div>
+    </a>
+</div>
 
-        <div class="controls">
+<div class="main-content">
+    <div class="header">
+        <div class="header-left">
+            <h1>List of food and drinks</h1>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'success' : (${messageType == 'error'} ? 'error' : 'warning')">
+        <span th:text="${message}"></span>
+    </div>
+
+    <div class="controls">
+        <div class="left-controls">
             <div class="filter-box">
                 <form th:action="@{/theater_stock}" method="get" id="theaterFilterForm">
                     <input type="hidden" name="itemName" id="hiddenItemNameInFilterForm">
@@ -60,92 +263,156 @@
             </div>
 
             <div class="search-box">
-                <form th:action="@{/theater_stock}" method="get">
+                <form th:action="@{/theater_stock}" method="get" class="search-form">
                     <input type="hidden" name="theaterId" th:value="${selectedTheaterId}">
-                    <input type="text" name="itemName" id="itemName" class="search-input" placeholder="Search for items's name" th:value="${itemName}">
-                    <button type="submit">Search</button>
+                    <input type="text" name="itemName" id="itemName" class="search-input" placeholder="Search for item's name" th:value="${itemName}">
+                    <button type="submit" class="search-btn">Search</button>
                 </form>
             </div>
-            <a class="navbar-brand" th:href="@{/theater_stock/add_stock}"><u>Add new item</u></a>
         </div>
 
-        <div class="table-container">
-            <table class="table">
-                <thead>
-                <tr>
-                    <th>NAME</th>
-                    <th>Price</th>
-                    <th>Theater</th>
-                    <th>Quantity in Stock</th>
-                    <th>Image</th>
-                    <th>STATUS</th>
-                    <th>ACTION</th>
-                    <th></th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr th:each="stock : ${theaterStocks}">
-                    <td th:text="${stock.getFoodName()}"></td>
-                    <td th:text="${#numbers.formatCurrency(stock.getUnitPrice())}"></td>
-                    <td th:text="${stock.theater.theaterName}"></td>
-                    <td th:text="${stock.getQuantity()}"></td>
-                    <td>
-                        <img th:src="${stock.image}" style="width: 132px; height: 86px;" alt="Product Image">
-                    </td>
-                    <td th:text="${stock.getStatus()}"></td>
-                    <td>
-                        <div class="action-buttons">
-                            <form class="edit-form" method="get" th:action="@{/theater_stock/showFormForUpdate}">
-                                <input type="hidden" name="id" th:value="${stock.getTheaterStockId()}" />
-                                <button type="submit" class="action-btn btn-edit">Edit</button>
-                            </form>
-
-                            <form th:action="@{/theater_stock/delete}" method="POST" onsubmit="return confirmDelete()">
-                                <input type="hidden" name="id" th:value="${stock.getTheaterStockId()}" />
-                                <button type="submit" class="action-btn btn-delete">Delete</button>
-                            </form>
-                        </div>
-                    </td>
-                </tr>
-                </tbody>
-            </table>
-            <div class="pagination-container">
-                <div class="pagination">
-                    <!-- Previous Button -->
-                    <a th:href="@{/theater_stock(page=${currentPage - 1})}"
-                       th:classappend="${currentPage == 0} ? 'disabled' : ''"
-                       class="page-btn">‹</a>
-
-                    <!-- Page Numbers -->
-                    <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
-                        <a th:href="@{/theater_stock(page=${i})}"
-                           th:text="${i + 1}"
-                           th:classappend="${i == currentPage} ? 'active' : ''"
-                           class="page-btn">1</a>
-                    </th:block>
-
-                    <!-- Next Button -->
-                    <a th:href="@{/theater_stock(page=${currentPage + 1})}"
-                       th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''"
-                       class="page-btn">›</a>
-                </div>
-            </div>
-
+        <div class="right-controls">
+            <a class="add-item-btn" th:href="@{/theater_stock/add_stock}">Add new item</a>
         </div>
     </div>
 
-    <script>
-        function confirmDelete() {
-            return confirm('Are you sure you want to delete this item?');
-        }function submitFilterForm() {
-            const currentSearchValue = document.getElementById('itemName').value;
+    <div class="table-container">
+        <table class="table">
+            <thead>
+            <tr>
+                <th>
+                    <th:block th:with="url = @{/theater_stock(
+                page=${currentPage},
+                itemName=${itemName},
+                theaterId=${selectedTheaterId},
+                sortField='itemName',
+                sortDir=${reverseSortDir}
+            )}">
+                        <a th:href="${url}">
+                            NAME
+                            <span th:if="${sortField == 'itemName'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th:block>
+                </th>
+                <th>
+                    <th:block th:with="url = @{/theater_stock(
+                page=${currentPage},
+                itemName=${itemName},
+                theaterId=${selectedTheaterId},
+                sortField='price',
+                sortDir=${reverseSortDir}
+            )}">
+                        <a th:href="${url}">
+                            Price
+                            <span th:if="${sortField == 'price'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th:block>
+                </th>
+                <th th:with="url = @{/theater_stock(
+                page=${currentPage},
+                itemName=${itemName},
+                theaterId=${selectedTheaterId},
+                sortField='theater.theaterName',
+                sortDir=${reverseSortDir}
+            )}"><a th:href="${url}">
+                    Theater
+                    <span th:if="${sortField == 'theater.theaterName'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                </a></th>
+                <th>
+                    <th:block th:with="url = @{/theater_stock(
+                page=${currentPage},
+                itemName=${itemName},
+                theaterId=${selectedTheaterId},
+                sortField='quantity',
+                sortDir=${reverseSortDir}
+            )}">
+                        <a th:href="${url}">
+                            Quantity in Stock
+                            <span th:if="${sortField == 'quantity'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th:block>
+                </th>
+                <th>Image</th>
+                <th>STATUS</th>
+                <th>ACTION</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="stock : ${theaterStocks}">
+                <td th:text="${stock.getFoodName()}"></td>
+                <td th:text="${#numbers.formatCurrency(stock.getUnitPrice())}"></td>
+                <td th:text="${stock.theater.theaterName}"></td>
+                <td th:text="${stock.getQuantity()}"></td>
+                <td>
+                    <img th:src="${stock.image}" style="width: 132px; height: 86px;" alt="Product Image">
+                </td>
+                <td th:text="${stock.getStatus()}"></td>
+                <td>
+                    <div class="action-buttons">
+                        <form class="edit-form" method="get" th:action="@{/theater_stock/showFormForUpdate}">
+                            <input type="hidden" name="id" th:value="${stock.getTheaterStockId()}" />
+                            <button type="submit" class="action-btn btn-edit">Edit</button>
+                        </form>
 
-            document.getElementById('hiddenItemNameInFilterForm').value = currentSearchValue;
-            document.getElementById('theaterFilterForm').submit();
-        }
+                        <form th:action="@{/theater_stock/delete}" method="POST" onsubmit="return confirmDelete()">
+                            <input type="hidden" name="id" th:value="${stock.getTheaterStockId()}" />
+                            <button type="submit" class="action-btn btn-delete">Delete</button>
+                        </form>
+                    </div>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div class="pagination-container" th:if="${totalPages > 1}">
+            <div class="pagination">
+                <a th:href="@{/theater_stock(
+               page=${currentPage - 1},
+               itemName=${itemName},
+               theaterId=${selectedTheaterId},
+               sortField=${sortField},
+               sortDir=${sortDir}
+           )}"
+                   th:classappend="${currentPage == 0} ? 'disabled' : ''"
+                   class="page-btn">‹</a>
 
-    </script>
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/theater_stock(
+                   page=${i},
+                   itemName=${itemName},
+                   theaterId=${selectedTheaterId},
+                   sortField=${sortField},
+                   sortDir=${sortDir}
+               )}"
+                       th:text="${i + 1}"
+                       th:classappend="${i == currentPage} ? 'active' : ''"
+                       class="page-btn"></a>
+                </th:block>
 
-    </body>
+                <a th:href="@{/theater_stock(
+               page=${currentPage + 1},
+               itemName=${itemName},
+               theaterId=${selectedTheaterId},
+               sortField=${sortField},
+               sortDir=${sortDir}
+           )}"
+                   th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+                   class="page-btn">›</a>
+            </div>
+        </div>
+    </div>
+</div>
 
-    </html>
+<script>
+    function confirmDelete() {
+        return confirm('Are you sure you want to delete this item?');
+    }
+
+    function submitFilterForm() {
+        const currentSearchValue = document.getElementById('itemName').value;
+        document.getElementById('hiddenItemNameInFilterForm').value = currentSearchValue;
+        document.getElementById('theaterFilterForm').submit();
+    }
+</script>
+
+</body>
+</html>
