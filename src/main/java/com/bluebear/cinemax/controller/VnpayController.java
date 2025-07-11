@@ -1,10 +1,8 @@
 package com.bluebear.cinemax.controller;
-import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.repository.InvoiceRepository;
 import com.bluebear.cinemax.service.EmailService;
-import com.bluebear.cinemax.service.VnpayService;
+import com.bluebear.cinemax.service.payment.VnpayService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -44,9 +42,10 @@ public class VnpayController {
             model.addAttribute("message", "Thanh toán thành công!");
 
             try {
+                int invoiceId = Integer.parseInt(txnRef);
                 String email = "nguyentavan188@gmail.com"; // ← thay bằng email thật
                 String subject = "🎟️ Vé xem phim thành công - Hóa đơn #" + txnRef;
-
+                vnpayService.confirmInvoiceAfterPayment(invoiceId);
                 InvoiceDTO invoiceDTO = vnpayService.getInvoiceDTOById(Integer.parseInt(txnRef));
 
                 // Lấy lịch chiếu từ ghế đầu tiên

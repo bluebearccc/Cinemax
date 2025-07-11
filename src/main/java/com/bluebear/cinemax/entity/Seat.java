@@ -1,34 +1,43 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Seat_Status;
+import com.bluebear.cinemax.enumtype.TypeOfSeat;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 import java.math.BigDecimal;
 
 @Entity
 @Table(name = "Seat")
-@Getter
-@Setter
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Seat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer seatId;
+    @Column(name = "SeatID")
+    private Integer seatID;
 
-    @ManyToOne
-    @JoinColumn(name = "roomId")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "RoomID", nullable = false)
     private Room room;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "SeatType", nullable = false, length = 10)
+    private TypeOfSeat seatType;
 
-    private String seatType; // 'Couple' or 'Single'
+    @Column(name = "Position", nullable = false, length = 10)
+    private String position;
 
-    private String position; // A1, A2...
-
+    @Column(name = "IsVIP", nullable = false)
     private boolean isVIP;
 
+    @Column(name = "UnitPrice", nullable = false)
     private Double unitPrice;
 
-    private String status; // 'Active', 'Inactive'
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status", nullable = false, length = 20)
+    private Seat_Status status; // 'Active', 'Inactive'
 
 
 }

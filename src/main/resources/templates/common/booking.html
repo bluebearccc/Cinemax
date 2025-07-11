@@ -38,22 +38,6 @@
 
                 <input type="hidden" name="selectedSeats" th:each="seatId : ${selectedSeats}" th:value="${seatId}"/>
                 <!-- Promotion Code Section -->
-                <div class="promo-section">
-                    <label class="promo-label">
-                        <i class="fas fa-gift"></i>Mã giảm giá đặc biệt
-                    </label>
-                    <div class="input-group promo-input-group">
-                        <input type="text"
-                               name="promotionCode"
-                               id="promotionCode"
-                               class="form-control promo-input"
-                               placeholder="Nhập mã để nhận ưu đãi hấp dẫn" />
-                        <button type="button" id="applyPromoBtn" class="btn promo-btn">
-                            <i class="fas fa-magic me-2"></i>Áp dụng
-                        </button>
-                    </div>
-                    <div id="promoMessage" class="promo-message" style="display: none;"></div>
-                </div>
 
                 <!-- Screen Section -->
                 <div class="screen-section">
@@ -75,24 +59,23 @@
                         <div class="seat-container">
                             <div th:each="seat, stat : ${entry.value}">
                                 <!-- lấy phần tử bên cạnh: seatNext -->
-                                <!--<th:block th:if="${seat.seatType == 'Couple'}"
-                                          th:with="seatNext=${stat.index + 1 < entry.value.size()} ? ${entry.value[stat.index + 1]} : null">
-
-                                    <div class="seat-couple-wrapper">
-                                        <input type="checkbox"
-                                               class="btn-check couple-seat"
-                                               name="selectedSeats"
-                                               th:id="'seat-couple-' + ${seat.seatId}"
-                                               th:attr="data-seatid1=${seat.seatId}, data-seatid2=${seatNext != null ? seatNext.seatId : 0},
-                            data-price1=${seat.unitPrice}, data-price2=${seatNext != null ? seatNext.unitPrice : 0}" />
-                                        <label th:for="'seat-couple-' + ${seat.seatId}"
-                                               class="seat seat-couple"
-                                               th:text="${seat.position + (seatNext != null ? ' + ' + seatNext.position : '')}">C</label>
-                                    </div>
-                                </th:block>-->
+                                <!-- Ghế đôi -->
+                                <div th:if="${seat.seatType.name() == 'Couple'}" th:remove="tag">
+                                    <input type="checkbox"
+                                           class="btn-check"
+                                           name="selectedSeats"
+                                           th:value="${seat.seatID}"
+                                           th:disabled="${seat.booked}"
+                                           th:id="'seat-' + ${seat.seatID}"
+                                           th:attr="data-price=${seat.unitPrice}, data-position=${seat.position}" />
+                                    <label th:for="'seat-' + ${seat.seatID}"
+                                           class="seat seat-couple"
+                                           th:classappend="(${seat.booked} ? 'seat-booked ' : '') + (${seat.isVIP} ? 'seat-vip' : '')"
+                                           th:text="${#strings.substring(seat.position, 1)}">C</label>
+                                </div>
 
                                 <!-- Ghế đơn -->
-                                <div th:if="${seat.seatType != 'couple'}" th:remove="tag">
+                                <div th:if="${seat.seatType.name() != 'Couple'}" th:remove="tag">
                                     <input type="checkbox"
                                            class="btn-check"
                                            name="selectedSeats"
@@ -113,22 +96,28 @@
 
                     <div class="legend">
                         <div class="legend-item">
-                            <div class="legend-seat legend-isVIP"></div>
-                            <span>ghế VIP</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-seat legend-available"></div>
+                            <i class="fa-solid fa-couch legend-icon" style="color: #dee2e6;"></i>
                             <span>Ghế trống</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-seat legend-selected"></div>
+                            <i class="fa-solid fa-couch legend-icon" style="color: #28a745;"></i>
                             <span>Ghế đã chọn</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-seat legend-booked"></div>
+                            <i class="fa-solid fa-couch legend-icon" style="color: #070606;"></i>
                             <span>Ghế đã đặt</span>
                         </div>
+                        <div class="legend-item">
+                            <i class="fa-solid fa-couch legend-icon" style="color: #e74c3c;"></i>
+                            <span>Ghế VIP</span>
+                        </div>
+                        <div class="legend-item">
+                            <i class="fa-solid fa-couch legend-icon" style="color: #c136b5;"></i>
+                            <i class="fa-solid fa-couch legend-icon" style="color: #c136b5; margin-left: -8px;"></i>
+                            <span>Ghế đôi</span>
+                        </div>
                     </div>
+
                 </div>
                 <!-- Selected Seats Summary -->
                 <div class="selected-seats-section mt-4">

@@ -15,7 +15,7 @@ public class MovieFeedback {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = "Id")
     private Integer id;
 
     @ManyToOne(optional = false)
@@ -33,8 +33,8 @@ public class MovieFeedback {
     private Integer movieRate;
 
     @Column(name = "CreatedDate")
-    private LocalDateTime createdDate = LocalDateTime.now();
+    private LocalDateTime createdDate;
 
-//    @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-//    private List<MovieFeedbackComment> comments;
+    @OneToMany(mappedBy = "feedback", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<MovieFeedbackComment> comments;
 }

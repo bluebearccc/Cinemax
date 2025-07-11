@@ -1,7 +1,8 @@
 package com.bluebear.cinemax.enumtype;
 
-public enum Invoice_Status {
+public enum InvoiceStatus {
     Booked,
+
     Cancelled,
-    Pending
+    Unpaid, //
 }

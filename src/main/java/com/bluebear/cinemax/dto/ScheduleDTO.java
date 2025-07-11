@@ -1,11 +1,11 @@
 package com.bluebear.cinemax.dto;
 
-import com.bluebear.cinemax.entity.Schedule;
 import com.bluebear.cinemax.enumtype.Schedule_Status;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.Date;
+import java.time.format.DateTimeFormatter;
 
 @Data
 @NoArgsConstructor
@@ -19,29 +19,27 @@ public class ScheduleDTO {
     private Integer roomID;
     private Integer numberOfSeatsRemain;
     private Schedule_Status status;
+
+    private String movieName;
+    private String roomType;
+    private String roomName;
+    private String theaterName;
     private MovieDTO movie;
     private RoomDTO room;
 
-    public ScheduleDTO(Schedule schedule) {
-        this.scheduleID = schedule.getScheduleId();
-        this.startTime = schedule.getStartTime();
-        this.endTime = schedule.getEndTime();
-        this.movieID = schedule.getMovie().getMovieID();
-        this.roomID = schedule.getRoom().getRoomID();
-        this.status = schedule.getStatus();
-
-
-        if (schedule.getMovie() != null) {
-            this.movie = new MovieDTO();
-            this.movie.setMovieID(schedule.getMovie().getMovieID());
-            this.movie.setMovieName(schedule.getMovie().getMovieName());
-        }
-
-        if (schedule.getRoom() != null) {
-            this.room = new RoomDTO();
-            this.room.setRoomID(schedule.getRoom().getRoomID());
-            this.room.setName(schedule.getRoom().getName());
-        }
+    private SeatAvailabilityDTO seatAvailability;
+    public String getFormattedMovieDate() {
+        return startTime.format(DateTimeFormatter.ofPattern("dd-MM-yyyy"));
+    }
+    public String getFormattedStartTime() {
+        return startTime.format(DateTimeFormatter.ofPattern("HH:mm"));
     }
 
+    public String getFormattedEndTime() {
+        return endTime.format(DateTimeFormatter.ofPattern("HH:mm"));
+    }
+
+    public String getShowDateKey() {
+        return startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
+    }
 }

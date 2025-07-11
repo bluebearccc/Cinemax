@@ -6,7 +6,7 @@ import com.bluebear.cinemax.dto.InvoiceDTO;
 import com.bluebear.cinemax.dto.WatchedMovieDTO;
 import com.bluebear.cinemax.entity.*;
 
-import com.bluebear.cinemax.enumtype.Invoice_Status;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import com.bluebear.cinemax.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -33,24 +33,13 @@ public class UserProfileService {
     private TheaterRepository theaterRepository;
     public CustomerDTO toDTO(Customer customer) {
         return CustomerDTO.builder()
-                .id(customer.getID())
+                .id(customer.getId())
                 .accountID(customer.getAccount() != null ? customer.getAccount().getId() : null)
                 .fullName(customer.getFullName())
                 .phone(customer.getPhone())
+                .point(customer.getPoint())
+                .email(customer.getAccount() != null ? customer.getAccount().getEmail() : null)
                 .build();
-    }
-
-    public Customer toEntity(CustomerDTO dto) {
-        Customer customer = new Customer();
-        customer.setID(dto.getId());
-        customer.setFullName(dto.getFullName());
-        customer.setPhone(dto.getPhone());
-
-        if (dto.getAccountID() != null) {
-            accountRepository.findById(dto.getAccountID().longValue()).ifPresent(customer::setAccount);
-        }
-
-        return customer;
     }
 
     public AccountDTO toDTO(Account account) {
@@ -63,23 +52,18 @@ public class UserProfileService {
                 .build();
     }
 
-    public Account toEntity(AccountDTO dto) {
-        return Account.builder()
-                .id(dto.getId())
-                .email(dto.getEmail())
-                .password(dto.getPassword())
-                .role(dto.getRole())
-                .status(dto.getStatus())
-                .build();
-    }
     public Account getAccountByEmail(String email) {
         return accountRepository.findByEmail(email);
     }
+
     public void saveCustomer(CustomerDTO dto) {
-        Customer customer = toEntity(dto);
+        Customer customer = customerRepository.findById(dto.getId()).orElseThrow();
+        customer.setFullName(dto.getFullName());
+        customer.setPhone(dto.getPhone());
+        customer.setPoint(dto.getPoint());
+
         customerRepository.save(customer);
     }
-
 
     public AccountDTO getAccountById(Long id) {
         return accountRepository.findById(id).map(this::toDTO).orElse(null);
@@ -90,10 +74,13 @@ public class UserProfileService {
     }
 
     public void saveAccount(AccountDTO dto) {
-        Account account = toEntity(dto);
+        Account account = accountRepository.findById(Long.valueOf(dto.getId())).orElseThrow();
+        account.setEmail(dto.getEmail());
+        account.setPassword(dto.getPassword());
+        account.setStatus(dto.getStatus());
+        account.setRole(dto.getRole());
         accountRepository.save(account);
     }
-
 
     public Customer getCustomerByAccount(Account account) {
         return customerRepository.findByAccount(account);
@@ -103,13 +90,13 @@ public class UserProfileService {
         Customer customer = customerRepository.findById(customerDTO.getId()).orElse(null);
         if (customer == null) return List.of();
 
-        List<Invoice> invoices = invoiceRepository.findByCustomerAndStatus(customer, Invoice_Status.Booked);
+        List<Invoice> invoices = invoiceRepository.findByCustomerAndStatus(customer, InvoiceStatus.Booked);
 
         return invoices.stream().map(invoice -> {
             InvoiceDTO dto = new InvoiceDTO();
-            dto.setInvoiceId(invoice.getInvoiceId());
+            dto.setInvoiceId(invoice.getInvoiceID());
             dto.setBookingDate(invoice.getBookingDate());
-            dto.setTotalprice(invoice.getTotalPrice());
+            dto.setTotalPrice(invoice.getTotalPrice());
             dto.setDiscount(invoice.getDiscount());
             dto.setStatus(invoice.getStatus()); // hoặc giữ nguyên enum nếu DTO dùng enum
             return dto;
@@ -121,7 +108,7 @@ public class UserProfileService {
         Customer customer = customerRepository.findById(customerDTO.getId()).orElse(null);
         if (customer == null) return false;
 
-        return invoiceRepository.existsByCustomerAndStatus(customer, Invoice_Status.Booked);
+        return invoiceRepository.existsByCustomerAndStatus(customer, InvoiceStatus.Booked);
     }
 
 
@@ -137,7 +124,7 @@ public class UserProfileService {
         Customer customer = customerRepository.findById(customerDTO.getId()).orElse(null);
         if (customer == null) return List.of();
 
-        List<Invoice> bookedInvoices = invoiceRepository.findByCustomerAndStatus(customer, Invoice_Status.Booked);
+        List<Invoice> bookedInvoices = invoiceRepository.findByCustomerAndStatus(customer, InvoiceStatus.Booked);
 
         return bookedInvoices.stream()
                 .flatMap(invoice -> invoice.getDetailSeats().stream())
@@ -151,5 +138,6 @@ public class UserProfileService {
                 .distinct() // tránh bị trùng nếu nhiều ghế trong cùng suất chiếu
                 .collect(Collectors.toList());
     }
+
 
 }

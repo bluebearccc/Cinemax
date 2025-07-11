@@ -3,18 +3,18 @@ package com.bluebear.cinemax.repository;
 import com.bluebear.cinemax.entity.Customer;
 import com.bluebear.cinemax.entity.Invoice;
 
-import com.bluebear.cinemax.enumtype.Invoice_Status;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Repository
 public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
-    List<Invoice> findByCustomerAndStatus(Customer customer, Invoice_Status status);
-    boolean existsByCustomerAndStatus(Customer customer, Invoice_Status status);
-    Optional<Invoice> findByInvoiceIdAndStatus(int invoiceId, Invoice_Status status);
-
+    List<Invoice> findByCustomerAndStatus(Customer customer, InvoiceStatus status);
+    boolean existsByCustomerAndStatus(Customer customer, InvoiceStatus status);
+//    Optional<Invoice> findByInvoiceIDAndStatus(int invoiceId, Invoice_Status status);
+//    List<Invoice> findByStatusAndBookingDateBefore(Invoice_Status status, LocalDateTime time);
+    List<Invoice> findByStatusAndBookingDateBefore(InvoiceStatus status, LocalDateTime time);
 }

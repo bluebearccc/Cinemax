@@ -1,39 +1,26 @@
 package com.bluebear.cinemax.dto;
-import com.bluebear.cinemax.entity.Invoice;
-import com.bluebear.cinemax.enumtype.Invoice_Status;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import lombok.*;
-import java.math.BigDecimal;
+
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
+@Builder
 public class InvoiceDTO {
-
     private Integer invoiceId;
     private Integer customerId;
     private Integer employeeId;
     private Integer promotionId;
-    private Float discount;
+    private Double discount;
     private LocalDateTime bookingDate;
-    private Double totalprice;
-    private Invoice_Status status;
+    private Double totalPrice;
+    private InvoiceStatus status;
+    private String guestName;
+    private String guestEmail;
+    private String guestPhone;
     private List<DetailSeatDTO> detailSeats;
-    public InvoiceDTO(Invoice invoice) {
-        this.invoiceId = invoice.getInvoiceId();
-        this.customerId = invoice.getCustomer() != null ? invoice.getCustomer().getID() : null;
-        this.employeeId = invoice.getEmployee() != null ? invoice.getEmployee().getId() : null;
-        this.promotionId=invoice.getPromotion() != null ? invoice.getPromotion().getPromotionID() : null;
-        this.discount=invoice.getDiscount();
-        this.bookingDate=invoice.getBookingDate();
-        this.totalprice=invoice.getTotalPrice();
-
-    }
-
-
-
+    private List<Detail_FDDTO> detail_FDDTO;
 }

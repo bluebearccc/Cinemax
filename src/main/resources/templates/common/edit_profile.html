@@ -15,8 +15,8 @@
 
     <form th:action="@{/user/profile/update}" method="post">
         <!-- Hidden fields -->
-        <input type="hidden" name="customerId" th:value="${customer.customerId}"/>
-        <input type="hidden" name="accountId" th:value="${account.accountId}"/>
+        <input type="hidden" name="customerId" th:value="${customer.id}"/>
+        <input type="hidden" name="accountId" th:value="${account.id}"/>
 
         <!-- Full name -->
         <div class="mb-3">
@@ -54,7 +54,7 @@
         <!-- Buttons -->
         <div class="d-flex gap-2">
             <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
-            <a th:href="@{/user/profile(customerId=${customer.customerId})}" class="btn btn-secondary">Quay lại</a>
+            <a th:href="@{/user/profile(customerId=${customer.id})}" class="btn btn-secondary">Quay lại</a>
         </div>
     </form>
 </div>

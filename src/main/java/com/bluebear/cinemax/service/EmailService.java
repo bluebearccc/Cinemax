@@ -1,4 +1,6 @@
 package com.bluebear.cinemax.service;
+import com.bluebear.cinemax.dto.PromotionDTO;
+import com.bluebear.cinemax.dto.TheaterStockDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
@@ -50,7 +52,6 @@ public class EmailService {
             throw new RuntimeException("Gửi email thất bại", e);
         }
     }
-
 
 
 }

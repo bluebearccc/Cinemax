@@ -2,7 +2,10 @@ package com.bluebear.cinemax.entity;
 
 import com.bluebear.cinemax.enumtype.Promotion_Status;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -20,11 +23,11 @@ public class Promotion {
     @Column(name = "PromotionID")
     private Integer promotionID;
 
-    @Column(name = "PromotionCode", nullable = false, unique = true, length = 10)
+    @Column(name = "PromotionCode", nullable = false, length = 10, unique = true)
     private String promotionCode;
 
     @Column(name = "Discount", nullable = false)
-    private Integer discount;
+    private Double discount; // Giá trị giảm giá (ví dụ: phần trăm hoặc số tiền cố định)
 
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;
@@ -33,14 +36,15 @@ public class Promotion {
     private LocalDateTime endTime;
 
     @Column(name = "Quantity", nullable = false)
-    private Integer quantity;
+    private Integer quantity; // Số lượng mã khuyến mãi có sẵn
 
-    @Column(name = "Status", nullable = false, length = 20)
     @Enumerated(EnumType.STRING)
-    private Promotion_Status status;
+    @Column(name = "Status", nullable = false, length = 20)
+    private Promotion_Status status; // Enum PromotionStatus sẽ được định nghĩa bên dưới
 
-    @OneToMany(mappedBy = "promotion", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Invoice> invoices;
+    @OneToMany(mappedBy = "promotion")
+    private List<Invoice> InvoiceList;
+
     public boolean isValid() {
         return quantity > 0 && endTime.isAfter(LocalDateTime.now());
     }

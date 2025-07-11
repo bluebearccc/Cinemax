@@ -23,13 +23,5 @@ public class RoomDTO {
     private List<SeatDTO> seats;
     private List<ScheduleDTO> schedules;
 
-    public RoomDTO(Room room) {
-        this.roomID = room.getRoomID();
-        this.theaterID=room.getTheater().getTheaterId();
-        this.name=room.getName();
-        this.collumn=room.getCollumn();
-        this.row=room.getRow();
-        this.typeOfRoom=room.getTypeOfRoom();
-        this.status=room.getStatus();
-    }
+
 }

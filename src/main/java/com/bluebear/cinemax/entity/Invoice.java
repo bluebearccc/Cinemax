@@ -1,51 +1,71 @@
 package com.bluebear.cinemax.entity;
 
-
-import com.bluebear.cinemax.enumtype.Invoice_Status;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
+import com.bluebear.cinemax.enumtype.PaymentMethod;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.List;
-
-@Getter
-@Setter
+@Builder
 @Entity
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 @Table(name = "Invoice")
 public class Invoice {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer invoiceId;
+    @Column(name = "InvoiceID")
+    private Integer invoiceID;
 
-    @ManyToOne
-    @JoinColumn(name = "CustomerID", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CustomerID", referencedColumnName = "CustomerID")
     private Customer customer;
 
-    @ManyToOne
-    @JoinColumn(name = "EmployeeID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "EmployeeID", referencedColumnName = "EmployeeID")
     private Employee employee;
 
-    @ManyToOne
-    @JoinColumn(name = "PromotionID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "PromotionID", referencedColumnName = "PromotionID")
     private Promotion promotion;
-
     @Column(name = "Discount", nullable = true)
-    private Float discount;
+    private Double discount;
 
-    @Column(name = "BookingDate", nullable = false)
+    @Column(name = "BookingDate")
     private LocalDateTime bookingDate;
 
-    @Column(name = "Totalprice", nullable = false)
+    @Enumerated(EnumType.STRING)
+    @Column(name = "Status")
+    private InvoiceStatus status;
+
+    @Column(name = "TotalPrice")
     private Double totalPrice;
 
-    @Column(name = "Status", nullable = false)
-    @Enumerated(EnumType.STRING)
-    private Invoice_Status status;
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "invoice")
+    private List<Detail_FD> detail_FD;
+
+    @Column(name = "GuestName")
+    private String guestName;
+
+    @Column(name = "GuestPhone")
+    private String guestPhone;
+
+    @Column(name = "GuestEmail", nullable = true)
+    private String guestEmail;
+
+//    @Enumerated(EnumType.STRING)
+//    @Column(name = "payment_method", length = 20)
+//    private PaymentMethod paymentMethod;
+
+//    @Column(columnDefinition = "TEXT")
+//    private String bookingDetails;
+
+    @OneToMany(mappedBy = "invoice")
     private List<DetailSeat> detailSeats;
-    public List<DetailSeat> getDetailSeats() {
-        return detailSeats;
-    }
 }

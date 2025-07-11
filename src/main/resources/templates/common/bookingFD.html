@@ -36,7 +36,7 @@
             </th:block>
 
             <div class="combo-grid">
-                <div th:each="combo : ${combos}" class="combo-card" th:attr="data-combo-id=${combo.theaterStockID}">
+                <div th:each="combo : ${combos}" class="combo-card" th:attr="data-combo-id=${combo.theaterStockId}">
                     <div class="combo-image-container">
                         <img th:src="@{${combo.image}}"
                              class="combo-image"
@@ -67,24 +67,24 @@
                         <div class="quantity-section">
                             <span class="quantity-label">Số lượng:</span>
                             <div class="quantity-controls">
-                                <button type="button" class="quantity-btn minus-btn" th:attr="data-combo=${combo.theaterStockID}">
+                                <button type="button" class="quantity-btn minus-btn" th:attr="data-combo=${combo.theaterStockId}">
                                     <i class="fas fa-minus"></i>
                                 </button>
                                 <input type="number"
                                        class="quantity-input"
-                                       th:name="'comboQuantities[' + ${combo.theaterStockID} + ']'"
-                                       th:id="'quantity-' + ${combo.theaterStockID}"
+                                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                                       th:id="'quantity-' + ${combo.theaterStockId}"
                                        min="0"
                                        th:max="${combo.quantity}"
                                        value="0"
                                        th:attr="data-price=${combo.unitPrice}, data-max=${combo.quantity}">
-                                <button type="button" class="quantity-btn plus-btn" th:attr="data-combo=${combo.theaterStockID}">
+                                <button type="button" class="quantity-btn plus-btn" th:attr="data-combo=${combo.theaterStockId}">
                                     <i class="fas fa-plus"></i>
                                 </button>
                             </div>
                         </div>
 
-                        <button type="button" class="add-to-cart-btn" th:attr="data-combo=${combo.theaterStockID}">
+                        <button type="button" class="add-to-cart-btn" th:attr="data-combo=${combo.theaterStockId}">
                             <i class="fas fa-cart-plus me-2"></i>Thêm vào giỏ
                         </button>
                     </div>

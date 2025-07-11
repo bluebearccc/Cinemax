@@ -19,7 +19,7 @@ public class Schedule {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "ScheduleID")
-    private Integer scheduleId;
+    private Integer scheduleID;
 
     @Column(name = "StartTime", nullable = false)
     private LocalDateTime startTime;

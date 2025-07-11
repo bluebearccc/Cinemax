@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.Age_Limit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +28,8 @@ public class Movie {
     private String movieName;
 
 //    @Column(name = "Age_limit", length = 10)
-//    private String ageLimit;
+//    @Enumerated(EnumType.STRING)
+//    private Age_Limit ageLimit;
 
     @Column(name = "Description", length = 1000)
     private String description;
@@ -60,26 +62,25 @@ public class Movie {
     @Enumerated(EnumType.STRING)
     private Movie_Status status;
 
-//    @ManyToMany(fetch = FetchType.EAGER)
-//    @JoinTable(
-//            name = "Movie_Genre",
-//            joinColumns = @JoinColumn(name = "MovieID"),
-//            inverseJoinColumns = @JoinColumn(name = "GenreID")
-//    )
-//    private List<Genre> genres;
-//
-//    @ManyToMany
-//    @JoinTable(
-//            name = "Movie_Actor",
-//            joinColumns = @JoinColumn(name = "MovieID"),
-//            inverseJoinColumns = @JoinColumn(name = "ActorID")
-//    )
-//    private List<Actor> actors;
+    @ManyToMany(fetch = FetchType.EAGER)
+    @JoinTable(
+            name = "Movie_Genre",
+            joinColumns = @JoinColumn(name = "MovieID"),
+            inverseJoinColumns = @JoinColumn(name = "GenreID")
+    )
+    private List<Genre> genres;
+
+    @ManyToMany
+    @JoinTable(
+            name = "Movie_Actor",
+            joinColumns = @JoinColumn(name = "MovieID"),
+            inverseJoinColumns = @JoinColumn(name = "ActorID")
+    )
+    private List<Actor> actors;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<MovieFeedback> feedbackList;
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Schedule> scheduleList;
-
 }

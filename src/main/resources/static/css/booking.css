@@ -427,13 +427,21 @@ body {
 }
 
 .seat-couple {
-    background-color: #f44336;
+    background-color: #c136b5; /* đỏ thường */
     border-radius: 8px;
-    width: 100%;
+    width: 40px;
+    height: 40px;
     text-align: center;
-    padding: 10px 0;
+    font-size: 1rem;
     font-weight: bold;
     cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 4px;
+    transition: all 0.2s ease-in-out;
+    color: white;
+
 }
 /* Ghế VIP khi được chọn (giống ghế thường đã chọn) */
 .btn-check:checked + .seat-vip {
@@ -442,7 +450,12 @@ body {
     color: white !important;
     transform: scale(1.05);
 }
-
+.btn-check:checked + .seat-couple {
+    background-color: #28a745 !important;
+    border-color: #1e7e34 !important;
+    color: white !important;
+    transform: scale(1.05);
+}
 /* Ghế VIP đã đặt (giống như seat-booked) */
 .seat-vip.seat-booked {
     background-color: #070606 !important;
@@ -454,5 +467,11 @@ body {
     background-color: #e74c3c; /* đỏ VIP */
     color: white;
 }
+
+/*đoi*/
+
+
+
+
 
 

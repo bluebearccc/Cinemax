@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.dto;
 
+import com.bluebear.cinemax.entity.Account;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -14,13 +15,12 @@ import java.util.List;
 public class CustomerDTO {
 
     private Integer id;
-
     private Integer accountID;
-
     private String fullName;
-
     private String phone;
     private Integer point;
-
+    private String email;
+    private List<MovieFeedbackDTO> movieFeedback;
+    private List<InvoiceDTO> invoice;
 }
 

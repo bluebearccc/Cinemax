@@ -1,44 +1,46 @@
 package com.bluebear.cinemax.entity;
-import com.bluebear.cinemax.enumtype.Movie_Status;
-import com.bluebear.cinemax.enumtype.Theater_Status;
-import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
 
-import java.math.BigDecimal;
+import com.bluebear.cinemax.enumtype.TheaterStock_Status;
+import jakarta.persistence.*;
+import lombok.*;
+
+import java.util.List;
+import java.util.Set;
+@Builder
 @Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
 @Table(name = "Theater_Stock")
 public class TheaterStock {
+
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Theater_StockID")
-    private Integer theaterStockID;
-
-
-    @Column(name = "TheaterID", nullable = false)
-    private int theater;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer stockID;
 
     @Column(name = "FoodName", length = 20, nullable = false)
-    private String foodName;
+    private String itemName;
+
+    @Column(name = "Image", length = 255)
+    private String image;
 
     @Column(name = "Quantity", nullable = false)
     private Integer quantity;
 
     @Column(name = "UnitPrice", nullable = false)
-    private Double unitPrice;
+    private Double price;
 
-    @Column(name = "Image", length = 255, nullable = false)
-    private String image;
-
-    @Column(name = "Status", length = 20)
     @Enumerated(EnumType.STRING)
-    private Theater_Status status;
+    @Column(name = "Status", length = 50, nullable = false)
+    private TheaterStock_Status status;
 
-    // Getters and Setters
+    @OneToMany(mappedBy = "theaterStock")
+    private List<Detail_FD> detail_FD;
 
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "TheaterID", nullable = false, referencedColumnName = "TheaterID")
+    private Theater theater;
 }

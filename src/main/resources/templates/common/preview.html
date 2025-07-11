@@ -14,7 +14,41 @@
         <div class="card-header bg-primary text-white rounded-top-4">
             <h2 class="mb-0"><i class="bi bi-ticket-perforated"></i> Xác nhận đặt vé</h2>
         </div>
+
         <div class="card-body">
+            <div th:if="${promotionError != null}" class="alert alert-danger">
+                [[${promotionError}]]
+            </div>
+            <!-- Nếu chưa có mã giảm giá thì hiển thị ô nhập -->
+            <div class="mb-3">
+                <form method="post" th:action="@{/booking/step2}">
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                    <input type="hidden" name="roomId" th:value="${room.roomID}">
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
+                    <input type="hidden" th:each="combo : ${comboList}"
+                           th:if="${comboQuantities[combo.theaterStockId] != null}"
+                           th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                           th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                    <label for="promotionCode" class="form-label"><strong>Nhập mã giảm giá:</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="promotionCode" class="form-control" name="promotionCode"
+                               placeholder="Mã giảm giá" th:value="${param.promotionCode}">
+                        <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                    </div>
+
+                    <!-- Hiện lỗi nếu có -->
+                    <div th:if="${promotionError != null}" class="form-text text-danger mt-1">
+                        [[${promotionError}]]
+                    </div>
+
+                    <!-- Hiện mã nếu áp dụng thành công -->
+                    <div th:if="${promotion != null}" class="form-text text-success mt-1">
+                        Mã [[${promotion.promotionCode}]] đã được áp dụng ([[${promotion.discount}]]%).
+                    </div>
+                </form>
+            </div>
+
             <div class="mb-3">
                 <strong>Lịch chiếu:</strong>
                 <span class="text-muted">[[${schedule.movie.movieName}]] - [[${#temporals.format(schedule.startTime, 'dd/MM/yyyy HH:mm')}]]</span>
@@ -42,7 +76,7 @@
                     <li class="list-group-item d-flex justify-content-between align-items-center"
                         th:each="combo : ${comboList}">
                         <div>
-                            <i class="bi bi-cup-straw"></i> [[${combo.foodName}]] - Số lượng: [[${comboQuantities[combo.theaterStockID]}]]
+                            <i class="bi bi-cup-straw"></i> [[${combo.foodName}]] - Số lượng: [[${comboQuantities[combo.theaterStockId]}]]
                         </div>
                         <span class="badge bg-warning text-dark">
                             [[${#numbers.formatDecimal(combo.unitPrice, 0, 0)}]]đ
@@ -114,9 +148,9 @@
 
                 <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
                 <input type="hidden" th:each="combo : ${comboList}"
-                       th:if="${comboQuantities[combo.theaterStockID] != null}"
-                       th:name="'comboQuantities[' + ${combo.theaterStockID} + ']'"
-                       th:value="${comboQuantities[combo.theaterStockID]}" />
+                       th:if="${comboQuantities[combo.theaterStockId] != null}"
+                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                       th:value="${comboQuantities[combo.theaterStockId]}" />
 
                 <div class="text-end mt-4">
 

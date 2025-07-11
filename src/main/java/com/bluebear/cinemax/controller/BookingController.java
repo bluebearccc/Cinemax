@@ -1,13 +1,13 @@
 package com.bluebear.cinemax.controller;
 import com.bluebear.cinemax.dto.*;
-import com.bluebear.cinemax.enumtype.Theater_Status;
-import com.bluebear.cinemax.service.EmailService;
-import com.bluebear.cinemax.entity.*;
-import com.bluebear.cinemax.repository.*;
-import com.bluebear.cinemax.service.BookingService;
-import com.bluebear.cinemax.service.VnpayService;
+
+import com.bluebear.cinemax.entity.Promotion;
+import com.bluebear.cinemax.repository.SeatRepository;
+import com.bluebear.cinemax.service.booking.BookingServiceImp;
+import com.bluebear.cinemax.service.payment.VnpayService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,34 +15,19 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-import com.bluebear.cinemax.repository.TheaterStockRepository;
+
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/booking")
 public class BookingController {
-    private final EmailService emailService;
-    private final BookingService bookingService;
-    private final TheaterStockRepository theaterStockRepo;
-    private final ScheduleRepository scheduleRepository;
-    private final RoomRepository roomRepository;
-    private final SeatRepository seatRepository;
-    private final PromotionRepository promotionRepository;
-    private final VnpayService vnpayService;
-    private final InvoiceRepository invoiceRepo;
-    public BookingController(EmailService emailService, BookingService bookingService, TheaterStockRepository theaterStockRepo, ScheduleRepository scheduleRepository, RoomRepository roomRepository, SeatRepository seatRepository, PromotionRepository promotionRepository, VnpayService vnpayService, InvoiceRepository invoiceRepo) {
-        this.emailService = emailService;
-        this.bookingService = bookingService;
-        this.theaterStockRepo = theaterStockRepo;
-        this.scheduleRepository = scheduleRepository;
-        this.roomRepository = roomRepository;
-        this.seatRepository = seatRepository;
-        this.promotionRepository = promotionRepository;
-        this.vnpayService = vnpayService;
-        this.invoiceRepo = invoiceRepo;
-    }
-
+    @Autowired
+    private BookingServiceImp bookingService;
+    @Autowired
+    private VnpayService vnpayService;
+    @Autowired
+    private SeatRepository seatRepo;
     // Trang 1: Đặt vé
     @GetMapping("")
     public String showBookingPage(@RequestParam("scheduleId") Integer scheduleId,
@@ -77,20 +62,24 @@ public class BookingController {
     public String handleBookingStep1(@RequestParam("scheduleId") Integer scheduleId,
                                      @RequestParam("roomId") Integer roomId,
                                      @RequestParam("selectedSeats") List<Integer> seatIds,
-                                     @RequestParam(value = "promotionCode", required = false) String promotionCode,
+
                                      Model model, RedirectAttributes redirect   ) {
         try {
             // Xử lý ghế và mã giảm giá
-            Double totalAmount = bookingService.calculateTotalAmount(scheduleId, seatIds, promotionCode);
+            // Tính sơ bộ tổng tiền mà không áp dụng mã
+            double totalAmount = seatIds.stream()
+                    .map(id -> seatRepo.findById(id).orElseThrow().getUnitPrice().doubleValue())
+                    .mapToDouble(Double::doubleValue)
+                    .sum();
+
 
             // Chuẩn bị dữ liệu cho bước 2
-            List<TheaterStockDTO> combos = theaterStockRepo.findByStatus(Theater_Status.Active).stream().map(TheaterStockDTO::new).collect(Collectors.toList());
+            List<TheaterStockDTO> combos = bookingService.getAvailableCombos();
 
             model.addAttribute("scheduleId", scheduleId);
             model.addAttribute("roomId", roomId);
             model.addAttribute("selectedSeats", seatIds);
             model.addAttribute("totalAmount", totalAmount);
-            model.addAttribute("promotionCode", promotionCode);
             model.addAttribute("combos", combos);
 
             return "common/bookingFD"; // Đây là file bookingFD.html
@@ -111,40 +100,27 @@ public class BookingController {
                                      Model model,
                                      HttpSession session) {
         try {
-            Map<Integer, Integer> comboQuantities = extractComboQuantities(allParams);
-
-            ScheduleDTO schedule = new ScheduleDTO(scheduleRepository.findById(scheduleId).orElseThrow());
-            RoomDTO room = new RoomDTO(roomRepository.findById(roomId).orElseThrow());
-
-            List<SeatDTO> selectedSeats = seatRepository.findAllById(seatIds)
-                    .stream().map(SeatDTO::new).toList();
-
-            List<TheaterStockDTO> combos = theaterStockRepo.findAllById(comboQuantities.keySet())
-                    .stream().map(TheaterStockDTO::new).toList();
-
-            double totalSeatPrice = selectedSeats.stream().mapToDouble(SeatDTO::getUnitPrice).sum();
-
-            double totalComboPrice = 0;
-            for (TheaterStockDTO combo : combos) {
-                int qty = comboQuantities.get(combo.getTheaterStockID());
-                totalComboPrice += combo.getUnitPrice().doubleValue() * qty;
+            Map<Integer, Integer> comboQuantities = bookingService.extractComboQuantities(allParams);
+            if (promotionCode != null && !promotionCode.isBlank()) {
+                Optional<PromotionDTO> promoOpt = bookingService.validatePromotionCode(promotionCode);
+                if (promoOpt.isEmpty()) {
+                    model.addAttribute("promotionError", "Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+                    promotionCode = null; // Bỏ mã lỗi để tránh áp dụng sai
+                }
             }
 
-            double total = totalSeatPrice + totalComboPrice;
-            PromotionDTO promo = promotionRepository.findByPromotionCode(promotionCode)
-                    .map(PromotionDTO::new).orElse(null);
-            double discount = (promo != null && promo.isValid()) ? promo.getDiscount() / 100.0 : 0.0;
-            double finalPrice = total * (1 - discount);
+            BookingPreviewDTO previewData = bookingService.prepareBookingPreview(scheduleId, roomId, seatIds, promotionCode, comboQuantities);
 
 
-            model.addAttribute("schedule", schedule);
-            model.addAttribute("room", room);
-            model.addAttribute("selectedSeats", selectedSeats);
-            model.addAttribute("comboQuantities", comboQuantities);
-            model.addAttribute("comboList", combos);
-            model.addAttribute("totalPrice", total);
-            model.addAttribute("finalPrice", finalPrice);
-            model.addAttribute("promotion", promo);
+
+            model.addAttribute("schedule", previewData.getSchedule());
+            model.addAttribute("room", previewData.getRoom());
+            model.addAttribute("selectedSeats", previewData.getSelectedSeats());
+            model.addAttribute("comboQuantities", previewData.getComboQuantities());
+            model.addAttribute("comboList", previewData.getCombos());
+            model.addAttribute("totalPrice", previewData.getTotalPrice());
+            model.addAttribute("finalPrice", previewData.getFinalPrice());
+            model.addAttribute("promotion", previewData.getPromotion());
 
             return "common/preview";
         } catch (IllegalStateException e) {
@@ -189,36 +165,23 @@ public class BookingController {
     }
 
 
-    // API kiểm tra mã giảm giá
-    @ResponseBody
-    @GetMapping("/checkPromotion")
-    public Map<String, Object> checkPromotion(@RequestParam("code") String code,
-                                              @RequestParam("totalAmount") Double totalAmount) {
-        return bookingService.checkPromotionCode(code, totalAmount);
-    }
+//    // API kiểm tra mã giảm giá
+//    @ResponseBody
+//    @GetMapping("/checkPromotion")
+//    public Map<String, Object> checkPromotion(@RequestParam("code") String code,
+//                                              @RequestParam("totalAmount") Double totalAmount) {
+//        return bookingService.checkPromotionCode(code, totalAmount);
+//    }
+//
+//    // API áp dụng mã giảm giá
+//    @ResponseBody
+//    @PostMapping("/applyPromotion")
+//    public Map<String, Object> applyPromotion(@RequestParam("code") String code,
+//                                              @RequestParam("totalAmount") Double totalAmount) {
+//        return bookingService.applyPromotionCode(code, totalAmount);
+//    }
 
-    // API áp dụng mã giảm giá
-    @ResponseBody
-    @PostMapping("/applyPromotion")
-    public Map<String, Object> applyPromotion(@RequestParam("code") String code,
-                                              @RequestParam("totalAmount") Double totalAmount) {
-        return bookingService.applyPromotionCode(code, totalAmount);
-    }
-    private Map<Integer, Integer> extractComboQuantities(Map<String, String> allParams) {
-        Map<Integer, Integer> result = new HashMap<>();
-        for (Map.Entry<String, String> entry : allParams.entrySet()) {
-            String key = entry.getKey();
-            if (key.startsWith("comboQuantities[")) {
-                String idStr = key.substring(16, key.length() - 1);
-                try {
-                    Integer comboId = Integer.parseInt(idStr);
-                    Integer quantity = Integer.parseInt(entry.getValue());
-                    if (quantity > 0) {
-                        result.put(comboId, quantity);
-                    }
-                } catch (NumberFormatException ignored) {}
-            }
-        }
-        return result;
-    }
+
+
+
 }

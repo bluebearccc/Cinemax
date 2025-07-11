@@ -2,6 +2,7 @@ package com.bluebear.cinemax.repository;
 
 import com.bluebear.cinemax.entity.DetailSeat;
 import com.bluebear.cinemax.entity.Invoice;
+import com.bluebear.cinemax.enumtype.DetailSeat_Status;
 import jakarta.transaction.Transactional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -12,9 +13,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer> {
-    List<DetailSeat> findByScheduleScheduleId(Integer scheduleId);
-
-    boolean existsBySeatSeatIdAndScheduleScheduleId(Integer seatId, Integer scheduleId);
+    List<DetailSeat> findByInvoiceInvoiceID(Integer invoiceId);
+    List<DetailSeat> findByInvoiceInvoiceIDAndStatus(Integer invoice_invoiceID, DetailSeat_Status status);
+    boolean existsBySeatSeatIDAndScheduleScheduleID(Integer seatId, Integer scheduleId);
     @Modifying
     @Transactional
     @Query(value = "INSERT INTO Detail_Seat (invoiceId, seatId, scheduleId ,status) VALUES (:invoiceId, :seatId, :scheduleId, :status)", nativeQuery = true)
@@ -22,4 +23,12 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
                           @Param("seatId") int seatId,
                           @Param("scheduleId") int scheduleId,
                           @Param("status")String status);
+    boolean existsBySeatSeatIDAndScheduleScheduleIDAndStatus(Integer seatId, Integer scheduleId, DetailSeat_Status status);
+    @Modifying
+    @Transactional
+    @Query("UPDATE DetailSeat ds SET ds.status = :status WHERE ds.invoice.invoiceID = :invoiceId")
+    void updateStatusByInvoiceId(@Param("invoiceId") int invoiceId,
+                                 @Param("status") com.bluebear.cinemax.enumtype.DetailSeat_Status status);
+    boolean existsBySeatSeatIDAndScheduleScheduleIDAndStatusIn(Integer seatId, Integer scheduleId, List<DetailSeat_Status> statuses);
+    List<DetailSeat> findBySeatSeatIDAndScheduleScheduleIDAndStatusIn(Integer seatId, Integer scheduleId, List<DetailSeat_Status> statuses);
 }

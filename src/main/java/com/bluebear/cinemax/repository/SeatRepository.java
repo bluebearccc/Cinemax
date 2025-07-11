@@ -9,6 +9,6 @@ import java.util.List;
 
 public interface SeatRepository extends JpaRepository<Seat, Integer> {
     List<Seat> findByRoomRoomID(Integer roomId);
-    @Query("SELECT ds.schedule.scheduleId FROM DetailSeat ds WHERE ds.seat.seatId = :seatId")
+    @Query("SELECT ds.schedule.scheduleID FROM DetailSeat ds WHERE ds.seat.seatID = :seatId")
     List<Integer> findScheduleIdsBySeatId(@Param("seatId") Integer seatId);
 }

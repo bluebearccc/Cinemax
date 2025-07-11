@@ -1,4 +1,5 @@
 package com.bluebear.cinemax.entity;
+import com.bluebear.cinemax.enumtype.FeedbackStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -17,8 +18,9 @@ public class FeedbackService {
     @Column(name = "ID", nullable = false)
     private Integer id;
 
-    @Column(name = "CustomerID", nullable = false)
-    private Integer customerId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "CustomerID", referencedColumnName = "CustomerID")
+    private Customer customer;
 
     @Column(name = "CreatedDate")
     private LocalDateTime createdDate;
@@ -32,6 +34,8 @@ public class FeedbackService {
     @Column(name = "ServiceRate", nullable = false)
     private Integer serviceRate;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "Status", nullable = false, length = 20)
-    private String status;
+    private FeedbackStatus status;
+
 }

@@ -1,7 +1,10 @@
 package com.bluebear.cinemax.controller;
 import  com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
+import com.bluebear.cinemax.enumtype.FeedbackStatus;
+import com.bluebear.cinemax.repository.CustomerRepository;
 import com.bluebear.cinemax.repository.FeedbackServiceRepository;
+import com.bluebear.cinemax.service.CustomerCareService;
 import com.bluebear.cinemax.service.UserProfileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -21,6 +24,8 @@ public class UserProfileController {
     private UserProfileService userProfileService;
     @Autowired
     private FeedbackServiceRepository feedbackServiceRepository;
+    @Autowired
+    private CustomerRepository  customerRepository;
 
     @GetMapping("/user/profile")
     public String showUserProfile(@RequestParam("customerId") Integer customerId, Model model) {
@@ -67,7 +72,6 @@ public class UserProfileController {
                                 @RequestParam("email") String email,
                                 @RequestParam("newPassword") String newPassword,
                                 @RequestParam("confirmPassword") String confirmPassword,
-                                @RequestParam("theaterId")Integer theaterId,
                                 Model model) {
 
         CustomerDTO customer = userProfileService.getCustomerById(customerId);
@@ -122,16 +126,18 @@ public class UserProfileController {
                                         @RequestParam("content") String content,
                                         @RequestParam("serviceRate") Integer serviceRate,
                                         RedirectAttributes redirectAttributes) {
+        Customer customer = customerRepository.findById(customerId)
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
         FeedbackService feedback = new FeedbackService();
-        feedback.setCustomerId(customerId);
+        feedback.setCustomer(customer);
         feedback.setTheaterId(theaterId);
         feedback.setContent(content);
         feedback.setServiceRate(serviceRate);
         feedback.setCreatedDate(LocalDateTime.now());
-        if (serviceRate < 3) {
-            feedback.setStatus("Not_Suported");
+        if (serviceRate < 4) {
+            feedback.setStatus(FeedbackStatus.Not_Suported);
         } else {
-            feedback.setStatus("Suported");
+            feedback.setStatus(FeedbackStatus.Suported);
         }
 
         feedbackServiceRepository.save(feedback); // Inject repository

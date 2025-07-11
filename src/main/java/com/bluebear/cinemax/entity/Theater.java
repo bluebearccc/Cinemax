@@ -17,7 +17,7 @@ public class Theater {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "TheaterID")
-    private Integer theaterId;
+    private Integer theaterID;
 
     @Column(name = "TheaterName", nullable = false, length = 100)
     private String theaterName;
@@ -39,5 +39,11 @@ public class Theater {
     private Theater_Status status;
 
     @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<TheaterStock> theaterStock;
+
+    @OneToMany(mappedBy = "theater")
+    private List<Employee> cashiers;
+
+    @OneToMany(mappedBy = "theater")
     private List<Room> rooms;
 }

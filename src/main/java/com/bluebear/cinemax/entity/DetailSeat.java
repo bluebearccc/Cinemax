@@ -14,7 +14,7 @@ import lombok.*;
 public class DetailSeat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "ID")
+    @Column(name = "Id")
     private Integer id;
 
     @ManyToOne
