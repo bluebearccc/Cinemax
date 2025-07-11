@@ -101,6 +101,8 @@ public class BlogController {
     @PostMapping("/blog-detail/like")
     public ResponseEntity<Void> likeBlog(@RequestParam(name = "blogId") Integer blogId, HttpSession session) {
         CustomerDTO customerDTO = (CustomerDTO) session.getAttribute("customer");
+        System.out.println("hehehehehe");
+
 
         if (blogLikeService.hasLiked(blogId, customerDTO.getId())) {
             blogLikeService.unlikeBlog(blogId, customerDTO.getId());

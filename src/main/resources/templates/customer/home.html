@@ -67,14 +67,13 @@
             <img class="movie-poster-hot-film" th:src="${topMovie.banner}">
             <div class="movie-info-hot-film">
                 <h3 th:text="${topMovie.movieName}"></h3>
-                <p th:text="${topMovie.description}">Cuộc chiến epic giữa các siêu anh hùng để bảo vệ trái đất khỏi mối
-                    đe dọa từ không gian.</p>
+                <p th:text="${topMovie.description}"></p>
             </div>
             <div class="movie-meta-hot-film">
                 <span class="rating-hot-film" th:text=" '⭐' + ${topMovie.movieRate}"></span>
                 <span class="genre-hot-film" th:text="${topMovie.genres.getFirst().genreName}"></span>
             </div>
-            <button class="book-btn-hot-film">Đặt Vé Ngay</button>
+            <button class="book-btn-hot-film">Book now</button>
         </div>
     </div>
 </section>

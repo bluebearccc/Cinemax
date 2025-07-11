@@ -36,8 +36,6 @@ public class HomeController {
     private MovieFeedbackService movieFeedbackService;
     @Autowired
     private TheaterService theaterService;
-    @Autowired
-    private ScheduleService scheduleService;
 
     private Page<MovieDTO> topMovies;
     private Page<MovieDTO> currentMovies;
@@ -69,6 +67,7 @@ public class HomeController {
         }
 
         String roomType = "single";
+        boolean isNearest = false;
 
         currentWebPage = "home";
         currentNumberOfFeedback = movieFeedbacks.size();
@@ -77,6 +76,7 @@ public class HomeController {
         topMovies = movieService.findTop3MoviesHighestRate();
         theaterMovies = movieService.findMoviesByScheduleAndTheaterAndRoomType(LocalDateTime.now(), currentTheater.getTheaterID(), roomType);
 
+        model.addAttribute("isNearest", isNearest);
         model.addAttribute("roomType", roomType);
         model.addAttribute("currentWebPage", currentWebPage);
         model.addAttribute("currentTheater", currentTheater);
@@ -112,13 +112,14 @@ public class HomeController {
     }
 
     @GetMapping("/home/loadBookMovie")
-    public String loadBookMovie(Model model, @RequestParam(name = "selectedIndex") int selectedIndex, @RequestParam(name = "theaterId") int theaterId, @RequestParam(name = "roomType") String roomType) {
+    public String loadBookMovie(Model model, @RequestParam(name = "selectedIndex") int selectedIndex, @RequestParam(name = "theaterId") int theaterId, @RequestParam(name = "roomType") String roomType, @RequestParam(name = "isNearest") Boolean isNearest) {
         LocalDateTime dateTime = LocalDateTime.now();
         if (selectedIndex > 0) {
             dateTime = LocalDateTime.now().plusDays(selectedIndex).toLocalDate().atStartOfDay();
         }
         theaterMovies = movieService.findMoviesByScheduleAndTheaterAndRoomType(dateTime, theaterId, roomType);
         currentTheater = theaterService.getTheaterById(theaterId);
+        model.addAttribute("isNearest", isNearest);
         model.addAttribute("roomType", roomType);
         model.addAttribute("theaterMovies", theaterMovies);
         model.addAttribute("currentTheater", currentTheater);

@@ -63,27 +63,3 @@ function handleEnter(event) {
         sendMessage();
     }
 }
-
-function scrollToMovies() {
-    document.getElementById('movies').scrollIntoView({behavior: 'smooth'});
-}
-
-// Header scroll effect
-window.addEventListener('scroll', () => {
-    const header = document.querySelector('.header');
-    if (window.scrollY > 100) {
-        header.style.background = 'rgba(0, 0, 0, 0.95)';
-    } else {
-        header.style.background = 'rgba(0, 0, 0, 0.9)';
-    }
-});
-
-// Movie card click effects
-document.querySelectorAll('.movie-card').forEach(card => {
-    card.addEventListener('click', () => {
-        card.style.transform = 'scale(0.98)';
-        setTimeout(() => {
-            card.style.transform = 'translateY(-10px)';
-        }, 100);
-    });
-});

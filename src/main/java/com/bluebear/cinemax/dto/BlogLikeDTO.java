@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 @Builder
 public class BlogLikeDTO {
 
-    private Integer id;
+    private Long id;
 
     private Integer blogID;
 

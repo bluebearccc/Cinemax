@@ -61,6 +61,7 @@ public class MovieDetailController {
     public String movieDetail(Model model, @RequestParam int movieId) {
         movieFeedbacks = new LinkedHashMap<>();
         String roomType = "single";
+        boolean isNearest = false;
         currentTheater = theaters.getContent().getFirst();
         MovieDTO movieDTO = movieService.findMovieByIdWithGenresAndActors(movieId);
         if (movieDTO != null) {
@@ -76,6 +77,7 @@ public class MovieDetailController {
 
             currentWebPage = "movies";
 
+            model.addAttribute("isNearest", isNearest);
             model.addAttribute("roomType", roomType);
             model.addAttribute("schedules", schedules);
             model.addAttribute("movieFeedbacks", movieFeedbacks);
@@ -95,7 +97,7 @@ public class MovieDetailController {
     }
 
     @GetMapping("/loadSchedule")
-    public String loadSchedule(Model model, @RequestParam(name = "movieId") int movieId, @RequestParam(name = "selectedIndex") int selectedIndex, @RequestParam(name = "theaterId") int theaterId, @RequestParam(name = "roomType") String roomType) {
+    public String loadSchedule(Model model, @RequestParam(name = "movieId") int movieId, @RequestParam(name = "selectedIndex") int selectedIndex, @RequestParam(name = "theaterId") int theaterId, @RequestParam(name = "roomType") String roomType, @RequestParam(name = "isNearest") Boolean isNearest) {
         currentTheater = theaterService.getTheaterById(theaterId);
         LocalDateTime dateTime = LocalDateTime.now();
         if (selectedIndex > 0) {
@@ -106,6 +108,7 @@ public class MovieDetailController {
             scheduleService.calculateNumOfSeatLeft(scheduleDTO);
         }
 
+        model.addAttribute("isNearest", isNearest);
         model.addAttribute("roomType", roomType);
         model.addAttribute("schedules", schedules);
         model.addAttribute("theaters", theaters);

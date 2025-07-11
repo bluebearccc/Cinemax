@@ -78,14 +78,14 @@
     <div class="cinema-dropdown">
         <button class="cinema-button" th:onclick="toggleCinemaDropdown()">
             <span><div class="cinema-logo">CGV</div></span>
-            <span class="cinema-option-text">Tất cả rạp</span>
+            <span class="cinema-option-text">All Theaters</span>
             <span class="dropdown-arrow">▼</span>
         </button>
         <div class="cinema-dropdown-content" id="cinemaDropdown">
             <div class="cinema-option active">
                 <span><div class="cinema-logo">CGV</div></span>
                 <input type="hidden" class="cinema-id" value="0">
-                <span class="cinema-option-text">Tất cả rạp</span>
+                <span class="cinema-option-text">All Theaters</span>
             </div>
             <div class="cinema-option" th:each="theater : ${theaters}">
                 <span><div class="cinema-logo">CGV</div></span>
@@ -110,7 +110,7 @@
         <!-- Filter Buttons -->
         <div class="filter-section">
             <button class="filter-btn active" data-genre-id="0">
-                Tất cả</button>
+                All</button>
             <button class="filter-btn" th:each="genre : ${genres}" th:text="${genre.genreName}" th:data-genre-id="${genre.genreID}">
             </button>
         </div>

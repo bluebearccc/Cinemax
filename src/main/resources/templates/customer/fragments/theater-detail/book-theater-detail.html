@@ -1,35 +1,10 @@
-<div class="container book-movie-area" th:fragment="book-movie-area" id="book-movie-area">
-    <h1 class="section-title-hot-film">Book Movie Tickets</h1>
+<div class="container book-theater-detail" th:fragment="book-theater-detail" id="book-theater-detail">
+    <h2 class="section-title">Book Movie Tickets</h2>
 
     <div class="booking-container">
-        <div class="cinema-list">
-            <h3>Select Cinema</h3>
-            <div th:class="${theater.getTheaterID() == currentTheater.theaterID} ? 'cinema-item active' : 'cinema-item'"
-                 th:each="theater : ${theaters.content}">
-                <input type="hidden" th:value="${theater.theaterID}">
-                <div class="cinema-logo">CGV</div>
-                <div>
-                    <div th:text="${theater.theaterName}"></div>
-                </div>
-            </div>
-        </div>
-
-        <script th:inline="javascript">
-            let cinemas = /*[[${theaters.content}]]*/ [];
-        </script>
-
         <div class="schedule-section">
             <div class="schedule-header">
-                <div>
-                    <h2 class="schedule-title" th:text="'Movie Schedule at ' + ${currentTheater.theaterName}"></h2>
-                    <p class="cinema-address" th:text="${currentTheater.address}"></p>
-                </div>
                 <div class="button-container">
-                    <div class="custom-button-item-theater" th:classappend="${isNearest} ? ' active' : ''"  onclick="toggleActive(this)">
-                        <i class="fas fa-crosshairs" style="margin-right: 5px;"></i>
-                        <span>Nearest</span>
-                    </div>
-
                     <div th:class="(${roomType.toLowerCase()} == 'single') ? 'custom-button-item active' : 'custom-button-item'">
                         <i class="fas fa-user"></i><span>Single</span>
                     </div>
