@@ -25,6 +25,9 @@
             --text-muted: #808080;
             --sidebar-bg: #1e1e1e;
             --sidebar-hover: #333333;
+            /* FIXED: Thêm màu đen cho text */
+            --text-black: #000000;
+            --text-dark: #333333;
         }
 
         * {
@@ -341,18 +344,49 @@
             background: var(--card-hover);
         }
 
-        .actor-image {
+        /* Fixed actor image styles */
+        .actor-image-container {
             width: 60px;
             height: 60px;
             border-radius: 50%;
-            object-fit: cover;
+            background: var(--darker-bg);
             border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
         }
 
+        .actor-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .actor-image-placeholder {
+            color: var(--text-muted);
+            font-size: 1.5rem;
+        }
+
+        .actor-image.loading {
+            opacity: 0.5;
+        }
+
+        .actor-image.error {
+            display: none;
+        }
+
+        /* FIXED: Actor name với màu đen dễ nhìn */
         .actor-name {
             font-weight: 600;
-            color: var(--text-primary);
+            color: #000000 !important; /* Màu đen cho chắc chắn */
             margin-bottom: 4px;
+            background-color: #ffffff; /* Nền trắng để contrast */
+            padding: 4px 8px;
+            border-radius: 4px;
+            display: inline-block;
         }
 
         .actor-id {
@@ -476,7 +510,7 @@
                 flex-direction: column;
             }
 
-            .actor-image {
+            .actor-image-container {
                 width: 40px;
                 height: 40px;
             }
@@ -654,10 +688,15 @@
                         <div class="actor-name" th:text="${actor.actorName}">John Doe</div>
                     </td>
                     <td>
-                        <img th:src="${actor.image != null ? actor.image : '/images/default-actor.png'}"
-                             th:alt="${actor.actorName}"
-                             class="actor-image"
-                             onerror="this.src='/images/default-actor.png'">
+                        <div class="actor-image-container">
+                            <img th:if="${actor.image != null and !#strings.isEmpty(actor.image)}"
+                                 th:src="${actor.image}"
+                                 th:alt="${actor.actorName}"
+                                 class="actor-image"
+                                 th:data-actor-id="${actor.actorId}">
+                            <i th:if="${actor.image == null or #strings.isEmpty(actor.image)}"
+                               class="fas fa-user actor-image-placeholder"></i>
+                        </div>
                     </td>
                     <td>
                         <div class="movies-list" th:if="${!#lists.isEmpty(actor.movies)}">
@@ -729,18 +768,42 @@
                 }
             });
         }
-    });
 
-    // Image error handling
-    function handleImageError(img) {
-        img.src = '/images/default-actor.png';
-        img.onerror = null;
-    }
+        // Improved image error handling
+        function handleImageError(img) {
+            // Only handle error once per image
+            if (img.classList.contains('error-handled')) {
+                return;
+            }
 
-    // Add to all actor images
-    document.querySelectorAll('.actor-image').forEach(img => {
-        img.addEventListener('error', function() {
-            handleImageError(this);
+            img.classList.add('error-handled');
+            img.classList.add('error');
+
+            // Create placeholder icon
+            const container = img.parentElement;
+            const placeholder = document.createElement('i');
+            placeholder.className = 'fas fa-user actor-image-placeholder';
+            container.appendChild(placeholder);
+
+            // Remove error event listener to prevent further calls
+            img.removeEventListener('error', handleImageError);
+        }
+
+        // Add error handling to existing images
+        document.querySelectorAll('.actor-image').forEach(img => {
+            img.addEventListener('error', function() {
+                handleImageError(this);
+            });
+
+            // Add loading state
+            img.addEventListener('load', function() {
+                this.classList.remove('loading');
+            });
+
+            // Check if image is already loaded
+            if (img.complete && img.naturalWidth === 0) {
+                handleImageError(img);
+            }
         });
     });
 </script>

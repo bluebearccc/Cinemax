@@ -8,11 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
-@RequestMapping("/admin/actors") // Đổi từ "/actors" thành "/admin/actors"
+@RequestMapping("/admin/actors")
 public class ActorController {
 
     @Autowired
@@ -26,10 +31,15 @@ public class ActorController {
     public String getAllActors(Model model) {
         List<ActorDTO> actors = actorService.getAllActors();
 
+        // Sắp xếp theo ID tăng dần
+        if (actors != null) {
+            actors.sort(Comparator.comparing(ActorDTO::getActorId, Comparator.nullsLast(Comparator.naturalOrder())));
+        }
+
         model.addAttribute("actors", actors);
         model.addAttribute("pageTitle", "Danh sách diễn viên");
 
-        return "admin/list-actor"; // Đổi từ "actors/list" thành "admin/list-actor"
+        return "admin/list-actor";
     }
 
     // Chi tiết diễn viên
@@ -37,15 +47,16 @@ public class ActorController {
     public String getActorDetail(@PathVariable Integer id, Model model) {
         ActorDTO actor = actorService.getActorById(id);
         if (actor == null) {
-            return "redirect:/admin/actors"; // Cập nhật redirect path
+            return "redirect:/admin/actors";
         }
 
         List<MovieDTO> movies = movieService.getMoviesByActor(id);
 
         model.addAttribute("actor", actor);
         model.addAttribute("movies", movies);
+        model.addAttribute("pageTitle", "Chi tiết diễn viên - " + actor.getActorName());
 
-        return "admin/actor-detail"; // Đổi từ "actors/detail" thành "admin/actor-detail"
+        return "admin/detail-actor";
     }
 
     // Tìm kiếm diễn viên
@@ -61,31 +72,216 @@ public class ActorController {
             actors = actorService.getAllActors();
         }
 
+        // Sắp xếp theo ID tăng dần
+        if (actors != null) {
+            actors.sort(Comparator.comparing(ActorDTO::getActorId, Comparator.nullsLast(Comparator.naturalOrder())));
+        }
+
         model.addAttribute("actors", actors);
         model.addAttribute("pageTitle", pageTitle);
         model.addAttribute("keyword", keyword);
 
-        return "admin/list-actor"; // Đổi từ "actors/list" thành "admin/list-actor"
+        return "admin/list-actor";
     }
 
-    // Thêm method để hiển thị form thêm actor mới
+    // Hiển thị form thêm actor mới
     @GetMapping("/add")
     public String addActorForm(Model model) {
+        ActorDTO actor = new ActorDTO(); // Tạo object rỗng cho form
+
+        // FIXED: Lấy tất cả phim từ database
+        List<MovieDTO> allMovies = movieService.getAllMovies(); // Hoặc getAllActiveMovies() nếu có
+
+        // DEBUG: Kiểm tra dữ liệu phim
+        System.out.println("DEBUG - Loading " + (allMovies != null ? allMovies.size() : 0) + " movies for actor form");
+        if (allMovies != null && !allMovies.isEmpty()) {
+            System.out.println("DEBUG - First movie: " + allMovies.get(0).getMovieName());
+        }
+
+        model.addAttribute("actor", actor);
+        model.addAttribute("allMovies", allMovies); // Thêm danh sách phim
+        model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Thêm diễn viên mới");
-        return "admin/add-actor";
+
+        return "admin/form-actor";
     }
 
-    // Thêm method để xử lý thêm actor (có thể implement sau)
+    // FIXED: Xử lý thêm actor mới với movies
     @PostMapping("/add")
-    public String addActor(@ModelAttribute ActorDTO actorDTO, Model model) {
+    public String addActor(@ModelAttribute ActorDTO actorDTO,
+                           @RequestParam("imageFile") MultipartFile imageFile,
+                           @RequestParam(value = "selectedMovies", required = false) String selectedMovies,
+                           Model model,
+                           RedirectAttributes redirectAttributes) {
         try {
-            // Implement logic thêm actor
-            // actorService.saveActor(actorDTO);
-            model.addAttribute("success", "Thêm diễn viên thành công!");
+            // Validate tên diễn viên
+            if (actorDTO.getActorName() == null || actorDTO.getActorName().trim().isEmpty()) {
+                throw new IllegalArgumentException("Tên diễn viên không được để trống");
+            }
+
+            // Xử lý upload file ảnh (nếu có)
+            if (imageFile != null && !imageFile.isEmpty()) {
+                // TODO: Implement file upload service
+                // String imagePath = fileUploadService.uploadActorImage(imageFile);
+                // actorDTO.setImage(imagePath);
+
+                // Tạm thời set default image
+                actorDTO.setImage("/images/default-actor.png");
+            } else {
+                // Set default image nếu không upload
+                actorDTO.setImage("/images/default-actor.png");
+            }
+
+            // Lưu actor trước
+            ActorDTO savedActor = actorService.saveActor(actorDTO);
+
+            // FIXED: Xử lý danh sách phim đã chọn
+            if (selectedMovies != null && !selectedMovies.trim().isEmpty()) {
+                List<Integer> movieIds = Arrays.stream(selectedMovies.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toList());
+
+                // Cập nhật quan hệ Actor-Movie
+                actorService.updateActorMovies(savedActor.getActorId(), movieIds);
+            }
+
+            redirectAttributes.addFlashAttribute("success", "Thêm diễn viên thành công!");
+            return "redirect:/admin/actors";
+
+        } catch (Exception e) {
+            // Lấy lại danh sách phim khi có lỗi
+            List<MovieDTO> allMovies = movieService.getAllMovies();
+
+            model.addAttribute("actor", actorDTO);
+            model.addAttribute("allMovies", allMovies);
+            model.addAttribute("isEdit", false);
+            model.addAttribute("pageTitle", "Thêm diễn viên mới");
+            model.addAttribute("error", "Có lỗi xảy ra khi thêm diễn viên: " + e.getMessage());
+
+            return "admin/form-actor";
+        }
+    }
+
+    // Hiển thị form chỉnh sửa actor
+    @GetMapping("/edit/{id}")
+    public String editActorForm(@PathVariable Integer id, Model model) {
+        ActorDTO actor = actorService.getActorById(id);
+        if (actor == null) {
+            return "redirect:/admin/actors";
+        }
+
+        // FIXED: Lấy tất cả phim và phim hiện tại của actor
+        List<MovieDTO> allMovies = movieService.getAllMovies();
+        List<MovieDTO> actorMovies = movieService.getMoviesByActor(id);
+
+        // DEBUG: Kiểm tra dữ liệu
+        System.out.println("DEBUG - Edit form: " + (allMovies != null ? allMovies.size() : 0) + " total movies");
+        System.out.println("DEBUG - Actor movies: " + (actorMovies != null ? actorMovies.size() : 0) + " movies");
+
+        // Tạo danh sách ID phim hiện tại
+        List<Integer> currentMovieIds = actorMovies.stream()
+                .map(MovieDTO::getMovieId)
+                .collect(Collectors.toList());
+
+        model.addAttribute("actor", actor);
+        model.addAttribute("allMovies", allMovies);
+        model.addAttribute("currentMovieIds", currentMovieIds);
+        model.addAttribute("isEdit", true);
+        model.addAttribute("pageTitle", "Chỉnh sửa diễn viên - " + actor.getActorName());
+
+        return "admin/form-actor";
+    }
+
+    // FIXED: Xử lý cập nhật actor với movies
+    @PostMapping("/edit/{id}")
+    public String updateActor(@PathVariable Integer id,
+                              @ModelAttribute ActorDTO actorDTO,
+                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
+                              @RequestParam(value = "selectedMovies", required = false) String selectedMovies,
+                              Model model,
+                              RedirectAttributes redirectAttributes) {
+        try {
+            // Đảm bảo ID được set đúng
+            actorDTO.setActorId(id);
+
+            // Validate tên diễn viên
+            if (actorDTO.getActorName() == null || actorDTO.getActorName().trim().isEmpty()) {
+                throw new IllegalArgumentException("Tên diễn viên không được để trống");
+            }
+
+            // Xử lý upload file ảnh mới (nếu có)
+            if (imageFile != null && !imageFile.isEmpty()) {
+                // TODO: Implement file upload service
+                // String imagePath = fileUploadService.uploadActorImage(imageFile);
+                // actorDTO.setImage(imagePath);
+            }
+            // Nếu không có file mới, giữ nguyên ảnh cũ (đã có trong actorDTO từ form)
+
+            // Cập nhật thông tin actor
+            ActorDTO updatedActor = actorService.updateActor(actorDTO);
+
+            // FIXED: Xử lý cập nhật danh sách phim
+            List<Integer> movieIds = null;
+            if (selectedMovies != null && !selectedMovies.trim().isEmpty()) {
+                movieIds = Arrays.stream(selectedMovies.split(","))
+                        .map(String::trim)
+                        .filter(s -> !s.isEmpty())
+                        .map(Integer::parseInt)
+                        .collect(Collectors.toList());
+            }
+
+            // Cập nhật quan hệ Actor-Movie (có thể là danh sách rỗng để xóa tất cả)
+            actorService.updateActorMovies(id, movieIds != null ? movieIds : List.of());
+
+            redirectAttributes.addFlashAttribute("success", "Cập nhật diễn viên thành công!");
+            return "redirect:/admin/actors/" + id;
+
+        } catch (Exception e) {
+            // Lấy lại dữ liệu khi có lỗi
+            List<MovieDTO> allMovies = movieService.getAllMovies();
+            List<MovieDTO> actorMovies = movieService.getMoviesByActor(id);
+            List<Integer> currentMovieIds = actorMovies.stream()
+                    .map(MovieDTO::getMovieId)
+                    .collect(Collectors.toList());
+
+            model.addAttribute("actor", actorDTO);
+            model.addAttribute("allMovies", allMovies);
+            model.addAttribute("currentMovieIds", currentMovieIds);
+            model.addAttribute("isEdit", true);
+            model.addAttribute("pageTitle", "Chỉnh sửa diễn viên - " + actorDTO.getActorName());
+            model.addAttribute("error", "Có lỗi xảy ra khi cập nhật diễn viên: " + e.getMessage());
+
+            return "admin/edit-actor";
+        }
+    }
+
+    // Xóa actor
+    @PostMapping("/delete/{id}")
+    public String deleteActor(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+        try {
+            ActorDTO actor = actorService.getActorById(id);
+            if (actor == null) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy diễn viên!");
+                return "redirect:/admin/actors";
+            }
+
+            // Kiểm tra xem diễn viên có đang tham gia phim nào không
+            List<MovieDTO> movies = movieService.getMoviesByActor(id);
+            if (movies != null && !movies.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error",
+                        "Không thể xóa diễn viên đang tham gia " + movies.size() + " phim!");
+                return "redirect:/admin/actors/" + id;
+            }
+
+             actorService.deleteActor(id);
+
+            redirectAttributes.addFlashAttribute("success", "Xóa diễn viên thành công!");
             return "redirect:/admin/actors";
         } catch (Exception e) {
-            model.addAttribute("error", "Có lỗi xảy ra khi thêm diễn viên!");
-            return "admin/add-actor";
+            redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi xóa diễn viên: " + e.getMessage());
+            return "redirect:/admin/actors/" + id;
         }
     }
 }
