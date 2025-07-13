@@ -440,39 +440,6 @@
             opacity: 0.5;
         }
 
-        .pagination {
-            justify-content: center;
-            margin-top: 24px;
-        }
-
-        .page-link {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            padding: 8px 12px;
-            margin: 0 2px;
-            border-radius: 6px;
-            transition: all 0.2s ease;
-        }
-
-        .page-link:hover {
-            background: var(--primary-blue);
-            border-color: var(--primary-blue);
-            color: white;
-        }
-
-        .page-item.active .page-link {
-            background: var(--primary-blue);
-            border-color: var(--primary-blue);
-            color: white;
-        }
-
-        .page-item.disabled .page-link {
-            background: var(--card-bg);
-            border-color: var(--border-color);
-            color: var(--text-muted);
-        }
-
         .showing-info {
             color: var(--text-secondary);
             font-size: 0.9rem;
@@ -596,9 +563,9 @@
                     <select class="form-select" name="genreId">
                         <option value="">All Categories</option>
                         <option th:each="genre : ${genres}"
-                                th:value="${genre.genreId}"
+                                th:value="${genre.genreID}"
                                 th:text="${genre.genreName}"
-                                th:selected="${genre.genreId == selectedGenreId}">
+                                th:selected="${genre.genreID == selectedGenreId}">
                         </option>
                     </select>
                 </div>
@@ -637,7 +604,7 @@
                     <span th:if="${selectedGenreId != null}" class="filter-badge">
                             <i class="fas fa-tags"></i>
                             Thể loại:
-                            <span th:each="genre : ${genres}" th:if="${genre.genreId == selectedGenreId}" th:text="${genre.genreName}"></span>
+                            <span th:each="genre : ${genres}" th:if="${genre.genreID == selectedGenreId}" th:text="${genre.genreName}"></span>
                         </span>
 
                     <span th:if="${selectedStatus != null and !#strings.isEmpty(selectedStatus)}" class="filter-badge">
@@ -665,7 +632,6 @@
             <table class="table">
                 <thead>
                 <tr>
-                    <th>ID</th>
                     <th>Image</th>
                     <th>Movie Name</th>
                     <th>Genres</th>
@@ -678,7 +644,6 @@
                 </thead>
                 <tbody>
                 <tr th:each="movie : ${movies}">
-                    <td th:text="${movie.movieId}">1</td>
                     <td>
                         <img th:src="${movie.image}" th:alt="${movie.movieName}"
                              src="https://via.placeholder.com/60x90/4285f4/ffffff?text=Movie"
@@ -720,13 +685,12 @@
                             <a th:href="@{/movies/{id}(id=${movie.movieId})}" class="btn-action btn-view" title="View Details">
                                 <i class="fas fa-eye"></i>
                             </a>
-
                         </div>
                     </td>
                 </tr>
                 <!-- No results message -->
                 <tr th:if="${#lists.isEmpty(movies)}">
-                    <td colspan="9" class="no-results">
+                    <td colspan="8" class="no-results">
                         <i class="fas fa-search"></i>
                         <p>No movies found matching your criteria</p>
                         <small>Try adjusting your search filters</small>
@@ -736,27 +700,6 @@
             </table>
         </div>
     </div>
-
-    <!-- Pagination -->
-    <nav>
-        <ul class="pagination">
-            <li class="page-item disabled">
-                <span class="page-link">Previous</span>
-            </li>
-            <li class="page-item active">
-                <span class="page-link">1</span>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="#">2</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="#">3</a>
-            </li>
-            <li class="page-item">
-                <a class="page-link" href="#">Next</a>
-            </li>
-        </ul>
-    </nav>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>

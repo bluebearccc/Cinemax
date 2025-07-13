@@ -11,7 +11,7 @@ import java.time.format.DateTimeFormatter;
 @NoArgsConstructor
 @AllArgsConstructor
 public class VoucherDTO {
-    private Integer promotionId;
+    private Integer promotionID;
     private String promotionCode;
     private Integer discount;
     private LocalDateTime startTime;

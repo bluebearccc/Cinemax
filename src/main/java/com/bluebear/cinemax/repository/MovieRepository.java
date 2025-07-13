@@ -2,6 +2,8 @@ package com.bluebear.cinemax.repository;
 
 import com.bluebear.cinemax.entity.Movie;
 import com.bluebear.cinemax.enumtype.Movie_Status;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -370,4 +372,31 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             "GROUP BY g.genreID, g.genreName " +
             "ORDER BY COUNT(DISTINCT m) DESC")
     List<Object[]> getMovieStatisticsByGenre();
+    /**
+     * Tìm phim theo status với phân trang
+     */
+    @Query("SELECT m FROM Movie m WHERE m.status = :status")
+    Page<Movie> findByStatus(@Param("status") Movie_Status status, Pageable pageable);
+
+    /**
+     * Tìm phim theo tên và status với phân trang
+     */
+    @Query("SELECT m FROM Movie m WHERE m.movieName LIKE %:keyword% AND m.status = :status")
+    Page<Movie> findByMovieNameContainingIgnoreCaseAndStatus(
+            @Param("keyword") String keyword,
+            @Param("status") Movie_Status status,
+            Pageable pageable);
+
+    /**
+     * Tìm phim theo danh sách ID và status với phân trang
+     */
+    @Query("SELECT m FROM Movie m WHERE m.movieID IN :movieIds AND m.status = :status")
+    Page<Movie> findByMovieIDInAndStatus(
+            @Param("movieIds") List<Integer> movieIds,
+            @Param("status") Movie_Status status,
+            Pageable pageable);
+
+
+
+
 }

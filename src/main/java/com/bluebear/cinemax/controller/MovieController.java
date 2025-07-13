@@ -9,6 +9,7 @@ import com.bluebear.cinemax.service.ActorService;
 import com.bluebear.cinemax.service.GenreService;
 import com.bluebear.cinemax.service.MovieService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -45,7 +46,7 @@ public class MovieController {
      */
     @GetMapping("")
     public String getAllMovies(Model model) {
-        List<MovieDTO> movies = movieService.getAllActiveMovies();
+        List<MovieDTO> movies = movieService.getAllMovies();
         List<Genre> genres = genreService.getAllGenres();
 
         model.addAttribute("movies", movies);
@@ -250,6 +251,7 @@ public class MovieController {
      * Hiển thị form chỉnh sửa phim - FIXED
      */
     @GetMapping("/{id}/edit")
+    @Transactional
     public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         System.out.println("=== SHOW EDIT FORM ===");
         System.out.println("Movie ID: " + id);

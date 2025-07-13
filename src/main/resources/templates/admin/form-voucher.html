@@ -549,7 +549,7 @@
             <span th:text="${isEdit} ? 'Chỉnh Sửa Thông Tin Voucher' : 'Tạo Voucher Mới'">Tạo Voucher Mới</span>
         </h3>
 
-        <form th:action="${isEdit} ? @{/admin/vouchers/edit/{id}(id=${voucher.promotionId})} : @{/admin/vouchers/add}"
+        <form th:action="${isEdit} ? @{/admin/vouchers/edit/{id}(id=${voucher.promotionID})} : @{/admin/vouchers/add}"
               method="post" th:object="${voucher}" id="voucherForm" novalidate>
 
             <div class="row">
@@ -771,14 +771,14 @@
             const endTimeValue = hiddenEndTime.value;
 
             // Không tự động fill, để user quyết định có muốn thay đổi hay không
-            if (startTimeValue && document.querySelector('[th\\:field="*{promotionId}"]')) {
+            if (startTimeValue && document.querySelector('[th\\:field="*{promotionID}"]')) {
                 // Chỉ hiển thị placeholder với giá trị hiện tại
                 const startDateTime = formatDateForInput(startTimeValue);
                 startDateInput.placeholder = `Hiện tại: ${startDateTime.date}`;
                 startTimeInput.placeholder = `Hiện tại: ${startDateTime.time}`;
             }
 
-            if (endTimeValue && document.querySelector('[th\\:field="*{promotionId}"]')) {
+            if (endTimeValue && document.querySelector('[th\\:field="*{promotionID}"]')) {
                 const endDateTime = formatDateForInput(endTimeValue);
                 endDateInput.placeholder = `Hiện tại: ${endDateTime.date}`;
                 endTimeInput.placeholder = `Hiện tại: ${endDateTime.time}`;

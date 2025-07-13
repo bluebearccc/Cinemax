@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller
-@RequestMapping("/actors")
+@RequestMapping("/admin/actors") // Đổi từ "/actors" thành "/admin/actors"
 public class ActorController {
 
     @Autowired
@@ -29,7 +29,7 @@ public class ActorController {
         model.addAttribute("actors", actors);
         model.addAttribute("pageTitle", "Danh sách diễn viên");
 
-        return "actors/list";
+        return "admin/list-actor"; // Đổi từ "actors/list" thành "admin/list-actor"
     }
 
     // Chi tiết diễn viên
@@ -37,7 +37,7 @@ public class ActorController {
     public String getActorDetail(@PathVariable Integer id, Model model) {
         ActorDTO actor = actorService.getActorById(id);
         if (actor == null) {
-            return "redirect:/actors";
+            return "redirect:/admin/actors"; // Cập nhật redirect path
         }
 
         List<MovieDTO> movies = movieService.getMoviesByActor(id);
@@ -45,7 +45,7 @@ public class ActorController {
         model.addAttribute("actor", actor);
         model.addAttribute("movies", movies);
 
-        return "actors/detail";
+        return "admin/actor-detail"; // Đổi từ "actors/detail" thành "admin/actor-detail"
     }
 
     // Tìm kiếm diễn viên
@@ -65,6 +65,27 @@ public class ActorController {
         model.addAttribute("pageTitle", pageTitle);
         model.addAttribute("keyword", keyword);
 
-        return "actors/list";
+        return "admin/list-actor"; // Đổi từ "actors/list" thành "admin/list-actor"
+    }
+
+    // Thêm method để hiển thị form thêm actor mới
+    @GetMapping("/add")
+    public String addActorForm(Model model) {
+        model.addAttribute("pageTitle", "Thêm diễn viên mới");
+        return "admin/add-actor";
+    }
+
+    // Thêm method để xử lý thêm actor (có thể implement sau)
+    @PostMapping("/add")
+    public String addActor(@ModelAttribute ActorDTO actorDTO, Model model) {
+        try {
+            // Implement logic thêm actor
+            // actorService.saveActor(actorDTO);
+            model.addAttribute("success", "Thêm diễn viên thành công!");
+            return "redirect:/admin/actors";
+        } catch (Exception e) {
+            model.addAttribute("error", "Có lỗi xảy ra khi thêm diễn viên!");
+            return "admin/add-actor";
+        }
     }
 }

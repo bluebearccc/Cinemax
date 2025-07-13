@@ -11,8 +11,10 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/admin")
@@ -93,6 +95,94 @@ public class DashboardController {
         }
 
         return "admin/index"; // Trả về template admin/index.html
+    }
+
+    /**
+     * Trang Movies trong Admin - THÊM METHOD MỚI
+     */
+    @GetMapping("/movies")
+    public String moviesPage(@RequestParam(required = false) String keyword,
+                             @RequestParam(required = false) Integer genreId,
+                             @RequestParam(required = false) String status,
+                             Model model) {
+        try {
+            List<MovieDTO> movies;
+            String pageTitle = "Quản lý phim";
+            StringBuilder titleBuilder = new StringBuilder();
+
+            // Bước 1: Lọc theo Status
+            if (status != null && !status.trim().isEmpty()) {
+                if ("Active".equals(status)) {
+                    movies = movieService.getAllActiveMovies();
+                    titleBuilder.append("Phim Active");
+                } else if ("Removed".equals(status)) {
+                    movies = movieService.getAllMovies().stream()
+                            .filter(movie -> "Removed".equals(movie.getStatus()))
+                            .collect(Collectors.toList());
+                    titleBuilder.append("Phim Removed");
+                } else {
+                    movies = movieService.getAllMovies();
+                    titleBuilder.append("Tất cả phim");
+                }
+            } else {
+                movies = movieService.getAllActiveMovies(); // Mặc định chỉ hiển thị phim Active
+                titleBuilder.append("Phim đang hoạt động");
+            }
+
+            // Bước 2: Lọc theo tên phim (keyword)
+            if (keyword != null && !keyword.trim().isEmpty()) {
+                movies = movies.stream()
+                        .filter(movie -> movie.getMovieName().toLowerCase()
+                                .contains(keyword.toLowerCase()))
+                        .collect(Collectors.toList());
+
+                if (titleBuilder.length() > 0) titleBuilder.append(" | ");
+                titleBuilder.append("Tìm kiếm: \"").append(keyword).append("\"");
+            }
+
+            // Bước 3: Lọc theo thể loại
+            if (genreId != null) {
+                movies = movies.stream()
+                        .filter(movie -> movie.getGenres() != null &&
+                                movie.getGenres().stream().anyMatch(genre -> {
+                                    Genre g = genreService.getGenreById(genreId);
+                                    return g != null && genre.equals(g.getGenreName());
+                                }))
+                        .collect(Collectors.toList());
+
+                Genre genre = genreService.getGenreById(genreId);
+                if (genre != null) {
+                    if (titleBuilder.length() > 0) titleBuilder.append(" | ");
+                    titleBuilder.append("Thể loại: ").append(genre.getGenreName());
+                }
+            }
+
+            // Cập nhật page title
+            if (titleBuilder.length() > 0) {
+                pageTitle = titleBuilder.toString();
+            }
+
+            List<Genre> allGenres = genreService.getAllGenres();
+
+            model.addAttribute("movies", movies);
+            model.addAttribute("genres", allGenres);
+            model.addAttribute("pageTitle", pageTitle);
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("selectedGenreId", genreId);
+            model.addAttribute("selectedStatus", status);
+            model.addAttribute("resultCount", movies.size());
+
+            return "admin/movies"; // Trả về template admin/movies.html
+
+        } catch (Exception e) {
+            System.err.println("Error in admin movies page: " + e.getMessage());
+            e.printStackTrace();
+            model.addAttribute("error", "Có lỗi xảy ra khi tải danh sách phim");
+            model.addAttribute("movies", List.of());
+            model.addAttribute("genres", List.of());
+            model.addAttribute("pageTitle", "Quản lý phim - Lỗi");
+            return "admin/movies";
+        }
     }
 
     /**

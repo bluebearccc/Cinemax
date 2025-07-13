@@ -8,877 +8,416 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #4285f4;
-            --primary-light: #5a9bf8;
-            --primary-dark: #3367d6;
-            --accent-blue: #1976d2;
-            --success-green: #34a853;
-            --warning-orange: #fbbc04;
-            --danger-red: #ea4335;
-            --dark-bg: #1a1a1a;
-            --darker-bg: #0f0f0f;
-            --card-bg: #2d2d2d;
-            --card-hover: #3a3a3a;
-            --border-color: #404040;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-muted: #808080;
-            --sidebar-bg: #1e1e1e;
-            --sidebar-hover: #333333;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-bg: #343a40;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
         }
 
         body {
-            background: var(--dark-bg);
+            background-color: var(--light-bg);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
         }
 
-        .sidebar {
-            background: var(--sidebar-bg);
-            min-height: 100vh;
-            width: 260px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            border-right: 1px solid var(--border-color);
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .sidebar-header h5 {
-            color: var(--text-primary);
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin: 0;
-        }
-
-        .sidebar-header .fa-film {
-            color: var(--primary-blue);
-            margin-right: 10px;
-        }
-
-        .sidebar-nav {
-            padding: 20px 0;
-        }
-
-        .nav-link {
-            color: var(--text-secondary);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: none;
-            background: none;
-            margin: 2px 0;
-        }
-
-        .nav-link:hover {
-            color: var(--text-primary);
-            background: var(--sidebar-hover);
-        }
-
-        .nav-link.active {
-            color: var(--primary-blue);
-            background: rgba(66, 133, 244, 0.1);
-            border-right: 3px solid var(--primary-blue);
-        }
-
-        .nav-link i {
-            width: 20px;
-            margin-right: 12px;
-            font-size: 1rem;
-        }
-
-        .main-content {
-            margin-left: 260px;
-            padding: 24px;
-            min-height: 100vh;
-            background: var(--dark-bg);
-        }
-
-        .header-section {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-content h2 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--text-primary);
-        }
-
-        .breadcrumb-text {
-            color: var(--text-secondary);
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-        }
-
-        .btn-primary {
-            background: var(--primary-blue);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            color: white;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-warning {
-            background: var(--warning-orange);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            color: white;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-warning:hover {
-            background: #e8a317;
-            transform: translateY(-1px);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-secondary {
-            background: none;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 20px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-            text-decoration: none;
-        }
-
-        .btn-danger {
-            background: var(--danger-red);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            color: white;
-            font-weight: 500;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-danger:hover {
-            background: #d33b2c;
-            transform: translateY(-1px);
-            color: white;
-            text-decoration: none;
-        }
-
-        .detail-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 24px;
-            margin-bottom: 24px;
-        }
-
-        .detail-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
-            transition: all 0.3s ease;
-        }
-
-        .detail-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-        }
-
-        .card-title {
-            font-size: 1.25rem;
-            font-weight: 600;
+        .navbar {
+            background-color: var(--dark-bg) !important;
             margin-bottom: 20px;
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            gap: 10px;
         }
 
-        .card-title i {
-            color: var(--primary-blue);
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
         }
 
-        .detail-item {
-            margin-bottom: 16px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid var(--border-color);
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
 
-        .detail-item:last-child {
-            margin-bottom: 0;
-            padding-bottom: 0;
-            border-bottom: none;
-        }
-
-        .detail-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            margin-bottom: 8px;
-            font-weight: 500;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .detail-value {
-            font-size: 1rem;
-            color: var(--text-primary);
-            font-weight: 600;
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
         }
 
         .voucher-code {
-            font-family: 'Courier New', monospace;
-            font-weight: 700;
-            color: var(--primary-blue);
-            background: rgba(66, 133, 244, 0.1);
-            padding: 12px 20px;
-            border-radius: 8px;
-            font-size: 1.4rem;
+            background-color: #e9ecef;
+            border: 2px dashed var(--primary-color);
+            padding: 15px;
             text-align: center;
-            border: 2px dashed var(--primary-blue);
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
             letter-spacing: 2px;
-            text-transform: uppercase;
         }
 
-        .discount-value {
-            font-size: 3rem;
-            font-weight: 700;
-            color: var(--success-green);
-            text-align: center;
-            margin: 10px 0;
+        .discount-badge {
+            background-color: var(--success-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: inline-block;
         }
 
         .status-badge {
-            padding: 10px 20px;
-            border-radius: 25px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
             font-size: 0.9rem;
-            font-weight: 600;
-            text-align: center;
-            display: inline-block;
-            width: 100%;
-            text-transform: uppercase;
-            letter-spacing: 1px;
         }
 
-        .status-available {
-            background: rgba(52, 168, 83, 0.2);
-            color: var(--success-green);
-            border: 2px solid var(--success-green);
+        .status-active {
+            background-color: var(--success-color);
+            color: white;
         }
 
         .status-expired {
-            background: rgba(234, 67, 53, 0.2);
-            color: var(--danger-red);
-            border: 2px solid var(--danger-red);
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .status-pending {
+            background-color: var(--warning-color);
+            color: #212529;
+        }
+
+        .info-row {
+            border-bottom: 1px solid #eee;
+            padding: 12px 0;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            font-weight: bold;
+            color: #666;
+        }
+
+        .info-value {
+            color: #333;
+        }
+
+        .btn-group-custom {
+            gap: 10px;
         }
 
         .quantity-display {
-            text-align: center;
             font-size: 2rem;
-            font-weight: 700;
-            color: var(--warning-orange);
-            margin: 10px 0;
-        }
-
-        .date-value {
-            background: var(--darker-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px;
-            font-family: 'Courier New', monospace;
-        }
-
-        .date-main {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .date-time {
-            font-size: 1rem;
-            color: var(--primary-blue);
-            font-weight: 600;
-        }
-
-        .validity-indicator {
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            padding: 24px;
+            font-weight: bold;
+            color: var(--warning-color);
             text-align: center;
-            margin-top: 20px;
-            transition: all 0.3s ease;
         }
 
-        .validity-available {
-            border-color: var(--success-green);
-            background: rgba(52, 168, 83, 0.05);
-            box-shadow: 0 0 20px rgba(52, 168, 83, 0.1);
+        .date-display {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid var(--primary-color);
         }
 
-        .validity-expired {
-            border-color: var(--danger-red);
-            background: rgba(234, 67, 53, 0.05);
-            box-shadow: 0 0 20px rgba(234, 67, 53, 0.1);
-        }
-
-        .validity-icon {
-            font-size: 3rem;
-            margin-bottom: 12px;
-        }
-
-        .validity-text {
-            font-weight: 700;
-            margin-bottom: 8px;
-            font-size: 1.2rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .validity-desc {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            margin-bottom: 16px;
-        }
-
-        .alert {
+        .stats-card {
+            background-color: #f8f9fa;
+            padding: 15px;
             border-radius: 8px;
-            margin-bottom: 20px;
-        }
-
-        .alert-success {
-            background: rgba(52, 168, 83, 0.1);
-            border: 1px solid rgba(52, 168, 83, 0.3);
-            color: var(--success-green);
-        }
-
-        .alert-danger {
-            background: rgba(234, 67, 53, 0.1);
-            border: 1px solid rgba(234, 67, 53, 0.3);
-            color: var(--danger-red);
-        }
-
-        .usage-stats {
-            background: var(--darker-bg);
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 16px;
-        }
-
-        .usage-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 8px;
-        }
-
-        .usage-item:last-child {
-            margin-bottom: 0;
-        }
-
-        .usage-label {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
-
-        .usage-value {
-            color: var(--text-primary);
-            font-weight: 600;
-        }
-
-        .progress-bar {
-            width: 100%;
-            height: 8px;
-            background: var(--border-color);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-top: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--success-green), var(--primary-blue));
-            transition: width 0.3s ease;
-        }
-
-        .info-box {
-            background: rgba(66, 133, 244, 0.1);
-            border: 1px solid rgba(66, 133, 244, 0.3);
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 20px;
-        }
-
-        .info-box-title {
-            color: var(--primary-blue);
-            font-weight: 600;
-            margin-bottom: 8px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .info-box-content {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
-        .voucher-preview {
-            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
-            border-radius: 12px;
-            padding: 20px;
-            color: white;
             text-align: center;
-            margin-top: 20px;
-            position: relative;
-            overflow: hidden;
         }
 
-        .voucher-preview::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: repeating-linear-gradient(
-                    45deg,
-                    transparent,
-                    transparent 10px,
-                    rgba(255, 255, 255, 0.1) 10px,
-                    rgba(255, 255, 255, 0.1) 20px
-            );
-            animation: shimmer 3s linear infinite;
+        .stats-number {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
         }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%); }
-            100% { transform: translateX(100%) translateY(100%); }
-        }
-
-        .voucher-preview-content {
-            position: relative;
-            z-index: 1;
-        }
-
-        .voucher-title {
-            font-size: 1.2rem;
-            font-weight: 700;
-            margin-bottom: 10px;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-        }
-
-        .voucher-code-preview {
-            font-family: 'Courier New', monospace;
-            font-size: 1.8rem;
-            font-weight: 900;
-            letter-spacing: 3px;
-            margin: 15px 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .voucher-discount-preview {
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: #FFD700;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        .stats-label {
+            color: #666;
+            font-size: 0.9rem;
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 16px;
-            }
-
-            .header-section {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .action-buttons {
+            .btn-group-custom {
                 flex-direction: column;
             }
 
             .voucher-code {
                 font-size: 1.2rem;
-                letter-spacing: 1px;
-            }
-
-            .discount-value {
-                font-size: 2.5rem;
-            }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.6s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
             }
         }
     </style>
 </head>
 <body>
-<!-- Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <h5>
-            <i class="fas fa-film"></i>
-            BlueBear Cinema
-        </h5>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/admin">
+            <i class="fas fa-film"></i> BlueBear Cinema
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/admin">Dashboard</a>
+            <a class="nav-link" href="/admin/movies">Movies</a>
+            <a class="nav-link" href="/admin/actors">Actors</a>
+            <a class="nav-link active" href="/admin/vouchers">Vouchers</a>
+        </div>
     </div>
+</nav>
 
-    <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin">
-            <i class="fas fa-home"></i>Dashboard
-        </a>
-        <a class="nav-link" href="/admin/movies">
-            <i class="fas fa-film"></i>Movies
-        </a>
-        <a class="nav-link" href="/admin/actors">
-            <i class="fas fa-users"></i>Actors
-        </a>
-        <a class="nav-link active" href="/admin/vouchers">
-            <i class="fas fa-ticket-alt"></i>Vouchers
-        </a>
-    </nav>
-</div>
-
-<!-- Main Content -->
-<div class="main-content">
+<div class="container">
     <!-- Alert Messages -->
     <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="fas fa-check-circle"></i>
         <span th:text="${success}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
     <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
-        <i class="fas fa-exclamation-circle me-2"></i>
+        <i class="fas fa-exclamation-circle"></i>
         <span th:text="${error}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
     <!-- Header -->
-    <div class="header-section fade-in">
-        <div class="header-content">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
             <h2>Chi Tiết Voucher</h2>
-            <p class="breadcrumb-text">Dashboard > Vouchers > <span th:text="${voucher.promotionCode}">SAVE20</span></p>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/vouchers">Vouchers</a></li>
+                    <li class="breadcrumb-item active" th:text="${voucher.promotionCode}">SAVE20</li>
+                </ol>
+            </nav>
         </div>
-        <div class="action-buttons">
-            <a href="/admin/vouchers" class="btn-secondary">
-                <i class="fas fa-arrow-left"></i>Quay Lại
+        <div class="btn-group-custom d-flex">
+            <a href="/admin/vouchers" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay Lại
             </a>
-            <a th:href="@{/admin/vouchers/edit/{id}(id=${voucher.promotionId})}" class="btn-warning">
-                <i class="fas fa-edit"></i>Chỉnh Sửa
+            <a th:href="@{/admin/vouchers/edit/{id}(id=${voucher.promotionID})}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh Sửa
             </a>
+            <!-- Only show delete button if voucher status is Expired -->
+            <button th:if="${voucher.status.name() == 'Expired'}"
+                    type="button"
+                    class="btn btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteModal">
+                <i class="fas fa-trash"></i> Xóa
+            </button>
         </div>
     </div>
 
-    <!-- Voucher Details -->
-    <div class="detail-grid fade-in">
+    <div class="row">
         <!-- Main Information -->
-        <div class="detail-card">
-            <h3 class="card-title">
-                <i class="fas fa-ticket-alt"></i>
-                Thông Tin Voucher
-            </h3>
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-ticket-alt"></i> Thông Tin Voucher
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="info-row">
+                                <div class="info-label">Mã Voucher</div>
+                                <div class="voucher-code mt-2" th:text="${voucher.promotionCode}">SAVE20</div>
+                            </div>
 
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-barcode"></i>
-                    Mã Khuyến Mãi
-                </div>
-                <div class="voucher-code" th:text="${voucher.promotionCode}">SAVE20</div>
-            </div>
+                            <div class="info-row">
+                                <div class="info-label">Giá Trị Giảm Giá</div>
+                                <div class="mt-2">
+                                    <span class="discount-badge" th:text="${voucher.discount + '%'}">20%</span>
+                                </div>
+                            </div>
 
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-percent"></i>
-                    Phần Trăm Giảm Giá
-                </div>
-                <div class="discount-value" th:text="${voucher.formattedDiscount}">20%</div>
-            </div>
+                            <div class="info-row">
+                                <div class="info-label">Số Lượng Còn Lại</div>
+                                <div class="quantity-display" th:text="${voucher.quantity}">100</div>
+                            </div>
+                        </div>
 
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-calendar-alt"></i>
-                    Ngày Bắt Đầu
-                </div>
-                <div class="date-value">
-                    <div class="date-main" th:text="${voucher.formattedStartDate}">15/01/2024</div>
-                    <div class="date-time" th:text="${'Lúc ' + voucher.formattedStartTimeOnly}">Lúc 10:00</div>
-                </div>
-            </div>
+                        <div class="col-md-6">
+                            <div class="info-row">
+                                <div class="info-label">Ngày Bắt Đầu</div>
+                                <div class="date-display mt-2">
+                                    <div th:text="${#temporals.format(voucher.startTime, 'dd/MM/yyyy HH:mm')}">15/01/2024 10:00</div>
+                                </div>
+                            </div>
 
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-calendar-times"></i>
-                    Ngày Kết Thúc
-                </div>
-                <div class="date-value">
-                    <div class="date-main" th:text="${voucher.formattedEndDate}">15/04/2024</div>
-                    <div class="date-time" th:text="${'Lúc ' + voucher.formattedEndTimeOnly}">Lúc 23:59</div>
-                </div>
-            </div>
+                            <div class="info-row">
+                                <div class="info-label">Ngày Kết Thúc</div>
+                                <div class="date-display mt-2">
+                                    <div th:text="${#temporals.format(voucher.endTime, 'dd/MM/yyyy HH:mm')}">15/04/2024 23:59</div>
+                                </div>
+                            </div>
 
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-hashtag"></i>
-                    Số Lượng Còn Lại
-                </div>
-                <div class="quantity-display" th:text="${voucher.quantity}">100</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" th:style="'width: ' + ${voucher.quantity > 0 ? (voucher.quantity * 100 / 100) : 0} + '%'"></div>
-                </div>
-            </div>
+                            <div class="info-row">
+                                <div class="info-label">Trạng Thái</div>
+                                <div class="mt-2">
+                                    <!-- Cách 1: Sử dụng trực tiếp enum status từ voucher -->
+                                    <div th:switch="${voucher.status.name()}">
+                                        <span th:case="'Available'" class="status-badge status-active">
+                                            <i class="fas fa-check-circle"></i> Đang Hoạt Động
+                                        </span>
+                                        <span th:case="'Expired'" class="status-badge status-expired">
+                                            <i class="fas fa-times-circle"></i> Đã Hết Hạn
+                                        </span>
+                                    </div>
 
-            <div class="detail-item">
-                <div class="detail-label">
-                    <i class="fas fa-toggle-on"></i>
-                    Trạng Thái
-                </div>
-                <div th:class="${voucher.status == 'Available'} ? 'status-badge status-available' : 'status-badge status-expired'"
-                     th:text="${voucher.status == 'Available'} ? 'Có Sẵn' : 'Hết Hạn'">Có Sẵn</div>
-            </div>
-
-            <!-- Usage Statistics -->
-            <div class="usage-stats">
-                <h5 style="color: var(--text-primary); margin-bottom: 12px;">
-                    <i class="fas fa-chart-bar"></i>
-                    Thống Kê Sử Dụng
-                </h5>
-                <div class="usage-item">
-                    <span class="usage-label">ID Voucher:</span>
-                    <span class="usage-value" th:text="${'#' + voucher.promotionId}">#001</span>
-                </div>
-                <div class="usage-item">
-                    <span class="usage-label">Thời Gian Còn Lại:</span>
-                    <span class="usage-value" th:if="${voucher.active}">Đang Hoạt Động</span>
-                    <span class="usage-value" th:if="${voucher.expired}" style="color: var(--danger-red);">Đã Hết Hạn</span>
-                    <span class="usage-value" th:if="${!voucher.active and !voucher.expired}" style="color: var(--warning-orange);">Chưa Bắt Đầu</span>
-                </div>
-                <div class="usage-item" th:if="${voucher.quantity != null}">
-                    <span class="usage-label">Tình Trạng:</span>
-                    <span class="usage-value" th:if="${voucher.quantity > 0}" style="color: var(--success-green);"
-                          th:text="${voucher.quantity + ' voucher còn lại'}">50 voucher còn lại</span>
-                    <span class="usage-value" th:if="${voucher.quantity == 0}" style="color: var(--danger-red);">Đã sử dụng hết</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Status & Validity -->
-        <div class="detail-card">
-            <h3 class="card-title">
-                <i class="fas fa-info-circle"></i>
-                Trạng Thái Hiệu Lực
-            </h3>
-
-            <!-- Validity Status for Available -->
-            <div th:if="${voucher.status == 'Available' and voucher.active}" class="validity-indicator validity-available">
-                <div class="validity-icon" style="color: var(--success-green);">
-                    <i class="fas fa-check-circle"></i>
-                </div>
-                <div class="validity-text" style="color: var(--success-green);">Có Sẵn & Hoạt Động</div>
-                <div class="validity-desc">Voucher này hiện có sẵn và có thể được sử dụng</div>
-                <div style="margin-top: 12px;">
-                    <span style="background: var(--success-green); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
-                        <i class="fas fa-thumbs-up"></i> Có Thể Sử Dụng
-                    </span>
-                </div>
-            </div>
-
-            <!-- Validity Status for Expired -->
-            <div th:if="${voucher.status == 'Expired' or voucher.expired}" class="validity-indicator validity-expired">
-                <div class="validity-icon" style="color: var(--danger-red);">
-                    <i class="fas fa-times-circle"></i>
-                </div>
-                <div class="validity-text" style="color: var(--danger-red);">Đã Hết Hạn</div>
-                <div class="validity-desc">Voucher này đã hết hạn và không thể sử dụng</div>
-                <div style="margin-top: 12px;">
-                    <span style="background: var(--danger-red); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
-                        <i class="fas fa-ban"></i> Không Thể Sử Dụng
-                    </span>
-                </div>
-            </div>
-
-            <!-- Validity Status for Available but not yet active -->
-            <div th:if="${voucher.status == 'Available' and !voucher.active and !voucher.expired}" class="validity-indicator validity-available">
-                <div class="validity-icon" style="color: var(--warning-orange);">
-                    <i class="fas fa-clock"></i>
-                </div>
-                <div class="validity-text" style="color: var(--warning-orange);">Chưa Bắt Đầu</div>
-                <div class="validity-desc">Voucher này có sẵn nhưng chưa đến thời gian sử dụng</div>
-                <div style="margin-top: 12px;">
-                    <span style="background: var(--warning-orange); color: white; padding: 4px 12px; border-radius: 12px; font-size: 0.8rem;">
-                        <i class="fas fa-hourglass-half"></i> Chờ Kích Hoạt
-                    </span>
-                </div>
-            </div>
-
-            <!-- Voucher Preview -->
-            <div class="voucher-preview">
-                <div class="voucher-preview-content">
-                    <div class="voucher-title">BlueBear Cinema</div>
-                    <div class="voucher-code-preview" th:text="${voucher.promotionCode}">SAVE20</div>
-                    <div class="voucher-discount-preview" th:text="${voucher.formattedDiscount}">20% OFF</div>
-                    <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">
-                        Áp dụng cho tất cả suất chiếu
+                                    <!-- Cách 2: Nếu muốn kiểm tra thêm thời gian thực tế -->
+                                    <!-- Uncomment phần này nếu muốn check theo thời gian thực
+                                    <div th:if="${#temporals.createNow().isAfter(voucher.endTime)}" class="status-badge status-expired">
+                                        <i class="fas fa-times-circle"></i> Đã Hết Hạn
+                                    </div>
+                                    <div th:if="${#temporals.createNow().isBefore(voucher.startTime)}" class="status-badge status-pending">
+                                        <i class="fas fa-clock"></i> Chưa Bắt Đầu
+                                    </div>
+                                    <div th:if="${#temporals.createNow().isAfter(voucher.startTime) and #temporals.createNow().isBefore(voucher.endTime)}" class="status-badge status-active">
+                                        <i class="fas fa-check-circle"></i> Đang Hoạt Động
+                                    </div>
+                                    -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <!-- Info Box -->
-            <div class="info-box">
-                <div class="info-box-title">
-                    <i class="fas fa-lightbulb"></i>
-                    Hướng Dẫn Sử Dụng
+            <!-- Usage Statistics -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-chart-bar"></i> Thống Kê Sử Dụng
                 </div>
-                <div class="info-box-content">
-                    • Nhập mã voucher khi thanh toán<br>
-                    • Giảm giá được áp dụng tự động<br>
-                    • Mỗi mã chỉ sử dụng được một lần<br>
-                    • Không áp dụng cùng với khuyến mãi khác
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-number" th:text="${originalQuantity}">100</div>
+                                <div class="stats-label">Tổng Ban Đầu</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-number" th:text="${usedQuantity}">0</div>
+                                <div class="stats-label">Đã Sử Dụng</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-number" th:text="${voucher.quantity}">100</div>
+                                <div class="stats-label">Còn Lại</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <div class="stats-number" th:text="${usagePercentage + '%'}">0%</div>
+                                <div class="stats-label">Tỷ Lệ Sử Dụng</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Information -->
+        <div class="col-lg-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i> Thông Tin Thêm
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <div class="info-label">ID Voucher</div>
+                        <div class="info-value" th:text="${'#' + voucher.promotionID}">#001</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">Loại Giảm Giá</div>
+                        <div class="info-value">Phần Trăm</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">Áp Dụng Cho</div>
+                        <div class="info-value">Tất Cả Suất Chiếu</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">Giới Hạn</div>
+                        <div class="info-value">Mỗi Khách Hàng 1 Lần</div>
+                    </div>
+
+                    <div class="info-row">
+                        <div class="info-label">Trạng Thái Hệ Thống</div>
+                        <div class="info-value">
+                            <span th:switch="${voucher.status.name()}">
+                                <span th:case="'Available'">Khả Dụng</span>
+                                <span th:case="'Expired'">Hết Hạn</span>
+                            </span>
+                        </div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Quick Actions -->
-            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
-                <h5 style="color: var(--text-primary); margin-bottom: 16px;">
-                    <i class="fas fa-bolt"></i>
-                    Thao Tác Nhanh
-                </h5>
-                <div class="d-grid gap-2">
-                    <button type="button" class="btn-primary w-100"
-                            th:data-voucher-code="${voucher.promotionCode}"
-                            onclick="copyToClipboard(this.getAttribute('data-voucher-code'))">
-                        <i class="fas fa-copy"></i>Sao Chép Mã Voucher
-                    </button>
-                    <button type="button" class="btn-danger w-100"
-                            th:data-voucher-id="${voucher.promotionId}"
-                            th:data-voucher-code="${voucher.promotionCode}"
-                            onclick="confirmDelete(this.getAttribute('data-voucher-id'), this.getAttribute('data-voucher-code'))">
-                        <i class="fas fa-trash"></i>Xóa Voucher
-                    </button>
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-lightbulb"></i> Hướng Dẫn
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            Nhập mã khi thanh toán để giảm giá
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            Mỗi mã chỉ sử dụng được 1 lần
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            Không thể hoàn lại sau khi sử dụng
+                        </li>
+                        <li>
+                            <i class="fas fa-check text-success"></i>
+                            Kiểm tra hạn sử dụng trước khi áp dụng
+                        </li>
+                    </ul>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
-<div class="modal fade" id="deleteModal" tabindex="-1">
+<!-- Delete Modal - Only shown when voucher is expired -->
+<div th:if="${voucher.status.name() == 'Expired'}" class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
-        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
-            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-                <h5 class="modal-title" style="color: var(--text-primary);">
-                    <i class="fas fa-exclamation-triangle"></i>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
                     Xác Nhận Xóa
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body" style="color: var(--text-primary);">
-                <div style="text-align: center; margin-bottom: 20px;">
-                    <i class="fas fa-trash-alt" style="font-size: 3rem; color: var(--danger-red); margin-bottom: 16px;"></i>
-                    <h5>Bạn có chắc chắn muốn xóa voucher này?</h5>
+            <div class="modal-body">
+                <p>Bạn có chắc chắn muốn xóa voucher <strong th:text="${voucher.promotionCode}">SAVE20</strong> không?</p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Hành động này không thể hoàn tác!
                 </div>
-                <div style="background: var(--darker-bg); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-                    <strong>Mã Voucher: <span id="deleteVoucherCode" style="color: var(--primary-blue);"></span></strong>
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Chỉ có thể xóa voucher đã hết hạn để đảm bảo tính toàn vẹn dữ liệu.
                 </div>
-                <p class="text-danger">
-                    <i class="fas fa-exclamation-circle"></i>
-                    <strong>Cảnh báo:</strong> Hành động này không thể hoàn tác!
-                </p>
-                <ul style="color: var(--text-secondary); font-size: 0.9rem;">
-                    <li>Voucher sẽ bị xóa vĩnh viễn khỏi hệ thống</li>
-                    <li>Khách hàng sẽ không thể sử dụng mã này nữa</li>
-                    <li>Dữ liệu thống kê liên quan sẽ bị mất</li>
-                </ul>
             </div>
-            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i>Hủy Bỏ
-                </button>
-                <form id="deleteForm" method="post" style="display: inline;">
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                <form th:action="@{/admin/vouchers/delete/{id}(id=${voucher.promotionID})}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger">
-                        <i class="fas fa-trash"></i>Xác Nhận Xóa
+                        <i class="fas fa-trash"></i> Xóa Voucher
                     </button>
                 </form>
             </div>
@@ -886,125 +425,42 @@
     </div>
 </div>
 
-<!-- Share Modal -->
-<div class="modal fade" id="shareModal" tabindex="-1">
-    <div class="modal-dialog">
-        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
-            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
-                <h5 class="modal-title" style="color: var(--text-primary);">
-                    <i class="fas fa-share-alt"></i>
-                    Chia Sẻ Voucher
-                </h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body" style="color: var(--text-primary);">
-                <div class="text-center mb-3">
-                    <div class="voucher-preview" style="margin: 0;">
-                        <div class="voucher-preview-content">
-                            <div class="voucher-title">BlueBear Cinema</div>
-                            <div class="voucher-code-preview" th:text="${voucher.promotionCode}">SAVE20</div>
-                            <div class="voucher-discount-preview" th:text="${voucher.formattedDiscount}">20% OFF</div>
-                        </div>
-                    </div>
-                </div>
-                <div class="row g-2">
-                    <div class="col-6">
-                        <button class="btn btn-primary w-100" onclick="shareToFacebook()">
-                            <i class="fab fa-facebook"></i> Facebook
-                        </button>
-                    </div>
-                    <div class="col-6">
-                        <button class="btn btn-info w-100" onclick="shareToTwitter()">
-                            <i class="fab fa-twitter"></i> Twitter
-                        </button>
-                    </div>
-                    <div class="col-6">
-                        <button class="btn btn-success w-100" onclick="shareToWhatsApp()">
-                            <i class="fab fa-whatsapp"></i> WhatsApp
-                        </button>
-                    </div>
-                    <div class="col-6">
-                        <button class="btn btn-warning w-100" onclick="copyShareLink()">
-                            <i class="fas fa-link"></i> Copy Link
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Success Toast -->
-<div class="toast-container position-fixed bottom-0 end-0 p-3">
-    <div id="copyToast" class="toast" role="alert">
-        <div class="toast-header" style="background: var(--card-bg); border-bottom: 1px solid var(--border-color);">
-            <i class="fas fa-check-circle text-success me-2"></i>
-            <strong class="me-auto" style="color: var(--text-primary);">Thành Công</strong>
-            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
-        </div>
-        <div class="toast-body" style="background: var(--card-bg); color: var(--text-primary);">
-            Đã sao chép mã voucher vào clipboard!
-        </div>
-    </div>
-</div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+
+    // Copy voucher code to clipboard
     document.addEventListener('DOMContentLoaded', function() {
-        // Add fade-in animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
+        const voucherCode = document.querySelector('.voucher-code');
+        if (voucherCode) {
+            voucherCode.addEventListener('click', function() {
+                navigator.clipboard.writeText(this.textContent).then(function() {
+                    const originalText = voucherCode.textContent;
+                    const originalBg = voucherCode.style.backgroundColor;
 
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
+                    voucherCode.textContent = 'Đã sao chép!';
+                    voucherCode.style.backgroundColor = '#d4edda';
+                    voucherCode.style.color = '#155724';
+
+                    setTimeout(function() {
+                        voucherCode.textContent = originalText;
+                        voucherCode.style.backgroundColor = originalBg;
+                        voucherCode.style.color = 'var(--primary-color)';
+                    }, 2000);
+                });
             });
-        }, observerOptions);
 
-        // Observe fade-in elements
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
-        });
+            voucherCode.style.cursor = 'pointer';
+            voucherCode.title = 'Click để sao chép mã voucher';
+        }
     });
-
-    // Copy to clipboard function
-    function copyToClipboard(text) {
-        navigator.clipboard.writeText(text).then(function() {
-            const toast = new bootstrap.Toast(document.getElementById('copyToast'));
-            toast.show();
-        }).catch(function(err) {
-            console.error('Could not copy text: ', err);
-            // Fallback method
-            const textArea = document.createElement('textarea');
-            textArea.value = text;
-            document.body.appendChild(textArea);
-            textArea.focus();
-            textArea.select();
-            try {
-                document.execCommand('copy');
-                const toast = new bootstrap.Toast(document.getElementById('copyToast'));
-                toast.show();
-            } catch (err) {
-                console.error('Fallback: Could not copy text: ', err);
-            }
-            document.body.removeChild(textArea);
-        });
-    }
-
-    // Delete confirmation
-    function confirmDelete(voucherId, voucherCode) {
-        document.getElementById('deleteVoucherCode').textContent = voucherCode;
-        document.getElementById('deleteForm').action = '/admin/vouchers/delete/' + voucherId;
-        new bootstrap.Modal(document.getElementById('deleteModal')).show();
-    }
 </script>
 </body>
 </html>

@@ -70,12 +70,14 @@ public class MovieService {
      * Lấy tất cả phim active với phân trang
      */
     public Page<MovieDTO> getAllActiveMoviesWithPaging(PageRequest pageRequest) {
-        Page<Movie> moviePage = movieRepository.findAll(pageRequest);
+        // ✅ Lấy trực tiếp phim Active với phân trang từ repository
+        Page<Movie> moviePage = movieRepository.findByStatus(Movie_Status.Active, pageRequest);
+
         List<MovieDTO> movieDTOs = moviePage.getContent().stream()
-                .filter(movie -> movie.getStatus() == Movie_Status.Active)
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
 
+        // ✅ Sử dụng đúng totalElements của phim Active
         return new PageImpl<>(movieDTOs, pageRequest, moviePage.getTotalElements());
     }
 
@@ -403,93 +405,183 @@ public class MovieService {
         return !isMovieNameExists(movieName.trim(), null);
     }
 
+    // ==================== UPDATE OPERATIONS - COMPLETELY FIXED ====================
+
     /**
-     * Cập nhật phim hoàn chỉnh bao gồm cả genres - IMPROVED VERSION
+     * Cập nhật phim hoàn chỉnh bao gồm cả genres - COMPLETELY FIXED VERSION
      */
     @Transactional
     public boolean updateMovieComplete(Integer id, Movie movieDetails, List<Integer> genreIds) {
-        if (id == null || movieDetails == null) return false;
+        if (id == null || movieDetails == null) {
+            System.out.println("ERROR: Invalid parameters - id or movieDetails is null");
+            return false;
+        }
 
         try {
+            System.out.println("=== SERVICE: UPDATE MOVIE COMPLETE START ===");
+            System.out.println("Movie ID: " + id);
+            System.out.println("Movie details name: " + movieDetails.getMovieName());
+            System.out.println("Movie details rating: " + movieDetails.getMovieRate());
+            System.out.println("Movie details duration: " + movieDetails.getDuration());
+
+            // 1. Lấy movie hiện tại từ database
             Optional<Movie> optionalMovie = movieRepository.findById(id);
-            if (optionalMovie.isPresent()) {
-                Movie movie = optionalMovie.get();
-
-                // Debug rating trước update
-                System.out.println("=== BEFORE UPDATE DEBUG ===");
-                debugMovieRating(id);
-
-                // 1. Cập nhật các thuộc tính cơ bản
-                updateBasicMovieInfo(movie, movieDetails);
-
-                // 2. Lưu movie trước (để có ID cho relationships)
-                Movie savedMovie = movieRepository.save(movie);
-
-                // Debug rating sau update
-                System.out.println("=== AFTER UPDATE DEBUG ===");
-                debugMovieRating(id);
-
-                // 3. Cập nhật genres với transaction
-                updateMovieGenresImproved(savedMovie, genreIds);
-
-                return true;
+            if (!optionalMovie.isPresent()) {
+                System.out.println("ERROR: Movie not found with ID: " + id);
+                return false;
             }
-            return false;
+
+            Movie existingMovie = optionalMovie.get();
+
+            System.out.println("=== BEFORE UPDATE ===");
+            System.out.println("Current movie name: " + existingMovie.getMovieName());
+            System.out.println("Current movie rating: " + existingMovie.getMovieRate());
+            System.out.println("Current movie duration: " + existingMovie.getDuration());
+
+            // 2. Cập nhật từng field một cách cẩn thận - ALWAYS UPDATE
+            updateMovieFieldsDirectly(existingMovie, movieDetails);
+
+            System.out.println("=== AFTER FIELD UPDATE ===");
+            System.out.println("Updated movie name: " + existingMovie.getMovieName());
+            System.out.println("Updated movie rating: " + existingMovie.getMovieRate());
+            System.out.println("Updated movie duration: " + existingMovie.getDuration());
+
+            // 3. Lưu movie vào database
+            Movie savedMovie = movieRepository.save(existingMovie);
+            movieRepository.flush(); // Force immediate database sync
+
+            System.out.println("=== AFTER SAVE ===");
+            System.out.println("Saved movie ID: " + savedMovie.getMovieID());
+            System.out.println("Saved movie name: " + savedMovie.getMovieName());
+            System.out.println("Saved movie rating: " + savedMovie.getMovieRate());
+            System.out.println("Saved movie duration: " + savedMovie.getDuration());
+
+            // 4. Cập nhật genres
+            updateMovieGenresDirectly(savedMovie, genreIds);
+            System.out.println("Genres updated successfully");
+
+            // 5. Verify lại từ database
+            Movie verifyMovie = movieRepository.findById(id).orElse(null);
+            if (verifyMovie != null) {
+                System.out.println("=== FINAL VERIFICATION ===");
+                System.out.println("Verified movie name: " + verifyMovie.getMovieName());
+                System.out.println("Verified movie rating: " + verifyMovie.getMovieRate());
+                System.out.println("Verified movie duration: " + verifyMovie.getDuration());
+
+                // Check if update was successful
+                boolean nameMatch = movieDetails.getMovieName().equals(verifyMovie.getMovieName());
+                boolean durationMatch = Objects.equals(movieDetails.getDuration(), verifyMovie.getDuration());
+                boolean ratingMatch = Objects.equals(movieDetails.getMovieRate(), verifyMovie.getMovieRate());
+
+                System.out.println("Name updated correctly: " + nameMatch);
+                System.out.println("Duration updated correctly: " + durationMatch);
+                System.out.println("Rating updated correctly: " + ratingMatch);
+
+                if (nameMatch && durationMatch && ratingMatch) {
+                    System.out.println("✅ ALL UPDATES VERIFIED SUCCESSFULLY");
+                    return true;
+                } else {
+                    System.out.println("❌ SOME UPDATES FAILED VERIFICATION");
+                    return false;
+                }
+            } else {
+                System.out.println("ERROR: Cannot verify movie after save");
+                return false;
+            }
+
         } catch (Exception e) {
+            System.err.println("CRITICAL ERROR in updateMovieComplete: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Error updating movie: " + e.getMessage());
         }
     }
 
     /**
-     * Cập nhật thông tin cơ bản của phim - FIXED VERSION
+     * Cập nhật từng field của movie một cách trực tiếp - ALWAYS UPDATE VERSION
      */
-    private void updateBasicMovieInfo(Movie movie, Movie movieDetails) {
-        System.out.println("=== UPDATE BASIC INFO DEBUG ===");
-        System.out.println("Current movie rating: " + movie.getMovieRate());
-        System.out.println("New movie rating from form: " + movieDetails.getMovieRate());
+    private void updateMovieFieldsDirectly(Movie existingMovie, Movie movieDetails) {
+        System.out.println("=== UPDATING MOVIE FIELDS DIRECTLY ===");
 
-        movie.setMovieName(movieDetails.getMovieName());
-        movie.setDescription(movieDetails.getDescription());
-        movie.setImage(movieDetails.getImage());
-        movie.setBanner(movieDetails.getBanner());
-        movie.setStudio(movieDetails.getStudio());
-        movie.setDuration(movieDetails.getDuration());
-        movie.setTrailer(movieDetails.getTrailer());
-
-        // ⚠️ FIX CRITICAL: Kiểm tra null trước khi set rating
-        if (movieDetails.getMovieRate() != null) {
-            System.out.println("Setting new rating: " + movieDetails.getMovieRate());
-            movie.setMovieRate(movieDetails.getMovieRate());
-        } else {
-            System.out.println("WARNING: movieDetails.getMovieRate() is NULL - keeping old rating: " + movie.getMovieRate());
-            // Không thay đổi rating nếu null
+        // Update movie name - ALWAYS
+        if (movieDetails.getMovieName() != null) {
+            existingMovie.setMovieName(movieDetails.getMovieName());
+            System.out.println("✓ Updated movie name: " + movieDetails.getMovieName());
         }
 
-        movie.setStartDate(movieDetails.getStartDate());
-        movie.setEndDate(movieDetails.getEndDate());
-        movie.setStatus(movieDetails.getStatus());
+        // Update description - ALWAYS (even if null)
+        existingMovie.setDescription(movieDetails.getDescription());
+        System.out.println("✓ Updated description");
 
-        System.out.println("Final movie rating after basic update: " + movie.getMovieRate());
-        System.out.println("=== END UPDATE BASIC INFO DEBUG ===");
+        // Update image - ALWAYS (even if null)
+        existingMovie.setImage(movieDetails.getImage());
+        System.out.println("✓ Updated image");
+
+        // Update banner - ALWAYS (even if null)
+        existingMovie.setBanner(movieDetails.getBanner());
+        System.out.println("✓ Updated banner");
+
+        // Update studio - ALWAYS (even if null)
+        existingMovie.setStudio(movieDetails.getStudio());
+        System.out.println("✓ Updated studio");
+
+        // Update duration - ALWAYS
+        if (movieDetails.getDuration() != null) {
+            existingMovie.setDuration(movieDetails.getDuration());
+            System.out.println("✓ Updated duration: " + movieDetails.getDuration());
+        }
+
+        // Update trailer - ALWAYS (even if null)
+        existingMovie.setTrailer(movieDetails.getTrailer());
+        System.out.println("✓ Updated trailer");
+
+        // Update movie rate - ALWAYS UPDATE (even if null)
+        System.out.println("Old rating: " + existingMovie.getMovieRate());
+        System.out.println("New rating from form: " + movieDetails.getMovieRate());
+        existingMovie.setMovieRate(movieDetails.getMovieRate());
+        System.out.println("✓ Updated rating to: " + existingMovie.getMovieRate());
+
+        // Update dates - ALWAYS
+        if (movieDetails.getStartDate() != null) {
+            existingMovie.setStartDate(movieDetails.getStartDate());
+            System.out.println("✓ Updated start date: " + movieDetails.getStartDate());
+        }
+
+        if (movieDetails.getEndDate() != null) {
+            existingMovie.setEndDate(movieDetails.getEndDate());
+            System.out.println("✓ Updated end date: " + movieDetails.getEndDate());
+        }
+
+        // Update status - ALWAYS
+        if (movieDetails.getStatus() != null) {
+            existingMovie.setStatus(movieDetails.getStatus());
+            System.out.println("✓ Updated status: " + movieDetails.getStatus());
+        }
+
+        System.out.println("=== FIELD UPDATE COMPLETE ===");
     }
 
     /**
-     * Cập nhật genres của phim - IMPROVED VERSION
+     * Cập nhật genres của phim một cách trực tiếp
      */
     @Transactional
-    public void updateMovieGenresImproved(Movie movie, List<Integer> genreIds) {
-        if (movie == null) return;
+    public void updateMovieGenresDirectly(Movie movie, List<Integer> genreIds) {
+        if (movie == null) {
+            System.out.println("ERROR: Movie is null in updateMovieGenresDirectly");
+            return;
+        }
 
         try {
-            // 1. Xóa tất cả MovieGenre hiện tại cho phim này
             Integer movieId = (Integer) movie.getMovieID();
+            System.out.println("=== UPDATING MOVIE GENRES ===");
+            System.out.println("Movie ID: " + movieId);
+            System.out.println("New genre IDs: " + genreIds);
+
+            // 1. Xóa tất cả MovieGenre hiện tại cho phim này
             movieGenreRepository.deleteBymovieID(movieId);
+            movieGenreRepository.flush(); // Force delete
+            System.out.println("✓ Deleted old movie-genre relationships");
 
-            // 2. Flush để đảm bảo delete được thực hiện
-            movieGenreRepository.flush();
-
-            // 3. Thêm genres mới
+            // 2. Thêm genres mới (nếu có)
             if (genreIds != null && !genreIds.isEmpty()) {
                 for (Integer genreId : genreIds) {
                     Genre genre = genreRepository.findById(genreId).orElse(null);
@@ -498,15 +590,27 @@ public class MovieService {
                         movieGenre.setMovie(movie);
                         movieGenre.setGenre(genre);
                         movieGenreRepository.save(movieGenre);
+                        System.out.println("✓ Added genre: " + genre.getGenreName());
+                    } else {
+                        System.out.println("⚠ Genre not found: " + genreId);
                     }
                 }
+                movieGenreRepository.flush(); // Force save
+                System.out.println("✓ Added " + genreIds.size() + " new genres");
+            } else {
+                System.out.println("ℹ No genres to add");
             }
 
+            System.out.println("=== GENRE UPDATE COMPLETE ===");
+
         } catch (Exception e) {
+            System.err.println("ERROR in updateMovieGenresDirectly: " + e.getMessage());
             e.printStackTrace();
             throw new RuntimeException("Error updating movie genres: " + e.getMessage());
         }
     }
+
+    // ==================== STATISTICS OPERATIONS ====================
 
     /**
      * Các phương thức thống kê
@@ -555,8 +659,6 @@ public class MovieService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
-
-    // ==================== STATISTICS OPERATIONS ====================
 
     // ==================== DELETE OPERATIONS ====================
 
@@ -650,66 +752,6 @@ public class MovieService {
             e.printStackTrace();
             return false;
         }
-    }
-
-    /**
-     * Convert Entity to DTO - FIXED VERSION
-     */
-    private MovieDTO convertToDTO(Movie movie) {
-        if (movie == null) return null;
-
-        MovieDTO dto = new MovieDTO();
-        dto.setMovieId((Integer) movie.getMovieID()); // Cast Object to Integer
-        dto.setMovieName(movie.getMovieName());
-        dto.setDescription(movie.getDescription());
-        dto.setImage(movie.getImage());
-        dto.setBanner(movie.getBanner());
-        dto.setStudio(movie.getStudio());
-        dto.setDuration(movie.getDuration());
-        dto.setTrailer(movie.getTrailer());
-
-        // Handle Double to BigDecimal conversion for movieRate
-        if (movie.getMovieRate() != null) {
-            dto.setMovieRate(BigDecimal.valueOf(movie.getMovieRate()).setScale(1, RoundingMode.HALF_UP));
-        } else {
-            dto.setMovieRate(null);
-        }
-
-        // Handle LocalDateTime to LocalDate conversion - FIXED
-        if (movie.getStartDate() != null) {
-            dto.setStartDate(movie.getStartDate().toLocalDate());
-        }
-
-        if (movie.getEndDate() != null) {
-            dto.setEndDate(movie.getEndDate().toLocalDate());
-        }
-
-        dto.setStatus(movie.getStatus() != null ? movie.getStatus().toString() : "Unknown");
-
-        // Lấy danh sách thể loại từ MovieGenre relationship - FIXED
-        Integer movieId = (Integer) movie.getMovieID();
-        List<Integer> genreIds = movieGenreRepository.findgenreIDsBymovieID(movieId);
-        List<String> genreNames = new ArrayList<>();
-        for (Integer genreId : genreIds) {
-            Optional<Genre> genre = genreRepository.findById(genreId);
-            if (genre.isPresent()) {
-                genreNames.add(genre.get().getGenreName());
-            }
-        }
-        dto.setGenres(genreNames);
-
-        // Lấy danh sách diễn viên từ MovieActor relationship - FIXED
-        List<Integer> actorIds = movieActorRepository.findactorIDsBymovieID(movieId);
-        List<String> actorNames = new ArrayList<>();
-        for (Integer actorId : actorIds) {
-            Optional<Actor> actor = actorRepository.findById(actorId);
-            if (actor.isPresent()) {
-                actorNames.add(actor.get().getActorName());
-            }
-        }
-        dto.setActors(actorNames);
-
-        return dto;
     }
 
     // ==================== UTILITY OPERATIONS - FIXED ====================
@@ -1167,5 +1209,67 @@ public class MovieService {
             System.err.println("Error adding actors to movie: " + e.getMessage());
             throw new RuntimeException("Có lỗi xảy ra khi thêm diễn viên cho phim: " + e.getMessage());
         }
+    }
+
+    // ==================== CONVERT TO DTO ====================
+
+    /**
+     * Convert Entity to DTO - FIXED VERSION
+     */
+    private MovieDTO convertToDTO(Movie movie) {
+        if (movie == null) return null;
+
+        MovieDTO dto = new MovieDTO();
+        dto.setMovieId((Integer) movie.getMovieID()); // Cast Object to Integer
+        dto.setMovieName(movie.getMovieName());
+        dto.setDescription(movie.getDescription());
+        dto.setImage(movie.getImage());
+        dto.setBanner(movie.getBanner());
+        dto.setStudio(movie.getStudio());
+        dto.setDuration(movie.getDuration());
+        dto.setTrailer(movie.getTrailer());
+
+        // Handle Double to BigDecimal conversion for movieRate
+        if (movie.getMovieRate() != null) {
+            dto.setMovieRate(BigDecimal.valueOf(movie.getMovieRate()).setScale(1, RoundingMode.HALF_UP));
+        } else {
+            dto.setMovieRate(null);
+        }
+
+        // Handle LocalDateTime to LocalDate conversion - FIXED
+        if (movie.getStartDate() != null) {
+            dto.setStartDate(movie.getStartDate().toLocalDate());
+        }
+
+        if (movie.getEndDate() != null) {
+            dto.setEndDate(movie.getEndDate().toLocalDate());
+        }
+
+        dto.setStatus(movie.getStatus() != null ? movie.getStatus().toString() : "Unknown");
+
+        // Lấy danh sách thể loại từ MovieGenre relationship - FIXED
+        Integer movieId = (Integer) movie.getMovieID();
+        List<Integer> genreIds = movieGenreRepository.findgenreIDsBymovieID(movieId);
+        List<String> genreNames = new ArrayList<>();
+        for (Integer genreId : genreIds) {
+            Optional<Genre> genre = genreRepository.findById(genreId);
+            if (genre.isPresent()) {
+                genreNames.add(genre.get().getGenreName());
+            }
+        }
+        dto.setGenres(genreNames);
+
+        // Lấy danh sách diễn viên từ MovieActor relationship - FIXED
+        List<Integer> actorIds = movieActorRepository.findactorIDsBymovieID(movieId);
+        List<String> actorNames = new ArrayList<>();
+        for (Integer actorId : actorIds) {
+            Optional<Actor> actor = actorRepository.findById(actorId);
+            if (actor.isPresent()) {
+                actorNames.add(actor.get().getActorName());
+            }
+        }
+        dto.setActors(actorNames);
+
+        return dto;
     }
 }

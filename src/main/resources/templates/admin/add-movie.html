@@ -593,8 +593,8 @@
             <div class="genres-grid">
                 <div th:each="genre : ${allGenres}" class="form-check">
                     <input class="form-check-input genre-checkbox" type="checkbox"
-                           th:id="'genre_' + ${genre.genreId}" th:name="genreIds" th:value="${genre.genreId}">
-                    <label class="form-check-label" th:for="'genre_' + ${genre.genreId}" th:text="${genre.genreName}">
+                           th:id="'genre_' + ${genre.genreID}" th:name="genreIDs" th:value="${genre.genreID}">
+                    <label class="form-check-label" th:for="'genre_' + ${genre.genreID}" th:text="${genre.genreName}">
                         Action
                     </label>
                 </div>

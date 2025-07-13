@@ -29,9 +29,7 @@ public class VoucherController {
         model.addAttribute("stats", stats);
         model.addAttribute("pageTitle", "Voucher Management");
 
-        // Change this line to match your actual template location
-        return "admin/list-voucher"; // If list-voucher.html is directly in admin folder
-        // return "admin/vouchers/list-voucher"; // If list-voucher.html is in admin/vouchers folder
+        return "admin/list-voucher";
     }
 
     // Search vouchers
@@ -48,7 +46,7 @@ public class VoucherController {
         model.addAttribute("selectedStatus", status);
         model.addAttribute("pageTitle", "Voucher Search Results");
 
-        return "admin/list-voucher"; // Match the same template path as above
+        return "admin/list-voucher";
     }
 
     // Show voucher details
@@ -63,7 +61,7 @@ public class VoucherController {
         model.addAttribute("voucher", voucher.get());
         model.addAttribute("pageTitle", "Voucher Details");
 
-        return "admin/detail-voucher"; // Adjust path as needed
+        return "admin/detail-voucher";
     }
 
     // Show add voucher form
@@ -73,7 +71,7 @@ public class VoucherController {
         model.addAttribute("pageTitle", "Add New Voucher");
         model.addAttribute("isEdit", false);
 
-        return "admin/form-voucher"; // Adjust path as needed
+        return "admin/add-voucher"; // Sửa để trả về template add
     }
 
     // Process add voucher
@@ -108,14 +106,14 @@ public class VoucherController {
                 voucher.getStartTime(),
                 voucher.getEndTime(),
                 voucher.getQuantity(),
-                voucher.getStatus().toString() // FIXED: Convert enum to String
+                voucher.getStatus().toString()
         );
 
         model.addAttribute("voucher", voucherDTO);
         model.addAttribute("pageTitle", "Edit Voucher");
         model.addAttribute("isEdit", true);
 
-        return "admin/form-voucher"; // Adjust path as needed
+        return "admin/edit-voucher"; // Sửa để trả về template edit
     }
 
     // Process edit voucher

@@ -547,10 +547,10 @@
                     <div th:each="genre : ${allGenres}" class="genre-checkbox">
                         <input type="checkbox"
                                name="genreIds"
-                               th:value="${genre.genreId}"
-                               th:checked="${#lists.contains(movieGenreIds, genre.genreId)}"
-                               th:id="'genre_' + ${genre.genreId}">
-                        <label th:for="'genre_' + ${genre.genreId}" th:text="${genre.genreName}">Action</label>
+                               th:value="${genre.genreID}"
+                               th:checked="${#lists.contains(movieGenreIds, genre.genreID)}"
+                               th:id="'genre_' + ${genre.genreID}">
+                        <label th:for="'genre_' + ${genre.genreID}" th:text="${genre.genreName}">Action</label>
                     </div>
                 </div>
             </div>
