@@ -2,8 +2,7 @@ package com.bluebear.cinemax.controller.cashier;
 
 import com.bluebear.cinemax.dto.SepayWebhookDTO;
 import com.bluebear.cinemax.service.booking.BookingService;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,21 +11,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/webhook")
-@RequiredArgsConstructor
-@Slf4j
 public class WebhookController {
 
-    private final BookingService bookingService;
+    @Autowired
+    private BookingService bookingService;
 
     @PostMapping("/sepay")
     public ResponseEntity<String> handleSepayPaymentWebhook(@RequestBody SepayWebhookDTO payload) {
-        log.info("Received SePay webhook with raw content: {}", payload.getContent());
         try {
             bookingService.saveTransactionFromWebhook(payload);
             String transactionContent = payload.getContent();
             if (transactionContent == null || transactionContent.isBlank()) {
                 return ResponseEntity.ok("Webhook received but content is empty.");
             }
+
             String upperCaseContent = transactionContent.toUpperCase();
             int startIndex = upperCaseContent.indexOf("DH");
             if (startIndex == -1) {
@@ -41,14 +39,14 @@ public class WebhookController {
                     break;
                 }
             }
+
             if (invoiceIdBuilder.length() == 0) {
                 return ResponseEntity.ok("Webhook received but invoice ID is missing after prefix.");
             }
 
             Integer invoiceId = Integer.parseInt(invoiceIdBuilder.toString());
-            bookingService.finalizeBooking(invoiceId); // Hoàn tất đơn hàng
+            bookingService.finalizeBooking(invoiceId);
             return ResponseEntity.ok("Webhook processed successfully.");
-
         } catch (NumberFormatException e) {
             return ResponseEntity.badRequest().body("Invalid invoice ID format.");
         } catch (Exception e) {

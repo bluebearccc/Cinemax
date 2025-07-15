@@ -1,9 +1,6 @@
 package com.bluebear.cinemax.service.booking;
 
-import com.bluebear.cinemax.dto.BookingRequestDTO;
-import com.bluebear.cinemax.dto.BookingResultDTO;
-import com.bluebear.cinemax.dto.InvoiceDTO;
-import com.bluebear.cinemax.dto.SepayWebhookDTO;
+import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.enumtype.DetailSeat_Status;
 import com.bluebear.cinemax.enumtype.InvoiceStatus;
@@ -12,6 +9,7 @@ import com.bluebear.cinemax.repository.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -25,17 +23,24 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class BookingService {
-
-    private final ObjectMapper objectMapper = new ObjectMapper();
-    private final InvoiceRepository invoiceRepository;
-    private final DetailSeatRepository detailSeatRepository;
-    private final DetailFDRepository detailFDRepository;
-    private final SeatRepository seatRepository;
-    private final TheaterStockRepository theaterStockRepository;
-    private final PromotionRepository promotionRepository;
-    private final ScheduleRepository scheduleRepository;
-
-    private final TransactionRepository transactionRepository;
+    @Autowired
+    private ObjectMapper objectMapper = new ObjectMapper();
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+    @Autowired
+    private DetailSeatRepository detailSeatRepository;
+    @Autowired
+    private DetailFDRepository detailFDRepository;
+    @Autowired
+    private SeatRepository seatRepository;
+    @Autowired
+    private TheaterStockRepository theaterStockRepository;
+    @Autowired
+    private PromotionRepository promotionRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     @Transactional
     public InvoiceDTO initiateBooking(BookingRequestDTO request) {
@@ -124,8 +129,8 @@ public class BookingService {
                         if (stockItem.getQuantity() < quantity) {
                             throw new RuntimeException("Not enough stock for " + stockItem.getItemName());
                         }
-                        stockItem.setQuantity(stockItem.getQuantity() - quantity);
-                        theaterStockRepository.save(stockItem);
+                        // **ĐÃ XÓA LOGIC TRỪ TỒN KHO TẠI ĐÂY**
+                        // Việc trừ tồn kho sẽ do trigger của database xử lý khi Detail_FD được lưu.
 
                         double itemTotalPrice = stockItem.getPrice() * quantity;
                         Detail_FD detailFd = Detail_FD.builder()
@@ -281,8 +286,7 @@ public class BookingService {
                     if (stockItem.getQuantity() < quantity) {
                         throw new RuntimeException("Not enough stock for " + stockItem.getItemName());
                     }
-                    stockItem.setQuantity(stockItem.getQuantity() - quantity);
-                    theaterStockRepository.save(stockItem);
+
                     double itemTotalPrice = stockItem.getPrice() * quantity;
                     Detail_FD detailFd = Detail_FD.builder()
                             .invoice(savedInvoice)
@@ -311,4 +315,38 @@ public class BookingService {
         return buildBookingResult(savedInvoice, schedule, seats, foodItemsDTO, totalTicketPrice, totalFoodPrice);
     }
 
+
+    public CheckinDTO performCheckIn(Integer invoiceId) {
+        LocalDateTime now = LocalDateTime.now();
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Hóa đơn không tồn tại với ID: " + invoiceId));
+
+        if (invoice.getStatus() == InvoiceStatus.CHECKED_IN) {
+            throw new IllegalStateException("Vé này đã được check-in trước đó.");
+        }
+
+        if (invoice.getStatus() != InvoiceStatus.Booked && invoice.getStatus() != InvoiceStatus.Unpaid) {
+            throw new IllegalStateException("Vé không hợp lệ để check-in (chưa thanh toán hoặc đã hủy).");
+        }
+
+        // Optional: Kiểm tra thời gian check-in so với suất chiế
+        if (now.isBefore(invoice.getBookingDate()) || now.isEqual(invoice.getBookingDate())) {
+
+        }
+        else {
+
+        }
+        // Ví dụ: chỉ cho phép check-in trong khoảng 1 giờ trước và sau giờ chiếu
+        // ...
+
+        // Cập nhật trạng thái
+        invoice.setStatus(InvoiceStatus.CHECKED_IN);
+        // Optional: Ghi nhận thời gian check-in
+        // invoice.setCheckInTime(LocalDateTime.now());
+        invoiceRepository.save(invoice);
+
+        // Trả về kết quả để hiển thị cho nhân viên
+        BookingResultDTO bookingResult = getBookingResult(invoiceId); // Tái sử dụng hàm đã có
+        return new CheckinDTO("success", "Check-in thành công!", bookingResult);
+    }
 }

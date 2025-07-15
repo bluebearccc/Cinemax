@@ -49,7 +49,7 @@ public class BookingProcessController {
     private final LocalDateTime sevenDate = currentDate.plusDays(7);
     private Integer theaterId = 1;
 
-    @GetMapping({"", "/", "/movie/"})
+    @GetMapping("/movie/")
     public String getMovie(@RequestParam(required = false) String keyword,
                            @RequestParam(required = false) Integer genreId,
                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime date,
@@ -69,9 +69,15 @@ public class BookingProcessController {
             if (ageLimit != null) {
                 applicableAgeLimits = new ArrayList<>();
                 switch (ageLimit) {
-                    case AGE_18_PLUS: applicableAgeLimits.add(Age_Limit.AGE_18_PLUS);
-                    case AGE_16_PLUS: applicableAgeLimits.add(Age_Limit.AGE_16_PLUS);
-                    case AGE_13_PLUS: applicableAgeLimits.add(Age_Limit.AGE_13_PLUS);
+                    case AGE_18_PLUS:
+                        applicableAgeLimits.add(Age_Limit.AGE_18_PLUS);
+
+                    case AGE_16_PLUS:
+                        applicableAgeLimits.add(Age_Limit.AGE_16_PLUS);
+
+                    case AGE_13_PLUS:
+                        applicableAgeLimits.add(Age_Limit.AGE_13_PLUS);
+
                     case AGE_P: applicableAgeLimits.add(Age_Limit.AGE_P);
                         break;
                 }
@@ -81,9 +87,9 @@ public class BookingProcessController {
             Page<MovieDTO> moviesPage;
 
             if (normalizedKeyword != null && genreId != null) {
-                moviesPage = movieService.findMoviesByTheaterAndGenreAndKeywordAndDateRange(theaterId, genreId, keyword, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
+                moviesPage = movieService.findMoviesByTheaterAndGenreAndKeywordAndDateRange(theaterId, genreId, normalizedKeyword, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
             } else if (normalizedKeyword != null) {
-                moviesPage = movieService.findMoviesByTheaterAndKeywordAndDateRange(theaterId, keyword, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
+                moviesPage = movieService.findMoviesByTheaterAndKeywordAndDateRange(theaterId, normalizedKeyword, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
             } else if (genreId != null) {
                 moviesPage = movieService.findMoviesByTheaterAndGenreAndDateRange(theaterId, genreId, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
             } else {
@@ -112,7 +118,7 @@ public class BookingProcessController {
             model.addAttribute("hasSearchCriteria", (normalizedKeyword != null && !normalizedKeyword.isEmpty()) || genreId != null || date != null || ageLimit != null);
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("errorMessage", "Có lỗi xảy ra khi tải danh sách phim. Vui lòng thử lại.");
+            model.addAttribute("errorMessage", "Error to load film, pls reload page");
         }
         return "cashier/cashier-booking";
     }
@@ -206,7 +212,7 @@ public class BookingProcessController {
     public String goBackToSeats(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         ScheduleDTO selectedSchedule = (ScheduleDTO) session.getAttribute("selectedSchedule");
         if (selectedSchedule == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Phiên làm việc đã hết hạn. Vui lòng bắt đầu lại.");
+            redirectAttributes.addFlashAttribute("errorMessage", "Session is expried");
             return "redirect:/cashier/movie/";
         }
         return selectSeats(selectedSchedule.getScheduleID(), session, model, redirectAttributes);

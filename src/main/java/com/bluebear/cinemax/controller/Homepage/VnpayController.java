@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.controller;
+package com.bluebear.cinemax.controller.Homepage;
 
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.repository.InvoiceRepository;

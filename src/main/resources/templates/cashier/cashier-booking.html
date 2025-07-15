@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
     <meta charset="UTF-8">
@@ -7,416 +7,7 @@
     <title>Cinemax - Cashier System</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container-fluid > .row {
-            justify-content: center;
-        }
-
-        .step-indicator .step {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 90px;
-            text-align: center;
-        }
-
-
-        .step-indicator .step .step-number {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            line-height: 1;
-        }
-
-        .progress-line {
-            top: 20px;
-        }
-
-
-        :root {
-            --primary-color: #1a1a2e;
-            --secondary-color: #16213e;
-            --accent-color: #e94560;
-            --accent-hover: #d63851;
-            --gold-color: #ffd700;
-            --text-light: #ffffff;
-            --text-gray: #a0a0a0;
-            --background-dark: #0f0f23;
-            --card-bg: #1e1e3f;
-            --border-color: #333366;
-            --success-color: #4caf50;
-            --warning-color: #ff9800;
-            --error-color: #f44336;
-            --couple-seat-color: #e91e63;
-            --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-gold: linear-gradient(135deg, #ffd700 0%, #ffb347 100%);
-            --shadow-light: 0 4px 15px rgba(0, 0, 0, 0.1);
-            --shadow-medium: 0 8px 30px rgba(0, 0, 0, 0.15);
-            --shadow-heavy: 0 15px 40px rgba(0, 0, 0, 0.2);
-            --border-radius: 12px;
-            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: var(--background-dark);
-            color: var(--text-light);
-            line-height: 1.6;
-            min-height: 100vh;
-            background-image: radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%);
-            background-attachment: fixed;
-        }
-
-        /* ========== GENERAL FIXES & CUSTOMS ========== */
-        .card-custom {
-            background-color: var(--card-bg);
-            border: 1px solid var(--border-color);
-        }
-
-        .card-custom .card-header, .card-custom .card-footer {
-            background-color: rgba(0, 0, 0, 0.2);
-            border-bottom: 1px solid var(--border-color);
-            border-top: 1px solid var(--border-color);
-        }
-
-        .card-custom, .card-custom .text-dark, .card-custom h1, .card-custom h2, .card-custom h3, .card-custom h4, .card-custom h5, .card-custom h6 {
-            color: var(--text-light);
-        }
-
-        .card-custom .text-muted {
-            color: var(--text-gray) !important;
-        }
-
-        .form-control, .form-select {
-            background-color: var(--secondary-color);
-            color: var(--text-light);
-            border: 1px solid var(--border-color);
-        }
-
-        .form-control:focus, .form-select:focus {
-            background-color: var(--secondary-color);
-            color: var(--text-light);
-            border-color: var(--accent-color);
-            box-shadow: 0 0 0 0.25rem rgba(233, 69, 96, 0.25);
-        }
-
-        select.form-select option {
-            background: var(--background-dark);
-            color: var(--text-light);
-        }
-
-        .pagination .page-link {
-            background-color: var(--card-bg);
-            border-color: var(--border-color);
-            color: var(--text-light);
-        }
-
-        .pagination .page-item.active .page-link {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-
-        .pagination .page-item.disabled .page-link {
-            background-color: var(--secondary-color);
-            border-color: var(--border-color);
-        }
-
-        .navbar-custom {
-            background-color: var(--card-bg) !important;
-        }
-
-        /* ========== STEP INDICATOR ========== */
-        /* NOTE: The existing HTML structure for step indicator is kept. The CSS below styles it. */
-        .step-indicator {
-            display: flex;
-            justify-content: space-around;
-            padding: 20px 0;
-            margin-bottom: 2rem;
-            border: 1px solid var(--border-color);
-            background-color: var(--card-bg);
-            border-radius: var(--border-radius);
-            position: relative;
-        }
-
-        .step-indicator .step {
-            text-align: center;
-            color: var(--text-gray);
-            position: relative;
-            z-index: 1;
-        }
-
-        .step-indicator .step .step-number {
-            width: 40px;
-            height: 40px;
-            line-height: 36px;
-            border: 2px solid var(--border-color);
-            display: inline-block;
-            border-radius: 50%;
-            margin-bottom: 10px;
-            background-color: var(--secondary-color);
-            transition: var(--transition);
-        }
-
-        .step-indicator .step.active {
-            color: var(--accent-color);
-            font-weight: bold;
-        }
-
-        .step-indicator .step.active .step-number {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-            color: var(--text-light);
-            transform: scale(1.1);
-        }
-
-        .step-indicator .step.completed .step-number {
-            background-color: var(--success-color);
-            border-color: var(--success-color);
-            color: var(--text-light);
-        }
-
-        .step-indicator .step.completed {
-            color: var(--success-color);
-        }
-
-        .progress-line {
-            position: absolute;
-            height: 2px;
-            background-color: var(--success-color);
-            top: 40px; /* Vertically center with the step numbers */
-            left: 10%;
-            z-index: 0;
-            transition: width 0.5s ease;
-        }
-
-        /* ========== MOVIE CARDS ========== */
-        .movie-card {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            transition: var(--transition);
-            height: 100%;
-        }
-        .movie-card:hover {
-            transform: translateY(-5px);
-            box-shadow: var(--shadow-medium);
-            border-color: var(--accent-color);
-        }
-
-        /* ========== SEAT SELECTION ========== */
-        .screen {
-            background: var(--gradient-primary);
-            color: var(--text-light);
-            text-align: center;
-            padding: 10px;
-            border-radius: 5px;
-            margin: 0 auto 30px auto;
-            max-width: 50%;
-            font-weight: 600;
-        }
-
-        .seat {
-            width: 35px;
-            height: 35px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: var(--transition);
-            background-color: var(--success-color); /* Available by default */
-            border: 1px solid rgba(0, 0, 0, 0.2);
-        }
-
-        .seat.vip {
-            background: var(--gradient-gold);
-        }
-
-        /* 'occupied' from HTML is treated as 'booked' */
-        .seat.occupied {
-            background: var(--error-color);
-            cursor: not-allowed;
-        }
-
-        .seat.couple {
-            width: 78px; /* 35px * 2 + 8px gap */
-            background-color: var(--couple-seat-color);
-        }
-
-        .seat.selected {
-            background: var(--accent-color);
-            transform: scale(1.1);
-            box-shadow: 0 0 15px rgba(233, 69, 96, 0.5);
-        }
-
-        .seat:hover:not(.occupied) {
-            transform: scale(1.1);
-        }
-
-        /* Fix the legend to use variables from CSS */
-        .seat-legend .seat-example[style*="#28a745"] {
-            background-color: var(--success-color) !important;
-        }
-
-        /* Trống */
-        .seat-legend .seat-example[style*="#ffc107"] {
-            background-color: var(--accent-color) !important;
-        }
-
-        /* Đang chọn */
-        .seat-legend .seat-example[style*="#dc3545"] {
-            background-color: var(--error-color) !important;
-        }
-
-        /* Đã bán */
-        .seat-legend .seat-example[style*="#6f42c1"] {
-            background: var(--gradient-gold) !important;
-        }
-
-        /* VIP */
-        .seat-legend .seat-example[style*="#e91e63"] {
-            background-color: var(--couple-seat-color) !important;
-        }
-
-        /* Ghế đôi */
-
-        .booking-summary {
-            background: rgba(0, 0, 0, 0.3);
-            border-radius: 10px;
-            border: 1px solid var(--border-color);
-        }
-
-        .booking-summary hr {
-            border-top: 1px solid var(--border-color);
-        }
-
-        #selected-seats-list .d-flex span:last-child {
-            color: var(--gold-color);
-            font-weight: bold;
-        }
-
-        /* ========== FOOD & DRINKS ========== */
-        .quantity-controls {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .quantity-btn {
-            width: 30px;
-            height: 30px;
-            border-radius: 50%;
-            background: var(--accent-color);
-            color: var(--text-light);
-            border: none;
-            cursor: pointer;
-        }
-
-        /* ========== CUSTOMER INFO FORM ========== */
-        .form-check-input:checked {
-            background-color: var(--accent-color);
-            border-color: var(--accent-color);
-        }
-
-        /* Final Invoice/Ticket */
-        .text-primary {
-            color: var(--accent-color) !important;
-        }
-
-        .text-warning {
-            color: var(--gold-color) !important;
-        }
-
-        .bg-primary {
-            background-color: var(--accent-color) !important;
-        }
-
-        .bg-warning {
-            background-color: var(--gold-color) !important;
-        }
-
-        exit-front {
-            position: absolute;
-            top: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ff4444;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        .exit-back {
-            position: absolute;
-            bottom: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #ff4444;
-            color: white;
-            padding: 5px 15px;
-            border-radius: 5px;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        .exit-left {
-            position: absolute;
-            left: -50px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #ff4444;
-            color: white;
-            padding: 10px 5px;
-            border-radius: 5px;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            writing-mode: vertical-lr;
-            text-orientation: mixed;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        .exit-right {
-            position: absolute;
-            right: -50px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: #ff4444;
-            color: white;
-            padding: 10px 5px;
-            border-radius: 5px;
-            font-size: 10px;
-            font-weight: bold;
-            text-align: center;
-            writing-mode: vertical-lr;
-            text-orientation: mixed;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% {
-                opacity: 1;
-            }
-            50% {
-                opacity: 0.7;
-            }
-        }
-
-    </style>
+    <link th:href="@{/cashier-static/cashier.css}"  rel="stylesheet">
 </head>
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom" th:fragment="navigation">
@@ -431,7 +22,7 @@
                     Cashier: <span>Admin</span>
                 </span>
             <a href="/cashier/" class="btn btn-outline-light btn-sm">
-                <i class="fas fa-sign-out-alt me-1"></i>Đăng xuất
+                <i class="fas fa-sign-out-alt me-1"></i>Logout
             </a>
         </div>
     </div>
@@ -443,23 +34,23 @@
 
         <div class="step" th:classappend="${currentStep == 1} ? 'active' : (${currentStep > 1} ? 'completed' : '')">
             <div class="step-number">1</div>
-            <small>Chọn Phim</small>
+            <small>Film Selection</small>
         </div>
         <div class="step" th:classappend="${currentStep == 2} ? 'active' : (${currentStep > 2} ? 'completed' : '')">
             <div class="step-number">2</div>
-            <small>Chọn Suất</small>
+            <small>Schedule Selection</small>
         </div>
         <div class="step" th:classappend="${currentStep == 3} ? 'active' : (${currentStep > 3} ? 'completed' : '')">
             <div class="step-number">3</div>
-            <small>Chọn Ghế</small>
+            <small>Seat Selection</small>
         </div>
         <div class="step" th:classappend="${currentStep == 4} ? 'active' : (${currentStep > 4} ? 'completed' : '')">
             <div class="step-number">4</div>
-            <small>Thông Tin</small>
+            <small>Information</small>
         </div>
         <div class="step" th:classappend="${currentStep == 5} ? 'active' : ''">
             <div class="step-number">5</div>
-            <small>Thanh Toán</small>
+            <small>Payment</small>
         </div>
     </div>
 
@@ -470,7 +61,7 @@
                     <div class="row align-items-center">
                         <div class="col-md-3">
                             <h5 class="mb-0">
-                                <i class="fas fa-film me-2"></i>Đang Chiếu Trong Bảy Ngày Tới
+                                <i class="fas fa-film me-2"></i>Movies Showing in 7 days
                             </h5>
                         </div>
                         <div class="col-md-9">
@@ -478,7 +69,7 @@
                                 <div class="flex-grow-1">
                                     <div class="input-group">
                                         <input type="text" name="keyword" class="form-control"
-                                               placeholder="Tìm kiếm phim theo tên..." th:value="${keyword}">
+                                               placeholder="Search Movie by name" th:value="${keyword}">
                                         <button type="submit" class="btn btn-outline-warning">
                                             <i class="fas fa-search"></i>
                                         </button>
@@ -486,7 +77,7 @@
                                 </div>
                                 <div style="min-width: 150px;">
                                     <select name="genreId" class="form-select" onchange="this.form.submit()">
-                                        <option value="">Tất cả thể loại</option>
+                                        <option value="">All categories</option>
                                         <option th:each="genre : ${availableGenres}"
                                                 th:value="${genre.genreID}"
                                                 th:text="${genre.genreName}"
@@ -496,7 +87,7 @@
                                 </div>
                                 <div style="min-width: 180px;">
                                     <select name="date" class="form-select" onchange="this.form.submit()">
-                                        <option value="">Tất cả ngày</option>
+                                        <option value="">All days</option>
                                         <option th:each="dateTime : ${availableDates}"
                                                 th:value="${#temporals.format(dateTime, 'yyyy-MM-dd''T''HH:mm')}"
                                                 th:text="${#temporals.format(dateTime, 'dd/MM/yyyy - EEEE')}"
@@ -506,7 +97,7 @@
                                 </div>
                                 <div style="min-width: 160px;">
                                     <select name="ageLimit" class="form-select" onchange="this.form.submit()">
-                                        <option value="">Giới hạn tuổi</option>
+                                        <option value="">Age limitation</option>
                                         <option th:each="limit : ${availableAgeLimits}"
                                                 th:value="${limit}"
                                                 th:text="${limit.name()}"
@@ -516,7 +107,7 @@
                                 </div>
                                 <div th:if="${hasSearchCriteria}">
                                     <a th:href="@{/cashier/movie/}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i><span>Xóa Lọc</span>
+                                        <i class="fas fa-times me-1"></i><span>Clear filter</span>
                                     </a>
                                 </div>
                             </form>
@@ -525,19 +116,19 @@
 
                     <div th:if="${hasSearchCriteria}" class="mt-2">
                         <small class="text-muted">
-                            <i class="fas fa-filter me-1"></i>Đang lọc:
+                            <i class="fas fa-filter me-1"></i>Filter:
                             <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge bg-info me-1">
-                    Từ khóa: "<span th:text="${keyword}"></span>"
+                    Keyword: "<span th:text="${keyword}"></span>"
                 </span>
                             <span th:if="${selectedGenreId != null}" class="badge bg-success me-1">
-                     Thể loại: <span th:text="${selectedGenreName}"></span>
+                     Category: <span th:text="${selectedGenreName}"></span>
                             </span>
-                </span>
+                            </span>
                             <span th:if="${selectedDate != null}" class="badge bg-warning text-dark me-1">
-                    Ngày: <span th:text="${#temporals.format(selectedDate, 'dd/MM/yyyy')}"></span>
+                    Date: <span th:text="${#temporals.format(selectedDate, 'dd/MM/yyyy')}"></span>
                 </span>
                             <span th:if="${selectedAgeLimit != null}" class="badge bg-danger me-1">
-                    Tuổi: <span th:text="${selectedAgeLimit.name()}"></span>
+                    Age: <span th:text="${selectedAgeLimit.name()}"></span>
                 </span>
                         </small>
                     </div>
@@ -545,7 +136,7 @@
                     <div th:if="${hasSearchCriteria}" class="mt-2">
                         <small class="text-info">
                             <i class="fas fa-info-circle me-1"></i>
-                            Tìm thấy <strong th:text="${totalMovies}"></strong> phim
+                            Found <strong th:text="${totalMovies}"></strong> movie(s)
                         </small>
                     </div>
                 </div>
@@ -556,19 +147,18 @@
                             <a th:href="@{'/cashier/' + ${movie.movieID} + '/select-schedule'}"
                                style="text-decoration: none;">
                                 <div class="card movie-card">
-                                    <img th:src="@{${movie.image}}" class="card-img-top" alt="Ảnh phim"
+                                    <img th:src="@{${movie.image}}" class="card-img-top" alt="Movie Poster"
                                          style="height: 300px; object-fit: cover;">
                                     <div class="card-body">
                                         <h5 class="card-title" th:text="${movie.movieName}"></h5>
                                         <p class="card-text text-muted">
                                             <i class="fas fa-clock me-1"></i><span
-                                                th:text="${movie.duration + ' phút'}"></span><br>
+                                                th:text="${movie.duration + ' minutes'}"></span><br>
                                             <i class="fas fa-tags me-1"></i>
                                             <span th:if="${movie.genres != null and !movie.genres.isEmpty()}"
                                                   th:text="${movie.genres[0].genreName}"></span>
                                             <span
-                                                    th:unless="${movie.genres != null and !movie.genres.isEmpty()}">Chưa
-                                        phân loại</span>
+                                                    th:unless="${movie.genres != null and !movie.genres.isEmpty()}">Not Specified</span>
                                         </p>
                                     </div>
                                 </div>
@@ -578,16 +168,16 @@
 
                     <div th:if="${movies == null or movies.isEmpty()}" class="text-center py-5">
                         <i class="fas fa-film fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Không tìm thấy phim nào</h5>
+                        <h5 class="text-muted">No Movies Found</h5>
                         <p class="text-muted" th:if="${hasSearchCriteria}">
-                            Không có phim nào phù hợp với bộ lọc hiện tại. Thử thay đổi điều kiện tìm kiếm.
+                            There are no available movies matching your criteria.
                         </p>
                         <p class="text-muted" th:unless="${hasSearchCriteria}">
-                            Hiện tại không có phim nào đang chiếu.
+                            There are currently no movies available.
                         </p>
                         <a th:href="@{/cashier/movie/}" class="btn btn-outline-warning mt-2"
                            th:if="${hasSearchCriteria}">
-                            <i class="fas fa-refresh me-1"></i>Xem tất cả phim
+                            <i class="fas fa-refresh me-1"></i>Show All Movies
                         </a>
                     </div>
 
@@ -618,15 +208,15 @@
 
             <div class="card card-custom mb-4" th:if="${currentStep == 2}">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Chọn Suất Chiếu</h5>
+                    <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Schedule Selection</h5>
                     <a href="/cashier/movie/" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>Chọn phim khác
+                        <i class="fas fa-arrow-left me-1"></i>Choose another movie
                     </a>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <h6 th:text="${selectedMovie.movieName}"></h6>
-                        <p class="text-muted" th:text="${selectedMovie.duration + ' phút'}"></p>
+                        <p class="text-muted" th:text="${selectedMovie.duration + ' minutes'}"></p>
                     </div>
                     <hr>
 
@@ -656,7 +246,7 @@
                                             </div>
 
                                             <small>
-                                                Phòng <span th:text="${schedule.roomID}"></span> - <span
+                                                Room <span th:text="${schedule.roomID}"></span> - <span
                                                     th:text="${schedule.roomType}"></span>
                                             </small>
 
@@ -664,14 +254,14 @@
                                                 <hr class="my-1">
                                                 <div class="mb-1">
                                                     <i class="fas fa-chair"></i>
-                                                    Ghế trống:
+                                                    Available Seats:
                                                     <strong th:text="${schedule.seatAvailability.availableSeats}"></strong>
                                                     /
                                                     <span th:text="${schedule.seatAvailability.totalSeats}"></span>
                                                 </div>
 
                                                 <div style="font-size: 0.75rem;">
-                                                    <span>Thường: </span>
+                                                    <span>Regular: </span>
                                                     <span th:text="${schedule.seatAvailability.availableRegularSeats}"></span>
                                                     <span>/</span>
                                                     <span th:text="${schedule.seatAvailability.totalRegularSeats}"></span>
@@ -692,31 +282,26 @@
                             </div>
 
                             <div th:if="${#lists.isEmpty(dailySchedules)}" class="text-center py-2">
-                                <small class="text-muted">Không có suất chiếu</small>
+                                <small class="text-muted">No schedules available for this day.</small>
                             </div>
                         </th:block>
                     </div>
 
                     <div th:if="${schedules == null or schedules.content.isEmpty()}" class="text-center py-4">
                         <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Không có suất chiếu</h5>
-                        <p class="text-muted">Phim này hiện tại không có suất chiếu nào.</p>
+                        <h5 class="text-muted">No Schedules</h5>
+                        <p class="text-muted">This movie does not have any schedules yet.</p>
                     </div>
 
-                    <div th:if="${schedules == null or schedules.isEmpty()}" class="text-center py-4">
-                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">Không có suất chiếu</h5>
-                        <p class="text-muted">Phim này hiện tại không có suất chiếu nào.</p>
-                    </div>
                 </div>
             </div>
 
             <div class="card card-custom mb-4" th:if="${currentStep == 3}">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-chair me-2"></i>Chọn Ghế</h5>
+                    <h5 class="mb-0"><i class="fas fa-chair me-2"></i>Select Seats</h5>
                     <a th:href="@{'/cashier/' + ${selectedMovie.movieID} + '/select-schedule'}"
                        class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>Chọn lại suất chiếu
+                        <i class="fas fa-arrow-left me-1"></i>Choose another schedule
                     </a>
                 </div>
                 <div class="card-body">
@@ -724,24 +309,17 @@
                         <div class="col-lg-9">
                             <div class="row">
                                 <div class="col-12 text-center">
-                                    <div class="screen mb-3">Màn hình</div>
+                                    <div class="screen mb-3">Screen</div>
                                     <div class="seat-map-container mb-4" style="position: relative;">
 
-                                        <!-- Lối thoát phía trước -->
-                                        <div class="exit-front">
-                                            <i class="fas fa-running"></i> THOÁT HIỂM
-                                        </div>
-
-                                        <!-- Lối thoát bên trái -->
                                         <div class="exit-left">
                                             <i class="fas fa-door-open"></i><br>
-                                            LốiRa/LôiVào
+                                            Entrance/Exit
                                         </div>
 
-                                        <!-- Lối thoát bên phải -->
                                         <div class="exit-right">
                                             <i class="fas fa-door-open"></i><br>
-                                            LốiRa/LôiVào
+                                            Entrance/Exit
                                         </div>
 
                                         <div th:each="rowEntry : ${seatsByRow}"
@@ -768,27 +346,21 @@
                                                   style="width: 30px; text-align: center;"
                                                   th:text="${rowEntry.key}"></span>
                                         </div>
-
-                                        <!-- Lối thoát phía sau -->
-                                        <div class="exit-back">
-                                            <i class="fas fa-running"></i> THOÁT HIỂM
-                                        </div>
-
                                         <div class="seat-legend d-flex justify-content-center mt-4">
                                             <div class="d-flex align-items-center me-3">
                                                 <div class="seat-example"
                                                      style="width: 20px; height: 20px; background: #28a745; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Trống</small>
+                                                <small>Available</small>
                                             </div>
                                             <div class="d-flex align-items-center me-3">
                                                 <div class="seat-example"
                                                      style="width: 20px; height: 20px; background: #ffc107; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Đang chọn</small>
+                                                <small>Selected</small>
                                             </div>
                                             <div class="d-flex align-items-center me-3">
                                                 <div class="seat-example"
                                                      style="width: 20px; height: 20px; background: #dc3545; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Đã bán</small>
+                                                <small>Booked</small>
                                             </div>
                                             <div class="d-flex align-items-center me-3">
                                                 <div class="seat-example"
@@ -798,12 +370,7 @@
                                             <div class="d-flex align-items-center me-3">
                                                 <div class="seat-example"
                                                      style="width: 30px; height: 20px; background: #e91e63; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Ghế đôi</small>
-                                            </div>
-                                            <div class="d-flex align-items-center">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #ff4444; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Thoát hiểm</small>
+                                                <small>Couple</small>
                                             </div>
                                         </div>
                                     </div>
@@ -820,11 +387,11 @@
                                         th:text="${#temporals.format(selectedSchedule.startTime, 'HH:mm')}"></span> |
                                     <i class="far fa-calendar-alt"></i> <span
                                         th:text="${#temporals.format(selectedSchedule.startTime, 'dd/MM/yyyy')}"></span><br>
-                                    <i class="fas fa-desktop"></i> Phòng <span
+                                    <i class="fas fa-desktop"></i> Room <span
                                         th:text="${selectedSchedule.roomID}"></span>
                                 </p>
                                 <hr>
-                                <h6>Ghế đã chọn (<span id="selected-seat-count">0</span>)</h6>
+                                <h6>Selected Seats (<span id="selected-seat-count">0</span>)</h6>
                                 <ul id="selected-seats-list" class="list-unstyled mb-2"
                                     style="max-height: 200px; overflow-y: auto;"></ul>
                                 <hr>
@@ -832,7 +399,7 @@
                                     <input type="hidden" name="seatIDs" id="selected-seat-ids-input">
                                     <input type="hidden" name="scheduleId" th:value="${selectedSchedule.scheduleID}">
                                     <button type="submit" class="btn btn-warning w-100 mt-3">
-                                        <i class="fas fa-arrow-right"></i> Tiếp tục
+                                        <i class="fas fa-arrow-right"></i> Continue
                                     </button>
                                 </form>
                             </div>
@@ -843,9 +410,9 @@
 
             <div class="card card-custom mb-4" th:if="${currentStep == 4}">
                 <div class="card-header d-flex justify-content-between align-items-center">
-                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông Tin Khách Hàng</h5>
+                    <h5 class="mb-0"><i class="fas fa-user me-2"></i>Customer Information</h5>
                     <a href="/cashier/back-to-seats" class="btn btn-outline-secondary btn-sm">
-                        <i class="fas fa-arrow-left me-1"></i>Chọn lại ghế
+                        <i class="fas fa-arrow-left me-1"></i>Choose other seats
                     </a>
                 </div>
                 <div class="card-body">
@@ -858,8 +425,8 @@
                             <h6 th:text="${selectedMovie.movieName}"></h6>
                             <p class="text-muted">
                                 <span th:text="${#temporals.format(selectedSchedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(selectedSchedule.endTime, 'HH:mm')}"></span> -
-                                Phòng <span th:text="${selectedSchedule.roomName}"></span><br>
-                                <strong>Ghế đã chọn:</strong>
+                                Room <span th:text="${selectedSchedule.roomName}"></span><br>
+                                <strong>Selected Seats:</strong>
                                 <span th:each="seat, iterStat : ${selectedSeats}">
                         <span class="badge bg-warning text-dark" th:text="${seat}"></span><span th:if="${!iterStat.last}">, </span>
                     </span>
@@ -869,25 +436,25 @@
 
                         <div class="row">
                             <div class="col-md-6">
-                                <h6 class="mb-3"><i class="fas fa-user-circle me-2"></i>Thông tin khách hàng</h6>
+                                <h6 class="mb-3"><i class="fas fa-user-circle me-2"></i>Customer Information</h6>
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
-                                        <label for="customerName" class="form-label">Họ tên</label>
-                                        <input type="text" class="form-control" id="customerName" name="customerName" placeholder="Nhập họ tên">
+                                        <label for="customerName" class="form-label">Full Name</label>
+                                        <input type="text" class="form-control" id="customerName" name="customerName" placeholder="Enter customer's name">
                                     </div>
                                     <div class="col-md-6 mb-3">
-                                        <label for="customerPhone" class="form-label">Số điện thoại (Tùy chọn)</label>
-                                        <input type="tel" class="form-control" id="customerPhone" name="customerPhone" placeholder="Nhập số điện thoại">
+                                        <label for="customerPhone" class="form-label">Phone (Optional)</label>
+                                        <input type="tel" class="form-control" id="customerPhone" name="customerPhone" placeholder="Enter phone number...">
                                     </div>
                                 </div>
                                 <div class="mb-3">
-                                    <label for="customerEmail" class="form-label">Email (tùy chọn)</label>
-                                    <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="Nhập email">
+                                    <label for="customerEmail" class="form-label">Email (Optional)</label>
+                                    <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="Enter email">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="promotion" class="form-label">Khuyến mãi (tùy chọn)</label>
+                                    <label for="promotion" class="form-label">Promotion (Optional)</label>
                                     <select id="promotion" name="promotionId" class="form-select">
-                                        <option value="">-- Chọn khuyến mãi --</option>
+                                        <option value="">-- Choose promotion --</option>
                                         <option th:each="pro : ${promotions}"
                                                 th:value="${pro.promotionID}"
                                                 th:text="${pro.promotionCode}">
@@ -897,10 +464,10 @@
                             </div>
 
                             <div class="col-md-6">
-                                <h6 class="mb-3"><i class="fas fa-hamburger me-2"></i>Đồ ăn & Nước uống</h6>
+                                <h6 class="mb-3"><i class="fas fa-hamburger me-2"></i>Food & Drink</h6>
 
                                 <div class="input-group mb-3">
-                                    <input type="text" name="foodKeyword" class="form-control" placeholder="Tìm tên đồ ăn..." th:value="${foodKeyword}">
+                                    <input type="text" name="foodKeyword" class="form-control" placeholder="Search for food..." th:value="${foodKeyword}">
                                     <input type="hidden" name="seatIDs" th:value="${selectedSeatIds}">
                                     <button class="btn btn-outline-primary" type="submit" formaction="/cashier/cus-info" formnovalidate>
                                         <i class="fas fa-search"></i>
@@ -913,9 +480,9 @@
                                             <div class="card h-100" style="background: rgba(0,0,0,0.2);">
                                                 <div class="card-body d-flex justify-content-between align-items-center p-2">
                                                     <div class="flex-grow-1 me-3">
-                                                        <h6 class="mb-1" th:text="${food.foodName}">Tên đồ ăn</h6>
-                                                        <p class="mb-1">Giá: <span class="text-warning" th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
-                                                        <p class="text-muted small mb-0">Còn lại: <span th:text="${food.quantity}"></span></p>
+                                                        <h6 class="mb-1" th:text="${food.foodName}">Food Name</h6>
+                                                        <p class="mb-1">Price: <span class="text-warning" th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
+                                                        <p class="text-muted small mb-0">In Stock: <span th:text="${food.quantity}"></span></p>
                                                     </div>
                                                     <div class="input-group" style="max-width: 130px;">
                                                         <button class="btn btn-outline-secondary btn-sm" type="button" th:onclick="updateQuantity([[${food.theaterStockId}]], -1)">-</button>
@@ -946,20 +513,20 @@
                                 </div>
 
                                 <div th:if="${theaterStockPage == null or theaterStockPage.isEmpty()}">
-                                    <p class="text-center text-muted mt-4">Không tìm thấy đồ ăn phù hợp.</p>
+                                    <p class="text-center text-muted mt-4">No matching food found.</p>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-md-12 mt-4">
-                            <h6 class="mb-3"><i class="fas fa-money-check-alt me-2"></i>Phương thức thanh toán</h6>
+                            <h6 class="mb-3"><i class="fas fa-money-check-alt me-2"></i>Payment Method</h6>
                             <div class="card card-custom p-3">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-check">
                                             <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCash" value="cash" checked>
                                             <label class="form-check-label" for="paymentCash" style="color: white">
-                                                <i class="fas fa-money-bill-wave me-2"></i><span>Thanh toán tiền mặt</span>
+                                                <i class="fas fa-money-bill-wave me-2"></i><span>Cash</span>
                                             </label>
                                         </div>
                                     </div>
@@ -967,7 +534,7 @@
                                         <div class="form-check" style="color: white">
                                             <input class="form-check-input" type="radio" name="paymentMethod" id="paymentBank" value="bank">
                                             <label class="form-check-label" for="paymentBank">
-                                                <i class="fas fa-university me-2"></i><span>Chuyển khoản ngân hàng</span>
+                                                <i class="fas fa-university me-2"></i><span>Bank Transfer</span>
                                             </label>
                                         </div>
                                     </div>
@@ -976,7 +543,7 @@
                         </div>
 
                         <div class="col-12 text-center mt-4">
-                            <button type="submit" class="btn btn-primary w-100">Xác nhận và tiếp tục</button>
+                            <button type="submit" class="btn btn-primary w-100">Confirm and Continue</button>
                         </div>
                     </form>
 
@@ -995,8 +562,8 @@
                             <div class="success-icon mb-3">
                                 <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
                             </div>
-                            <h2 class="text-success mb-2">Đặt vé thành công!</h2>
-                            <p class="text-muted">Cảm ơn bạn đã sử dụng dịch vụ của chúng tôi</p>
+                            <h2 class="text-success mb-2">Booking Successful!</h2>
+                            <p class="text-muted">Thank you for using our service.</p>
                         </div>
                     </div>
                 </div>
@@ -1006,12 +573,12 @@
                         <div class="card card-custom">
                             <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="mb-0">
-                                    <i class="fas fa-receipt me-2"></i>Thông tin hóa đơn
+                                    <i class="fas fa-receipt me-2"></i>Invoice Information
                                 </h5>
                                 <div class="invoice-actions">
                                     <button class="btn btn-outline-primary btn-sm"
                                             th:onclick="'window.open(\'' + @{/cashier/print-ticket/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=400,height=600\');'">
-                                        <i class="fas fa-print me-1"></i>In hóa đơn
+                                        <i class="fas fa-print me-1"></i>Print Invoice
                                     </button>
                                 </div>
                             </div>
@@ -1019,15 +586,15 @@
                                 <div class="invoice-header mb-4">
                                     <div class="row">
                                         <div class="col-md-6">
-                                            <h6 class="text-muted mb-1">Mã hóa đơn:</h6>
+                                            <h6 class="text-muted mb-1">Invoice ID:</h6>
                                             <h5 class="text-primary mb-3"
                                                 th:text="'#' + ${bookingResult.invoiceId}"></h5>
 
-                                            <h6 class="text-muted mb-1">Ngày đặt:</h6>
+                                            <h6 class="text-muted mb-1">Booking Date:</h6>
                                             <p th:text="${bookingResult.bookingDate}"></p>
                                         </div>
                                         <div class="col-md-6 text-md-end">
-                                            <h6 class="text-muted mb-1">Tổng tiền:</h6>
+                                            <h6 class="text-muted mb-1">Total Amount:</h6>
                                             <h3 class="text-warning mb-0"
                                                 th:text="${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></h3>
                                         </div>
@@ -1036,18 +603,18 @@
 
                                 <div class="customer-info mb-4">
                                     <h6 class="border-bottom pb-2 mb-3">
-                                        <i class="fas fa-user me-2"></i>Thông tin khách hàng
+                                        <i class="fas fa-user me-2"></i>Customer Information
                                     </h6>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p class="mb-2">
-                                                <strong>Họ tên:</strong>
+                                                <strong>Full Name:</strong>
                                                 <span th:text="${bookingResult.customerName}"></span>
                                             </p>
                                         </div>
                                         <div class="col-md-6">
                                             <p class="mb-2">
-                                                <strong>Số điện thoại:</strong>
+                                                <strong>Phone Number:</strong>
                                                 <span th:text="${bookingResult.customerPhone}"></span>
                                             </p>
                                         </div>
@@ -1056,26 +623,26 @@
 
                                 <div class="movie-info mb-4">
                                     <h6 class="border-bottom pb-2 mb-3">
-                                        <i class="fas fa-film me-2"></i>Thông tin phim
+                                        <i class="fas fa-film me-2"></i>Movie Information
                                     </h6>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p class="mb-2">
-                                                <strong>Tên phim:</strong>
+                                                <strong>Movie Title:</strong>
                                                 <span th:text="${bookingResult.movieName}"></span>
                                             </p>
                                             <p class="mb-2">
-                                                <strong>Thời lượng:</strong>
-                                                <span th:text="${bookingResult.movieDuration} + ' phút'"></span>
+                                                <strong>Duration:</strong>
+                                                <span th:text="${bookingResult.movieDuration} + ' minutes'"></span>
                                             </p>
                                         </div>
                                         <div class="col-md-6">
                                             <p class="mb-2">
-                                                <strong>Giờ chiếu:</strong>
+                                                <strong>Showtime:</strong>
                                                 <span th:text="${bookingResult.scheduleTime}"></span>
                                             </p>
                                             <p class="mb-2">
-                                                <strong>Phòng chiếu:</strong>
+                                                <strong>Screen:</strong>
                                                 <span th:text="${bookingResult.roomName}"></span>
                                             </p>
                                         </div>
@@ -1084,12 +651,12 @@
 
                                 <div class="seat-info mb-4">
                                     <h6 class="border-bottom pb-2 mb-3">
-                                        <i class="fas fa-chair me-2"></i>Thông tin ghế
+                                        <i class="fas fa-chair me-2"></i>Seat Information
                                     </h6>
                                     <div class="row">
                                         <div class="col-md-6">
                                             <p class="mb-2">
-                                                <strong>Vị trí ghế:</strong>
+                                                <strong>Seat Positions:</strong>
                                             </p>
                                             <div class="seat-list">
                         <span th:each="seat, iterStat : ${bookingResult.seatPositions}"
@@ -1099,7 +666,7 @@
                                         </div>
                                         <div class="col-md-6">
                                             <p class="mb-2">
-                                                <strong>Tổng tiền vé:</strong>
+                                                <strong>Total Ticket Price:</strong>
                                                 <span class="text-success"
                                                       th:text="${#numbers.formatDecimal(bookingResult.totalTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                                             </p>
@@ -1110,16 +677,16 @@
                                 <div th:if="${bookingResult.foodItems != null and !bookingResult.foodItems.isEmpty()}"
                                      class="food-info mb-4">
                                     <h6 class="border-bottom pb-2 mb-3">
-                                        <i class="fas fa-utensils me-2"></i>Thông tin bắp nước
+                                        <i class="fas fa-utensils me-2"></i>Concessions Information
                                     </h6>
                                     <div class="table-responsive">
                                         <table class="table table-sm">
                                             <thead class="table-light">
                                             <tr>
-                                                <th>Tên món</th>
-                                                <th class="text-center">Số lượng</th>
-                                                <th class="text-end">Đơn giá</th>
-                                                <th class="text-end">Thành tiền</th>
+                                                <th>Item</th>
+                                                <th class="text-center">Quantity</th>
+                                                <th class="text-end">Unit Price</th>
+                                                <th class="text-end">Subtotal</th>
                                             </tr>
                                             </thead>
                                             <tbody>
@@ -1134,7 +701,7 @@
                                             </tbody>
                                             <tfoot class="table-light">
                                             <tr>
-                                                <th colspan="3" class="text-end">Tổng tiền bắp nước:</th>
+                                                <th colspan="3" class="text-end">Total Concessions Price:</th>
                                                 <th class="text-end text-success"
                                                     th:text="${#numbers.formatDecimal(bookingResult.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></th>
                                             </tr>
@@ -1149,17 +716,17 @@
                                             <div class="card bg-light">
                                                 <div class="card-body">
                                                     <div class="d-flex justify-content-between mb-2">
-                                                        <span>Tiền vé:</span>
+                                                        <span>Ticket Price:</span>
                                                         <span th:text="${#numbers.formatDecimal(bookingResult.totalTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                                                     </div>
                                                     <div th:if="${bookingResult.totalFoodPrice != null and bookingResult.totalFoodPrice > 0}"
                                                          class="d-flex justify-content-between mb-2">
-                                                        <span>Tiền bắp nước:</span>
+                                                        <span>Concessions Price:</span>
                                                         <span th:text="${#numbers.formatDecimal(bookingResult.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
                                                     </div>
                                                     <hr class="my-2">
                                                     <div class="d-flex justify-content-between">
-                                                        <strong class="fs-5">Tổng cộng:</strong>
+                                                        <strong class="fs-5">Grand Total:</strong>
                                                         <strong class="text-warning fs-5"
                                                                 th:text="${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
                                                     </div>
@@ -1176,24 +743,24 @@
                         <div class="card card-custom">
                             <div class="card-header">
                                 <h5 class="mb-0">
-                                    <i class="fas fa-cogs me-2"></i>Thao tác nhanh
+                                    <i class="fas fa-cogs me-2"></i>Quick Actions
                                 </h5>
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-3">
                                     <button class="btn btn-primary btn-lg"
                                             th:onclick="'window.open(\'' + @{/cashier/print/invoice/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=500,height=800\');'">
-                                        <i class="fas fa-receipt me-2"></i>In Hóa Đơn Chính
+                                        <i class="fas fa-receipt me-2"></i>Print Main Invoice
                                     </button>
 
                                     <button th:if="${bookingResult.totalFoodPrice != null && bookingResult.totalFoodPrice.doubleValue() > 0}"
                                             class="btn btn-info btn-lg"
                                             th:onclick="'window.open(\'' + @{/cashier/print/food-receipt/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=400,height=600\');'">
-                                        <i class="fas fa-utensils me-2"></i>In Hóa Đơn Đồ Ăn
+                                        <i class="fas fa-utensils me-2"></i>Print Food Invoice
                                     </button>
 
                                     <a href="/cashier" class="btn btn-outline-success btn-lg">
-                                        <i class="fas fa-plus me-2"></i>Đặt vé mới
+                                        <i class="fas fa-plus me-2"></i>New Booking
                                     </a>
                                 </div>
                             </div>
@@ -1202,26 +769,26 @@
                         <div class="card card-custom mt-3">
                             <div class="card-header">
                                 <h6 class="mb-0">
-                                    <i class="fas fa-info-circle me-2"></i>Lưu ý
+                                    <i class="fas fa-info-circle me-2"></i>Notes
                                 </h6>
                             </div>
                             <div class="card-body">
                                 <ul class="list-unstyled small mb-0">
                                     <li class="mb-2">
                                         <i class="fas fa-check-circle text-success me-1"></i>
-                                        Vui lòng có mặt trước giờ chiếu 15 phút
+                                        Please arrive 15 minutes before the showtime.
                                     </li>
                                     <li class="mb-2">
                                         <i class="fas fa-check-circle text-success me-1"></i>
-                                        Xuất trình hóa đơn khi vào rạp
+                                        Present the invoice at the entrance.
                                     </li>
                                     <li class="mb-2">
                                         <i class="fas fa-check-circle text-success me-1"></i>
-                                        Giữ vé cẩn thận trong suốt buổi chiếu
+                                        Keep your ticket safe throughout the screening.
                                     </li>
                                     <li class="mb-0">
                                         <i class="fas fa-check-circle text-success me-1"></i>
-                                        Liên hệ quầy vé nếu cần hỗ trợ
+                                        Contact the ticket counter for assistance.
                                     </li>
                                 </ul>
                             </div>
@@ -1229,27 +796,11 @@
                     </div>
 
                 </div>
-                </div>
-
-<!--                <div th:unless="${bookingResult != null}" class="row">-->
-<!--                    <div class="col-12">-->
-<!--                        <div class="card card-custom border-danger">-->
-<!--                            <div class="card-body text-center">-->
-<!--                                <div class="error-icon mb-3">-->
-<!--                                    <i class="fas fa-exclamation-triangle text-danger" style="font-size: 3rem;"></i>-->
-<!--                                </div>-->
-<!--                                <h4 class="text-danger mb-2">Có lỗi xảy ra!</h4>-->
-<!--                                <p class="text-muted mb-3">Không thể tải thông tin hóa đơn. Vui lòng thử lại.</p>-->
-<!--                                <a href="/cashier" class="btn btn-primary">-->
-<!--                                    <i class="fas fa-arrow-left me-2"></i>Quay lại trang chủ-->
-<!--                                </a>-->
-<!--                            </div>-->
-<!--                        </div>-->
-<!--                    </div>-->
-<!--                </div>-->
             </div>
+
         </div>
     </div>
+</div>
 </div>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script th:if="${currentStep == 3}">
@@ -1288,7 +839,7 @@
             for (const [id, seatData] of selectedSeats.entries()) {
                 const li = document.createElement('li');
                 li.className = 'd-flex justify-content-between';
-                li.innerHTML = `<span><i class="fas fa-chair fa-xs me-2"></i>${seatData.position}</span> <span>${seatData.price.toLocaleString('vi-VN')} đ</span>`;
+                li.innerHTML = `<span><i class="fas fa-chair fa-xs me-2"></i>${seatData.position}</span> <span>${seatData.price.toLocaleString('en-US')} VND</span>`;
                 selectedSeatsList.appendChild(li);
                 total += seatData.price;
             }
@@ -1300,7 +851,7 @@
         seatSelectionForm.addEventListener('submit', function (e) {
             if (selectedSeats.size === 0) {
                 e.preventDefault();
-                alert('Vui lòng chọn ít nhất một ghế.');
+                alert('Please select at least one seat.');
             }
         });
     });

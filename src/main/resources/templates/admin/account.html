@@ -9,14 +9,14 @@
 <body>
 
 <div class="container mt-4">
-    <h2 class="mb-4">Quản Lý Tài Khoản</h2>
+    <h2 class="mb-4">Account management</h2>
 
     <div th:if="${success}" class="alert alert-success" th:text="${success}"></div>
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
     <div class="mb-3">
         <a th:href="@{/admin/account/add}" class="btn btn-primary">
-            <i class="fas fa-plus me-2"></i>Thêm Tài Khoản Mới
+            <i class="fas fa-plus me-2"></i>Add new Account
         </a>
     </div>
 
@@ -33,7 +33,7 @@
                 </div>
 
                 <div class="col-md-3">
-                    <label for="role" class="form-label">Vai trò</label>
+                    <label for="role" class="form-label">Role</label>
                     <select id="role" name="role" class="form-select">
                         <option value="All" th:selected="${role == 'All'}">Tất cả vai trò</option>
                         <option th:each="r : ${T(com.bluebear.cinemax.enumtype.Role).values()}"
@@ -46,7 +46,7 @@
                 <div class="col-md-3">
                     <label for="status" class="form-label">Trạng thái</label>
                     <select id="status" name="status" class="form-select">
-                        <option value="All" th:selected="${status == 'All'}">Tất cả trạng thái</option>
+                        <option value="All" th:selected="${status == 'All'}">All Status</option>
                         <option th:each="s : ${T(com.bluebear.cinemax.enumtype.Account_Status).values()}"
                                 th:value="${s.name()}"
                                 th:text="${s.name()}"

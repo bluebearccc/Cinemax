@@ -25,11 +25,13 @@ public class BookingConfirmController {
 
     @Autowired
     private BookingService bookingService;
+
     @Autowired
     private InvoiceRepository invoiceRepository;
 
     @Value("${payment.sepay.bank}")
     private String sepayBank;
+
     @Value("${payment.sepay.account}")
     private String sepayAccount;
 
@@ -40,7 +42,7 @@ public class BookingConfirmController {
                 bookingRequest.setPaymentMethod(PaymentMethod.BANK_TRANSFER.name());
                 InvoiceDTO invoiceDto = bookingService.initiateBooking(bookingRequest);
                 if (invoiceDto == null) {
-                    redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi khởi tạo hoá đơn. Vui lòng thử lại.");
+                    redirectAttributes.addFlashAttribute("errorMessage", "Error to initial invoice");
                     return "redirect:/cashier/back-to-seats";
                 }
                 model.addAttribute("invoiceDto", invoiceDto);
@@ -56,7 +58,7 @@ public class BookingConfirmController {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi đặt vé: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Fail to book ticket " + e.getMessage());
             return "redirect:/cashier/back-to-seats";
         }
     }
@@ -72,7 +74,7 @@ public class BookingConfirmController {
         } catch (Exception e) {
             mav.addObject("currentStep", 5);
             mav.addObject("bookingResult", null);
-            mav.addObject("errorMessage", "Không thể tải thông tin đặt vé.");
+            mav.addObject("errorMessage", "Error to load invoice info");
         }
         return mav;
     }

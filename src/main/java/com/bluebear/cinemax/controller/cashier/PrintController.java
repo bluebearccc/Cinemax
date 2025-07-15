@@ -26,15 +26,14 @@ public class PrintController {
                 bookingResult = bookingService.getBookingResult(invoiceId);
             }
             if (bookingResult == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thông tin hóa đơn.");
+                redirectAttributes.addFlashAttribute("errorMessage", "Invoice not found");
                 return "redirect:/cashier/";
             }
             model.addAttribute("bookingResult", bookingResult);
-            // Sửa tên template trả về ở đây nếu bạn đã đổi tên file print-ticket.html
             return "cashier/print-ticket";
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tạo hóa đơn để in: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error to print Invoice " + e.getMessage());
             return "redirect:/cashier/";
         }
     }
@@ -47,14 +46,14 @@ public class PrintController {
                 bookingResult = bookingService.getBookingResult(invoiceId);
             }
             if (bookingResult == null) {
-                redirectAttributes.addFlashAttribute("errorMessage", "Không tìm thấy thông tin hóa đơn phù hợp.");
+                redirectAttributes.addFlashAttribute("errorMessage", "Invoice not found");
                 return "redirect:/cashier/";
             }
             model.addAttribute("bookingResult", bookingResult);
             return "cashier/print-food-receipt";
         } catch (Exception e) {
             e.printStackTrace();
-            redirectAttributes.addFlashAttribute("errorMessage", "Lỗi khi tạo hóa đơn đồ ăn: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("errorMessage", "Error to find invoice " + e.getMessage());
             return "redirect:/cashier/";
         }
     }

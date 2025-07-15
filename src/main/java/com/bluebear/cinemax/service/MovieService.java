@@ -18,7 +18,6 @@ public class MovieService {
 
     public List<Movie> getAllMovies() {
         List<Movie> movies = movieRepository.findAll();
-        logger.info("Retrieved {} movies from database", movies.size());
         return movies;
     }
 
@@ -36,7 +35,6 @@ public class MovieService {
 
     public List<Movie> searchMoviesByName(String keyword) {
         List<Movie> movies = movieRepository.findByMovieNameContaining(keyword);
-        logger.info("Retrieved {} movies from database", movies.size());
         return movies;
     }
 }
