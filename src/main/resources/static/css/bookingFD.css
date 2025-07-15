@@ -409,3 +409,27 @@ body {
     background-color: #5a6268;
     color: #fff;
 }
+
+.pagination-section {
+    margin-top: 20px;
+}
+
+.pagination form {
+    display: inline;
+}
+
+.page-link {
+    padding: 8px 12px;
+    border: none;
+    background-color: #fff;
+    color: #007bff;
+    margin: 0 3px;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.page-item.active .page-link {
+    background-color: #007bff;
+    color: white;
+    font-weight: bold;
+}

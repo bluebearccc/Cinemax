@@ -10,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer> {
@@ -31,4 +32,15 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
                                  @Param("status") com.bluebear.cinemax.enumtype.DetailSeat_Status status);
     boolean existsBySeatSeatIDAndScheduleScheduleIDAndStatusIn(Integer seatId, Integer scheduleId, List<DetailSeat_Status> statuses);
     List<DetailSeat> findBySeatSeatIDAndScheduleScheduleIDAndStatusIn(Integer seatId, Integer scheduleId, List<DetailSeat_Status> statuses);
+    @Query("SELECT COUNT(ds) FROM DetailSeat ds " +
+            "WHERE ds.invoice.status = 'Booked' AND ds.invoice.bookingDate BETWEEN :startOfDay AND :endOfDay")
+    Long countTicketsToday(@Param("startOfDay") LocalDateTime startOfDay,
+                           @Param("endOfDay") LocalDateTime endOfDay);
+
+
+    // Tổng số vé đã bán trong khoảng thời gian
+    @Query("SELECT COUNT(ds) FROM DetailSeat ds " +
+            "WHERE ds.invoice.status = 'Booked' AND ds.invoice.bookingDate BETWEEN :start AND :end")
+    Integer countTicketsBetween(@Param("start") LocalDateTime start,
+                             @Param("end") LocalDateTime end);
 }

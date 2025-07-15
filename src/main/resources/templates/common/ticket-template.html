@@ -3,102 +3,383 @@
 <head>
     <meta charset="UTF-8">
     <title>Vé xem phim - Cinemax</title>
-
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         body {
-            font-family: 'Georgia', serif;
-            background-color: #fefefe;
-            padding: 40px;
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .ticket-container {
+            perspective: 1000px;
+            animation: fadeInUp 1s ease-out;
         }
 
         .ticket-box {
-            background-color: #fdf6f0;
-            border: 1px solid #ccc;
-            width: 500px;
-            margin: auto;
-            padding: 20px 25px;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
+            width: 450px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.3s ease;
+        }
+
+        .ticket-box:hover {
+            transform: rotateY(5deg) rotateX(5deg);
         }
 
         .ticket-header {
-            text-align: left;
-            margin-bottom: 10px;
-        }
-
-        .ticket-header h3 {
-            margin: 0;
-            font-size: 20px;
-        }
-
-        .ticket-header p {
-            margin: 5px 0;
-            font-size: 16px;
-        }
-
-        .poster {
-            width: 100%;
-            margin: 10px 0;
-        }
-
-        .details {
-            margin: 15px 0;
-            font-size: 18px;
-        }
-
-        .details p {
-            margin: 6px 0;
-        }
-
-        .details .label {
-            font-weight: bold;
-        }
-
-        .barcode {
+            background: linear-gradient(90deg, #ff6b6b, #ffa500);
+            padding: 25px;
             text-align: center;
-            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
         }
 
-        .barcode img {
-            height: 60px;
+        .ticket-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: shimmer 3s infinite;
         }
 
-        .barcode-code {
+        .ticket-header h2 {
+            color: white;
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 5px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            position: relative;
+            z-index: 1;
+        }
+
+        .cinema-logo {
+            font-size: 16px;
+            color: rgba(255,255,255,0.9);
+            font-weight: 300;
+            position: relative;
+            z-index: 1;
+        }
+
+        .ticket-body {
+            background: white;
+            padding: 30px;
+            position: relative;
+        }
+
+        .ticket-body::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+            box-shadow: 0 0 0 10px white;
+        }
+
+        .movie-info {
+            margin-bottom: 25px;
+        }
+
+        .info-row {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: linear-gradient(90deg, #f8f9ff 0%, #e8f2ff 100%);
+            border-radius: 10px;
+            border-left: 4px solid #ff6b6b;
+            transition: all 0.3s ease;
+        }
+
+        .info-row:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .info-icon {
+            font-size: 20px;
+            margin-right: 12px;
+            width: 30px;
+            text-align: center;
+        }
+
+        .info-label {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-right: 8px;
+            min-width: 100px;
+        }
+
+        .info-value {
+            color: #34495e;
+            font-weight: 400;
+        }
+
+        .divider {
+            height: 2px;
+            background: linear-gradient(90deg, transparent, #ff6b6b, transparent);
+            margin: 25px 0;
+            position: relative;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 15px;
+            height: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
+        }
+
+        .divider::before {
+            left: -7px;
+        }
+
+        .divider::after {
+            right: -7px;
+        }
+
+        .payment-info {
+            margin-bottom: 25px;
+        }
+
+        .payment-info .info-row {
+            border-left-color: #2ecc71;
+        }
+
+        .qr-section {
+            text-align: center;
+            padding: 20px;
+            background: linear-gradient(135deg, #f8f9ff 0%, #e8f2ff 100%);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            border: 2px dashed #3498db;
+        }
+
+        .qr-code {
+            margin-bottom: 15px;
+        }
+
+        .qr-code img {
+            border-radius: 10px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            background: white;
+            padding: 10px;
+        }
+
+        .qr-text {
+            color: #2c3e50;
+            font-weight: 600;
             font-size: 14px;
-            letter-spacing: 2px;
-            margin-top: 5px;
         }
 
+        .footer {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 12px;
+            line-height: 1.6;
+            background: linear-gradient(90deg, #ecf0f1 0%, #bdc3c7 100%);
+            padding: 20px;
+            margin: -30px -30px 0;
+            border-radius: 0 0 15px 15px;
+        }
+
+        .footer strong {
+            color: #2c3e50;
+            font-weight: 700;
+        }
+
+        .perforation {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: repeating-linear-gradient(
+                    90deg,
+                    transparent,
+                    transparent 8px,
+                    #bdc3c7 8px,
+                    #bdc3c7 12px
+            );
+        }
+
+        .perforation-top {
+            top: 80px;
+        }
+
+        .perforation-bottom {
+            bottom: 60px;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+            100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
+        }
+
+        .ticket-number {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            background: rgba(255,255,255,0.2);
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            color: white;
+            font-weight: 600;
+        }
+
+        .decoration {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            border-radius: 50%;
+            top: 20px;
+            left: 20px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 0.7; }
+            50% { transform: scale(1.1); opacity: 1; }
+        }
+
+        @media (max-width: 480px) {
+            .ticket-box {
+                width: 90%;
+                max-width: 400px;
+            }
+
+            .ticket-header h2 {
+                font-size: 20px;
+            }
+
+            .ticket-body {
+                padding: 20px;
+            }
+
+            .info-row {
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+
+            .info-label {
+                margin-bottom: 5px;
+            }
+        }
     </style>
 </head>
 <body>
-<div class="ticket-box">
-    <h2>🎟️ Vé xem phim - Cinemax</h2>
+<div class="ticket-container">
+    <div class="ticket-box">
+        <div class="decoration"></div>
+        <div class="ticket-number">${invoiceId}</div>
+        <div class="perforation perforation-top"></div>
 
-    <div class="info">
-        <p><span class="label">🎬 Tên phim:</span> <span th:text="${movieName}"></span></p>
-        <p><span class="label">🏢 Phòng chiếu:</span> <span th:text="${room}"></span></p>
-        <p><span class="label">💺 Ghế ngồi:</span> <span th:text="${seats}"></span></p>
-        <p><span class="label">🕒 Thời gian chiếu:</span> <span th:text="${showtime}"></span></p>
-    </div>
+        <div class="ticket-header">
+            <h2>🎟️ VÉ XEM PHIM</h2>
+            <div class="cinema-logo">CINEMAX VIETNAM</div>
+        </div>
 
-    <hr/>
+        <div class="ticket-body">
+            <div class="movie-info">
+                <div class="info-row">
+                    <div class="info-icon">🎬</div>
+                    <div class="info-label">Tên phim:</div>
+                    <div class="info-value" th:text="${movieName}">Avengers: Endgame</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon">🏢</div>
+                    <div class="info-label">Phòng chiếu:</div>
+                    <div class="info-value" th:text="${room}">Phòng 1</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon">💺</div>
+                    <div class="info-label">Ghế ngồi:</div>
+                    <div class="info-value" th:text="${seats}">A1, A2</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon">🕒</div>
+                    <div class="info-label">Giờ chiếu:</div>
+                    <div class="info-value" th:text="${showtime}">19:30 - 25/07/2025</div>
+                </div>
+            </div>
 
-    <div class="info">
-        <p><span class="label">🧾 Mã hóa đơn:</span> <span th:text="${invoiceId}"></span></p>
-        <p><span class="label">💵 Số tiền:</span> <span th:text="${amount}"></span> VND</p>
-        <p><span class="label">🏦 Ngân hàng:</span> <span th:text="${bankCode}"></span></p>
-    </div>
+            <div class="divider"></div>
 
-    <div class="qr-code">
-        <img th:src="@{https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VNPAY-${invoiceId}}" alt="QR Code"/>
-        <p>Mã QR vé của bạn</p>
-    </div>
+            <div class="payment-info">
+                <div class="info-row">
+                    <div class="info-icon">🧾</div>
+                    <div class="info-label">Mã hóa đơn:</div>
+                    <div class="info-value" th:text="${invoiceId}">INV001234</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon">💵</div>
+                    <div class="info-label">Số tiền:</div>
+                    <div class="info-value"><span th:text="${amount}">180,000</span> VND</div>
+                </div>
+                <div class="info-row">
+                    <div class="info-icon">🏦</div>
+                    <div class="info-label">Ngân hàng:</div>
+                    <div class="info-value" th:text="${bankCode}">VNPAY</div>
+                </div>
+            </div>
 
-    <div class="footer">
-        Cảm ơn bạn đã đặt vé tại <strong>Cinemax</strong>! <br>
-        Vui lòng xuất trình mã QR khi vào rạp.
+            <div class="qr-section">
+                <div class="qr-code">
+                    <img th:src="@{https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VNPAY-${invoiceId}}"
+                         src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VNPAY-INV001234"
+                         alt="QR Code"/>
+                </div>
+                <div class="qr-text">Mã QR vé của bạn</div>
+            </div>
+        </div>
+
+        <div class="perforation perforation-bottom"></div>
+
+        <div class="footer">
+            Cảm ơn bạn đã đặt vé tại <strong>CINEMAX</strong>! <br>
+            Vui lòng xuất trình mã QR khi vào rạp. <br>
+            <em>Ticket valid for single use only</em>
+        </div>
     </div>
 </div>
 </body>
 </html>
-

@@ -3,10 +3,9 @@ package com.bluebear.cinemax.controller;
 import com.bluebear.cinemax.dto.CustomerDTO;
 import com.bluebear.cinemax.dto.CustomerServiceFeedbackDTO;
 import com.bluebear.cinemax.dto.WatchedMovieDTO;
-import com.bluebear.cinemax.entity.FeedbackService;
 import com.bluebear.cinemax.enumtype.FeedbackStatus;
-import com.bluebear.cinemax.repository.FeedbackServiceRepository;
-import com.bluebear.cinemax.service.CustomerCareService;
+import com.bluebear.cinemax.repository.ServiceFeedbackRepository;
+import com.bluebear.cinemax.service.feedbackService.CustomerCareService;
 import com.bluebear.cinemax.service.UserProfileService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,14 +17,12 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
 
-import java.util.stream.Collectors;
-
 @Controller
 @RequestMapping("/customer-care")
 public class CustomerCareController {
     private static final Logger log = LoggerFactory.getLogger(CustomerCareController.class);
     @Autowired
-    private FeedbackServiceRepository feedbackServiceRepository;
+    private ServiceFeedbackRepository serviceFeedbackRepository;
     @Autowired
     private CustomerCareService customerCareService;
     @Autowired
@@ -63,9 +60,9 @@ public class CustomerCareController {
         model.addAttribute("priority", priority);
         // sau khi lấy allFeedbacks
         model.addAttribute("totalItems", allFeedbacks.size());
-        long resolved = feedbackServiceRepository.countByStatus(FeedbackStatus.Suported);
+        long resolved = serviceFeedbackRepository.countByStatus(FeedbackStatus.Suported);
         model.addAttribute("resolvedCount", resolved);
-        long pending = feedbackServiceRepository.countByStatus(FeedbackStatus.Not_Suported);
+        long pending = serviceFeedbackRepository.countByStatus(FeedbackStatus.Not_Suported);
         model.addAttribute("pendingCount", pending);
 // nếu muốn Đang xử lý khác với Chưa xử lý thì thêm logic, ví dụ processing = pending…
         model.addAttribute("processingCount", pending);

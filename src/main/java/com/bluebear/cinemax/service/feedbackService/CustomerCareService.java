@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.service;
+package com.bluebear.cinemax.service.feedbackService;
 
 import com.bluebear.cinemax.dto.CustomerServiceFeedbackDTO;
 import com.bluebear.cinemax.entity.Account;
@@ -7,7 +7,7 @@ import com.bluebear.cinemax.entity.FeedbackService;
 import com.bluebear.cinemax.enumtype.FeedbackStatus;
 import com.bluebear.cinemax.repository.AccountRepository;
 import com.bluebear.cinemax.repository.CustomerRepository;
-import com.bluebear.cinemax.repository.FeedbackServiceRepository;
+import com.bluebear.cinemax.repository.ServiceFeedbackRepository;
 import com.bluebear.cinemax.service.sms.SmsService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
 public class CustomerCareService {
 
     @Autowired
-    private FeedbackServiceRepository feedbackServiceRepository;
+    private ServiceFeedbackRepository serviceFeedbackRepository;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -30,7 +30,7 @@ public class CustomerCareService {
     private SmsService smsService;
 
     public List<CustomerServiceFeedbackDTO> getUnresolvedServiceFeedbacks() {
-        List<FeedbackService> feedbacks = feedbackServiceRepository.findByStatus(FeedbackStatus.Not_Suported);
+        List<FeedbackService> feedbacks = serviceFeedbackRepository.findByStatus(FeedbackStatus.Not_Suported);
 
         return feedbacks.stream()
                 .map(fb -> {
@@ -96,10 +96,10 @@ public class CustomerCareService {
         smsService.sendSms(phone, customMessage);
     }
     public void resolveFeedback(Integer feedbackId) {
-        FeedbackService fb = feedbackServiceRepository.findById(feedbackId)
+        FeedbackService fb = serviceFeedbackRepository.findById(feedbackId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy feedback với id " + feedbackId));
         fb.setStatus(FeedbackStatus.Suported);
-        feedbackServiceRepository.save(fb);
+        serviceFeedbackRepository.save(fb);
     }
 
 }

@@ -4,6 +4,7 @@ import com.bluebear.cinemax.dto.TheaterStockDTO;
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -19,20 +20,6 @@ public class EmailService {
     private final JavaMailSender mailSender;
     private final SpringTemplateEngine templateEngine;
 
-    public void sendTicketCode(String toEmail, String subject, String content) {
-        try {
-            MimeMessage message = mailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(toEmail);
-            helper.setSubject(subject);
-            helper.setText(content, true);
-
-            mailSender.send(message);
-        } catch (MessagingException e) {
-            throw new RuntimeException("Gửi email thất bại", e);
-        }
-    }
     public void sendTicketHtmlTemplate(String toEmail, String subject, Map<String, Object> variables) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -51,6 +38,14 @@ public class EmailService {
         } catch (MessagingException e) {
             throw new RuntimeException("Gửi email thất bại", e);
         }
+    }
+    public void sendOtpEmail(String toEmail, String otp) {
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setTo(toEmail);
+        message.setSubject("Mã OTP để đổi mật khẩu");
+        message.setText("Mã OTP của bạn là: " + otp + ". Mã có hiệu lực trong 5 phút.");
+
+        mailSender.send(message);
     }
 
 

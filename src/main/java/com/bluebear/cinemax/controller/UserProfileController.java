@@ -3,27 +3,28 @@ import  com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.enumtype.FeedbackStatus;
 import com.bluebear.cinemax.repository.CustomerRepository;
-import com.bluebear.cinemax.repository.FeedbackServiceRepository;
-import com.bluebear.cinemax.service.CustomerCareService;
+import com.bluebear.cinemax.repository.ServiceFeedbackRepository;
+import com.bluebear.cinemax.service.EmailService;
 import com.bluebear.cinemax.service.UserProfileService;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
-
+import jakarta.servlet.http.HttpSession;
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
 public class UserProfileController {
-
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private UserProfileService userProfileService;
     @Autowired
-    private FeedbackServiceRepository feedbackServiceRepository;
+    private ServiceFeedbackRepository serviceFeedbackRepository;
     @Autowired
     private CustomerRepository  customerRepository;
 
@@ -48,22 +49,7 @@ public class UserProfileController {
 
         return "common/profile";
     }
-    @GetMapping("/user/profile/edit")
-    public String showEditProfileForm(@RequestParam("customerId") Integer customerId, Model model) {
-        CustomerDTO customer = userProfileService.getCustomerById(customerId);
-        if (customer == null) {
-            model.addAttribute("errorMessage", "Không tìm thấy người dùng.");
-            return "error/404";
-        }
 
-        AccountDTO account = userProfileService.getAccountById(customer.getAccountID().longValue());
-
-
-        model.addAttribute("customer", customer);
-        model.addAttribute("account", account);
-
-        return "common/edit_profile"; // Tên file .html bạn đã tạo
-    }
     @PostMapping("/user/profile/update")
     public String updateProfile(@RequestParam("customerId") Integer customerId,
                                 @RequestParam("accountId") Long accountId,
@@ -72,7 +58,8 @@ public class UserProfileController {
                                 @RequestParam("email") String email,
                                 @RequestParam("newPassword") String newPassword,
                                 @RequestParam("confirmPassword") String confirmPassword,
-                                Model model) {
+                                @RequestParam("otp") String otpInput,
+                                Model model,HttpSession session) {
 
         CustomerDTO customer = userProfileService.getCustomerById(customerId);
         AccountDTO account = userProfileService.getAccountById(accountId);
@@ -82,15 +69,31 @@ public class UserProfileController {
             model.addAttribute("errorMessage", "Không tìm thấy người dùng.");
             return "error/404";
         }
+        //otp
+        String sessionOtp = (String) session.getAttribute("otp");
+        LocalDateTime otpTime = (LocalDateTime) session.getAttribute("otpTime");
+
+        if (sessionOtp == null || otpTime == null || !sessionOtp.equals(otpInput) || otpTime.plusMinutes(5).isBefore(LocalDateTime.now())) {
+            model.addAttribute("errorMessage", "OTP không hợp lệ hoặc đã hết hạn.");
+
+            populateUserProfileModel(model, customer, account);
+            model.addAttribute("inputFullName", fullName);
+            model.addAttribute("inputPhone", phone);
+            model.addAttribute("inputEmail", email);
+
+            return "common/profile";
+        }
+
+
+
 
         // Kiểm tra email đã tồn tại chưa (nếu có đổi)
         if (!account.getEmail().equals(email) && userProfileService.emailExists(email)) {
             model.addAttribute("errorMessage", "Email đã được sử dụng.");
-            model.addAttribute("customer", customer); // Thêm dòng này
-            model.addAttribute("account", account);
-//            model.addAttribute("theater", theater);
-            return "common/edit_profile";
+            populateUserProfileModel(model, customer, account);
+            return "common/profile";
         }
+
 
 
         // Cập nhật thông tin
@@ -102,11 +105,10 @@ public class UserProfileController {
         if (!newPassword.isEmpty()) {
             if (!newPassword.equals(confirmPassword)) {
                 model.addAttribute("errorMessage", "Mật khẩu xác nhận không khớp.");
-                model.addAttribute("customer", customer); // Thêm dòng này
-                model.addAttribute("account", account);
-//                model.addAttribute("theater", theater);
-                return "common/edit_profile";
+                populateUserProfileModel(model, customer, account);
+                return "common/profile";
             }
+
 
 
             // Nên mã hóa mật khẩu
@@ -140,11 +142,40 @@ public class UserProfileController {
             feedback.setStatus(FeedbackStatus.Suported);
         }
 
-        feedbackServiceRepository.save(feedback); // Inject repository
+        serviceFeedbackRepository.save(feedback); // Inject repository
 
         redirectAttributes.addFlashAttribute("successMessage", "Gửi đánh giá thành công!");
         return "redirect:/user/profile?customerId=" + customerId;
     }
+    @PostMapping("/invoice/{invoiceId}/detail")
+    @ResponseBody
+    public ResponseEntity<InvoiceDetailDTO> getInvoiceDetail(@PathVariable("invoiceId") Integer invoiceId) {
+        InvoiceDetailDTO dto = userProfileService.getInvoiceDetailById(invoiceId);
+        return ResponseEntity.ok(dto);
+    }
+    //otp
+    @PostMapping("/user/send-otp")
+    @ResponseBody
+    public ResponseEntity<String> sendOtp(@RequestParam("email") String email, HttpSession session) {
+        Account account = userProfileService.getAccountByEmail(email);
+        if (account == null) return ResponseEntity.badRequest().body("Email không tồn tại!");
+
+        String otp = String.valueOf((int)(Math.random() * 900000) + 100000);
+        session.setAttribute("otp", otp);
+        session.setAttribute("otpTime", LocalDateTime.now());
+
+        emailService.sendOtpEmail(email, otp); // Gửi mail qua service
+        return ResponseEntity.ok("OTP đã được gửi về email.");
+    }
+    private void populateUserProfileModel(Model model, CustomerDTO customer, AccountDTO account) {
+        model.addAttribute("customer", customer);
+        model.addAttribute("account", account);
+        model.addAttribute("watchedInvoices", userProfileService.getBookedInvoicesByCustomer(customer));
+        model.addAttribute("hasWatched", userProfileService.hasWatchedMovies(customer));
+        model.addAttribute("watchedMovies", userProfileService.getWatchedMovies(customer));
+    }
+
+
 
 
 }

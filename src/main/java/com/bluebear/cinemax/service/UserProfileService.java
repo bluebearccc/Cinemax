@@ -1,9 +1,6 @@
 package com.bluebear.cinemax.service;
 
-import com.bluebear.cinemax.dto.AccountDTO;
-import com.bluebear.cinemax.dto.CustomerDTO;
-import com.bluebear.cinemax.dto.InvoiceDTO;
-import com.bluebear.cinemax.dto.WatchedMovieDTO;
+import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
 
 import com.bluebear.cinemax.enumtype.InvoiceStatus;
@@ -17,7 +14,8 @@ import java.util.stream.Collectors;
 
 @Service
 public class UserProfileService {
-
+    @Autowired
+    private DetailFDRepository detailFDRepository;
     @Autowired
     private AccountRepository accountRepository;
 
@@ -129,15 +127,62 @@ public class UserProfileService {
         return bookedInvoices.stream()
                 .flatMap(invoice -> invoice.getDetailSeats().stream())
                 .filter(detailSeat -> detailSeat.getSchedule().getEndTime().isBefore(LocalDateTime.now()))
-                .map(detailSeat -> {
-                    Movie movie = detailSeat.getSchedule().getMovie();
-                    Theater theater = detailSeat.getSchedule().getRoom().getTheater();
-
-                    return new WatchedMovieDTO(movie, theater);
-                })
-                .distinct() // tránh bị trùng nếu nhiều ghế trong cùng suất chiếu
+                .map(this::toWatchedMovieDTO) // sử dụng hàm toDTO thay vì constructor
+                .distinct() // nếu cần loại trùng, cần override equals/hashCode
                 .collect(Collectors.toList());
     }
+
+    public InvoiceDetailDTO getInvoiceDetailById(Integer invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
+
+        DetailSeat firstSeat = invoice.getDetailSeats().stream().findFirst()
+                .orElseThrow(() -> new RuntimeException("Invoice has no seats"));
+
+        Room room = firstSeat.getSchedule().getRoom();
+        Theater theater = room.getTheater();
+
+        List<String> seatNames = invoice.getDetailSeats()
+                .stream()
+                .map(ds -> ds.getSeat().getPosition())
+                .collect(Collectors.toList());
+
+        List<String> foodNames = invoice.getDetail_FD()
+                .stream()
+                .map(detailFD -> {
+                    TheaterStock stock = detailFD.getTheaterStock();
+                    return stock != null ? stock.getItemName() : "Không rõ";
+                })
+                .collect(Collectors.toList());
+
+        return InvoiceDetailDTO.builder()
+                .invoiceId(invoice.getInvoiceID())
+                .theaterName(theater.getTheaterName())
+                .roomName(room.getName())
+                .bookingDate(invoice.getBookingDate())
+                .seats(seatNames)
+                .foodName(foodNames)
+                .totalPrice(invoice.getTotalPrice())
+                .discount(invoice.getDiscount())
+                .status(invoice.getStatus())
+                .build();
+    }
+    public WatchedMovieDTO toWatchedMovieDTO(DetailSeat detailSeat) {
+        Schedule schedule = detailSeat.getSchedule();
+        Movie movie = schedule.getMovie();
+        Theater theater = schedule.getRoom().getTheater();
+        Integer invoiceId = detailSeat.getInvoice().getInvoiceID();
+
+        return WatchedMovieDTO.builder()
+                .movie(movie)
+                .theater(theater)
+                .schedule(schedule)
+                .invoiceId(invoiceId) // BẮT BUỘC phải có dòng này
+                .build();
+    }
+
+
+
+
 
 
 }

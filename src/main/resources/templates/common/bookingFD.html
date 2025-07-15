@@ -25,6 +25,25 @@
     </header>
 
     <div class="combo-container">
+        <!-- 🔍 Tìm kiếm Combo -->
+        <div class="combo-search-bar mb-4 d-flex justify-content-between align-items-center px-4">
+            <form method="post" th:action="@{/booking/step1}" class="d-flex w-100" style="gap: 10px;">
+                <input type="hidden" name="scheduleId" th:value="${scheduleId}" />
+                <input type="hidden" name="roomId" th:value="${roomId}" />
+                <input type="hidden" name="page" th:value="1" />
+                <th:block th:each="seatId : ${selectedSeats}">
+                    <input type="hidden" name="selectedSeats" th:value="${seatId}" />
+                </th:block>
+
+                <input type="text" name="search" class="form-control" th:value="${search}" placeholder="Tìm theo tên combo...">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i> Tìm kiếm
+                </button>
+            </form>
+        </div>
+
+
+
         <form th:action="@{/booking/step2}" method="post" id="comboForm">
             <input type="hidden" name="scheduleId" th:value="${scheduleId}">
             <input type="hidden" name="roomId" th:value="${roomId}">
@@ -90,7 +109,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="checkout-section">
                 <button type="submit" class="checkout-btn" id="checkoutBtn">
                     <i class="fas fa-shopping-cart me-2"></i>Đặt Combo Ngay

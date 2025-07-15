@@ -1,5 +1,4 @@
 package com.bluebear.cinemax.dto;
-import com.bluebear.cinemax.entity.Customer;
 import com.bluebear.cinemax.enumtype.FeedbackStatus;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -7,8 +6,8 @@ import java.time.LocalDateTime;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString
-public class FeedbackServiceDTO {
+@Builder
+public class ServiceFeedbackDTO {
     private Integer id;
     private Integer customerId;
     private LocalDateTime createdDate;

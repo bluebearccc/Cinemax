@@ -323,12 +323,14 @@
     });
 
     document.querySelector('form').addEventListener('submit', function(e) {
-        const hasAnySeatSelected = document.querySelectorAll('input:checked').length > 0;
-        if (!hasAnySeatSelected) {
+        const selected = document.querySelectorAll('input[name="selectedSeats"]:checked').length;
+        if (selected === 0) {
             e.preventDefault();
             alert('Vui lòng chọn ít nhất một ghế trước khi tiếp tục!');
+            return false;
         }
     });
+
 
     updateTotalDisplay(0);
 </script>

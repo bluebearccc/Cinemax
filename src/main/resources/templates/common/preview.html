@@ -59,31 +59,29 @@
                 <span class="text-muted">[[${room.name}]]</span>
             </div>
 
+            <!-- Ghế đã chọn -->
             <div class="mb-3">
                 <strong>Ghế đã chọn:</strong>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        th:each="seat : ${selectedSeats}">
-                        <span><i class="bi bi-chair"></i> [[${seat.position}]]</span>
-                        <span class="badge bg-success">[[${#numbers.formatDecimal(seat.unitPrice, 0, 0)}]]đ</span>
-                    </li>
-                </ul>
+                <span th:each="seat, iterStat : ${selectedSeats}">
+        <span class="badge bg-success">
+            [[${seat.position}]] ([[${#numbers.formatDecimal(seat.unitPrice, 0, 0)}]]đ)
+        </span>
+        <span th:if="${!iterStat.last}">, </span>
+    </span>
             </div>
 
-            <div class="mb-3">
-                <strong>Combo:</strong>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        th:each="combo : ${comboList}">
-                        <div>
-                            <i class="bi bi-cup-straw"></i> [[${combo.foodName}]] - Số lượng: [[${comboQuantities[combo.theaterStockId]}]]
-                        </div>
-                        <span class="badge bg-warning text-dark">
-                            [[${#numbers.formatDecimal(combo.unitPrice, 0, 0)}]]đ
-                        </span>
-                    </li>
-                </ul>
+            <!-- Combo đã chọn -->
+            <div class="mb-3" th:if="${comboList != null and !comboList.isEmpty()}">
+                <strong>Combo đã chọn:</strong>
+                <span th:each="combo, iterStat : ${comboList}"
+                      th:if="${comboQuantities[combo.theaterStockId] != null and comboQuantities[combo.theaterStockId] > 0}">
+        <span class="badge bg-warning text-dark">
+            [[${combo.foodName}]] - SL: [[${comboQuantities[combo.theaterStockId]}]] ([[${#numbers.formatDecimal(combo.unitPrice, 0, 0)}]]đ)
+        </span>
+        <span th:if="${!iterStat.last}">, </span>
+    </span>
             </div>
+
 
             <div class="mb-3">
                 <strong>Tổng tiền:</strong>
@@ -156,7 +154,30 @@
 
 
                     <button type="submit" class="btn btn-success btn-lg">
-                        <i class="bi bi-check-circle"></i> Xác nhận và thanh toán
+                        <i class="bi bi-check-circle"></i> thanh toán với VNPay
+                    </button>
+                </div>
+            </form>
+            <form method="post" th:action="@{/webhook/sepay}">
+                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                <input type="hidden" name="roomId" th:value="${room.roomID}">
+
+                <div th:if="${promotion != null}">
+                    <input type="hidden" name="promotionCode" th:value="${promotion.promotionCode}">
+                </div>
+                <div th:if="${promotion == null}">
+                    <input type="hidden" name="promotionCode" value="">
+                </div>
+
+                <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
+                <input type="hidden" th:each="combo : ${comboList}"
+                       th:if="${comboQuantities[combo.theaterStockId] != null}"
+                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                       th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                <div class="text-end mt-2">
+                    <button type="submit" class="btn btn-info btn-lg text-white">
+                        <i class="fa-solid fa-money-check-dollar"></i> Thanh toán với SePay
                     </button>
                 </div>
             </form>

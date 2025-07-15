@@ -3,8 +3,11 @@ import com.bluebear.cinemax.dto.*;
 
 import com.bluebear.cinemax.entity.Promotion;
 import com.bluebear.cinemax.repository.SeatRepository;
+import com.bluebear.cinemax.service.booking.BookingService;
 import com.bluebear.cinemax.service.booking.BookingServiceImp;
 import com.bluebear.cinemax.service.payment.VnpayService;
+import com.bluebear.cinemax.service.promotion.PromotionService;
+import com.bluebear.cinemax.service.seat.SeatService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,7 +26,11 @@ import java.util.stream.Collectors;
 @RequestMapping("/booking")
 public class BookingController {
     @Autowired
-    private BookingServiceImp bookingService;
+    private SeatService seatService;
+    @Autowired
+    private PromotionService promotionService;
+    @Autowired
+    private BookingService bookingService;
     @Autowired
     private VnpayService vnpayService;
     @Autowired
@@ -35,7 +42,7 @@ public class BookingController {
 
                                   Model model) {
 
-        List<SeatDTO> seats = bookingService.getSeatsWithStatus(roomId, scheduleId);
+        List<SeatDTO> seats = seatService.getSeatsWithStatus(roomId, scheduleId);
         Map<String, List<SeatDTO>> seatMap = seats.stream()
                 .collect(Collectors.groupingBy(
                         seat -> seat.getPosition().substring(0, 1),
@@ -61,8 +68,8 @@ public class BookingController {
     @PostMapping("/step1")
     public String handleBookingStep1(@RequestParam("scheduleId") Integer scheduleId,
                                      @RequestParam("roomId") Integer roomId,
-                                     @RequestParam("selectedSeats") List<Integer> seatIds,
-
+                                     @RequestParam(value = "selectedSeats", required = false) List<Integer> seatIds,
+                                     @RequestParam(value = "search", required = false) String search,
                                      Model model, RedirectAttributes redirect   ) {
         try {
             // Xử lý ghế và mã giảm giá
@@ -75,19 +82,25 @@ public class BookingController {
 
             // Chuẩn bị dữ liệu cho bước 2
             List<TheaterStockDTO> combos = bookingService.getAvailableCombos();
-
+            //locj theo ten
+            if (search != null && !search.isBlank()) {
+                combos = combos.stream()
+                        .filter(c -> c.getFoodName().toLowerCase().contains(search.toLowerCase()))
+                        .toList();
+            }
             model.addAttribute("scheduleId", scheduleId);
             model.addAttribute("roomId", roomId);
             model.addAttribute("selectedSeats", seatIds);
             model.addAttribute("totalAmount", totalAmount);
             model.addAttribute("combos", combos);
-
+            model.addAttribute("search", search);
             return "common/bookingFD"; // Đây là file bookingFD.html
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute("error", e.getMessage());
             return "redirect:/booking?scheduleId=" + scheduleId + "  &roomId=" + roomId;
         }
     }
+
 
     // Trang 2: Đặt combo đồ ăn và hoàn tất
     @PostMapping("/step2")
@@ -102,7 +115,7 @@ public class BookingController {
         try {
             Map<Integer, Integer> comboQuantities = bookingService.extractComboQuantities(allParams);
             if (promotionCode != null && !promotionCode.isBlank()) {
-                Optional<PromotionDTO> promoOpt = bookingService.validatePromotionCode(promotionCode);
+                Optional<PromotionDTO> promoOpt = promotionService.validatePromotionCode(promotionCode);
                 if (promoOpt.isEmpty()) {
                     model.addAttribute("promotionError", "Mã giảm giá không hợp lệ hoặc đã hết hạn.");
                     promotionCode = null; // Bỏ mã lỗi để tránh áp dụng sai

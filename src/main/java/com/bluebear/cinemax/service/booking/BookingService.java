@@ -9,15 +9,13 @@ import java.util.Map;
 import java.util.Optional;
 
 public interface BookingService {
-    List<SeatDTO> getSeatsWithStatus(Integer roomId, Integer scheduleId);
 
-    Optional<PromotionDTO> validatePromotionCode(String code);
+
 
     List<TheaterStockDTO> getAvailableCombos();
 
     InvoiceDTO bookSeatsAndCombos(Integer scheduleId, List<Integer> seatIds, String promotionCode, Map<Integer, Integer> selectedCombos);
 
-    Map<String, Object> checkPromotionCode(String code, double totalAmount);
 
     BookingPreviewDTO prepareBookingPreview(Integer scheduleId, Integer roomId,
                                             List<Integer> seatIds, String promotionCode,
@@ -25,13 +23,14 @@ public interface BookingService {
 
     Map<Integer, Integer> extractComboQuantities(Map<String, String> allParams);
 
-    Map<String, Object> applyPromotionCode(String code, double totalAmount);
+
 
     double calculateTotalAmount(Integer scheduleId, List<Integer> seatIds, String promotionCode);
 
-    List<SeatDTO> toSeatDTOList(List<Seat> seats);
+
 
     List<TheaterStockDTO> toTheaterStockDTOList(List<TheaterStock> stocks);
-
-
+    List<TheaterStockDTO> filterCombosByKeyword(String keyword);
+    void saveTransactionFromWebhook(SepayWebhookDTO payload);
+    void finalizeBooking(Integer invoiceId);
 }

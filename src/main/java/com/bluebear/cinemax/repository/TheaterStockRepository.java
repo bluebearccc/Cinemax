@@ -11,5 +11,6 @@ import java.util.List;
 public interface TheaterStockRepository extends JpaRepository<TheaterStock, Integer> {
     List<TheaterStock> findByStatus(TheaterStock_Status status);
     // Tìm kiếm combo theo ID
+    List<TheaterStock> findByStockID(Integer stockID);
 
 }

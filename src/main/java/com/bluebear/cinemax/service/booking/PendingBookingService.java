@@ -28,7 +28,7 @@ public class PendingBookingService {
     @Scheduled(fixedRate = 60_000)
     @Transactional
     public void removeExpiredUnpaidSeats() {
-        LocalDateTime threshold = LocalDateTime.now().minusMinutes(15);
+        LocalDateTime threshold = LocalDateTime.now().minusMinutes(5);
 
         List<Invoice> expiredInvoices = invoiceRepo.findByStatusAndBookingDateBefore(InvoiceStatus.Unpaid, threshold);
 

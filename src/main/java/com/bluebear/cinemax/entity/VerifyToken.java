@@ -13,6 +13,7 @@ import java.util.Date;
 @Builder
 public class VerifyToken {
 
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "Id")
