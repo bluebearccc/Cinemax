@@ -32,6 +32,12 @@ public class Theater {
     @Column(name = "RoomQuantity", nullable = false)
     private Integer roomQuantity;
 
+    @Column(name = "longtitude", length = 255)
+    private Double longtitude;
+
+    @Column(name = "latitude", length = 255)
+    private Double latitude;
+
     @Enumerated(EnumType.STRING)
     @Column(name = "Status", length = 20, nullable = false)
     private Theater_Status  status;

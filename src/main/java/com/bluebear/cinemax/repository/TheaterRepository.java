@@ -1,7 +1,10 @@
 package com.bluebear.cinemax.repository;
 
+import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.enumtype.Theater_Status;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -17,5 +20,12 @@ public interface TheaterRepository extends JpaRepository<Theater, Integer> {
     // Kiểm tra xem địa chỉ đã tồn tại chưa (không phân biệt chữ hoa/thường)
     boolean existsByAddressIgnoreCase(String address);
     boolean existsByTheaterNameIgnoreCaseAndTheaterIDNot(String theaterName, Integer theaterID);
+    // Tìm theo tên và có phân trang
+    Page<Theater> findByTheaterNameContainingIgnoreCase(String keyword, Pageable pageable);
 
+    // Tìm theo status và có phân trang
+    Page<Theater> findByStatus(Theater_Status status, Pageable pageable);
+
+    // Tìm theo cả tên và status, có phân trang
+    Page<Theater> findByTheaterNameContainingIgnoreCaseAndStatus(String keyword, Theater_Status status, Pageable pageable);
 }

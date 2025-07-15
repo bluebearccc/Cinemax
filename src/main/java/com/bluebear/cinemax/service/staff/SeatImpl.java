@@ -1,14 +1,19 @@
 package com.bluebear.cinemax.service.staff;
 
+import com.bluebear.cinemax.config.EmailService;
 import com.bluebear.cinemax.dto.SeatDTO;
 import com.bluebear.cinemax.dto.SeatUpdateRequest;
+import com.bluebear.cinemax.entity.DetailSeat;
 import com.bluebear.cinemax.entity.Seat;
+import com.bluebear.cinemax.enumtype.Seat_Status;
+import com.bluebear.cinemax.repository.DetailSeatRepository;
 import com.bluebear.cinemax.repository.RoomRepository;
 import com.bluebear.cinemax.repository.SeatRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -23,6 +28,12 @@ public class SeatImpl implements SeatService {
 
     @Autowired
     private SeatRepository seatRepository;
+
+    @Autowired
+    private DetailSeatRepository detailSeatRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     private SeatDTO convertToDTO(Seat seat) {
         if (seat == null) {
@@ -124,20 +135,34 @@ public class SeatImpl implements SeatService {
     @Override
     @Transactional
     public List<SeatDTO> deleteSeatById(Integer seatId) throws Exception {
-        // 1. Tìm ghế để lấy ID của phòng trước khi xóa
+
+        // === BƯỚC 1: KIỂM TRA RÀNG BUỘC TRONG DetailSeat ===
+        // Gọi phương thức mới từ repository để đếm số lần ghế này đã được đặt vé
+        long bookingCount = detailSeatRepository.countBySeat_SeatID(seatId);
+
+        // Nếu ghế đã có trong bất kỳ hóa đơn nào (đã được đặt), ném ra lỗi và không cho xóa
+        if (bookingCount > 0) {
+            throw new Exception("Cannot delete this seat because it is part of existing bookings. Consider setting its status to 'Inactive' instead.");
+        }
+
+        // === BƯỚC 2: TIẾN HÀNH XÓA NẾU HỢP LỆ ===
+        // Chỉ thực hiện các bước dưới đây nếu việc kiểm tra ở trên đã vượt qua
+
+        // Tìm ghế để lấy ID của phòng trước khi xóa
         Seat seatToDelete = seatRepository.findById(seatId)
                 .orElseThrow(() -> new Exception("Seat not found with id: " + seatId));
         Integer roomId = seatToDelete.getRoom().getRoomID();
 
-        // 2. Xóa ghế
+        // Xóa ghế
         seatRepository.delete(seatToDelete);
 
-        // 3. Đánh lại tên các ghế còn lại
+        // Đánh lại tên các ghế còn lại
         this.resetSeatNamesInRoom(roomId);
+
+        // Trả về danh sách ghế mới nhất của phòng
         List<Seat> updatedSeats = seatRepository.findByRoom_RoomIDOrderByPositionAsc(roomId);
-        // 4. Trả về danh sách ghế mới nhất đã được sắp xếp
         return updatedSeats.stream()
-                .map(this::convertToDTO) // Sử dụng phương thức convertToDTO có sẵn
+                .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
     @Override
@@ -161,5 +186,49 @@ public class SeatImpl implements SeatService {
             }
         }
 
-        seatRepository.saveAll(allSeats);}
+        seatRepository.saveAll(allSeats);
+    }
+    @Transactional
+    public void updateSeatsInRoom(SeatUpdateRequest request) {
+        Integer roomId = request.getRoomId();
+        List<Integer> vipSeatIds = request.getVipSeatIds() != null ? request.getVipSeatIds() : new ArrayList<>();
+        Map<Integer, Seat_Status> newStatuses = request.getSeatStatuses();
+
+        List<Seat> seatsInRoom = seatRepository.findByRoom_RoomID(roomId);
+
+        for (Seat seat : seatsInRoom) {
+            // Lấy trạng thái cũ và mới
+            Seat_Status oldStatus = seat.getStatus();
+            Seat_Status newStatus = newStatuses.get(seat.getSeatID());
+
+            // --- LOGIC KIỂM TRA TRƯỚC KHI CẬP NHẬT ---
+            // Chỉ kiểm tra nếu trạng thái thực sự thay đổi từ Active sang Inactive
+            if (newStatus != null && oldStatus == Seat_Status.Active && newStatus == Seat_Status.Inactive) {
+
+                // 1. Tìm các vé trong tương lai bị ảnh hưởng
+                List<DetailSeat> futureBookings = detailSeatRepository.findFutureBookingsBySeatId(seat.getSeatID(), LocalDateTime.now());
+
+                // 2. Nếu có, gửi email thông báo
+                if (!futureBookings.isEmpty()) {
+                    emailService.sendSeatCancellationNotice(futureBookings);}
+            }
+
+            // --- TIẾN HÀNH CẬP NHẬT DỮ LIỆU ---
+            // Cập nhật VIP và giá vé
+            if (vipSeatIds.contains(seat.getSeatID())) {
+                seat.setVIP(true);
+                seat.setUnitPrice(request.getVipPrice());
+            } else {
+                seat.setVIP(false);
+                seat.setUnitPrice(request.getNonVipPrice());
+            }
+
+            // Cập nhật trạng thái
+            if (newStatus != null) {
+                seat.setStatus(newStatus);
+            }
+        }
+
+        seatRepository.saveAll(seatsInRoom);
+    }
 }

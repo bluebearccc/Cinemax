@@ -3,10 +3,13 @@ package com.bluebear.cinemax.service.staff;
 import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.enumtype.Theater_Status;
+import com.bluebear.cinemax.repository.RoomRepository;
 import com.bluebear.cinemax.repository.TheaterRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -27,6 +30,8 @@ public class TheaterServiceImpl implements TheaterService {
     private static final String UPLOAD_DIR = "D:\\SWP391\\Cinemax\\uploads\\images";
     @Autowired
     private TheaterRepository theaterRepository;
+    @Autowired
+    private RoomRepository roomRepository;
 
     private Theater convertToEntity(TheaterDTO theaterDTO) {
         if (theaterDTO == null) {
@@ -39,6 +44,8 @@ public class TheaterServiceImpl implements TheaterService {
         theater.setImage(theaterDTO.getImage());
         theater.setRoomQuantity(theaterDTO.getRoomQuantity());
         theater.setStatus(theaterDTO.getStatus());
+        theater.setLatitude(theaterDTO.getLatitude());
+        theater.setLongtitude(theaterDTO.getLongtitude());
         return theater;
     }
 
@@ -53,6 +60,8 @@ public class TheaterServiceImpl implements TheaterService {
                 .image(theater.getImage())
                 .roomQuantity(theater.getRoomQuantity())
                 .status(theater.getStatus())
+                .longtitude(theater.getLongtitude())
+                .latitude(theater.getLatitude())
                 .build();
     }
 
@@ -130,6 +139,8 @@ public class TheaterServiceImpl implements TheaterService {
         theaterToUpdate.setAddress(theaterDTO.getAddress());
         theaterToUpdate.setRoomQuantity(theaterDTO.getRoomQuantity());
         theaterToUpdate.setStatus(theaterDTO.getStatus());
+        theaterToUpdate.setLatitude(theaterDTO.getLatitude());
+        theaterToUpdate.setLongtitude(theaterDTO.getLongtitude());
         MultipartFile newImageFile = theaterDTO.getNewImage();
         if (newImageFile != null && !newImageFile.isEmpty()) {
             String newFileName = saveImage(newImageFile);
@@ -138,18 +149,7 @@ public class TheaterServiceImpl implements TheaterService {
 
     }
 
-    public boolean deleteTheater(Integer id) {
-        try {
-            theaterRepository.deleteById(id);
-            return true;
-        } catch (DataIntegrityViolationException e) {
-            System.err.println("Cannot delete Theater with ID " + id + " due to data integrity violation: " + e.getMessage());
-            return false;
-        } catch (Exception e) {
-            System.err.println("An error occurred while deleting Theater with ID " + id + ": " + e.getMessage());
-            return false;
-        }
-    }
+
 
     @Override
     public TheaterDTO addTheater(TheaterDTO theaterDTO, MultipartFile imageFile) throws Exception {
@@ -204,5 +204,51 @@ public class TheaterServiceImpl implements TheaterService {
 
         return filename;
     }
+    @Transactional
+    public void deleteTheater(Integer theaterId) throws Exception {
+        // BƯỚC 1: KIỂM TRA SỰ TỒN TẠI CỦA CÁC PHÒNG
+        long roomCount = roomRepository.countByTheater_TheaterID(theaterId);
 
+        // Nếu số phòng lớn hơn 0, ném ra lỗi và không cho xóa
+        if (roomCount > 0) {
+            throw new Exception("Cannot delete this theater as it contains " + roomCount + " room(s). Please delete all rooms in this theater first.");
+        }
+
+        // BƯỚC 2: KIỂM TRA RẠP HÁT CÓ TỒN TẠI KHÔNG
+        if (!theaterRepository.existsById(theaterId)) {
+            throw new Exception("Theater not found with ID: " + theaterId);
+        }
+
+        // BƯỚC 3: TIẾN HÀNH XÓA NẾU HỢP LỆ
+        theaterRepository.deleteById(theaterId);
+    }
+    @Override
+    public Page<TheaterDTO> findAllPaginated(Pageable pageable) {
+        return theaterRepository.findAll(pageable).map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<TheaterDTO> findByKeywordPaginated(String keyword, Pageable pageable) {
+        return theaterRepository.findByTheaterNameContainingIgnoreCase(keyword, pageable).map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<TheaterDTO> findByStatusPaginated(String status, Pageable pageable) {
+        try {
+            Theater_Status statusEnum = Theater_Status.valueOf(status);
+            return theaterRepository.findByStatus(statusEnum, pageable).map(this::convertToDTO);
+        } catch (Exception e) {
+            return Page.empty(pageable); // Trả về trang trống nếu status không hợp lệ
+        }
+    }
+
+    @Override
+    public Page<TheaterDTO> findByKeywordAndStatusPaginated(String keyword, String status, Pageable pageable) {
+        try {
+            Theater_Status statusEnum = Theater_Status.valueOf(status);
+            return theaterRepository.findByTheaterNameContainingIgnoreCaseAndStatus(keyword, statusEnum, pageable).map(this::convertToDTO);
+        } catch (Exception e) {
+            return Page.empty(pageable);
+        }
+    }
 }

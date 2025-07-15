@@ -56,11 +56,9 @@ public class    MovieScheduleController {
         model.addAttribute("movies", moviePage);
         model.addAttribute("genres", genreServiceImpl.getAllGenres());
 
-        // Thông tin phân trang
         model.addAttribute("currentPage", page);
         model.addAttribute("totalPages", moviePage.getTotalPages());
 
-        // Giữ lại các giá trị filter để hiển thị lại trên form
         model.addAttribute("name", name);
         model.addAttribute("genre", genreId);
         model.addAttribute("start_date", startDate);
@@ -81,7 +79,7 @@ public class    MovieScheduleController {
     }
 
     @GetMapping("/show_schedule")
-    public String showSchedule(@RequestParam("movieId") Integer movieID, Model model) {
+    public String showSchedule(@RequestParam("movieId") Integer movieID, Model model, RedirectAttributes redirectAttributes) {
         EmployeeDTO e = employeeServiceImpl.getEmployeeById(4);
 
         List<RoomDTO> rooms = roomServiceImpl.findAllRoomsByTheaterId(e.getTheaterId());
@@ -91,7 +89,10 @@ public class    MovieScheduleController {
         List<ScheduleDTO> schedules = scheduleServiceImpl.findByMovieId(movieID);
 
         List<TheaterDTO> theaters = theaterServiceImpl.findAllTheaters();
-
+        if (movie == null) {
+            redirectAttributes.addFlashAttribute("message", "Error: Movie not found with ID " + movieID);
+            return "redirect:/movie_schedule";
+        }
         model.addAttribute("movie", movie);
         model.addAttribute("startTime", movie.getStartDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
         model.addAttribute("endTime", movie.getEndDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
@@ -99,12 +100,6 @@ public class    MovieScheduleController {
         model.addAttribute("rooms", rooms);
         model.addAttribute("newSchedule", new Schedule());
         model.addAttribute("theatersCbBox", theaters);
-
-        // Thêm tin nhắn từ redirectAttributes (nếu có)
-        if (model.asMap().containsKey("message")) {
-            model.addAttribute("message", model.asMap().get("message"));
-        }
-
 
         return "staff/movie_schedule_detail";
     }
@@ -345,7 +340,7 @@ public class    MovieScheduleController {
         return "redirect:/movie_schedule/show_schedule?movieId=" + movieId;
     }
     @PostMapping("/update_schedule_ajax")
-    @ResponseBody // Rất quan trọng: Báo cho Spring trả về JSON, không phải tên View
+    @ResponseBody
     public Map<String, Object> updateScheduleAjax(@RequestParam(value = "scheduleID") Integer scheduleId,
                                                   @RequestParam(value = "movieID") Integer movieId,
                                                   @RequestParam(value = "roomId", required = false) Integer roomId,

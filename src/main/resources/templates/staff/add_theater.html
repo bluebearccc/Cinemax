@@ -13,8 +13,9 @@
   <title>Food And Drink</title>
 
   <link rel="stylesheet" th:href="@{/staff/css/style.css}">
-
   <link rel="stylesheet" th:href="@{/staff/css/add_update_item.css}">
+  <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet'/>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
   <style>
     .alert {
       padding: 15px;
@@ -25,18 +26,36 @@
       text-align: center;
     }
 
-    /* Style riêng cho thông báo lỗi (màu đỏ) */
     .alert-error {
-      color: #a94442; /* Màu chữ đỏ sẫm */
-      background-color: #f2dede; /* Màu nền hồng nhạt */
-      border-color: #ebccd1; /* Màu viền hồng sẫm */
+      color: #a94442;
+      background-color: #f2dede;
+      border-color: #ebccd1;
     }
 
-    /* Bạn cũng có thể thêm style cho thông báo thành công (màu xanh) nếu cần */
     .alert-success {
       color: #3c763d;
       background-color: #dff0d8;
       border-color: #d6e9c6;
+    }
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 8px;
+      margin-bottom: 15px;
+    }
+
+    .address-input-group {
+      display: flex;
+      align-items: center;
+    }
+
+    .address-input-group .form-input {
+      flex-grow: 1;
+      margin-right: 10px;
+    }
+
+    .address-input-group .search-button {
+      flex-shrink: 0;
     }
   </style>
 </head>
@@ -44,8 +63,6 @@
 
 
 <body>
-
-<!-- Sidebar -->
 
 <div class="sidebar">
 
@@ -95,11 +112,7 @@
 
 
 
-<!-- Main Content -->
-
 <div class="main-content">
-
-  <!-- Header -->
 
   <div class="header">
 
@@ -121,7 +134,6 @@
   <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'alert-success' : 'alert-error'">
     <span th:text="${message}"></span>
   </div>
-  <!-- Form Container -->
   <div class="form-container">
     <div class="form-header">
       <p class="form-subtitle">Complete the item information</p>
@@ -136,7 +148,6 @@
         <div class="form-column">
 
           <div class="form-group">
-
             <label class="form-label">Theater Name</label>
             <input type="text"
                    class="form-input"
@@ -146,69 +157,73 @@
             <div class="error-message" id="nameError"></div>
           </div>
 
+          <input type="hidden" name="name" />
+          <input type="hidden" th:field="*{latitude}" id="latitude-field">
+          <input type="hidden" th:field="*{longtitude}" id="longitude-field">
           <div class="form-column">
 
             <div class="form-group">
-
               <label class="form-label">Theater Address</label>
-              <input type="text"
-                     class="form-input"
-                     th:field="*{address}"
-                     placeholder="Enter theater address "
-                     required>
+              <div class="address-input-group">
+                <input type="text"
+                       class="form-input"
+                       th:field="*{address}"
+                       id="search-input"
+                       placeholder="Enter theater address "
+                       required>
+                <button type="button" class="search-button" id="search-btn">Search</button>
+              </div>
               <div class="error-message" id="addressError"></div>
+              <div id="map"></div>
             </div>
-          <!-- Status -->
-          <div class="form-group">
-            <label class="form-label">Set Availbility</label>
-            <div class="radio-group">
-              <div class="radio-item">
-                <input type="radio"
-                       id="statusActive"
-                       name="status"
-                       value="Active"
-                       th:field="*{status}"
-                       th:checked="${theater.status == 'Active'}"
-                       checked
-                >
-                <label for="statusActive">Active</label>
-              </div>
-              <div class="radio-item">
-                <input type="radio"
-                       id="statusInactive"
-                       name="status"
-                       value="Inactive"
-                       th:field="*{status}"
-                       th:checked="${theater.status == 'Inactive'}">
-                <label for="statusInactive">Inactive</label>
-              </div>
+            <div class="form-group">
+              <label class="form-label">Set Availbility</label>
+              <div class="radio-group">
+                <div class="radio-item">
+                  <input type="radio"
+                         id="statusActive"
+                         name="status"
+                         value="Active"
+                         th:field="*{status}"
+                         th:checked="${theater.status == 'Active'}"
+                         checked
+                  >
+                  <label for="statusActive">Active</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio"
+                         id="statusInactive"
+                         name="status"
+                         value="Inactive"
+                         th:field="*{status}"
+                         th:checked="${theater.status == 'Inactive'}">
+                  <label for="statusInactive">Inactive</label>
+                </div>
 
+              </div>
+              <div class="error-message" id="statusError"></div>
             </div>
-            <div class="error-message" id="statusError"></div>
+          </div>
+          <div class="form-column">
+            <div class="form-group">
+              <label class="form-label">Upload New Image</label>
+              <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+                <div>📸</div>
+                <p>Click to upload or drag and drop</p>
+                <small>PNG, JPG, GIF up to 10MB</small>
+              </div>
+              <input type="file"
+                     id="imageInput"
+                     name="imageInput"
+                     accept="image/*"
+                     style="display: none;"
+                     onchange="previewImage(this)">
+
+              <div id="imagePreview" class="image-preview"></div>
+              <div class="error-message" id="imageError"></div>
+            </div>
           </div>
         </div>
-        <!-- Right Column - Image Upload -->
-        <div class="form-column">
-          <!-- Image Upload -->
-          <div class="form-group">
-            <label class="form-label">Upload New Image</label>
-            <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
-              <div>📸</div>
-              <p>Click to upload or drag and drop</p>
-              <small>PNG, JPG, GIF up to 10MB</small>
-            </div>
-            <input type="file"
-                   id="imageInput"
-                   name="imageInput"
-                   accept="image/*"
-                   style="display: none;"
-                   onchange="previewImage(this)">
-
-            <div id="imagePreview" class="image-preview"></div>
-            <div class="error-message" id="imageError"></div>
-          </div>
-        </div>
-      </div>
       </div>
       <div class="form-actions">
         <button type="submit" class="btn btn-primary">Save</button>
@@ -216,7 +231,6 @@
         <a th:href="@{/theater}" class="btn btn-danger">Cancel</a>
       </div>
     </form>
-
   </div>
 
 </div>
@@ -253,19 +267,15 @@
     document.getElementById('statusActive').checked = true;
   }
 
-  // **** HÀM VALIDATE ĐÃ ĐƯỢC VIẾT LẠI HOÀN TOÀN ****
+  // Hàm validate (giữ nguyên)
   function validateForm() {
     let isValid = true;
-    // Xóa các thông báo lỗi cũ
     document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
-
-    // 1. Lấy đúng các trường input từ form "Add Theater"
     const theaterNameInput = document.querySelector('input[name="theaterName"]');
     const addressInput = document.querySelector('input[name="address"]');
     const statusInput = document.querySelector('input[name="status"]:checked');
     const imageInput = document.getElementById('imageInput');
 
-    // 2. Kiểm tra Theater Name
     if (theaterNameInput.value.trim() === '') {
       document.getElementById('nameError').textContent = 'Theater Name is required.';
       isValid = false;
@@ -273,27 +283,164 @@
       document.getElementById('nameError').textContent = 'Theater Name must begin with "CGV".';
       isValid = false;
     }
-
-    // 3. Kiểm tra Address
     if (addressInput.value.trim() === '') {
       document.getElementById('addressError').textContent = 'Address is required.';
       isValid = false;
     }
-
-    // 4. Kiểm tra Status
     if (!statusInput) {
       document.getElementById('statusError').textContent = 'Please select an availability status.';
       isValid = false;
     }
-
-    // 5. Kiểm tra Image
     if (imageInput.files.length === 0) {
       document.getElementById('imageError').textContent = 'Please upload an image for the theater.';
       isValid = false;
     }
-
     return isValid;
   }
+
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Khởi tạo bản đồ
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYmx1ZWJlYXIxMjMiLCJhIjoiY21jcnQzYzVqMDZkNjJvczkyem5qcDYyNCJ9.4qcFRtXFMsoTuDCxr1aMyw';
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [105.84, 21.02],
+      zoom: 10
+    });
+
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const longitudeField = document.getElementById('longitude-field');
+    const latitudeField = document.getElementById('latitude-field');
+
+    let currentMarker = null;
+
+    searchBtn.addEventListener('click', function() {
+      const address = searchInput.value.trim();
+      if (address) {
+        searchAddress(address);
+      } else {
+        alert('Vui lòng nhập địa chỉ để tìm kiếm.');
+      }
+    });
+
+    searchInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        searchBtn.click();
+      }
+    });
+
+    map.on('click', function(e) {
+      const { lng, lat } = e.lngLat;
+      addDraggableMarker(lat, lng, 'Vị trí được chọn');
+      reverseGeocode(lat, lng);
+    });
+
+    function searchAddress(address) {
+      const encodedAddress = encodeURIComponent(address);
+      fetch(`/theater/search/${encodedAddress}`)
+              .then(response => {
+                if (response.ok) return response.json();
+                throw new Error('Address not found');
+              })
+              .then(location => {
+                addDraggableMarker(location.lat, location.lng, location.placeName);
+                updateLocationInfo(location.placeName, location.lat, location.lng);
+              })
+              .catch(error => {
+                console.error('Lỗi tìm kiếm:', error);
+                alert('Không tìm thấy địa chỉ bạn yêu cầu.');
+              });
+    }
+
+    function addDraggableMarker(lat, lng, placeName) {
+      if (currentMarker) {
+        currentMarker.remove();
+      }
+      currentMarker = new mapboxgl.Marker({
+        color: '#d9534f',
+        draggable: true
+      })
+              .setLngLat([lng, lat])
+              .setPopup(new mapboxgl.Popup().setText(placeName))
+              .addTo(map);
+
+      currentMarker.on('dragend', function() {
+        const newLngLat = currentMarker.getLngLat();
+        console.log('Marker được di chuyển tới:', newLngLat);
+        reverseGeocode(newLngLat.lat, newLngLat.lng);
+        currentMarker.getPopup().setText('Vị trí đã chọn');
+      });
+
+      map.flyTo({
+        center: [lng, lat],
+        zoom: 17
+      });
+      updateLocationInfo(placeName, lat, lng);
+    }
+
+    function reverseGeocode(lat, lng) {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}&country=VN&language=vi`;
+
+      fetch(url)
+              .then(response => response.json())
+              .then(data => {
+                if (data.features && data.features.length > 0) {
+                  const placeName = data.features[0].place_name;
+                  updateLocationInfo(placeName, lat, lng);
+                  if (currentMarker) {
+                    currentMarker.getPopup().setText(placeName);
+                  }
+                } else {
+                  updateLocationInfo('Không xác định được địa chỉ', lat, lng);
+                }
+              })
+              .catch(error => {
+                console.error('Lỗi reverse geocoding:', error);
+                updateLocationInfo('Không thể lấy thông tin địa chỉ', lat, lng);
+              });
+    }
+
+    function updateLocationInfo(placeName, lat, lng) {
+      // Cập nhật các trường ẩn chứa tọa độ
+      longitudeField.value = lng.toFixed(6);
+      latitudeField.value = lat.toFixed(6);
+
+      // --- DÒNG MỚI ĐƯỢC THÊM VÀO ---
+      // Cập nhật ô nhập liệu địa chỉ để người dùng thấy địa chỉ mới
+      document.getElementById('search-input').value = placeName;
+
+      console.log('Đã cập nhật tọa độ và địa chỉ:', {
+        address: placeName,
+        longitude: lng.toFixed(6),
+        latitude: lat.toFixed(6)
+      });
+    }
+
+    // Thêm controls cho bản đồ
+    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.FullscreenControl());
+    map.addControl(new mapboxgl.ScaleControl({
+      maxWidth: 80,
+      unit: 'metric'
+    }));
+
+    // Validation trước khi submit
+    document.querySelector('form').addEventListener('submit', function(event) {
+      const lng = longitudeField.value;
+      const lat = latitudeField.value;
+
+      if (!lng || !lat) {
+        event.preventDefault();
+        alert('Please select a location on the map or enter an address.');
+        return false;
+      }
+    });
+  });
+
 </script>
 </body>
 </html>

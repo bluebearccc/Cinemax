@@ -1,525 +1,670 @@
-<!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+    <!DOCTYPE html>
+    <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Theater Management</title>
-    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
-    <style>
-            /* Additional styles specific for theater list */
-        .theater-image {
-            width: auto;
-            height: auto;
-            object-fit: cover;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Theater Management</title>
+        <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+        <link rel="stylesheet" th:href="@{/staff/css/paging.css}">
+        <style>
+                /* Additional styles specific for theater list */
+            .theater-image {
+                width: auto;
+                height: auto;
+                object-fit: cover;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            }
 
-        .theater-name {
-            font-weight: 600;
-            color: #2c3e50;
-            margin-bottom: 5px;
-        }
+            .theater-name {
+                font-weight: 600;
+                color: #2c3e50;
+                margin-bottom: 5px;
+            }
 
-        .theater-address {
-            color: #6c757d;
-            font-size: 13px;
-            max-width: 300px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
+            .theater-address {
+                color: #6c757d;
+                font-size: 13px;
+                max-width: 300px;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
 
-        .room-count {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 4px 12px;
-            border-radius: 15px;
-            font-size: 12px;
-            font-weight: 600;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
+            .room-count {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 4px 12px;
+                border-radius: 15px;
+                font-size: 12px;
+                font-weight: 600;
+                display: inline-flex;
+                align-items: center;
+                gap: 4px;
+            }
 
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+            .status-badge {
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-size: 12px;
+                font-weight: 600;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+            }
 
-        .status-active {
-            background-color: #d4edda;
-            color: #155724;
-        }
+            .status-active {
+                background-color: #d4edda;
+                color: #155724;
+            }
 
-        .status-inactive {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
+            .status-inactive {
+                background-color: #f8d7da;
+                color: #721c24;
+            }
 
-        .table tbody tr {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
+            .table tbody tr {
+                transition: all 0.3s ease;
+                cursor: pointer;
+            }
 
-        .table tbody tr:hover {
-            background-color: #e3f2fd;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
+            .table tbody tr:hover {
+                background-color: #e3f2fd;
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            }
 
-        .btn-view {
-            background-color: #e3f2fd;
-            color: #1976d2;
-        }
+            .btn-view {
+                background-color: #e3f2fd;
+                color: #1976d2;
+            }
 
-        .btn-view:hover {
-            background-color: #1976d2;
-            color: white;
-        }
+            .btn-view:hover {
+                background-color: #1976d2;
+                color: white;
+            }
 
-        /* Enhanced Controls Section */
-        .controls {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            margin-bottom: 25px;
-            padding: 20px;
-            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-            flex-wrap: wrap;
-        }
-
-        /* Enhanced Search Box */
-        .search-box {
-            flex: 1;
-            min-width: 300px;
-        }
-
-        .search-box form {
-            display: flex;
-            position: relative;
-            background: white;
-            border-radius: 25px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s ease;
-        }
-
-        .search-box form:focus-within {
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .search-input {
-            flex: 1;
-            padding: 12px 20px;
-            border: none;
-            outline: none;
-            font-size: 14px;
-            background: transparent;
-            color: #495057;
-        }
-
-        .search-input::placeholder {
-            color: #adb5bd;
-            font-style: italic;
-        }
-
-        .search-box button {
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .search-box button::before {
-            content: '🔍';
-            margin-right: 8px;
-        }
-
-        .search-box button:hover {
-            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
-            transform: translateY(-1px);
-        }
-
-        /* Enhanced Filter Box */
-        .filter-box {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .filter-box form {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            background: white;
-            padding: 8px;
-            border-radius: 20px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            transition: box-shadow 0.3s ease;
-        }
-
-        .filter-box form:focus-within {
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-        }
-
-        .form-select {
-            padding: 10px 15px;
-            border: 2px solid transparent;
-            border-radius: 15px;
-            background: #f8f9fa;
-            color: #495057;
-            font-size: 14px;
-            font-weight: 500;
-            outline: none;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-width: 140px;
-        }
-
-        .form-select:focus {
-            border-color: #667eea;
-            background: white;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
-
-        .form-select option {
-            padding: 8px;
-            font-weight: 500;
-        }
-
-        .btn-filter {
-            padding: 10px 20px;
-            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-            color: white;
-            border: none;
-            border-radius: 15px;
-            cursor: pointer;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn-filter::before {
-            content: '⚡';
-            margin-right: 6px;
-        }
-
-        .btn-filter:hover {
-            background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
-        }
-
-        .btn-filter:active {
-            transform: translateY(0);
-        }
-
-        /* Enhanced Add Theater Link */
-        .navbar-brand {
-            padding: 12px 24px;
-            border-radius: 25px;
-            text-decoration: none;
-            font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            white-space: nowrap;
-        }
-
-        .navbar-brand::before {
-            content: '➕';
-            margin-right: 8px;
-        }
-
-        .navbar-brand:hover {
-            background: linear-gradient(135deg, #e8590c 0%, #d73384 100%);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(253, 126, 20, 0.4);
-            color: white !important;
-            text-decoration: none;
-        }
-
-        .navbar-brand u {
-            text-decoration: none;
-        }
-
-        /* Responsive Design */
-        @media (max-width: 768px) {
+            /* Enhanced Controls Section */
             .controls {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 15px;
+                display: flex;
+                gap: 20px;
+                align-items: center;
+                margin-bottom: 25px;
+                padding: 20px;
+                background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+                border-radius: 12px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+                flex-wrap: wrap;
             }
 
+            /* Enhanced Search Box */
             .search-box {
-                min-width: unset;
+                flex: 1;
+                min-width: 300px;
             }
 
+            .search-box form {
+                display: flex;
+                position: relative;
+                background: white;
+                border-radius: 25px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: box-shadow 0.3s ease;
+            }
+
+            .search-box form:focus-within {
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            }
+
+            .search-input {
+                flex: 1;
+                padding: 12px 20px;
+                border: none;
+                outline: none;
+                font-size: 14px;
+                background: transparent;
+                color: #495057;
+            }
+
+            .search-input::placeholder {
+                color: #adb5bd;
+                font-style: italic;
+            }
+
+            .search-box button {
+                padding: 12px 25px;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                border: none;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+            }
+
+            .search-box button::before {
+                content: '🔍';
+                margin-right: 8px;
+            }
+
+            .search-box button:hover {
+                background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+                transform: translateY(-1px);
+            }
+
+            /* Enhanced Filter Box */
             .filter-box {
-                justify-content: center;
-            }
-
-            .filter-box form {
-                flex-direction: column;
-                align-items: stretch;
+                display: flex;
+                align-items: center;
                 gap: 10px;
             }
 
-            .form-select,
+            .filter-box form {
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                background: white;
+                padding: 8px;
+                border-radius: 20px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                transition: box-shadow 0.3s ease;
+            }
+
+            .filter-box form:focus-within {
+                box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+            }
+
+            .form-select {
+                padding: 10px 15px;
+                border: 2px solid transparent;
+                border-radius: 15px;
+                background: #f8f9fa;
+                color: #495057;
+                font-size: 14px;
+                font-weight: 500;
+                outline: none;
+                cursor: pointer;
+                transition: all 0.3s ease;
+                min-width: 140px;
+            }
+
+            .form-select:focus {
+                border-color: #667eea;
+                background: white;
+                box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            }
+
+            .form-select option {
+                padding: 8px;
+                font-weight: 500;
+            }
+
             .btn-filter {
-                width: 100%;
-                text-align: center;
+                padding: 10px 20px;
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+                color: white;
+                border: none;
+                border-radius: 15px;
+                cursor: pointer;
+                font-weight: 600;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
             }
-        }
 
-        /* Animation for filter changes */
-        .controls * {
-            animation: fadeInUp 0.6s ease-out;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
+            .btn-filter::before {
+                content: '⚡';
+                margin-right: 6px;
             }
-            to {
-                opacity: 1;
+
+            .btn-filter:hover {
+                background: linear-gradient(135deg, #218838 0%, #1e7e34 100%);
+                transform: translateY(-1px);
+                box-shadow: 0 4px 8px rgba(40, 167, 69, 0.3);
+            }
+
+            .btn-filter:active {
                 transform: translateY(0);
             }
-        }
 
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.5);
-        }
+            /* Enhanced Add Theater Link */
+            .navbar-brand {
+                padding: 12px 24px;
+                border-radius: 25px;
+                text-decoration: none;
+                font-weight: 600;
+                font-size: 14px;
+                transition: all 0.3s ease;
+                position: relative;
+                overflow: hidden;
+                white-space: nowrap;
+            }
 
-        .modal.show {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+            .navbar-brand::before {
+                content: '➕';
+                margin-right: 8px;
+            }
 
-        .modal-content {
-            background: white;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 80vh;
-            overflow-y: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
+            .navbar-brand:hover {
+                background: linear-gradient(135deg, #e8590c 0%, #d73384 100%);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(253, 126, 20, 0.4);
+                color: white !important;
+                text-decoration: none;
+            }
 
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 20px;
-            border-radius: 12px 12px 0 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
+            .navbar-brand u {
+                text-decoration: none;
+            }
 
-        .modal-header h5 {
-            margin: 0;
-            font-size: 18px;
-            font-weight: 600;
-        }
+            /* Responsive Design */
+            @media (max-width: 768px) {
+                .controls {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 15px;
+                }
 
-        .modal-close {
-            background: none;
-            border: none;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            transition: background-color 0.3s;
-        }
+                .search-box {
+                    min-width: unset;
+                }
 
-        .modal-close:hover {
-            background-color: rgba(255,255,255,0.2);
-        }
+                .filter-box {
+                    justify-content: center;
+                }
 
-        .modal-body {
-            padding: 30px;
-        }
+                .filter-box form {
+                    flex-direction: column;
+                    align-items: stretch;
+                    gap: 10px;
+                }
 
-        .detail-item {
-            margin-bottom: 20px;
-            padding: 15px;
-            background-color: #f8f9fa;
-            border-radius: 8px;
-        }
+                .form-select,
+                .btn-filter {
+                    width: 100%;
+                    text-align: center;
+                }
+            }
 
-        .detail-label {
-            font-weight: 600;
-            color: #495057;
-            margin-bottom: 8px;
-            font-size: 14px;
-        }
+            /* Animation for filter changes */
+            .controls * {
+                animation: fadeInUp 0.6s ease-out;
+            }
 
-        .detail-value {
-            color: #6c757d;
-            font-size: 14px;
-            line-height: 1.5;
-        }
+            @keyframes fadeInUp {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
 
-        .theater-detail-image {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 20px;
-        }
-    </style>
-</head>
+            /* Modal styles */
+            .modal {
+                display: none;
+                position: fixed;
+                z-index: 1000;
+                left: 0;
+                top: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0,0,0,0.5);
+            }
 
-<body>
-<div class="sidebar">
-    <div class="user-info">
-        <div class="user-avatar">M</div>
-        <div class="user-name">Mary Johnson</div>
+            .modal.show {
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .modal-content {
+                background: white;
+                border-radius: 12px;
+                width: 90%;
+                max-width: 600px;
+                max-height: 80vh;
+                overflow-y: auto;
+                box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            }
+
+            .modal-header {
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                color: white;
+                padding: 20px;
+                border-radius: 12px 12px 0 0;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+            }
+
+            .modal-header h5 {
+                margin: 0;
+                font-size: 18px;
+                font-weight: 600;
+            }
+
+            .modal-close {
+                background: none;
+                border: none;
+                color: white;
+                font-size: 24px;
+                cursor: pointer;
+                padding: 0;
+                width: 30px;
+                height: 30px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 50%;
+                transition: background-color 0.3s;
+            }
+
+            .modal-close:hover {
+                background-color: rgba(255,255,255,0.2);
+            }
+
+            .modal-body {
+                padding: 30px;
+            }
+
+            .detail-item {
+                margin-bottom: 20px;
+                padding: 15px;
+                background-color: #f8f9fa;
+                border-radius: 8px;
+            }
+
+            .detail-label {
+                font-weight: 600;
+                color: #495057;
+                margin-bottom: 8px;
+                font-size: 14px;
+            }
+
+            .detail-value {
+                color: #6c757d;
+                font-size: 14px;
+                line-height: 1.5;
+            }
+
+            .theater-detail-image {
+                width: 100%;
+                height: 200px;
+                object-fit: cover;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+            /*Sort*/
+                table.table thead th {
+                    position: relative;
+                    transition: background-color 0.3s ease;
+                }
+
+                table.table thead th:hover {
+                    background-color: #f8f9fa;
+                }
+
+                table.table thead th a {
+                    text-decoration: none;
+                    color: #333;
+                    display: block;
+                    padding: 12px 8px;
+                    transition: all 0.3s ease;
+                    position: relative;
+                    font-weight: 600;
+                }
+
+                table.table thead th a:hover {
+                    color: #007bff;
+                    text-decoration: none;
+                    background-color: #e3f2fd;
+                    border-radius: 4px;
+                    transform: translateY(-1px);
+                    box-shadow: 0 2px 4px rgba(0,123,255,0.1);
+                }
+
+                /* Sorting arrow styling */
+                table.table thead th a span {
+                    font-size: 12px;
+                    margin-left: 5px;
+                    opacity: 0.7;
+                    transition: opacity 0.3s ease;
+                }
+
+                table.table thead th a:hover span {
+                    opacity: 1;
+                }
+
+                /* Active sort column styling */
+                table.table thead th.active-sort {
+                    background-color: #e3f2fd;
+                }
+
+                table.table thead th.active-sort a {
+                    color: #007bff;
+                    font-weight: 700;
+                }
+
+                table.table thead th.active-sort a span {
+                    opacity: 1;
+                    color: #007bff;
+                }
+
+                /* Sortable indicator */
+                table.table thead th a::after {
+                    content: '⇅';
+                    position: absolute;
+                    right: 8px;
+                    top: 50%;
+                    transform: translateY(-50%);
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                    font-size: 12px;
+                    color: #007bff;
+                }
+
+                table.table thead th a:hover::after {
+                    opacity: 0.5;
+                }
+
+                /* Hide the sort indicator when there's already a sort arrow */
+                table.table thead th a:has(span)::after {
+                    display: none;
+                }
+
+                /* Non-sortable columns */
+                table.table thead th:not(:has(a)) {
+                    color: #666;
+                    font-weight: 600;
+                    padding: 12px 8px;
+                }
+                .table th:nth-child(1),
+                .table td:nth-child(1) {
+                    min-width: 220px; /* Bạn có thể điều chỉnh giá trị này cho phù hợp */
+                    /* Tùy chọn: Đảm bảo văn bản được căn chỉnh đẹp mắt */
+                    vertical-align: middle;
+                }
+
+                /* Tùy chọn: Điều chỉnh cho các cột khác để đồng bộ hơn */
+                .table th:nth-child(2),
+                .table td:nth-child(2) { /* Cột Address */
+                    min-width: 250px;
+                }
+
+                .table th:nth-child(4),
+                .table td:nth-child(4) { /* Cột Room Quantity */
+                    min-width: 160px;
+                }
+        </style>
+    </head>
+
+    <body>
+    <div class="sidebar">
+        <div class="user-info">
+            <div class="user-avatar">M</div>
+            <div class="user-name">Mary Johnson</div>
+        </div>
+
+        <a href="#" class="sidebar-item">
+            <div class="sidebar-icon">🏠</div>
+            <div class="sidebar-text">Home</div>
+        </a>
+        <a th:href="@{/theater_stock}" class="sidebar-item">
+            <div class="sidebar-icon">🍿</div>
+            <div class="sidebar-text">Food and Drinks</div>
+        </a>
+        <a th:href="@{/movie_schedule}" class="sidebar-item ">
+            <div class="sidebar-icon">📅</div>
+            <div class="sidebar-text">Set Schedule</div>
+        </a>
+        <a th:href="@{/theater}" class="sidebar-item  active">
+            <div class="sidebar-icon">🎬</div>
+            <div class="sidebar-text">Manage Theater</div>
+        </a>
     </div>
 
-    <a href="#" class="sidebar-item">
-        <div class="sidebar-icon">🏠</div>
-        <div class="sidebar-text">Home</div>
-    </a>
-    <a th:href="@{/theater_stock}" class="sidebar-item">
-        <div class="sidebar-icon">🍿</div>
-        <div class="sidebar-text">Food and Drinks</div>
-    </a>
-    <a th:href="@{/movie_schedule}" class="sidebar-item ">
-        <div class="sidebar-icon">📅</div>
-        <div class="sidebar-text">Set Schedule</div>
-    </a>
-    <a th:href="@{/theater}" class="sidebar-item  active">
-        <div class="sidebar-icon">🎬</div>
-        <div class="sidebar-text">Manage Theater</div>
-    </a>
-</div>
+    <div class="main-content">
+        <div class="header">
+            <div class="header-left">
+                <h1>Theater Management</h1>
+            </div>
+        </div>
 
-<div class="main-content">
-    <div class="header">
-        <div class="header-left">
-            <h1>Theater Management</h1>
+        <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'success' : (${messageType == 'error'} ? 'error' : 'warning')">
+            <span th:text="${message}"></span>
+        </div>
+
+        <div class="controls">
+            <div class="search-box">
+                <form th:action="@{/theater}" method="get">
+                    <input type="text" name="keyword" class="search-input" placeholder="Search for theater's name" th:value="${currentKeyword}">
+
+                    <input type="hidden" name="status" th:value="${currentStatus}">
+                    <input type="hidden" name="sortField" th:value="${sortField}">
+                    <input type="hidden" name="sortDir" th:value="${sortDir}">
+
+                    <button type="submit">Search</button>
+                </form>
+            </div>
+            <div class="filter-box">
+                <form th:action="@{/theater}" method="get" class="d-flex">
+                    <select name="status" class="form-select" onchange="this.form.submit()"> <option value="">All Status</option>
+                        <option value="Active" th:selected="${currentStatus == 'Active'}">Active</option>
+                        <option value="Inactive" th:selected="${currentStatus == 'Inactive'}">Inactive</option>
+                    </select>
+                    <input type="hidden" name="keyword" th:value="${currentKeyword}">
+                    <input type="hidden" name="sortField" th:value="${sortField}">
+                    <input type="hidden" name="sortDir" th:value="${sortDir}">
+                </form>
+            </div>
+            <a class="navbar-brand" th:href="@{/theater/add_theater}"><u>Add new theater</u></a>
+        </div>
+
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th th:classappend="${sortField == 'theaterName'} ? 'active-sort' : ''">
+                        <a th:href="@{/theater(page=${currentPage}, keyword=${currentKeyword}, status=${currentStatus}, sortField='theaterName', sortDir=${reverseSortDir})}">
+                            THEATER NAME
+                            <span th:if="${sortField == 'theaterName'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
+                    <th th:classappend="${sortField == 'address'} ? 'active-sort' : ''">
+                        <a th:href="@{/theater(page=${currentPage}, keyword=${currentKeyword}, status=${currentStatus}, sortField='address', sortDir=${reverseSortDir})}">
+                            ADDRESS
+                            <span th:if="${sortField == 'address'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
+                    <th>IMAGE</th>
+                    <th th:classappend="${sortField == 'roomQuantity'} ? 'active-sort' : ''">
+                        <a th:href="@{/theater(page=${currentPage}, keyword=${currentKeyword}, status=${currentStatus}, sortField='roomQuantity', sortDir=${reverseSortDir})}">
+                            ROOM QUANTITY
+                            <span th:if="${sortField == 'roomQuantity'}" th:text="${sortDir == 'asc' ? '▲' : '▼'}"></span>
+                        </a>
+                    </th>
+                    <th>STATUS</th>
+                    <th>ACTION</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="theater : ${theaters}">
+                <td>
+                        <div class="theater-name" th:text="${theater.theaterName}">CGV Vincom Center</div>
+                        <div class="theater-address" style="font-size: 12px; color: #999;">
+                        </div>
+                    </td>
+                    <td>
+                        <div class="theater-address" th:text="${theater.address}" title="Full address">
+                        </div>
+                    </td>
+                    <td>
+                        <img th:src="${theater.image}" class="theater-image" alt="Theater Image"
+                    </td>
+                    <td>
+                        <span class=" ">
+                             <span th:text="${theater.roomQuantity}">8</span> rooms
+                        </span>
+                    </td>
+                    <td>
+                        <span class="status-badge"
+                              th:classappend="${theater.status.name() == 'Active'} ? 'status-active' : 'status-inactive'"
+                              th:text="${theater.status.name() == 'Active'} ? 'Active' : 'Inactive'">
+                            Active
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <form method="GET" th:action="@{/theater/theater_detail}" style="display: inline;">
+                                <input type="hidden" name="id" th:value="${theater.theaterID}" />
+                                <button type="submit" class="action-btn btn-edit" title="Theater Detail">👁️ View Detail</button>
+                            </form>
+
+                            <form class="edit-form" method="get" th:action="@{/theater/showFormForUpdate}" style="display: inline;">
+                                <input type="hidden" name="id" th:value="${theater.theaterID}" />
+                                <button type="submit" class="action-btn btn-edit" title="Edit Theater">✏️ Edit</button>
+                            </form>
+
+                            <form th:action="@{/theater/delete}" method="POST" onsubmit="return confirmDelete()" style="display: inline;">
+                                <input type="hidden" name="id" th:value="${theater.theaterID}" />
+                                <button type="submit" class="action-btn btn-delete" title="Delete Theater">🗑️ Delete</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div class="pagination-container" th:if="${totalPages > 0}">
+                <div class="pagination">
+                    <a th:href="@{/theater(page=${currentPage - 1}, keyword=${currentKeyword}, status=${currentStatus}, sortField=${sortField}, sortDir=${sortDir})}"
+                       th:classappend="${currentPage == 0} ? 'disabled' : ''"
+                       class="page-btn">‹</a>
+
+                    <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                        <a th:href="@{/theater(page=${i}, keyword=${currentKeyword}, status=${currentStatus}, sortField=${sortField}, sortDir=${sortDir})}"
+                           th:text="${i + 1}"
+                           th:classappend="${i == currentPage} ? 'active' : ''"
+                           class="page-btn"></a>
+                    </th:block>
+
+                    <a th:href="@{/theater(page=${currentPage + 1}, keyword=${currentKeyword}, status=${currentStatus}, sortField=${sortField}, sortDir=${sortDir})}"
+                       th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+                       class="page-btn">›</a>
+                </div>
+            </div>
         </div>
     </div>
-
-    <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'success' : (${messageType == 'error'} ? 'error' : 'warning')">
-        <span th:text="${message}"></span>
-    </div>
-
-    <div class="controls">
-        <div class="search-box">
-            <form th:action="@{/theater/search}" method="get">
-                <input type="text" name="theaterName" class="search-input" placeholder="Search for theater's name" th:value="${currentKeyword}">
-                <button type="submit">Search</button>
-            </form>
-        </div>
-        <div class="filter-box">
-            <form th:action="@{/theater/filter_status}" method="get" class="d-flex">
-                <select name="status" class="form-select">
-                    <option value="">All Status</option>
-                    <option value="Active" th:selected="${currentStatus == 'Active'}">Active</option>
-                    <option value="Inactive" th:selected="${currentStatus == 'Inactive'}">InActive</option>
-                </select>
-                <button type="submit" class="btn-filter">Lọc</button>
-            </form>
-        </div>
-        <a class="navbar-brand" th:href="@{/theater/add_theater}"><u>Add new theater</u></a>
-    </div>
-
-    <div class="table-container">
-        <table class="table">
-            <thead>
-            <tr>
-                <th>THEATER NAME</th>
-                <th>ADDRESS</th>
-                <th>IMAGE</th>
-                <th>ROOM QUANTITY</th>
-                <th>STATUS</th>
-                <th>ACTION</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:each="theater : ${theaters}">
-            <td>
-                    <div class="theater-name" th:text="${theater.theaterName}">CGV Vincom Center</div>
-                    <div class="theater-address" style="font-size: 12px; color: #999;">
-                    </div>
-                </td>
-                <td>
-                    <div class="theater-address" th:text="${theater.address}" title="Full address">
-                    </div>
-                </td>
-                <td>
-                    <img th:src="${theater.image}" class="theater-image" alt="Theater Image"
-                </td>
-                <td>
-                    <span class=" ">
-                         <span th:text="${theater.roomQuantity}">8</span> rooms
-                    </span>
-                </td>
-                <td>
-                    <span class="status-badge"
-                          th:classappend="${theater.status.name() == 'Active'} ? 'status-active' : 'status-inactive'"
-                          th:text="${theater.status.name() == 'Active'} ? 'Active' : 'Inactive'">
-                        Active
-                    </span>
-                </td>
-                <td>
-                    <div class="action-buttons">
-                        <form method="GET" th:action="@{/theater/theater_detail}" style="display: inline;">
-                            <input type="hidden" name="id" th:value="${theater.theaterID}" />
-                            <button type="submit" class="action-btn btn-edit" title="Theater Detail">👁️ View Detail</button>
-                        </form>
-
-                        <form class="edit-form" method="get" th:action="@{/theater/showFormForUpdate}" style="display: inline;">
-                            <input type="hidden" name="id" th:value="${theater.theaterID}" />
-                            <button type="submit" class="action-btn btn-edit" title="Edit Theater">✏️ Edit</button>
-                        </form>
-
-                        <form th:action="@{/theater/delete}" method="POST" onsubmit="return confirmDelete()" style="display: inline;">
-                            <input type="hidden" name="id" th:value="${theater.theaterID}" />
-                            <button type="submit" class="action-btn btn-delete" title="Delete Theater">🗑️ Delete</button>
-                        </form>
-                    </div>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
-
-</body>
-</html>
+    <script>
+        function confirmDelete() {
+            return confirm("Are you sure you want to delete this theater? This action cannot be undone.");
+        }
+    </script>
+    </body>
+    </html>

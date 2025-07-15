@@ -12,5 +12,6 @@ public interface RoomService {
     RoomDTO addRoom(RoomDTO roomDTO) throws Exception;
     public void deleteRoomById(Integer roomId) throws Exception;
     Integer findTheaterIdByRoomId(Integer roomId);
+    RoomDTO updateRoom(RoomDTO roomDTO) throws Exception;
 
 }

@@ -161,6 +161,10 @@
         }
 
         .seats-container {
+            padding-top: 100px !important;    /* Tạo không gian trống phía trên cho tooltip */
+            padding-bottom: 30px !important; /* Thêm không gian phía dưới cho cân đối */
+            padding-left: 20px !important;   /* Tạo không gian lề trái cho tooltip */
+            padding-right: 20px !important  ;  /* Tạo không gian lề phải cho tooltip */
             width: 100%;
             overflow-x: auto;
             padding: 20px 0;
@@ -519,7 +523,7 @@
         </div>
     </div>
 
-    <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'success' : (${messageType == 'error'} ? 'error' : 'warning')">
+    <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'alert-success' : 'alert-error'">
         <span th:text="${message}"></span>
     </div>
 
@@ -586,11 +590,6 @@
             </div>
         </div>
 
-        <!-- Screen -->
-        <div class="screen-area">
-            <div class="screen">🎬 SCREEN</div>
-        </div>
-
         <!-- Seats Grid -->
         <div class="seats-container">
             <div class="seat-layout-wrapper">
@@ -620,7 +619,7 @@
                                             <div class="seat-tooltip">
                                                 <div><strong>Position:</strong> <span th:text="${seat.position}"></span></div>
                                                 <div><strong>Type:</strong> <span th:text="${seat.seatType}"></span></div>
-                                                <div><strong>Price:</strong> $<span th:text="${#numbers.formatDecimal(seat.unitPrice, 1, 'COMMA', 2, 'POINT')}"></span></div>
+                                                <div><strong>Price:</strong> <span th:text="${#numbers.formatCurrency(seat.unitPrice)}"></span></div>
                                                 <div><strong>Status</strong> <span th:text="${seat.status}"></span></div>
                                                 <div th:if="${seat.isVIP}"><strong>⭐ Ghế VIP</strong></div>
                                             </div>

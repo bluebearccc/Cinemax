@@ -18,6 +18,9 @@ public class TheaterDTO {
     private Integer roomQuantity;
     private Theater_Status status;
     private MultipartFile newImage;
+    private Double longtitude;
+    private Double latitude;
     private List<RoomDTO> rooms;
     private List<TheaterStockDTO> theaterStockS;
+
 }

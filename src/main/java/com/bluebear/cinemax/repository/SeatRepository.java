@@ -23,4 +23,5 @@ public interface SeatRepository extends JpaRepository<Seat, Integer> {
     List<Seat> findByRoom_RoomID(Integer roomId);
     @Query("SELECT s FROM Seat s WHERE s.room.roomID = :roomId ORDER BY SUBSTRING(s.position, 1, 1), CAST(SUBSTRING(s.position, 2) AS int)")
     List<Seat> findByRoom_RoomIDOrderByPositionAsc(@Param("roomId") Integer roomId);
+
 }

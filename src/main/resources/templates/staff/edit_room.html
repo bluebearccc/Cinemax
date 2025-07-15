@@ -60,7 +60,12 @@
         <div class="header-left">
             <div class="breadcrumb">
                 <a href="#" th:href="@{/theater/theater_detail(id=${param.theaterID})}">Theater details</a> >
-                <span th:text="${room.roomID == null} ? 'Add new Room' : 'Edit Room ' + ${room.name}"></span>            </div>
+                <span>Edit room</span></div>
+        </div>
+        <div class="header-right">
+            <a th:href="@{/theater/update_seat(roomId=${room.roomID})}">
+                Edit Seats
+            </a>
         </div>
     </div>
 
@@ -73,24 +78,28 @@
         <div class="form-header">
             <p class="form-subtitle" th:text="${room.roomID == null} ? 'Complete the room information' : 'Update the room information'"></p>
         </div>
-
-        <!-- Left Column - Form -->
+        <div th:if="${message}" class="alert"
+             th:classappend="${messageType == 'success'} ? 'alert-success' : 'alert-error'">
+            <span th:text="${message}"></span>
+        </div>
+        <!-- Left column - Form -->
         <div class="left-column">
 
-            <form th:if="${room.roomID == null}"
-                  th:action="@{/theater/add_room}"
+            <form th:action="@{/theater/edit_room}"
                   th:object="${room}"
                   method="post"
                   enctype="multipart/form-data"
                   id="roomForm"
                   onsubmit="return validateForm()">
-                <input type="hidden" th:field="*{theaterID}"/>
+                <input type="hidden" th:field="*{roomID}" th:value="${room.roomID}" />
+                <input type="hidden" th:field="*{name}" th:value="${room.name}" />
+                <input type="hidden" th:field="*{theaterID}" th:value="${room.theaterID}"/>
                 <div class="form-row">
                     <div class="form-column">
 
-                        <!-- Column -->
+                        <!-- column -->
                         <div class="form-group">
-                            <label class="form-label">Number of Columns</label>
+                            <label class="form-label">Number of columns</label>
                             <input type="number"
                                    class="form-input"
                                    th:field="*{column}"
@@ -189,7 +198,7 @@
         const status = document.querySelector('input[name="status"]:checked');
 
 
-        // Validate Column
+        // Validate column
         if (!columnInput.value || columnInput.value <= 0) {
             document.getElementById('columnError').textContent = 'Number of columns must be greater than 0';
             isValid = false;

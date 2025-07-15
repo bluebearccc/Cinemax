@@ -18,5 +18,6 @@ public interface RoomRepository extends JpaRepository<Room, Integer> {
     List<Room> findByTheater_TheaterIDAndStatus(Integer theaterID, Room_Status status);
     boolean existsByNameAndTheater_TheaterID(String name, Integer theaterID);
     Optional<Room> findTopByTheater_TheaterIDAndNameStartsWithOrderByNameDesc(Integer theaterId, String prefix);
+    long countByTheater_TheaterID(Integer theaterId);
 
 }

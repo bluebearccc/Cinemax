@@ -277,13 +277,6 @@ function nextMonthMini() {
 
 document.getElementById('scheduleModal').addEventListener('click', function(e) { if (e.target === this) { closeModal(); } });
 
-// ==================================================================================
-// PHẦN LOGIC CHO MODAL EDIT - ĐÂY LÀ PHẦN CẦN THÊM VÀO
-// ==================================================================================
-
-/**
- * Hàm editSchedule: Được gọi khi nhấn vào một thẻ lịch trình.
- */
 function editSchedule(id) {
     addNewUpdateSchedule();
 
