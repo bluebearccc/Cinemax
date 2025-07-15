@@ -125,27 +125,9 @@ public class MovieService {
         return movie.map(this::convertToDTO).orElse(null);
     }
 
-    /**
-     * Lấy phim theo ID (Long version)
-     */
-    public MovieDTO getMovieById(Long id) {
-        if (id == null) return null;
-        return getMovieById(id.intValue());
-    }
 
     // ==================== SEARCH AND FILTER OPERATIONS ====================
 
-    /**
-     * Tìm kiếm phim theo keyword (tên) - tất cả phim
-     */
-    public List<MovieDTO> searchAllMoviesByKeyword(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getAllMovies();
-        }
-        return movieRepository.findByMovieNameContainingIgnoreCase(keyword).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
 
     /**
      * Tìm kiếm phim theo keyword (tên) - chỉ phim active
@@ -158,54 +140,6 @@ public class MovieService {
                 .filter(movie -> movie.getStatus() == Movie_Status.Active)
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
-    }
-
-    /**
-     * Tìm kiếm phim theo keyword và status
-     */
-    public List<MovieDTO> searchMoviesByKeywordAndStatus(String keyword, String status) {
-        List<MovieDTO> movies;
-
-        // Lọc theo status trước
-        if ("Active".equals(status)) {
-            movies = getAllActiveMovies();
-        } else if ("Removed".equals(status)) {
-            movies = getAllRemovedMovies();
-        } else {
-            movies = getAllMovies();
-        }
-
-        // Lọc theo keyword
-        if (keyword != null && !keyword.trim().isEmpty()) {
-            movies = movies.stream()
-                    .filter(movie -> movie.getMovieName().toLowerCase()
-                            .contains(keyword.toLowerCase()))
-                    .collect(Collectors.toList());
-        }
-
-        return movies;
-    }
-
-    /**
-     * Tìm kiếm phim với phân trang
-     */
-    public Page<MovieDTO> searchMoviesByKeywordWithPaging(String keyword, PageRequest pageRequest) {
-        if (keyword == null || keyword.trim().isEmpty()) {
-            return getAllActiveMoviesWithPaging(pageRequest);
-        }
-
-        List<Movie> movies = movieRepository.findByMovieNameContainingIgnoreCase(keyword);
-        List<MovieDTO> filteredMovies = movies.stream()
-                .filter(movie -> movie.getStatus() == Movie_Status.Active)
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-
-        // Tính toán phân trang thủ công
-        int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), filteredMovies.size());
-        List<MovieDTO> pageContent = filteredMovies.subList(start, end);
-
-        return new PageImpl<>(pageContent, pageRequest, filteredMovies.size());
     }
 
     /**
@@ -230,69 +164,6 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Lấy phim theo thể loại (Long version)
-     */
-    public List<MovieDTO> getMoviesByGenre(Long genreId) {
-        if (genreId == null) return getAllActiveMovies();
-        return getMoviesByGenre(genreId.intValue());
-    }
-
-    /**
-     * Lấy phim theo thể loại và status - FIXED
-     */
-    public List<MovieDTO> getMoviesByGenreAndStatus(Integer genreId, String status) {
-        List<MovieDTO> movies;
-
-        if (genreId == null) {
-            // Không có filter genre, lấy theo status
-            if ("Active".equals(status)) {
-                movies = getAllActiveMovies();
-            } else if ("Removed".equals(status)) {
-                movies = getAllRemovedMovies();
-            } else {
-                movies = getAllMovies();
-            }
-        } else {
-            // Có filter genre - sử dụng MovieGenreRepository
-            List<Integer> movieIds = movieGenreRepository.findmovieIDsBygenreID(genreId);
-            List<Movie> foundMovies = movieRepository.findAllById(movieIds);
-
-            if ("Active".equals(status)) {
-                foundMovies = foundMovies.stream()
-                        .filter(movie -> movie.getStatus() == Movie_Status.Active)
-                        .collect(Collectors.toList());
-            } else if ("Removed".equals(status)) {
-                foundMovies = foundMovies.stream()
-                        .filter(movie -> movie.getStatus() == Movie_Status.Removed)
-                        .collect(Collectors.toList());
-            }
-
-            movies = foundMovies.stream()
-                    .map(this::convertToDTO)
-                    .collect(Collectors.toList());
-        }
-
-        return movies;
-    }
-
-    /**
-     * Lấy phim theo thể loại với phân trang
-     */
-    public Page<MovieDTO> getMoviesByGenreWithPaging(Long genreId, PageRequest pageRequest) {
-        if (genreId == null) {
-            return getAllActiveMoviesWithPaging(pageRequest);
-        }
-
-        List<MovieDTO> movieDTOs = getMoviesByGenre(genreId.intValue());
-
-        // Tính toán phân trang thủ công
-        int start = (int) pageRequest.getOffset();
-        int end = Math.min((start + pageRequest.getPageSize()), movieDTOs.size());
-        List<MovieDTO> pageContent = movieDTOs.subList(start, end);
-
-        return new PageImpl<>(pageContent, pageRequest, movieDTOs.size());
-    }
 
     /**
      * Lấy phim theo diễn viên - FIXED
@@ -345,19 +216,6 @@ public class MovieService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Lấy phim theo studio
-     */
-    public List<MovieDTO> getMoviesByStudio(String studio) {
-        if (studio == null || studio.trim().isEmpty()) {
-            return getAllActiveMovies();
-        }
-
-        return movieRepository.findByStudioContainingIgnoreCaseAndStatus(studio, Movie_Status.Active)
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
 
     // ==================== EXISTENCE CHECK OPERATIONS ====================
 
@@ -369,10 +227,6 @@ public class MovieService {
         return movieRepository.existsById(id);
     }
 
-    public boolean existsById(Long id) {
-        if (id == null) return false;
-        return existsById(id.intValue());
-    }
 
     /**
      * Kiểm tra tên phim có bị trùng không (trừ phim hiện tại)
@@ -394,16 +248,6 @@ public class MovieService {
                 .anyMatch(movie -> movie.getMovieName().equalsIgnoreCase(movieName.trim()));
     }
 
-    /**
-     * Validate tên phim có unique không (cho add movie)
-     */
-    public boolean isMovieNameUniqueForAdd(String movieName) {
-        if (movieName == null || movieName.trim().isEmpty()) {
-            return false;
-        }
-
-        return !isMovieNameExists(movieName.trim(), null);
-    }
 
     // ==================== UPDATE OPERATIONS - COMPLETELY FIXED ====================
 
@@ -640,56 +484,10 @@ public class MovieService {
                 .orElse(0.0);
     }
 
-    /**
-     * Lấy phim được thêm gần đây nhất
-     */
-    public List<MovieDTO> getRecentlyAddedMovies(int limit) {
-        // Sử dụng movieID để sort vì ID tăng dần theo thời gian thêm
-        return movieRepository.findByStatus(Movie_Status.Active)
-                .stream()
-                .sorted((m1, m2) -> {
-                    Integer id1 = (Integer) m1.getMovieID();
-                    Integer id2 = (Integer) m2.getMovieID();
-                    if (id1 == null && id2 == null) return 0;
-                    if (id1 == null) return 1;
-                    if (id2 == null) return -1;
-                    return Integer.compare(id2, id1);
-                })
-                .limit(limit)
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
 
     // ==================== DELETE OPERATIONS ====================
 
-    /**
-     * Xóa phim (soft delete - chuyển status thành Removed)
-     */
-    public boolean deleteMovie(Integer id) {
-        if (id == null) return false;
 
-        Optional<Movie> optionalMovie = movieRepository.findById(id);
-        if (optionalMovie.isPresent()) {
-            Movie movie = optionalMovie.get();
-            movie.setStatus(Movie_Status.Removed);
-            movieRepository.save(movie);
-            return true;
-        }
-        return false;
-    }
-
-    /**
-     * Xóa phim hoàn toàn
-     */
-    public boolean hardDeleteMovie(Integer id) {
-        if (id == null) return false;
-
-        if (movieRepository.existsById(id)) {
-            movieRepository.deleteById(id);
-            return true;
-        }
-        return false;
-    }
 
     /**
      * Xóa vĩnh viễn phim hoàn toàn khỏi database (đơn giản)
@@ -837,30 +635,6 @@ public class MovieService {
         }
     }
 
-    /**
-     * Lấy lịch sử thay đổi của phim (có thể mở rộng sau)
-     */
-    public List<String> getMovieUpdateHistory(Integer movieId) {
-        // TODO: Implement movie update history tracking
-        // Có thể tạo bảng movie_history để track changes
-        return new ArrayList<>();
-    }
-
-    /**
-     * Backup dữ liệu phim trước khi update
-     */
-    public MovieDTO backupMovieBeforeUpdate(Integer movieId) {
-        if (movieId == null) return null;
-
-        MovieDTO currentMovie = getMovieById(movieId);
-        if (currentMovie != null) {
-            // TODO: Lưu backup vào database hoặc cache
-            // Có thể tạo bảng movie_backup
-            return currentMovie;
-        }
-
-        return null;
-    }
 
     // ==================== ADD MOVIE OPERATIONS ====================
 

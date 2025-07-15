@@ -1,7 +1,7 @@
 package com.bluebear.cinemax.controller;
 
 import com.bluebear.cinemax.dto.VoucherDTO;
-import com.bluebear.cinemax.entity.Voucher;
+import com.bluebear.cinemax.entity.Promotion;
 import com.bluebear.cinemax.service.VoucherService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -22,7 +22,7 @@ public class VoucherController {
     // Display all vouchers
     @GetMapping
     public String listVouchers(Model model) {
-        List<Voucher> vouchers = voucherService.getAllVouchers();
+        List<Promotion> vouchers = voucherService.getAllVouchers();
         VoucherService.VoucherStats stats = voucherService.getVoucherStats();
 
         model.addAttribute("vouchers", vouchers);
@@ -37,7 +37,7 @@ public class VoucherController {
     public String searchVouchers(@RequestParam(required = false) String keyword,
                                  @RequestParam(required = false) String status,
                                  Model model) {
-        List<Voucher> vouchers = voucherService.searchVouchers(keyword, status);
+        List<Promotion> vouchers = voucherService.searchVouchers(keyword, status);
         VoucherService.VoucherStats stats = voucherService.getVoucherStats();
 
         model.addAttribute("vouchers", vouchers);
@@ -52,7 +52,7 @@ public class VoucherController {
     // Show voucher details
     @GetMapping("/{id}")
     public String viewVoucher(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
-        Optional<Voucher> voucher = voucherService.getVoucherById(id);
+        Optional<Promotion> voucher = voucherService.getVoucherById(id);
         if (!voucher.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Voucher not found");
             return "redirect:/admin/vouchers";
@@ -92,13 +92,13 @@ public class VoucherController {
     // Show edit voucher form - FIXED VERSION
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
-        Optional<Voucher> voucherOpt = voucherService.getVoucherById(id);
+        Optional<Promotion> voucherOpt = voucherService.getVoucherById(id);
         if (!voucherOpt.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Voucher not found");
             return "redirect:/admin/vouchers";
         }
 
-        Voucher voucher = voucherOpt.get();
+        Promotion voucher = voucherOpt.get();
         VoucherDTO voucherDTO = new VoucherDTO(
                 voucher.getPromotionID(),
                 voucher.getPromotionCode(),
@@ -147,7 +147,7 @@ public class VoucherController {
     // Get active vouchers (API endpoint)
     @GetMapping("/api/active")
     @ResponseBody
-    public List<Voucher> getActiveVouchers() {
+    public List<Promotion> getActiveVouchers() {
         return voucherService.getActiveVouchers();
     }
 

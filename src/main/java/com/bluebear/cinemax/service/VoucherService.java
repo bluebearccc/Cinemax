@@ -1,14 +1,13 @@
 package com.bluebear.cinemax.service;
 
 import com.bluebear.cinemax.dto.VoucherDTO;
-import com.bluebear.cinemax.entity.Voucher;
+import com.bluebear.cinemax.entity.Promotion;
 import com.bluebear.cinemax.enumtype.Promotion_Status;
 import com.bluebear.cinemax.repository.VoucherRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -20,22 +19,17 @@ public class VoucherService {
     private VoucherRepository voucherRepository;
 
     // Get all vouchers
-    public List<Voucher> getAllVouchers() {
+    public List<Promotion> getAllVouchers() {
         return voucherRepository.findAll();
     }
 
     // Get voucher by ID
-    public Optional<Voucher> getVoucherById(Integer id) {
+    public Optional<Promotion> getVoucherById(Integer id) {
         return voucherRepository.findById(id);
     }
 
-    // Get voucher by promotion code
-    public Optional<Voucher> getVoucherByPromotionCode(String promotionCode) {
-        return voucherRepository.findByPromotionCode(promotionCode);
-    }
-
     // Create new voucher
-    public Voucher createVoucher(VoucherDTO voucherDTO) {
+    public Promotion createVoucher(VoucherDTO voucherDTO) {
         if (!voucherDTO.isValid()) {
             throw new IllegalArgumentException("Invalid voucher data");
         }
@@ -53,7 +47,7 @@ public class VoucherService {
         }
 
         // Create voucher entity
-        Voucher voucher = Voucher.builder()
+        Promotion voucher = Promotion.builder()
                 .promotionCode(voucherDTO.getPromotionCode())
                 .discount(voucherDTO.getDiscount())
                 .startTime(voucherDTO.getStartTime())
@@ -66,17 +60,17 @@ public class VoucherService {
     }
 
     // Update voucher
-    public Voucher updateVoucher(Integer id, VoucherDTO voucherDTO) {
+    public Promotion updateVoucher(Integer id, VoucherDTO voucherDTO) {
         if (!voucherDTO.isValidForUpdate()) {
             throw new IllegalArgumentException("Invalid voucher data for update");
         }
 
-        Optional<Voucher> voucherOpt = voucherRepository.findById(id);
+        Optional<Promotion> voucherOpt = voucherRepository.findById(id);
         if (!voucherOpt.isPresent()) {
             throw new IllegalArgumentException("Voucher not found");
         }
 
-        Voucher voucher = voucherOpt.get();
+        Promotion voucher = voucherOpt.get();
 
         // Check if promotion code is being changed and if it already exists
         if (voucherDTO.getPromotionCode() != null &&
@@ -117,7 +111,7 @@ public class VoucherService {
 
     // Delete voucher
     public void deleteVoucher(Integer id) {
-        Optional<Voucher> voucherOpt = voucherRepository.findById(id);
+        Optional<Promotion> voucherOpt = voucherRepository.findById(id);
         if (!voucherOpt.isPresent()) {
             throw new IllegalArgumentException("Voucher not found");
         }
@@ -125,19 +119,19 @@ public class VoucherService {
     }
 
     // Get active vouchers
-    public List<Voucher> getActiveVouchers() {
+    public List<Promotion> getActiveVouchers() {
         LocalDateTime now = LocalDateTime.now();
         return voucherRepository.findActiveVouchers(Promotion_Status.Available, now);
     }
 
     // Get expired vouchers
-    public List<Voucher> getExpiredVouchers() {
+    public List<Promotion> getExpiredVouchers() {
         LocalDateTime now = LocalDateTime.now();
         return voucherRepository.findExpiredVouchers(now, Promotion_Status.Expired);
     }
 
     // Search vouchers
-    public List<Voucher> searchVouchers(String keyword, String status) {
+    public List<Promotion> searchVouchers(String keyword, String status) {
         Promotion_Status enumStatus = null;
         if (status != null && !status.isEmpty()) {
             try {
@@ -149,24 +143,14 @@ public class VoucherService {
         return voucherRepository.searchVouchers(keyword, enumStatus);
     }
 
-    // Get vouchers by status
-    public List<Voucher> getVouchersByStatus(String status) {
-        try {
-            Promotion_Status enumStatus = Promotion_Status.valueOf(status);
-            return voucherRepository.findByStatus(enumStatus);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid status: " + status);
-        }
-    }
-
     // Validate voucher code - FIXED: Added null checks for time fields
     public boolean validateVoucher(String promotionCode) {
-        Optional<Voucher> voucherOpt = voucherRepository.findByPromotionCode(promotionCode);
+        Optional<Promotion> voucherOpt = voucherRepository.findByPromotionCode(promotionCode);
         if (!voucherOpt.isPresent()) {
             return false;
         }
 
-        Voucher voucher = voucherOpt.get();
+        Promotion voucher = voucherOpt.get();
         LocalDateTime now = LocalDateTime.now();
 
         // Check if voucher is active, within time range, and has quantity available
@@ -186,12 +170,6 @@ public class VoucherService {
         return isStatusValid && isQuantityValid && isTimeValid;
     }
 
-    // Get vouchers ending soon - FIXED: Added null checks
-    public List<Voucher> getVouchersEndingSoon() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime weekLater = now.plusWeeks(1);
-        return voucherRepository.findVouchersEndingSoon(Promotion_Status.Available, now, weekLater);
-    }
 
     // Get voucher statistics
     public VoucherStats getVoucherStats() {
@@ -204,159 +182,7 @@ public class VoucherService {
                 averageDiscount != null ? averageDiscount : 0.0);
     }
 
-    // Count vouchers by status
-    public long countVouchersByStatus(String status) {
-        try {
-            Promotion_Status enumStatus = Promotion_Status.valueOf(status);
-            return voucherRepository.countByStatus(enumStatus);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid status: " + status);
-        }
-    }
 
-    // Check if promotion code exists
-    public boolean existsByPromotionCode(String promotionCode) {
-        return voucherRepository.existsByPromotionCode(promotionCode);
-    }
-
-    // Use voucher (decrease quantity) - FIXED: Added null checks
-    public boolean useVoucher(String promotionCode) {
-        Optional<Voucher> voucherOpt = voucherRepository.findByPromotionCode(promotionCode);
-        if (!voucherOpt.isPresent()) {
-            return false;
-        }
-
-        Voucher voucher = voucherOpt.get();
-        if (!validateVoucher(promotionCode)) {
-            return false;
-        }
-
-        // Decrease quantity
-        voucher.setQuantity(voucher.getQuantity() - 1);
-
-        // If quantity becomes 0, set status to Expired
-        if (voucher.getQuantity() <= 0) {
-            voucher.setStatus(Promotion_Status.Expired);
-        }
-
-        voucherRepository.save(voucher);
-        return true;
-    }
-
-    // Update expired vouchers (batch job) - FIXED: Added null checks for time
-    public void updateExpiredVouchers() {
-        LocalDateTime now = LocalDateTime.now();
-        List<Voucher> availableVouchers = voucherRepository.findByStatus(Promotion_Status.Available);
-
-        for (Voucher voucher : availableVouchers) {
-            boolean shouldExpire = false;
-
-            // Check if voucher should be expired based on end time
-            if (voucher.getEndTime() != null && voucher.getEndTime().isBefore(now)) {
-                shouldExpire = true;
-            }
-
-            // Check if voucher should be expired based on quantity
-            if (voucher.getQuantity() <= 0) {
-                shouldExpire = true;
-            }
-
-            if (shouldExpire) {
-                voucher.setStatus(Promotion_Status.Expired);
-                voucherRepository.save(voucher);
-            }
-        }
-    }
-
-    // Helper method to convert String status to enum safely
-    private Promotion_Status convertStringToStatus(String status) {
-        if (status == null || status.isEmpty()) {
-            return null;
-        }
-        try {
-            return Promotion_Status.valueOf(status);
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Invalid promotion status: " + status +
-                    ". Valid values are: " + java.util.Arrays.toString(Promotion_Status.values()));
-        }
-    }
-
-    // Get vouchers by status enum (type-safe version)
-    public List<Voucher> getVouchersByStatus(Promotion_Status status) {
-        return voucherRepository.findByStatus(status);
-    }
-
-    // Count vouchers by status enum (type-safe version)
-    public long countVouchersByStatus(Promotion_Status status) {
-        return voucherRepository.countByStatus(status);
-    }
-
-    // Additional helper methods for better API
-    public List<Voucher> getAvailableVouchers() {
-        return voucherRepository.findByStatus(Promotion_Status.Available);
-    }
-
-    public List<Voucher> getExpiredVouchersByStatus() {
-        return voucherRepository.findByStatus(Promotion_Status.Expired);
-    }
-
-    public long countAvailableVouchers() {
-        return voucherRepository.countByStatus(Promotion_Status.Available);
-    }
-
-    public long countExpiredVouchers() {
-        return voucherRepository.countByStatus(Promotion_Status.Expired);
-    }
-
-    // Get voucher status for display - NEW METHOD
-    public String getVoucherStatus(Voucher voucher) {
-        if (voucher == null) {
-            return "UNKNOWN";
-        }
-
-        LocalDateTime now = LocalDateTime.now();
-
-        // Check if out of stock
-        if (voucher.getQuantity() <= 0) {
-            return "OUT_OF_STOCK";
-        }
-
-        // Check if expired by system status
-        if (voucher.getStatus() == Promotion_Status.Expired) {
-            return "EXPIRED";
-        }
-
-        // Check if expired by end time
-        if (voucher.getEndTime() != null && voucher.getEndTime().isBefore(now)) {
-            return "EXPIRED";
-        }
-
-        // Check if not started yet
-        if (voucher.getStartTime() != null && voucher.getStartTime().isAfter(now)) {
-            return "PENDING";
-        }
-
-        // Check if active
-        if (voucher.getStatus() == Promotion_Status.Available) {
-            return "ACTIVE";
-        }
-
-        return "UNKNOWN";
-    }
-
-    // Calculate usage statistics - NEW METHOD
-    public VoucherUsageStats calculateUsageStats(Voucher voucher, Integer originalQuantity) {
-        if (voucher == null) {
-            return new VoucherUsageStats(0, 0, 0, 0.0);
-        }
-
-        int original = originalQuantity != null ? originalQuantity : voucher.getQuantity();
-        int current = voucher.getQuantity();
-        int used = Math.max(0, original - current);
-        double percentage = original > 0 ? (double) used / original * 100 : 0.0;
-
-        return new VoucherUsageStats(original, used, current, percentage);
-    }
 
     // Inner class for voucher statistics
     @Data
@@ -373,31 +199,7 @@ public class VoucherService {
             this.averageDiscount = averageDiscount;
         }
 
-        // Format discount as percentage
-        public String getFormattedAverageDiscount() {
-            DecimalFormat df = new DecimalFormat("#.##");
-            return df.format(averageDiscount) + "%";
-        }
+
     }
 
-    // Inner class for usage statistics
-    @Data
-    public static class VoucherUsageStats {
-        private int originalQuantity;
-        private int usedQuantity;
-        private int currentQuantity;
-        private double usagePercentage;
-
-        public VoucherUsageStats(int originalQuantity, int usedQuantity, int currentQuantity, double usagePercentage) {
-            this.originalQuantity = originalQuantity;
-            this.usedQuantity = usedQuantity;
-            this.currentQuantity = currentQuantity;
-            this.usagePercentage = usagePercentage;
-        }
-
-        public String getFormattedUsagePercentage() {
-            DecimalFormat df = new DecimalFormat("#.#");
-            return df.format(usagePercentage) + "%";
-        }
-    }
 }
