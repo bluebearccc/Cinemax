@@ -9,9 +9,7 @@
   <style>
     :root {
       --primary-blue: #4285f4;
-      --primary-light: #5a9bf8;
       --primary-dark: #3367d6;
-      --accent-blue: #1976d2;
       --success-green: #34a853;
       --warning-orange: #fbbc04;
       --danger-red: #ea4335;
@@ -74,20 +72,6 @@
       padding: 20px 0;
     }
 
-    .nav-section {
-      margin-bottom: 30px;
-    }
-
-    .nav-section-title {
-      color: var(--text-muted);
-      font-size: 0.75rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      padding: 0 20px 10px;
-      margin-bottom: 10px;
-    }
-
     .nav-link {
       color: var(--text-secondary);
       padding: 12px 20px;
@@ -145,53 +129,72 @@
       font-size: 0.95rem;
     }
 
-    .feature-grid {
+    .welcome-card {
       background: var(--card-bg);
       border-radius: 12px;
       border: 1px solid var(--border-color);
-      overflow: hidden;
+      padding: 40px;
+      text-align: center;
       margin-bottom: 24px;
     }
 
-    .feature-grid-header {
-      background: var(--darker-bg);
-      padding: 20px 24px;
-      border-bottom: 1px solid var(--border-color);
+    .welcome-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
     }
 
-    .feature-grid-header h5 {
+    .welcome-icon i {
+      font-size: 2.5rem;
+      color: white;
+    }
+
+    .welcome-card h3 {
       color: var(--text-primary);
       font-weight: 600;
-      margin: 0;
-      font-size: 1.1rem;
+      margin-bottom: 12px;
     }
 
-    .feature-grid-header i {
-      color: var(--primary-blue);
-      margin-right: 10px;
+    .welcome-card p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 600px;
+      margin: 0 auto;
     }
 
-    .feature-cards {
-      padding: 24px;
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
     }
 
-    .feature-card {
-      background: var(--darker-bg);
+    .action-card {
+      background: var(--card-bg);
       border: 1px solid var(--border-color);
-      border-radius: 10px;
+      border-radius: 12px;
       padding: 24px;
-      height: 100%;
+      text-align: center;
       transition: all 0.3s ease;
-      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
     }
 
-    .feature-card:hover {
+    .action-card:hover {
       transform: translateY(-4px);
       box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
       border-color: var(--primary-blue);
+      text-decoration: none;
+      color: inherit;
     }
 
-    .feature-icon {
+    .action-icon {
       width: 48px;
       height: 48px;
       background: var(--primary-blue);
@@ -199,115 +202,26 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 16px;
+      margin: 0 auto 16px;
     }
 
-    .feature-icon i {
+    .action-icon i {
       font-size: 1.25rem;
       color: white;
     }
 
-    .feature-card h6 {
+    .action-card h6 {
       color: var(--text-primary);
       font-weight: 600;
       margin-bottom: 8px;
       font-size: 1rem;
     }
 
-    .feature-card p {
+    .action-card p {
       color: var(--text-secondary);
       font-size: 0.875rem;
       line-height: 1.5;
-      margin-bottom: 16px;
-    }
-
-    .btn-feature {
-      background: none;
-      border: 1px solid var(--primary-blue);
-      color: var(--primary-blue);
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      font-weight: 500;
-      transition: all 0.2s ease;
-      text-decoration: none;
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    .btn-feature:hover {
-      background: var(--primary-blue);
-      color: white;
-      text-decoration: none;
-    }
-
-    .stats-section {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 20px;
-    }
-
-    .stat-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 24px;
-      text-align: center;
-      transition: all 0.3s ease;
-      position: relative;
-    }
-
-    .stat-card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-    }
-
-    .stat-number {
-      font-size: 2.5rem;
-      font-weight: 700;
-      margin-bottom: 8px;
-      color: var(--primary-blue);
-    }
-
-    .stat-card.actors .stat-number {
-      color: var(--primary-blue);
-    }
-
-    .stat-card.rating .stat-number {
-      color: var(--warning-orange);
-    }
-
-    .stat-label {
-      color: var(--text-secondary);
-      font-size: 0.95rem;
-      margin-bottom: 16px;
-    }
-
-    .stat-icon {
-      font-size: 2.5rem;
-      opacity: 0.1;
-      position: absolute;
-      right: 20px;
-      top: 20px;
-      color: var(--text-primary);
-    }
-
-    .btn-stat {
-      background: none;
-      border: 1px solid var(--border-color);
-      color: var(--text-secondary);
-      padding: 8px 16px;
-      border-radius: 6px;
-      font-size: 0.875rem;
-      transition: all 0.2s ease;
-      text-decoration: none;
-    }
-
-    .btn-stat:hover {
-      border-color: var(--primary-blue);
-      color: var(--primary-blue);
-      text-decoration: none;
+      margin: 0;
     }
 
     @media (max-width: 768px) {
@@ -320,12 +234,12 @@
         padding: 16px;
       }
 
-      .feature-cards {
-        padding: 16px;
+      .quick-actions {
+        grid-template-columns: 1fr;
       }
 
-      .stats-section {
-        grid-template-columns: 1fr;
+      .welcome-card {
+        padding: 24px;
       }
     }
 
@@ -355,33 +269,23 @@
     </h5>
   </div>
 
-  <div class="sidebar-nav">
-    <div class="nav-section">
-      <div class="nav-section-title">Core</div>
-      <a class="nav-link active" href="/admin/">
-        <i class="fas fa-tachometer-alt"></i>Dashboard
-      </a>
-    </div>
-
-    <div class="nav-section">
-      <div class="nav-section-title">Management</div>
-      <a class="nav-link" href="/admin/movies">
-        <i class="fas fa-film"></i>Movies
-      </a>
-      <a class="nav-link" href="/admin/actors">
-        <i class="fas fa-users"></i>Actors
-      </a>
-      <a class="nav-link" href="/admin/vouchers">
-        <i class="fas fa-ticket-alt"></i>Vouchers
-      </a>
-      <a class="nav-link" href="/admin/accounts">
-        <i class="fas fa-user-circle"></i>Accounts
-      </a>
-      <a class="nav-link" href="/admin/tables">
-        <i class="fas fa-table"></i>Tables
-      </a>
-    </div>
-  </div>
+  <nav class="sidebar-nav">
+    <a class="nav-link active" href="/admin/">
+      <i class="fas fa-home"></i>Dashboard
+    </a>
+    <a class="nav-link" href="/admin/movies">
+      <i class="fas fa-film"></i>Movies
+    </a>
+    <a class="nav-link" href="/admin/actors">
+      <i class="fas fa-users"></i>Actors
+    </a>
+    <a class="nav-link" href="/admin/vouchers">
+      <i class="fas fa-ticket-alt"></i>Vouchers
+    </a>
+    <a class="nav-link" href="/admin/accounts">
+      <i class="fas fa-user-circle"></i>Accounts
+    </a>
+  </nav>
 </div>
 
 <!-- Main Content -->
@@ -392,107 +296,58 @@
     <p>Welcome to BlueBear Cinema Management System</p>
   </div>
 
-  <!-- System Features -->
-  <div class="feature-grid fade-in">
-    <div class="feature-grid-header">
-      <h5>
-        <i class="fas fa-cogs"></i>System Features & Functions
-      </h5>
+  <!-- Welcome Section -->
+  <div class="welcome-card fade-in">
+    <div class="welcome-icon">
+      <i class="fas fa-film"></i>
     </div>
-    <div class="feature-cards">
-      <div class="row">
-        <div class="col-lg-6 mb-4">
-          <div class="feature-card" onclick="window.location.href='/admin/movies'">
-            <div class="feature-icon">
-              <i class="fas fa-film"></i>
-            </div>
-            <h6>Movie Management</h6>
-            <p>Quản lý Phim - Comprehensive movie database management with advanced filtering and search capabilities.</p>
-            <a href="/admin/movies" class="btn-feature">
-              <i class="fas fa-arrow-right"></i>Manage Movies
-            </a>
-          </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-          <div class="feature-card" onclick="window.location.href='/admin/actors'">
-            <div class="feature-icon">
-              <i class="fas fa-users"></i>
-            </div>
-            <h6>Actor Management</h6>
-            <p>Quản lý danh sách diễn viên, thông tin cá nhân. Liên kết diễn viên với các bộ phim tương ứng.</p>
-            <a href="/admin/actors" class="btn-feature">
-              <i class="fas fa-arrow-right"></i>Manage Actors
-            </a>
-          </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-          <div class="feature-card" onclick="window.location.href='/admin/vouchers'">
-            <div class="feature-icon">
-              <i class="fas fa-ticket-alt"></i>
-            </div>
-            <h6>Voucher Management</h6>
-            <p>Quản lý Voucher - Create and manage promotional codes, discounts, and special offers for customers.</p>
-            <a href="/admin/vouchers" class="btn-feature">
-              <i class="fas fa-arrow-right"></i>Manage Vouchers
-            </a>
-          </div>
-        </div>
-
-        <div class="col-lg-6 mb-4">
-          <div class="feature-card" onclick="window.location.href='/admin/accounts'">
-            <div class="feature-icon">
-              <i class="fas fa-user-circle"></i>
-            </div>
-            <h6>Account Management</h6>
-            <p>Quản lý Account - User account administration, permissions, and detailed analytics reporting.</p>
-            <a href="/admin/accounts" class="btn-feature">
-              <i class="fas fa-arrow-right"></i>Manage Accounts
-            </a>
-          </div>
-        </div>
-      </div>
-    </div>
+    <h3>Welcome to BlueBear Cinema Admin</h3>
+    <p>
+      Manage your cinema system efficiently with our comprehensive admin panel.
+      Use the navigation menu to access different management modules.
+    </p>
   </div>
 
-  <!-- Quick Stats -->
-  <div class="stats-section fade-in">
-    <div class="stat-card actors">
-      <i class="fas fa-users stat-icon"></i>
-      <div class="stat-number" th:text="${totalActors ?: 15}">15</div>
-      <div class="stat-label">Total Actors</div>
-      <a href="/admin/actors" class="btn-stat">Manage Actors</a>
-    </div>
+  <!-- Quick Actions -->
+  <div class="quick-actions fade-in">
+    <a href="/admin/movies" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-film"></i>
+      </div>
+      <h6>Movies</h6>
+      <p>Manage movie database and information</p>
+    </a>
 
-    <div class="stat-card rating">
-      <i class="fas fa-star stat-icon"></i>
-      <div class="stat-number" th:text="${averageRating ?: '4.8'}">4.8</div>
-      <div class="stat-label">Average Rating</div>
-      <a href="/admin/tables" class="btn-stat">View Reports</a>
-    </div>
+    <a href="/admin/actors" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <h6>Actors</h6>
+      <p>Manage actor profiles and relationships</p>
+    </a>
 
-    <div class="stat-card">
-      <i class="fas fa-ticket-alt stat-icon"></i>
-      <div class="stat-number" th:text="${totalVouchers ?: 0}">0</div>
-      <div class="stat-label">Total Vouchers</div>
-      <a href="/admin/vouchers" class="btn-stat">Manage Vouchers</a>
-    </div>
+    <a href="/admin/vouchers" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-ticket-alt"></i>
+      </div>
+      <h6>Vouchers</h6>
+      <p>Create and manage promotional codes</p>
+    </a>
 
-    <div class="stat-card">
-      <i class="fas fa-user-circle stat-icon"></i>
-      <div class="stat-number" th:text="${totalAccounts ?: 0}">0</div>
-      <div class="stat-label">Total Accounts</div>
-      <a href="/admin/accounts" class="btn-stat">Manage Accounts</a>
-    </div>
+    <a href="/admin/accounts" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <h6>Accounts</h6>
+      <p>User account administration</p>
+    </a>
   </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-  // Add some interactive animations
   document.addEventListener('DOMContentLoaded', function() {
-    // Animate cards on scroll
+    // Simple fade-in animation
     const observerOptions = {
       threshold: 0.1,
       rootMargin: '0px 0px -50px 0px'
@@ -507,8 +362,7 @@
       });
     }, observerOptions);
 
-    // Observe all cards
-    document.querySelectorAll('.feature-card, .stat-card').forEach(card => {
+    document.querySelectorAll('.action-card').forEach(card => {
       card.style.opacity = '0';
       card.style.transform = 'translateY(20px)';
       card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';

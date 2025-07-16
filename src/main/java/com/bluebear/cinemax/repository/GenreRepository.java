@@ -16,7 +16,6 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
      */
     List<Genre> findAllByOrderByGenreNameAsc();
 
-
     /**
      * Tìm thể loại theo phim ID - SIMPLIFIED sử dụng @ManyToMany relationship
      */

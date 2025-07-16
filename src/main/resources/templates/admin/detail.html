@@ -581,16 +581,16 @@
     </div>
 
     <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin/">
+        <a class="nav-link" th:href="@{/admin/}">
             <i class="fas fa-home"></i>Dashboard
         </a>
-        <a class="nav-link active" href="/movies">
+        <a class="nav-link active" th:href="@{/admin/movies}">
             <i class="fas fa-film"></i>Movies
         </a>
-        <a class="nav-link" href="/actors">
+        <a class="nav-link" href="/admin/actors">
             <i class="fas fa-users"></i>Actors
         </a>
-        <a class="nav-link" href="/genres">
+        <a class="nav-link" href="/admin/genres">
             <i class="fas fa-tags"></i>Genres
         </a>
     </nav>
@@ -600,7 +600,7 @@
 <div class="main-content">
     <!-- Back Navigation -->
     <div class="back-nav fade-in">
-        <a href="/movies" class="back-btn">
+        <a th:href="@{/admin/movies}" class="back-btn">
             <i class="fas fa-arrow-left"></i>
             Back to Movies
         </a>
@@ -666,24 +666,21 @@
                             <i class="fab fa-youtube"></i>
                             Watch Trailer
                         </a>
-                        <a th:href="@{/movies/{id}/edit(id=${movie.movieId})}" class="btn-action btn-outline">
+                        <a th:href="@{/admin/movies/{id}/edit(id=${movie.movieId})}" class="btn-action btn-outline">
                             <i class="fas fa-edit"></i>
                             Edit Movie
                         </a>
 
-                        <!-- Hard Delete Button - chỉ hiển thị cho phim có status "Removed" -->
                         <form th:if="${movie.status == 'Removed'}"
-                              th:action="@{/movies/{id}/hard-delete(id=${movie.movieId})}"
-                              method="post"
-                              style="display: inline;"
-                              onsubmit="return confirmHardDelete()">
+                              th:action="@{/admin/movies/{id}/hard-delete(id=${movie.movieId})}"
+                              method="post">
                             <button type="submit" class="btn-action btn-danger">
                                 <i class="fas fa-trash-alt"></i>
                                 Xóa vĩnh viễn
                             </button>
                         </form>
 
-                        <a href="/movies" class="btn-action btn-outline">
+                        <a th:href="@{/admin/movies}" class="btn-action btn-outline">
                             <i class="fas fa-list"></i>
                             All Movies
                         </a>
@@ -721,6 +718,7 @@
                 <li>
                     <span class="info-label">Rating</span>
                    <span class="rating-score" th:text="${movie.movieRate != null ? movie.movieRate + '/5.0' : 'Chưa đánh giá'}">4.8/5.0</span>
+
                 </li>
                 <li>
                     <span class="info-label">Status</span>
@@ -759,7 +757,7 @@
         </h2>
         <div class="movies-grid">
             <div th:each="relatedMovie : ${relatedMovies}" class="movie-card"
-                 th:onclick="'window.location.href=\'/movies/' + ${relatedMovie.movieId} + '\''">
+                 th:onclick="'window.location.href=\'/admin/movies/' + ${relatedMovie.movieId} + '\''">
                 <img th:src="${relatedMovie.image}"
                      th:alt="${relatedMovie.movieName}"
                      src="https://via.placeholder.com/200x280/4285f4/ffffff?text=Movie"

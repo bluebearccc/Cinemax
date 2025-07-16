@@ -349,16 +349,16 @@
     </div>
 
     <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin/">
+        <a class="nav-link" th:href="@{/admin/}">
             <i class="fas fa-home"></i>Dashboard
         </a>
-        <a class="nav-link active" href="/movies">
+        <a class="nav-link active" th:href="@{/admin/movies}">
             <i class="fas fa-film"></i>Movies
         </a>
-        <a class="nav-link" href="/actors">
+        <a class="nav-link" href="/admin/actors">
             <i class="fas fa-users"></i>Actors
         </a>
-        <a class="nav-link" href="/genres">
+        <a class="nav-link" href="/admin/genres">
             <i class="fas fa-tags"></i>Genres
         </a>
     </nav>
@@ -370,9 +370,9 @@
     <div class="page-header">
         <h1 class="page-title" th:text="${pageTitle}">Edit Movie</h1>
         <div class="breadcrumb">
-            <a href="/movies">Movies</a>
+            <a th:href="@{/admin/movies}">Movies</a>
             <i class="fas fa-chevron-right"></i>
-            <a th:href="@{/movies/{id}(id=${movie.movieId})}" th:text="${movie.movieName}">Movie Detail</a>
+            <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" th:text="${movie.movieName}">Movie Detail</a>
             <i class="fas fa-chevron-right"></i>
             <span>Edit</span>
         </div>
@@ -392,7 +392,7 @@
     <!-- Edit Form -->
     <div class="edit-form-container">
         <!-- Updated form with proper action and method -->
-        <form th:action="@{/movies/{id}/edit(id=${movie.movieId})}" method="POST" id="editMovieForm" enctype="application/x-www-form-urlencoded">
+        <form th:action="@{/admin/movies/{id}/edit(id=${movie.movieId})}" method="POST">
 
             <!-- Basic Information -->
             <div class="form-section">
@@ -557,7 +557,7 @@
 
             <!-- Form Actions -->
             <div class="form-actions">
-                <a th:href="@{/movies/{id}(id=${movie.movieId})}" class="btn btn-secondary">
+                <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" class="btn btn-secondary">
                     <i class="fas fa-times"></i>
                     Cancel
                 </a>

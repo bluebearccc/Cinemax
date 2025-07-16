@@ -14,16 +14,9 @@ import java.util.Optional;
 @Repository
 public interface PromotionRepository extends JpaRepository<Promotion, Integer> {
 
-    // Find voucher by promotion code
-    Optional<Promotion> findByPromotionCode(String promotionCode);
 
     // Check if promotion code exists (for validation)
     boolean existsByPromotionCode(String promotionCode);
-
-    // Find active vouchers
-    @Query("SELECT v FROM Promotion v WHERE v.status = :status AND v.startTime <= :now AND v.endTime >= :now AND v.quantity > 0")
-    List<Promotion> findActiveVouchers(@Param("status") Promotion_Status status, @Param("now") LocalDateTime now);
-
 
     // Search vouchers by code or status
     @Query("SELECT v FROM Promotion v WHERE " +

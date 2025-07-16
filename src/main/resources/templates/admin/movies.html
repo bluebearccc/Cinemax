@@ -489,16 +489,16 @@
     </div>
 
     <nav class="sidebar-nav">
-        <a class="nav-link" href="/">
+        <a class="nav-link" th:href="@{/admin/}">
             <i class="fas fa-home"></i>Dashboard
         </a>
-        <a class="nav-link active" href="/movies">
+        <a class="nav-link active" th:href="@{/admin/movies}">
             <i class="fas fa-film"></i>Movies
         </a>
-        <a class="nav-link" href="/actors">
+        <a class="nav-link" href="/admin/actors">
             <i class="fas fa-users"></i>Actors
         </a>
-        <a class="nav-link" href="/genres">
+        <a class="nav-link" href="/admin/genres">
             <i class="fas fa-tags"></i>Genres
         </a>
     </nav>
@@ -537,11 +537,11 @@
             <div class="search-title">
                 <i class="fas fa-search"></i>Search & Filter Movies
             </div>
-            <a href="/movies/add" class="btn-add">
+            <a th:href="@{/admin/movies/add}" class="btn-add">
                 <i class="fas fa-plus"></i>Add New Movie
             </a>
         </div>
-        <form th:action="@{/movies/search}" method="get" id="searchForm">
+        <form th:action="@{/admin/movies/search}" method="get" id="searchForm">
             <div class="row g-3">
                 <div class="col-md-3">
                     <input type="text" class="form-control" name="keyword"
@@ -569,7 +569,7 @@
                         <button type="submit" class="btn-search flex-fill">
                             <i class="fas fa-search me-1"></i>Search
                         </button>
-                        <a href="/movies" class="btn-reset">
+                        <a th:href="@{/admin/movies}" class="btn-reset">
                             <i class="fas fa-refresh"></i>
                         </a>
                     </div>
@@ -661,7 +661,7 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <a th:href="@{/movies/{id}(id=${movie.movieId})}" class="btn-action btn-view" title="View Details">
+                            <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" class="btn-action btn-view">
                                 <i class="fas fa-eye"></i>
                             </a>
                         </div>
