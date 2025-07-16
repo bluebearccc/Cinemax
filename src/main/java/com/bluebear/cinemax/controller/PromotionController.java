@@ -23,10 +23,18 @@ public class PromotionController {
     @GetMapping
     public String listVouchers(Model model) {
         List<Promotion> vouchers = promotionService.getAllVouchers();
-        PromotionService.VoucherStats stats = promotionService.getVoucherStats();
+
+        // Lấy từng thống kê riêng lẻ thay vì dùng VoucherStats object
+        long totalVouchers = promotionService.getTotalVouchersCount();
+        long activeVouchers = promotionService.getActiveVouchersCount();
+        long expiredVouchers = promotionService.getExpiredVouchersCount();
+        double averageDiscount = promotionService.getAverageDiscountForActiveVouchers();
 
         model.addAttribute("vouchers", vouchers);
-        model.addAttribute("stats", stats);
+        model.addAttribute("totalVouchers", totalVouchers);
+        model.addAttribute("activeVouchers", activeVouchers);
+        model.addAttribute("expiredVouchers", expiredVouchers);
+        model.addAttribute("averageDiscount", averageDiscount);
         model.addAttribute("pageTitle", "Voucher Management");
 
         return "admin/list-voucher";
@@ -38,10 +46,18 @@ public class PromotionController {
                                  @RequestParam(required = false) String status,
                                  Model model) {
         List<Promotion> vouchers = promotionService.searchVouchers(keyword, status);
-        PromotionService.VoucherStats stats = promotionService.getVoucherStats();
+
+        // Lấy thống kê cho trang search
+        long totalVouchers = promotionService.getTotalVouchersCount();
+        long activeVouchers = promotionService.getActiveVouchersCount();
+        long expiredVouchers = promotionService.getExpiredVouchersCount();
+        double averageDiscount = promotionService.getAverageDiscountForActiveVouchers();
 
         model.addAttribute("vouchers", vouchers);
-        model.addAttribute("stats", stats);
+        model.addAttribute("totalVouchers", totalVouchers);
+        model.addAttribute("activeVouchers", activeVouchers);
+        model.addAttribute("expiredVouchers", expiredVouchers);
+        model.addAttribute("averageDiscount", averageDiscount);
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedStatus", status);
         model.addAttribute("pageTitle", "Voucher Search Results");
@@ -71,7 +87,7 @@ public class PromotionController {
         model.addAttribute("pageTitle", "Add New Voucher");
         model.addAttribute("isEdit", false);
 
-        return "admin/add-voucher"; // Sửa để trả về template add
+        return "admin/form-voucher";
     }
 
     // Process add voucher
@@ -89,7 +105,7 @@ public class PromotionController {
         }
     }
 
-    // Show edit voucher form - FIXED VERSION
+    // Show edit voucher form
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Promotion> voucherOpt = promotionService.getVoucherById(id);
@@ -113,7 +129,7 @@ public class PromotionController {
         model.addAttribute("pageTitle", "Edit Voucher");
         model.addAttribute("isEdit", true);
 
-        return "admin/edit-voucher"; // Sửa để trả về template edit
+        return "admin/edit-voucher";
     }
 
     // Process edit voucher
@@ -143,6 +159,4 @@ public class PromotionController {
         }
         return "redirect:/admin/vouchers";
     }
-
-
 }

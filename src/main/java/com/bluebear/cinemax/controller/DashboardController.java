@@ -29,8 +29,8 @@ public class DashboardController {
     @Autowired
     private ActorService actorService;
 
-    @Autowired(required = false) // Optional để tránh lỗi nếu VoucherService chưa được inject
-    private PromotionService voucherService;
+    @Autowired(required = false) // Optional để tránh lỗi nếu PromotionService chưa được inject
+    private PromotionService promotionService;
 
     /**
      * Trang Dashboard chính - Hiển thị thống kê tổng quan
@@ -46,16 +46,16 @@ public class DashboardController {
             long totalActors = actorService.countAllActors();
             long totalGenres = genreService.countAllGenres();
 
-            // Thống kê voucher (nếu service có sẵn)
+            // Thống kê voucher (nếu service có sẵn) - ĐÃ SỬA
             long totalVouchers = 0;
             long activeVouchers = 0;
             double averageDiscount = 0.0;
-            if (voucherService != null) {
+            if (promotionService != null) {
                 try {
-                    PromotionService.VoucherStats voucherStats = voucherService.getVoucherStats();
-                    totalVouchers = voucherStats.getTotalVouchers();
-                    activeVouchers = voucherStats.getActiveVouchers();
-                    averageDiscount = voucherStats.getAverageDiscount();
+                    // Sử dụng các method riêng lẻ thay vì VoucherStats
+                    totalVouchers = promotionService.getTotalVouchersCount();
+                    activeVouchers = promotionService.getActiveVouchersCount();
+                    averageDiscount = promotionService.getAverageDiscountForActiveVouchers();
                 } catch (Exception e) {
                     // Log error but continue with default values
                     e.printStackTrace();
@@ -185,78 +185,4 @@ public class DashboardController {
         }
     }
 
-    /**
-     * Trang Charts - Biểu đồ thống kê
-     */
-    @GetMapping("/charts")
-    public String charts(Model model) {
-        model.addAttribute("pageTitle", "Charts - Admin Panel");
-        return "admin/charts";
-    }
-
-    /**
-     * Trang Tables - Bảng dữ liệu
-     */
-    @GetMapping("/tables")
-    public String tables(Model model) {
-        model.addAttribute("pageTitle", "Tables - Admin Panel");
-        return "admin/tables";
-    }
-
-    /**
-     * Các trang layout demo
-     */
-    @GetMapping("/layout-static")
-    public String layoutStatic(Model model) {
-        model.addAttribute("pageTitle", "Static Navigation - Admin Panel");
-        return "admin/layout-static";
-    }
-
-    @GetMapping("/layout-sidenav-light")
-    public String layoutSidenavLight(Model model) {
-        model.addAttribute("pageTitle", "Light Sidenav - Admin Panel");
-        return "admin/layout-sidenav-light";
-    }
-
-    /**
-     * Các trang authentication
-     */
-    @GetMapping("/login")
-    public String login(Model model) {
-        model.addAttribute("pageTitle", "Login - Admin Panel");
-        return "admin/login";
-    }
-
-    @GetMapping("/register")
-    public String register(Model model) {
-        model.addAttribute("pageTitle", "Register - Admin Panel");
-        return "admin/register";
-    }
-
-    @GetMapping("/password")
-    public String forgotPassword(Model model) {
-        model.addAttribute("pageTitle", "Forgot Password - Admin Panel");
-        return "admin/password";
-    }
-
-    /**
-     * Các trang lỗi
-     */
-    @GetMapping("/401")
-    public String error401(Model model) {
-        model.addAttribute("pageTitle", "401 Unauthorized");
-        return "admin/401";
-    }
-
-    @GetMapping("/404")
-    public String error404(Model model) {
-        model.addAttribute("pageTitle", "404 Not Found");
-        return "admin/404";
-    }
-
-    @GetMapping("/500")
-    public String error500(Model model) {
-        model.addAttribute("pageTitle", "500 Internal Server Error");
-        return "admin/500";
-    }
 }

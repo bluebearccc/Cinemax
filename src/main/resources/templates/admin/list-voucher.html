@@ -415,8 +415,6 @@
             transform: translateY(-1px);
         }
 
-
-
         .no-results {
             text-align: center;
             padding: 40px 20px;
@@ -554,18 +552,18 @@
         </div>
     </div>
 
-    <!-- Stats Cards -->
+    <!-- Stats Cards - ĐÃ SỬA -->
     <div class="stats-grid fade-in">
         <div class="stat-card">
-            <div class="stat-number" th:text="${stats.totalVouchers}">0</div>
+            <div class="stat-number" th:text="${totalVouchers}">0</div>
             <div class="stat-label">Total Vouchers</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number" th:text="${stats.activeVouchers}">0</div>
+            <div class="stat-number" th:text="${activeVouchers}">0</div>
             <div class="stat-label">Available Vouchers</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number" th:text="${stats.expiredVouchers}">0</div>
+            <div class="stat-number" th:text="${expiredVouchers}">0</div>
             <div class="stat-label">Expired Vouchers</div>
         </div>
     </div>

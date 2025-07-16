@@ -167,11 +167,6 @@ public class PromotionService {
         voucherRepository.deleteById(id);
     }
 
-    // Get active vouchers
-    public List<Promotion> getActiveVouchers() {
-        LocalDateTime now = LocalDateTime.now();
-        return voucherRepository.findActiveVouchers(Promotion_Status.Available, now);
-    }
 
     // Search vouchers
     public List<Promotion> searchVouchers(String keyword, String status) {
@@ -186,57 +181,25 @@ public class PromotionService {
         return voucherRepository.searchVouchers(keyword, enumStatus);
     }
 
-    // Validate voucher code - FIXED: Added null checks for time fields
-    public boolean validateVoucher(String promotionCode) {
-        Optional<Promotion> voucherOpt = voucherRepository.findByPromotionCode(promotionCode);
-        if (!voucherOpt.isPresent()) {
-            return false;
-        }
 
-        Promotion voucher = voucherOpt.get();
-        LocalDateTime now = LocalDateTime.now();
-
-        // Check if voucher is active, within time range, and has quantity available
-        boolean isStatusValid = voucher.getStatus() == Promotion_Status.Available;
-        boolean isQuantityValid = voucher.getQuantity() > 0;
-        boolean isTimeValid = true;
-
-        // Check time range only if both start and end times are set
-        if (voucher.getStartTime() != null && voucher.getEndTime() != null) {
-            isTimeValid = voucher.getStartTime().isBefore(now) && voucher.getEndTime().isAfter(now);
-        } else if (voucher.getStartTime() != null) {
-            isTimeValid = voucher.getStartTime().isBefore(now);
-        } else if (voucher.getEndTime() != null) {
-            isTimeValid = voucher.getEndTime().isAfter(now);
-        }
-
-        return isStatusValid && isQuantityValid && isTimeValid;
+    // Get total vouchers count
+    public long getTotalVouchersCount() {
+        return voucherRepository.count();
     }
 
-    // Get voucher statistics
-    public VoucherStats getVoucherStats() {
-        long totalVouchers = voucherRepository.count();
-        long activeVouchers = voucherRepository.countByStatus(Promotion_Status.Available);
-        long expiredVouchers = voucherRepository.countByStatus(Promotion_Status.Expired);
+    // Get active vouchers count
+    public long getActiveVouchersCount() {
+        return voucherRepository.countByStatus(Promotion_Status.Available);
+    }
+
+    // Get expired vouchers count
+    public long getExpiredVouchersCount() {
+        return voucherRepository.countByStatus(Promotion_Status.Expired);
+    }
+
+    // Get average discount for active vouchers
+    public double getAverageDiscountForActiveVouchers() {
         Double averageDiscount = voucherRepository.getAverageDiscount(Promotion_Status.Available);
-
-        return new VoucherStats(totalVouchers, activeVouchers, expiredVouchers,
-                averageDiscount != null ? averageDiscount : 0.0);
-    }
-
-    // Inner class for voucher statistics
-    @Data
-    public static class VoucherStats {
-        private long totalVouchers;
-        private long activeVouchers;
-        private long expiredVouchers;
-        private double averageDiscount;
-
-        public VoucherStats(long totalVouchers, long activeVouchers, long expiredVouchers, double averageDiscount) {
-            this.totalVouchers = totalVouchers;
-            this.activeVouchers = activeVouchers;
-            this.expiredVouchers = expiredVouchers;
-            this.averageDiscount = averageDiscount;
-        }
+        return averageDiscount != null ? averageDiscount : 0.0;
     }
 }
