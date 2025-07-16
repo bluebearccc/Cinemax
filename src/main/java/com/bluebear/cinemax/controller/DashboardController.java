@@ -5,7 +5,7 @@ import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.service.MovieService;
 import com.bluebear.cinemax.service.GenreService;
 import com.bluebear.cinemax.service.ActorService;
-import com.bluebear.cinemax.service.VoucherService;
+import com.bluebear.cinemax.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -30,7 +30,7 @@ public class DashboardController {
     private ActorService actorService;
 
     @Autowired(required = false) // Optional để tránh lỗi nếu VoucherService chưa được inject
-    private VoucherService voucherService;
+    private PromotionService voucherService;
 
     /**
      * Trang Dashboard chính - Hiển thị thống kê tổng quan
@@ -52,7 +52,7 @@ public class DashboardController {
             double averageDiscount = 0.0;
             if (voucherService != null) {
                 try {
-                    VoucherService.VoucherStats voucherStats = voucherService.getVoucherStats();
+                    PromotionService.VoucherStats voucherStats = voucherService.getVoucherStats();
                     totalVouchers = voucherStats.getTotalVouchers();
                     activeVouchers = voucherStats.getActiveVouchers();
                     averageDiscount = voucherStats.getAverageDiscount();

@@ -6,15 +6,9 @@ import com.bluebear.cinemax.repository.*;
 import com.bluebear.cinemax.enumtype.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.PageImpl;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
+
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -31,11 +25,7 @@ public class MovieService {
     @Autowired
     private ActorRepository actorRepository;
 
-    @Autowired
-    private MovieActorRepository movieActorRepository;
 
-    @Autowired
-    private MovieGenreRepository movieGenreRepository;
 
     // ==================== BASIC MOVIE OPERATIONS ====================
 
@@ -58,34 +48,10 @@ public class MovieService {
     }
 
     /**
-     * Lấy tất cả phim đã xóa (Removed)
-     */
-    public List<MovieDTO> getAllRemovedMovies() {
-        return movieRepository.findByStatus(Movie_Status.Removed).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    /**
-     * Lấy tất cả phim active với phân trang
-     */
-    public Page<MovieDTO> getAllActiveMoviesWithPaging(PageRequest pageRequest) {
-        // ✅ Lấy trực tiếp phim Active với phân trang từ repository
-        Page<Movie> moviePage = movieRepository.findByStatus(Movie_Status.Active, pageRequest);
-
-        List<MovieDTO> movieDTOs = moviePage.getContent().stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-
-        // ✅ Sử dụng đúng totalElements của phim Active
-        return new PageImpl<>(movieDTOs, pageRequest, moviePage.getTotalElements());
-    }
-
-    /**
      * Lấy phim đang chiếu
      */
     public List<MovieDTO> getNowShowingMovies() {
-        return movieRepository.findActiveMovies(LocalDate.now()).stream()
+        return movieRepository.findActiveMovies(LocalDateTime.now()).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -94,7 +60,7 @@ public class MovieService {
      * Lấy phim sắp chiếu
      */
     public List<MovieDTO> getUpcomingMovies() {
-        return movieRepository.findUpcomingMovies(LocalDate.now()).stream()
+        return movieRepository.findUpcomingMovies(LocalDateTime.now()).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -125,44 +91,20 @@ public class MovieService {
         return movie.map(this::convertToDTO).orElse(null);
     }
 
+    //Lấy phim theo genreId (Integer version)
 
-    // ==================== SEARCH AND FILTER OPERATIONS ====================
-
-
-    /**
-     * Tìm kiếm phim theo keyword (tên) - chỉ phim active
-     */
-    public List<MovieDTO> searchMoviesByKeyword(String keyword) {
-        if (keyword == null || keyword.trim().isEmpty()) {
+    public List<MovieDTO> getMoviesByGenre(Integer genreId) {
+        if (genreId == null) {
             return getAllActiveMovies();
         }
-        return movieRepository.findByMovieNameContainingIgnoreCase(keyword).stream()
-                .filter(movie -> movie.getStatus() == Movie_Status.Active)
+
+        // SỬ DỤNG JOIN trực tiếp thay vì query phức tạp
+        return movieRepository.findMoviesByGenreIdJoin(genreId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * Alias cho searchMoviesByKeyword để tương thích với controller
-     */
-    public List<MovieDTO> searchMoviesByName(String keyword) {
-        return searchMoviesByKeyword(keyword);
-    }
-
-    /**
-     * Lấy phim theo thể loại (Integer version) - FIXED
-     */
-    public List<MovieDTO> getMoviesByGenre(Integer genreId) {
-        if (genreId == null) return getAllActiveMovies();
-
-        // Sử dụng MovieGenreRepository để tìm các movieId theo genreId
-        List<Integer> movieIds = movieGenreRepository.findmovieIDsBygenreID(genreId);
-
-        return movieRepository.findAllById(movieIds).stream()
-                .filter(movie -> movie.getStatus() == Movie_Status.Active)
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
+    // ==================== SEARCH AND FILTER OPERATIONS ====================
 
 
     /**
@@ -171,11 +113,8 @@ public class MovieService {
     public List<MovieDTO> getMoviesByActor(Integer actorId) {
         if (actorId == null) return getAllActiveMovies();
 
-        // Sử dụng MovieActorRepository để tìm các movieId theo actorId
-        List<Integer> movieIds = movieActorRepository.findmovieIDsByactorID(actorId);
-
-        return movieRepository.findAllById(movieIds).stream()
-                .filter(movie -> movie.getStatus() == Movie_Status.Active)
+        // SỬ DỤNG @ManyToMany JOIN trực tiếp
+        return movieRepository.findMoviesByActorIdJoin(actorId).stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
@@ -198,19 +137,18 @@ public class MovieService {
     public List<MovieDTO> getRelatedMovies(Long movieId) {
         if (movieId == null) return List.of();
 
-        // Lấy các genreIds của phim hiện tại
-        List<Integer> genreIds = movieGenreRepository.findgenreIDsBymovieID(movieId.intValue());
-        if (genreIds.isEmpty()) {
+        // Lấy movie hiện tại
+        Movie currentMovie = movieRepository.findById(movieId.intValue()).orElse(null);
+        if (currentMovie == null || currentMovie.getGenres().isEmpty()) {
             return List.of();
         }
 
-        // Lấy phim cùng thể loại (lấy genre đầu tiên)
-        Integer genreId = genreIds.get(0);
-        List<Integer> relatedMovieIds = movieGenreRepository.findmovieIDsBygenreID(genreId);
+        // Lấy genre đầu tiên của phim hiện tại
+        Integer genreId = currentMovie.getGenres().get(0).getGenreID();
 
-        return movieRepository.findAllById(relatedMovieIds).stream()
-                .filter(movie -> !((Integer) movie.getMovieID()).equals(movieId.intValue())) // Loại trừ phim hiện tại
-                .filter(movie -> movie.getStatus() == Movie_Status.Active)
+        // Tìm phim cùng thể loại, loại trừ phim hiện tại
+        return movieRepository.findMoviesByGenreIdJoin(genreId).stream()
+                .filter(movie -> !((Integer) movie.getMovieID()).equals(movieId.intValue()))
                 .limit(4)
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
@@ -218,14 +156,6 @@ public class MovieService {
 
 
     // ==================== EXISTENCE CHECK OPERATIONS ====================
-
-    /**
-     * Kiểm tra phim có tồn tại không
-     */
-    public boolean existsById(Integer id) {
-        if (id == null) return false;
-        return movieRepository.existsById(id);
-    }
 
 
     /**
@@ -415,36 +345,32 @@ public class MovieService {
         }
 
         try {
-            Integer movieId = (Integer) movie.getMovieID();
             System.out.println("=== UPDATING MOVIE GENRES ===");
-            System.out.println("Movie ID: " + movieId);
+            System.out.println("Movie ID: " + movie.getMovieID());
             System.out.println("New genre IDs: " + genreIds);
 
-            // 1. Xóa tất cả MovieGenre hiện tại cho phim này
-            movieGenreRepository.deleteBymovieID(movieId);
-            movieGenreRepository.flush(); // Force delete
-            System.out.println("✓ Deleted old movie-genre relationships");
+            // 1. Clear existing genres
+            if (movie.getGenres() != null) {
+                movie.getGenres().clear();
+            } else {
+                movie.setGenres(new ArrayList<>());
+            }
 
-            // 2. Thêm genres mới (nếu có)
+            // 2. Add new genres
             if (genreIds != null && !genreIds.isEmpty()) {
                 for (Integer genreId : genreIds) {
                     Genre genre = genreRepository.findById(genreId).orElse(null);
                     if (genre != null) {
-                        MovieGenre movieGenre = new MovieGenre();
-                        movieGenre.setMovie(movie);
-                        movieGenre.setGenre(genre);
-                        movieGenreRepository.save(movieGenre);
+                        movie.getGenres().add(genre);
                         System.out.println("✓ Added genre: " + genre.getGenreName());
                     } else {
                         System.out.println("⚠ Genre not found: " + genreId);
                     }
                 }
-                movieGenreRepository.flush(); // Force save
-                System.out.println("✓ Added " + genreIds.size() + " new genres");
-            } else {
-                System.out.println("ℹ No genres to add");
             }
 
+            // 3. Save movie (cascade sẽ tự động update bảng Movie_Genre)
+            movieRepository.save(movie);
             System.out.println("=== GENRE UPDATE COMPLETE ===");
 
         } catch (Exception e) {
@@ -453,6 +379,7 @@ public class MovieService {
             throw new RuntimeException("Error updating movie genres: " + e.getMessage());
         }
     }
+
 
     // ==================== STATISTICS OPERATIONS ====================
 
@@ -463,16 +390,12 @@ public class MovieService {
         return movieRepository.count();
     }
 
-    public long countActiveMovies() {
-        return movieRepository.countByStatus(Movie_Status.Active);
-    }
-
     public long countNowShowingMovies() {
-        return movieRepository.findActiveMovies(LocalDate.now()).size();
+        return movieRepository.findActiveMovies(LocalDateTime.now()).size();
     }
 
     public long countUpcomingMovies() {
-        return movieRepository.findUpcomingMovies(LocalDate.now()).size();
+        return movieRepository.findUpcomingMovies(LocalDateTime.now()).size();
     }
 
     public double getAverageRating() {
@@ -493,6 +416,7 @@ public class MovieService {
      * Xóa vĩnh viễn phim hoàn toàn khỏi database (đơn giản)
      */
     @Transactional
+
     public boolean hardDeleteMovieComplete(Integer movieId) {
         if (movieId == null) {
             return false;
@@ -518,23 +442,11 @@ public class MovieService {
             String movieName = movie.getMovieName();
             System.out.println("Deleting movie: " + movieName);
 
-            // 3. Xóa các mối quan hệ MovieGenre trước
-            movieGenreRepository.deleteBymovieID(movieId);
-            System.out.println("Deleted movie-genre relationships");
-
-            // 4. Xóa các mối quan hệ MovieActor trước
-            movieActorRepository.deleteBymovieID(movieId);
-            System.out.println("Deleted movie-actor relationships");
-
-            // 5. Flush để đảm bảo xóa relationships trước
-            movieGenreRepository.flush();
-            movieActorRepository.flush();
-
-            // 6. Xóa phim chính
+            // 3. Xóa phim chính - Hibernate sẽ tự động xóa Movie_Genre và Movie_Actor relationships
             movieRepository.deleteById(movieId);
             movieRepository.flush();
 
-            // 7. Verify deletion
+            // 4. Verify deletion
             boolean stillExists = movieRepository.existsById(movieId);
             if (stillExists) {
                 System.out.println("ERROR: Movie still exists after deletion");
@@ -552,13 +464,11 @@ public class MovieService {
         }
     }
 
-    // ==================== UTILITY OPERATIONS - FIXED ====================
-
     /**
-     * Cập nhật ngày hết hạn chiếu của phim - FIXED to use LocalDate
+     * Cập nhật ngày hết hạn chiếu của phim - FIXED to use LocalDateTime
      */
     @Transactional
-    public boolean updateEndDate(Integer id, LocalDate endDate) {
+    public boolean updateEndDate(Integer id, LocalDateTime endDate) {
         // Validate input parameters
         if (id == null || endDate == null) {
             System.err.println("UpdateEndDate: Invalid parameters - ID or endDate is null");
@@ -575,17 +485,14 @@ public class MovieService {
 
             Movie movie = optionalMovie.get();
 
-            // Convert LocalDate to LocalDateTime for comparison
-            LocalDateTime endDateTime = endDate.atTime(23, 59, 59);
-
             // Validate business logic - endDate phải sau startDate
-            if (movie.getStartDate() != null && endDateTime.isBefore(movie.getStartDate())) {
+            if (movie.getStartDate() != null && endDate.isBefore(movie.getStartDate())) {
                 System.err.println("UpdateEndDate: End date cannot be before start date");
                 throw new IllegalArgumentException("Ngày kết thúc không thể trước ngày bắt đầu chiếu");
             }
 
             // Validate endDate không được ở quá khứ (nếu phim đang active)
-            if (movie.getStatus() == Movie_Status.Active && endDateTime.isBefore(LocalDateTime.now())) {
+            if (movie.getStatus() == Movie_Status.Active && endDate.isBefore(LocalDateTime.now())) {
                 System.err.println("UpdateEndDate: End date cannot be in the past for active movies");
                 throw new IllegalArgumentException("Ngày kết thúc không thể ở quá khứ đối với phim đang chiếu");
             }
@@ -593,16 +500,16 @@ public class MovieService {
             // Log thông tin cập nhật
             System.out.println("UpdateEndDate: Updating movie '" + movie.getMovieName() + "' (ID: " + id + ")");
             System.out.println("Old end date: " + movie.getEndDate());
-            System.out.println("New end date: " + endDateTime);
+            System.out.println("New end date: " + endDate);
 
             // Cập nhật ngày kết thúc
-            movie.setEndDate(endDateTime);
+            movie.setEndDate(endDate);
 
             // Lưu vào database
             Movie savedMovie = movieRepository.save(movie);
 
             // Verify save operation
-            if (savedMovie != null && endDateTime.equals(savedMovie.getEndDate())) {
+            if (savedMovie != null && endDate.equals(savedMovie.getEndDate())) {
                 System.out.println("UpdateEndDate: Successfully updated end date for movie ID: " + id);
                 return true;
             } else {
@@ -937,17 +844,22 @@ public class MovieService {
         }
 
         try {
+            // Initialize genres list if null
+            if (movie.getGenres() == null) {
+                movie.setGenres(new ArrayList<>());
+            }
+
             for (Integer genreId : genreIds) {
                 Genre genre = genreRepository.findById(genreId).orElse(null);
                 if (genre != null) {
-                    MovieGenre movieGenre = new MovieGenre();
-                    movieGenre.setMovie(movie);
-                    movieGenre.setGenre(genre);
-                    movieGenreRepository.save(movieGenre);
+                    movie.getGenres().add(genre);
                 } else {
                     System.err.println("Genre not found: " + genreId);
                 }
             }
+
+            // Save sẽ tự động update bảng Movie_Genre thông qua cascade
+            movieRepository.save(movie);
             System.out.println("Saved " + genreIds.size() + " movie-genre relationships");
 
         } catch (Exception e) {
@@ -966,17 +878,22 @@ public class MovieService {
         }
 
         try {
+            // Initialize actors list if null
+            if (movie.getActors() == null) {
+                movie.setActors(new ArrayList<>());
+            }
+
             for (Integer actorId : actorIds) {
                 Actor actor = actorRepository.findById(actorId).orElse(null);
                 if (actor != null) {
-                    MovieActor movieActor = new MovieActor();
-                    movieActor.setMovie(movie);
-                    movieActor.setActor(actor);
-                    movieActorRepository.save(movieActor);
+                    movie.getActors().add(actor);
                 } else {
                     System.err.println("Actor not found: " + actorId);
                 }
             }
+
+            // Save sẽ tự động update bảng Movie_Actor thông qua cascade
+            movieRepository.save(movie);
             System.out.println("Saved " + actorIds.size() + " movie-actor relationships");
 
         } catch (Exception e) {
@@ -988,13 +905,13 @@ public class MovieService {
     // ==================== CONVERT TO DTO ====================
 
     /**
-     * Convert Entity to DTO - FIXED VERSION
+     * Convert Entity to DTO - Using Double and LocalDateTime
      */
     private MovieDTO convertToDTO(Movie movie) {
         if (movie == null) return null;
 
         MovieDTO dto = new MovieDTO();
-        dto.setMovieId((Integer) movie.getMovieID()); // Cast Object to Integer
+        dto.setMovieId((Integer) movie.getMovieID());
         dto.setMovieName(movie.getMovieName());
         dto.setDescription(movie.getDescription());
         dto.setImage(movie.getImage());
@@ -1003,43 +920,29 @@ public class MovieService {
         dto.setDuration(movie.getDuration());
         dto.setTrailer(movie.getTrailer());
 
-        // Handle Double to BigDecimal conversion for movieRate
-        if (movie.getMovieRate() != null) {
-            dto.setMovieRate(BigDecimal.valueOf(movie.getMovieRate()).setScale(1, RoundingMode.HALF_UP));
-        } else {
-            dto.setMovieRate(null);
-        }
+        // Keep movieRate as Double (no conversion needed)
+        dto.setMovieRate(movie.getMovieRate());
 
-        // Handle LocalDateTime to LocalDate conversion - FIXED
-        if (movie.getStartDate() != null) {
-            dto.setStartDate(movie.getStartDate().toLocalDate());
-        }
-
-        if (movie.getEndDate() != null) {
-            dto.setEndDate(movie.getEndDate().toLocalDate());
-        }
+        // Keep dates as LocalDateTime (no conversion needed)
+        dto.setStartDate(movie.getStartDate());
+        dto.setEndDate(movie.getEndDate());
 
         dto.setStatus(movie.getStatus() != null ? movie.getStatus().toString() : "Unknown");
 
-        // Lấy danh sách thể loại từ MovieGenre relationship - FIXED
-        Integer movieId = (Integer) movie.getMovieID();
-        List<Integer> genreIds = movieGenreRepository.findgenreIDsBymovieID(movieId);
+        // SIMPLIFIED: Lấy genres trực tiếp từ relationship
         List<String> genreNames = new ArrayList<>();
-        for (Integer genreId : genreIds) {
-            Optional<Genre> genre = genreRepository.findById(genreId);
-            if (genre.isPresent()) {
-                genreNames.add(genre.get().getGenreName());
+        if (movie.getGenres() != null) {
+            for (Genre genre : movie.getGenres()) {
+                genreNames.add(genre.getGenreName());
             }
         }
         dto.setGenres(genreNames);
 
-        // Lấy danh sách diễn viên từ MovieActor relationship - FIXED
-        List<Integer> actorIds = movieActorRepository.findactorIDsBymovieID(movieId);
+        // SIMPLIFIED: Lấy actors trực tiếp từ relationship
         List<String> actorNames = new ArrayList<>();
-        for (Integer actorId : actorIds) {
-            Optional<Actor> actor = actorRepository.findById(actorId);
-            if (actor.isPresent()) {
-                actorNames.add(actor.get().getActorName());
+        if (movie.getActors() != null) {
+            for (Actor actor : movie.getActors()) {
+                actorNames.add(actor.getActorName());
             }
         }
         dto.setActors(actorNames);

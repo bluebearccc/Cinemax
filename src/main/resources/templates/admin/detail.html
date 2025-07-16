@@ -627,7 +627,7 @@
                     <div class="movie-meta">
                         <div class="meta-item">
                             <i class="fas fa-clock"></i>
-                            <span th:text="${movie.formattedDuration}">3h 1m</span>
+                              <span class="info-value" th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa xác định'}">181 phút</span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-calendar-alt"></i>
@@ -645,7 +645,7 @@
                                   th:class="${i <= (movie.movieRate ?: 0)} ? 'fas fa-star' : 'far fa-star'">
                             </span>
                         </div>
-                        <span class="rating-score" th:text="${movie.formattedRating}">4.8/5</span>
+                        <span class="rating-score" th:text="${movie.movieRate != null ? movie.movieRate + '/5.0' : 'Chưa đánh giá'}">4.8/5.0</span>
                     </div>
 
                     <div class="genre-list" th:if="${movie.genres != null and !#lists.isEmpty(movie.genres)}">
@@ -704,7 +704,7 @@
             <ul class="info-list">
                 <li>
                     <span class="info-label">Duration</span>
-                    <span class="info-value" th:text="${movie.formattedDuration}">3h 1m</span>
+                      <span class="info-value" th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa xác định'}">181 phút</span>
                 </li>
                 <li>
                     <span class="info-label">Release Date</span>
@@ -720,7 +720,7 @@
                 </li>
                 <li>
                     <span class="info-label">Rating</span>
-                    <span class="info-value" th:text="${movie.formattedRating}">4.8/5</span>
+                   <span class="rating-score" th:text="${movie.movieRate != null ? movie.movieRate + '/5.0' : 'Chưa đánh giá'}">4.8/5.0</span>
                 </li>
                 <li>
                     <span class="info-label">Status</span>
@@ -768,7 +768,7 @@
                     <h4 class="movie-card-title" th:text="${relatedMovie.movieName}">Related Movie</h4>
                     <div class="movie-card-rating">
                         <i class="fas fa-star"></i>
-                        <span th:text="${relatedMovie.formattedRating}">4.5/5</span>
+                        <span th:text="${relatedMovie.movieRate}"></span>>4.5/5</span>
                     </div>
                 </div>
             </div>

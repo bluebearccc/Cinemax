@@ -16,9 +16,6 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.HashMap;
@@ -39,7 +36,7 @@ public class MovieController {
     @Autowired
     private GenreService genreService;
 
-    // ==================== BASIC MOVIE OPERATIONS ====================
+    // ==================== CÁC THAO TÁC CƠ BẢN VỚI PHIM ====================
 
     /**
      * Trang chủ - hiển thị tất cả phim
@@ -110,16 +107,16 @@ public class MovieController {
 
             return "admin/detail";
         } catch (Exception e) {
-            System.err.println("Error loading movie detail: " + e.getMessage());
+            System.err.println("Lỗi khi tải chi tiết phim: " + e.getMessage());
             model.addAttribute("error", "Có lỗi xảy ra khi tải thông tin phim");
             return "error/500";
         }
     }
 
-    // ==================== SEARCH AND FILTER ====================
+    // ==================== TÌM KIẾM VÀ LỌC ====================
 
     /**
-     * Tìm kiếm phim - Lọc theo tên phim, thể loại và status
+     * Tìm kiếm phim - Lọc theo tên phim, thể loại và trạng thái
      */
     @GetMapping("/search")
     public String searchMovies(@RequestParam(required = false) String keyword,
@@ -131,7 +128,7 @@ public class MovieController {
             String pageTitle = "Kết quả tìm kiếm";
             StringBuilder titleBuilder = new StringBuilder();
 
-            // Bước 1: Lọc theo Status
+            // Bước 1: Lọc theo Trạng thái
             if (status != null && !status.trim().isEmpty()) {
                 if ("Active".equals(status)) {
                     movies = movieService.getAllActiveMovies();
@@ -150,7 +147,7 @@ public class MovieController {
                 titleBuilder.append("Tất cả phim");
             }
 
-            // Bước 2: Lọc theo tên phim (keyword)
+            // Bước 2: Lọc theo tên phim (từ khóa)
             if (keyword != null && !keyword.trim().isEmpty()) {
                 movies = movies.stream()
                         .filter(movie -> movie.getMovieName().toLowerCase()
@@ -178,7 +175,7 @@ public class MovieController {
                 }
             }
 
-            // Cập nhật page title
+            // Cập nhật tiêu đề trang
             if (titleBuilder.length() > 0) {
                 pageTitle = titleBuilder.toString();
             }
@@ -195,7 +192,7 @@ public class MovieController {
 
             return "admin/movies";
         } catch (Exception e) {
-            System.err.println("Error in search: " + e.getMessage());
+            System.err.println("Lỗi trong tìm kiếm: " + e.getMessage());
             model.addAttribute("error", "Có lỗi xảy ra khi tìm kiếm");
             return "admin/movies";
         }
@@ -239,51 +236,51 @@ public class MovieController {
 
             return "admin/movies";
         } catch (Exception e) {
-            System.err.println("Error loading movies by genre: " + e.getMessage());
+            System.err.println("Lỗi khi tải phim theo thể loại: " + e.getMessage());
             model.addAttribute("error", "Có lỗi xảy ra khi tải phim theo thể loại");
             return "admin/movies";
         }
     }
 
-    // ==================== MOVIE EDIT FUNCTIONALITY ====================
+    // ==================== CHỨC NĂNG CHỈNH SỬA PHIM ====================
 
     /**
-     * Hiển thị form chỉnh sửa phim - FIXED
+     * Hiển thị form chỉnh sửa phim - ĐÃ SỬA
      */
     @GetMapping("/{id}/edit")
     @Transactional
     public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
-        System.out.println("=== SHOW EDIT FORM ===");
-        System.out.println("Movie ID: " + id);
+        System.out.println("=== HIỂN THỊ FORM CHỈNH SỬA ===");
+        System.out.println("ID Phim: " + id);
 
         try {
             MovieDTO movie = movieService.getMovieById(id);
             if (movie == null) {
-                System.out.println("Movie not found with ID: " + id);
+                System.out.println("Không tìm thấy phim với ID: " + id);
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim");
                 return "redirect:/movies";
             }
 
-            // Lấy tất cả genres
+            // Lấy tất cả thể loại
             List<Genre> allGenres = genreService.getAllGenres();
-            System.out.println("Total genres available: " + allGenres.size());
+            System.out.println("Tổng số thể loại có sẵn: " + allGenres.size());
 
-            // Lấy các genre IDs hiện tại của phim - FIXED
+            // Lấy các ID thể loại hiện tại của phim - ĐÃ SỬA
             List<Integer> movieGenreIds = genreService.getGenresByMovie(id).stream()
-                    .map(Genre::getGenreID) // Fixed: use getGenreID() instead of getGenreId()
+                    .map(Genre::getGenreID) // Đã sửa: sử dụng getGenreID() thay vì getGenreId()
                     .collect(Collectors.toList());
-            System.out.println("Current movie genres: " + movieGenreIds);
+            System.out.println("Thể loại hiện tại của phim: " + movieGenreIds);
 
             model.addAttribute("movie", movie);
             model.addAttribute("allGenres", allGenres);
             model.addAttribute("movieGenreIds", movieGenreIds);
             model.addAttribute("pageTitle", "Chỉnh sửa phim - " + movie.getMovieName());
 
-            System.out.println("Successfully loaded edit form for movie: " + movie.getMovieName());
+            System.out.println("Đã tải thành công form chỉnh sửa cho phim: " + movie.getMovieName());
             return "admin/edit";
 
         } catch (Exception e) {
-            System.err.println("Error loading edit form: " + e.getMessage());
+            System.err.println("Lỗi khi tải form chỉnh sửa: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi tải form chỉnh sửa");
             return "redirect:/movies";
@@ -291,7 +288,7 @@ public class MovieController {
     }
 
     /**
-     * Xử lý cập nhật phim - FIXED VERSION
+     * Xử lý cập nhật phim - PHIÊN BẢN ĐÃ SỬA
      */
     @PostMapping("/{id}/edit")
     public String updateMovie(@PathVariable Integer id,
@@ -301,30 +298,30 @@ public class MovieController {
                               HttpServletRequest request) {
 
         System.out.println("=========================");
-        System.out.println("=== UPDATE MOVIE START ===");
+        System.out.println("=== BẮT ĐẦU CẬP NHẬT PHIM ===");
         System.out.println("=========================");
-        System.out.println("Request URL: " + request.getRequestURL());
-        System.out.println("Request URI: " + request.getRequestURI());
-        System.out.println("Request Method: " + request.getMethod());
-        System.out.println("Movie ID: " + id);
-        System.out.println("Content Type: " + request.getContentType());
+        System.out.println("URL yêu cầu: " + request.getRequestURL());
+        System.out.println("URI yêu cầu: " + request.getRequestURI());
+        System.out.println("Phương thức yêu cầu: " + request.getMethod());
+        System.out.println("ID phim: " + id);
+        System.out.println("Loại nội dung: " + request.getContentType());
 
-        // Log all parameters
-        System.out.println("--- ALL FORM PARAMETERS ---");
+        // Ghi log tất cả tham số
+        System.out.println("--- TẤT CẢ THAM SỐ FORM ---");
         allParams.forEach((key, value) -> System.out.println(key + " = " + value));
-        System.out.println("Selected Genre IDs: " + genreIds);
+        System.out.println("ID thể loại được chọn: " + genreIds);
         System.out.println("=========================");
 
         try {
             // Kiểm tra phim có tồn tại không
             MovieDTO existingMovie = movieService.getMovieById(id);
             if (existingMovie == null) {
-                System.out.println("ERROR: Movie not found with ID: " + id);
+                System.out.println("LỖI: Không tìm thấy phim với ID: " + id);
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim để cập nhật");
                 return "redirect:/movies";
             }
 
-            System.out.println("Found existing movie: " + existingMovie.getMovieName());
+            System.out.println("Đã tìm thấy phim hiện tại: " + existingMovie.getMovieName());
 
             // Lấy và validate dữ liệu từ form
             String movieName = allParams.get("movieName");
@@ -339,78 +336,79 @@ public class MovieController {
 
             // Validate tên phim
             if (movieName == null || movieName.trim().isEmpty()) {
-                System.out.println("ERROR: Movie name is empty");
+                System.out.println("LỖI: Tên phim trống");
                 redirectAttributes.addFlashAttribute("error", "Tên phim không được để trống");
                 return "redirect:/movies/" + id + "/edit";
             }
 
-            // Validate và parse duration
+            // Validate và parse thời lượng
             Integer duration;
             try {
                 String durationStr = allParams.get("duration");
                 if (durationStr == null || durationStr.trim().isEmpty()) {
-                    throw new NumberFormatException("Duration is empty");
+                    throw new NumberFormatException("Thời lượng trống");
                 }
                 duration = Integer.parseInt(durationStr.trim());
                 if (duration <= 0 || duration > 500) {
-                    System.out.println("ERROR: Invalid duration: " + duration);
+                    System.out.println("LỖI: Thời lượng không hợp lệ: " + duration);
                     redirectAttributes.addFlashAttribute("error", "Thời lượng phim phải từ 1-500 phút");
                     return "redirect:/movies/" + id + "/edit";
                 }
             } catch (NumberFormatException e) {
-                System.out.println("ERROR: Cannot parse duration: " + allParams.get("duration"));
+                System.out.println("LỖI: Không thể parse thời lượng: " + allParams.get("duration"));
                 redirectAttributes.addFlashAttribute("error", "Thời lượng phim không hợp lệ");
                 return "redirect:/movies/" + id + "/edit";
             }
 
-            // Validate và parse movie rate (optional) - FIXED VERSION
-            Double movieRate = null; // Changed to Double to match entity
+            // Validate và parse đánh giá phim (tùy chọn) - PHIÊN BẢN ĐÃ SỬA SỬ DỤNG DOUBLE
+            Double movieRate = null; // Đổi thành Double để khớp với entity
             String movieRateStr = allParams.get("movieRate");
             if (movieRateStr != null && !movieRateStr.trim().isEmpty()) {
                 try {
                     movieRate = Double.parseDouble(movieRateStr.trim());
 
-                    System.out.println("Controller: Parsed rating = " + movieRate);
+                    System.out.println("Controller: Đánh giá đã parse = " + movieRate);
 
                     if (movieRate < 0.0 || movieRate > 5.0) {
-                        System.out.println("ERROR: Invalid movie rate: " + movieRate);
+                        System.out.println("LỖI: Đánh giá phim không hợp lệ: " + movieRate);
                         redirectAttributes.addFlashAttribute("error", "Đánh giá phim phải từ 0-5");
                         return "redirect:/movies/" + id + "/edit";
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("ERROR: Cannot parse movie rate: " + movieRateStr);
+                    System.out.println("LỖI: Không thể parse đánh giá phim: " + movieRateStr);
                     redirectAttributes.addFlashAttribute("error", "Đánh giá phim không hợp lệ");
                     return "redirect:/movies/" + id + "/edit";
                 }
             }
 
-            // Validate và parse dates - Convert to LocalDateTime
-            LocalDate startDate, endDate;
+            // Validate và parse ngày - Chuyển đổi thành LocalDateTime
+            LocalDateTime startDate, endDate;
             try {
                 if (startDateStr == null || startDateStr.trim().isEmpty()) {
-                    throw new DateTimeParseException("Start date is empty", "", 0);
+                    throw new DateTimeParseException("Ngày bắt đầu trống", "", 0);
                 }
                 if (endDateStr == null || endDateStr.trim().isEmpty()) {
-                    throw new DateTimeParseException("End date is empty", "", 0);
+                    throw new DateTimeParseException("Ngày kết thúc trống", "", 0);
                 }
 
-                startDate = LocalDate.parse(startDateStr.trim());
-                endDate = LocalDate.parse(endDateStr.trim());
+                // Parse ngày và chuyển thành LocalDateTime
+                startDate = LocalDateTime.parse(startDateStr.trim() + "T00:00:00");
+                endDate = LocalDateTime.parse(endDateStr.trim() + "T23:59:59");
 
                 if (startDate.isAfter(endDate) || startDate.isEqual(endDate)) {
-                    System.out.println("ERROR: Invalid date range - Start: " + startDate + ", End: " + endDate);
+                    System.out.println("LỖI: Khoảng ngày không hợp lệ - Bắt đầu: " + startDate + ", Kết thúc: " + endDate);
                     redirectAttributes.addFlashAttribute("error", "Ngày bắt đầu phải trước ngày kết thúc");
                     return "redirect:/movies/" + id + "/edit";
                 }
             } catch (DateTimeParseException e) {
-                System.out.println("ERROR: Cannot parse dates - Start: " + startDateStr + ", End: " + endDateStr);
+                System.out.println("LỖI: Không thể parse ngày - Bắt đầu: " + startDateStr + ", Kết thúc: " + endDateStr);
                 redirectAttributes.addFlashAttribute("error", "Định dạng ngày không hợp lệ (yyyy-MM-dd)");
                 return "redirect:/movies/" + id + "/edit";
             }
 
-            // Tạo Movie object để cập nhật - FIXED
+            // Tạo đối tượng Movie để cập nhật - ĐÃ SỬA
             Movie movieToUpdate = new Movie();
-            movieToUpdate.setMovieID(id); // Fixed: use setMovieID
+            movieToUpdate.setMovieID(id); // Đã sửa: sử dụng setMovieID
             movieToUpdate.setMovieName(movieName.trim());
             movieToUpdate.setDescription(description != null && !description.trim().isEmpty() ? description.trim() : null);
             movieToUpdate.setImage(image != null && !image.trim().isEmpty() ? image.trim() : null);
@@ -419,53 +417,53 @@ public class MovieController {
             movieToUpdate.setDuration(duration);
             movieToUpdate.setTrailer(trailer != null && !trailer.trim().isEmpty() ? trailer.trim() : null);
 
-            // Set rating - use Double instead of BigDecimal
+            // Đặt đánh giá - sử dụng Double thay vì BigDecimal
             movieToUpdate.setMovieRate(movieRate);
-            System.out.println("Controller: Setting movieToUpdate rating = " + movieToUpdate.getMovieRate());
+            System.out.println("Controller: Đặt đánh giá movieToUpdate = " + movieToUpdate.getMovieRate());
 
-            // Convert LocalDate to LocalDateTime for entity
-            movieToUpdate.setStartDate(startDate.atStartOfDay()); // Convert to LocalDateTime
-            movieToUpdate.setEndDate(endDate.atTime(23, 59, 59)); // Convert to LocalDateTime
+            // Sử dụng LocalDateTime thay vì LocalDate
+            movieToUpdate.setStartDate(startDate);
+            movieToUpdate.setEndDate(endDate);
 
-            // Set status - FIXED to use proper enum
+            // Đặt trạng thái - ĐÃ SỬA để sử dụng enum đúng
             if ("Active".equals(status)) {
                 movieToUpdate.setStatus(Movie_Status.Active);
             } else {
                 movieToUpdate.setStatus(Movie_Status.Removed);
             }
 
-            System.out.println("=== MOVIE UPDATE DATA ===");
-            System.out.println("Old name: " + existingMovie.getMovieName());
-            System.out.println("New name: " + movieToUpdate.getMovieName());
-            System.out.println("Old rating: " + existingMovie.getMovieRate());
-            System.out.println("New rating: " + movieToUpdate.getMovieRate());
-            System.out.println("New duration: " + movieToUpdate.getDuration());
-            System.out.println("New start date: " + movieToUpdate.getStartDate());
-            System.out.println("New end date: " + movieToUpdate.getEndDate());
-            System.out.println("New status: " + movieToUpdate.getStatus());
-            System.out.println("New genres: " + genreIds);
+            System.out.println("=== DỮ LIỆU CẬP NHẬT PHIM ===");
+            System.out.println("Tên cũ: " + existingMovie.getMovieName());
+            System.out.println("Tên mới: " + movieToUpdate.getMovieName());
+            System.out.println("Đánh giá cũ: " + existingMovie.getMovieRate());
+            System.out.println("Đánh giá mới: " + movieToUpdate.getMovieRate());
+            System.out.println("Thời lượng mới: " + movieToUpdate.getDuration());
+            System.out.println("Ngày bắt đầu mới: " + movieToUpdate.getStartDate());
+            System.out.println("Ngày kết thúc mới: " + movieToUpdate.getEndDate());
+            System.out.println("Trạng thái mới: " + movieToUpdate.getStatus());
+            System.out.println("Thể loại mới: " + genreIds);
 
-            // Debug rating trước update
-            System.out.println("=== CONTROLLER: BEFORE UPDATE ===");
+            // Debug đánh giá trước khi cập nhật
+            System.out.println("=== CONTROLLER: TRƯỚC KHI CẬP NHẬT ===");
             movieService.debugMovieRating(id);
 
             // Thực hiện cập nhật
-            System.out.println("Calling movieService.updateMovieComplete...");
+            System.out.println("Đang gọi movieService.updateMovieComplete...");
             boolean updateSuccess = movieService.updateMovieComplete(id, movieToUpdate, genreIds);
 
-            // Debug rating sau update
-            System.out.println("=== CONTROLLER: AFTER UPDATE ===");
+            // Debug đánh giá sau khi cập nhật
+            System.out.println("=== CONTROLLER: SAU KHI CẬP NHẬT ===");
             movieService.debugMovieRating(id);
 
             if (updateSuccess) {
-                System.out.println("SUCCESS: Movie updated successfully!");
+                System.out.println("THÀNH CÔNG: Phim đã được cập nhật thành công!");
 
-                // Verify update by getting updated movie
+                // Xác minh cập nhật bằng cách lấy phim đã cập nhật
                 MovieDTO updatedMovie = movieService.getMovieById(id);
                 if (updatedMovie != null) {
-                    System.out.println("Verified - Updated movie name: " + updatedMovie.getMovieName());
-                    System.out.println("Verified - Updated duration: " + updatedMovie.getDuration());
-                    System.out.println("Verified - Updated rating: " + updatedMovie.getMovieRate());
+                    System.out.println("Đã xác minh - Tên phim đã cập nhật: " + updatedMovie.getMovieName());
+                    System.out.println("Đã xác minh - Thời lượng đã cập nhật: " + updatedMovie.getDuration());
+                    System.out.println("Đã xác minh - Đánh giá đã cập nhật: " + updatedMovie.getMovieRate());
                 }
 
                 redirectAttributes.addFlashAttribute("success",
@@ -473,18 +471,18 @@ public class MovieController {
                 return "redirect:/movies/" + id;
 
             } else {
-                System.out.println("ERROR: Movie update failed - service returned false");
+                System.out.println("LỖI: Cập nhật phim thất bại - service trả về false");
                 redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi cập nhật phim");
                 return "redirect:/movies/" + id + "/edit";
             }
 
         } catch (IllegalArgumentException e) {
-            System.err.println("VALIDATION ERROR: " + e.getMessage());
+            System.err.println("LỖI VALIDATION: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/movies/" + id + "/edit";
 
         } catch (Exception e) {
-            System.err.println("CRITICAL ERROR in updateMovie: " + e.getMessage());
+            System.err.println("LỖI NGHIÊM TRỌNG trong updateMovie: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error",
                     "Có lỗi hệ thống xảy ra: " + e.getMessage());
@@ -492,7 +490,7 @@ public class MovieController {
         }
     }
 
-    // ==================== END DATE EDIT FUNCTIONALITY ====================
+    // ==================== CHỨC NĂNG CHỈNH SỬA NGÀY KẾT THÚC ====================
 
     /**
      * Hiển thị form sửa ngày hết hạn chiếu
@@ -511,7 +509,7 @@ public class MovieController {
 
             return "admin/edit-enddate";
         } catch (Exception e) {
-            System.err.println("Error loading edit end date form: " + e.getMessage());
+            System.err.println("Lỗi khi tải form sửa ngày kết thúc: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi tải form");
             return "redirect:/movies";
         }
@@ -531,8 +529,9 @@ public class MovieController {
                 return "redirect:/movies";
             }
 
-            LocalDate endDate = LocalDate.parse(endDateStr);
-            LocalDate startDate = movie.getStartDate();
+            // Parse và chuyển đổi thành LocalDateTime
+            LocalDateTime endDate = LocalDateTime.parse(endDateStr + "T23:59:59");
+            LocalDateTime startDate = movie.getStartDate();
 
             if (startDate != null && endDate.isBefore(startDate)) {
                 redirectAttributes.addFlashAttribute("error", "Ngày kết thúc không thể trước ngày bắt đầu");
@@ -550,7 +549,7 @@ public class MovieController {
             redirectAttributes.addFlashAttribute("error", "Định dạng ngày không hợp lệ");
             return "redirect:/movies/" + id + "/edit-enddate";
         } catch (Exception e) {
-            System.err.println("Error updating end date: " + e.getMessage());
+            System.err.println("Lỗi khi cập nhật ngày kết thúc: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", "Có lỗi hệ thống xảy ra");
             return "redirect:/movies/" + id + "/edit-enddate";
         }
@@ -558,171 +557,8 @@ public class MovieController {
         return "redirect:/movies/" + id;
     }
 
-    // ==================== DEBUG AND API ENDPOINTS ====================
 
-    /**
-     * API endpoint để kiểm tra thông tin phim và genres - FIXED
-     */
-    @GetMapping("/{id}/debug")
-    @ResponseBody
-    public Map<String, Object> debugMovieInfo(@PathVariable Integer id) {
-        Map<String, Object> result = new HashMap<>();
-
-        try {
-            MovieDTO movie = movieService.getMovieById(id);
-            List<Genre> allGenres = genreService.getAllGenres();
-            List<Genre> movieGenres = genreService.getGenresByMovie(id);
-            List<Integer> movieGenreIds = movieGenres.stream()
-                    .map(Genre::getGenreID) // Fixed: use getGenreID()
-                    .collect(Collectors.toList());
-
-            result.put("success", true);
-            result.put("movie", movie);
-            result.put("allGenres", allGenres);
-            result.put("movieGenres", movieGenres);
-            result.put("movieGenreIds", movieGenreIds);
-
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-
-        return result;
-    }
-
-    /**
-     * API endpoint để test form submission
-     */
-    @PostMapping("/{id}/test")
-    @ResponseBody
-    public Map<String, Object> testFormSubmission(@PathVariable Integer id,
-                                                  @RequestParam Map<String, String> allParams,
-                                                  @RequestParam(value = "genreIds", required = false) List<Integer> genreIds) {
-        Map<String, Object> result = new HashMap<>();
-
-        try {
-            result.put("success", true);
-            result.put("movieId", id);
-            result.put("totalParams", allParams.size());
-            result.put("allParameters", allParams);
-            result.put("genreIds", genreIds);
-            result.put("message", "Form data received successfully");
-            result.put("timestamp", java.time.LocalDateTime.now());
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-        }
-
-        return result;
-    }
-
-    /**
-     * Health check endpoint
-     */
-    @GetMapping("/health")
-    @ResponseBody
-    public Map<String, Object> healthCheck() {
-        Map<String, Object> result = new HashMap<>();
-        try {
-            long movieCount = movieService.countAllMovies();
-            long genreCount = genreService.getAllGenres().size();
-
-            result.put("status", "OK");
-            result.put("movieCount", movieCount);
-            result.put("genreCount", genreCount);
-            result.put("timestamp", java.time.LocalDateTime.now());
-        } catch (Exception e) {
-            result.put("status", "ERROR");
-            result.put("error", e.getMessage());
-        }
-        return result;
-    }
-
-    /**
-     * API endpoint để debug rating issues - NEW
-     */
-    @GetMapping("/{id}/debug-rating")
-    @ResponseBody
-    public Map<String, Object> debugRating(@PathVariable Integer id) {
-        Map<String, Object> result = new HashMap<>();
-
-        try {
-            MovieDTO movie = movieService.getMovieById(id);
-            if (movie == null) {
-                result.put("success", false);
-                result.put("error", "Movie not found");
-                return result;
-            }
-
-            // Debug rating trong service
-            movieService.debugMovieRating(id);
-
-            result.put("success", true);
-            result.put("movieId", id);
-            result.put("movieName", movie.getMovieName());
-            result.put("currentRating", movie.getMovieRate());
-            result.put("ratingClass", movie.getMovieRate() != null ? movie.getMovieRate().getClass().getSimpleName() : "null");
-            result.put("timestamp", java.time.LocalDateTime.now());
-
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-            e.printStackTrace();
-        }
-
-        return result;
-    }
-
-    /**
-     * API endpoint để test rating update - NEW
-     */
-    @PostMapping("/{id}/test-rating")
-    @ResponseBody
-    public Map<String, Object> testRatingUpdate(@PathVariable Integer id,
-                                                @RequestParam("rating") String ratingStr) {
-        Map<String, Object> result = new HashMap<>();
-
-        try {
-            System.out.println("=== TEST RATING UPDATE ===");
-            System.out.println("Movie ID: " + id);
-            System.out.println("Input rating string: '" + ratingStr + "'");
-
-            // Parse rating như trong controller - use Double instead of BigDecimal
-            Double testRating = null;
-            if (ratingStr != null && !ratingStr.trim().isEmpty()) {
-                testRating = Double.parseDouble(ratingStr.trim());
-            }
-
-            System.out.println("Parsed rating: " + testRating);
-
-            // Get current movie
-            MovieDTO currentMovie = movieService.getMovieById(id);
-            if (currentMovie == null) {
-                result.put("success", false);
-                result.put("error", "Movie not found");
-                return result;
-            }
-
-            result.put("success", true);
-            result.put("movieId", id);
-            result.put("inputRatingString", ratingStr);
-            result.put("parsedRating", testRating);
-            result.put("currentMovieRating", currentMovie.getMovieRate());
-            result.put("ratingWillChange", testRating != null && !testRating.equals(currentMovie.getMovieRate()));
-            result.put("timestamp", java.time.LocalDateTime.now());
-
-            System.out.println("Test completed successfully");
-
-        } catch (Exception e) {
-            result.put("success", false);
-            result.put("error", e.getMessage());
-            e.printStackTrace();
-        }
-
-        return result;
-    }
-
-    // ==================== ADD MOVIE FUNCTIONALITY - FIXED ====================
+    // ==================== CHỨC NĂNG THÊM PHIM - ĐÃ SỬA ====================
 
     /**
      * Hiển thị form thêm phim mới
@@ -739,14 +575,14 @@ public class MovieController {
 
             return "admin/add-movie";
         } catch (Exception e) {
-            System.err.println("Error loading add movie form: " + e.getMessage());
+            System.err.println("Lỗi khi tải form thêm phim: " + e.getMessage());
             model.addAttribute("error", "Có lỗi xảy ra khi tải form thêm phim");
             return "redirect:/movies";
         }
     }
 
     /**
-     * Xử lý thêm phim mới - FIXED VERSION
+     * Xử lý thêm phim mới - PHIÊN BẢN ĐÃ SỬA
      */
     @PostMapping("/add")
     public String addMovie(@RequestParam Map<String, String> allParams,
@@ -756,20 +592,20 @@ public class MovieController {
                            HttpServletRequest request) {
 
         System.out.println("=========================");
-        System.out.println("=== ADD NEW MOVIE START ===");
+        System.out.println("=== BẮT ĐẦU THÊM PHIM MỚI ===");
         System.out.println("=========================");
-        System.out.println("Request URL: " + request.getRequestURL());
-        System.out.println("Content Type: " + request.getContentType());
+        System.out.println("URL yêu cầu: " + request.getRequestURL());
+        System.out.println("Loại nội dung: " + request.getContentType());
 
-        // Log all parameters
-        System.out.println("--- ALL FORM PARAMETERS ---");
+        // Ghi log tất cả tham số
+        System.out.println("--- TẤT CẢ THAM SỐ FORM ---");
         allParams.forEach((key, value) -> System.out.println(key + " = " + value));
-        System.out.println("Selected Genre IDs: " + genreIds);
-        System.out.println("Selected Actor IDs: " + actorIds);
+        System.out.println("ID thể loại được chọn: " + genreIds);
+        System.out.println("ID diễn viên được chọn: " + actorIds);
         System.out.println("=========================");
 
         try {
-            // Lấy dữ liệu từ form với NULL handling
+            // Lấy dữ liệu từ form với xử lý NULL
             String movieName = getParameterOrNull(allParams, "movieName");
             String description = getParameterOrNull(allParams, "description");
             String image = getParameterOrNull(allParams, "image");
@@ -782,66 +618,66 @@ public class MovieController {
 
             // Validate tên phim - CHỈ CÓ TÊN PHIM LÀ BẮT BUỘC
             if (movieName == null || movieName.trim().isEmpty()) {
-                System.out.println("ERROR: Movie name is empty");
+                System.out.println("LỖI: Tên phim trống");
                 redirectAttributes.addFlashAttribute("error", "Tên phim không được để trống");
                 return "redirect:/movies/add";
             }
 
             // Kiểm tra tên phim trùng lặp
             if (movieService.isMovieNameExists(movieName.trim(), null)) {
-                System.out.println("ERROR: Movie name already exists: " + movieName);
+                System.out.println("LỖI: Tên phim đã tồn tại: " + movieName);
                 redirectAttributes.addFlashAttribute("error", "Tên phim đã tồn tại");
                 return "redirect:/movies/add";
             }
 
-            // Parse duration - CHO PHÉP NULL
+            // Parse thời lượng - CHO PHÉP NULL
             Integer duration = null;
             String durationStr = getParameterOrNull(allParams, "duration");
             if (durationStr != null && !durationStr.trim().isEmpty()) {
                 try {
                     duration = Integer.parseInt(durationStr.trim());
                     if (duration <= 0 || duration > 500) {
-                        System.out.println("ERROR: Invalid duration: " + duration);
+                        System.out.println("LỖI: Thời lượng không hợp lệ: " + duration);
                         redirectAttributes.addFlashAttribute("error", "Thời lượng phim phải từ 1-500 phút");
                         return "redirect:/movies/add";
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("ERROR: Cannot parse duration: " + durationStr);
+                    System.out.println("LỖI: Không thể parse thời lượng: " + durationStr);
                     redirectAttributes.addFlashAttribute("error", "Thời lượng phim không hợp lệ");
                     return "redirect:/movies/add";
                 }
             }
 
-            // Parse movie rate - CHO PHÉP NULL - FIXED to use Double
+            // Parse đánh giá phim - CHO PHÉP NULL - ĐÃ SỬA để sử dụng Double
             Double movieRate = null;
             String movieRateStr = getParameterOrNull(allParams, "movieRate");
             if (movieRateStr != null && !movieRateStr.trim().isEmpty()) {
                 try {
                     movieRate = Double.parseDouble(movieRateStr.trim());
 
-                    System.out.println("Controller: Parsed rating = " + movieRate);
+                    System.out.println("Controller: Đánh giá đã parse = " + movieRate);
 
                     if (movieRate < 0.0 || movieRate > 5.0) {
-                        System.out.println("ERROR: Invalid movie rate: " + movieRate);
+                        System.out.println("LỖI: Đánh giá phim không hợp lệ: " + movieRate);
                         redirectAttributes.addFlashAttribute("error", "Đánh giá phim phải từ 0-5");
                         return "redirect:/movies/add";
                     }
                 } catch (NumberFormatException e) {
-                    System.out.println("ERROR: Cannot parse movie rate: " + movieRateStr);
+                    System.out.println("LỖI: Không thể parse đánh giá phim: " + movieRateStr);
                     redirectAttributes.addFlashAttribute("error", "Đánh giá phim không hợp lệ");
                     return "redirect:/movies/add";
                 }
             }
 
-            // Parse dates - CHO PHÉP NULL
-            LocalDate startDate = null;
-            LocalDate endDate = null;
+            // Parse ngày - CHO PHÉP NULL và chuyển đổi thành LocalDateTime
+            LocalDateTime startDate = null;
+            LocalDateTime endDate = null;
 
             if (startDateStr != null && !startDateStr.trim().isEmpty()) {
                 try {
-                    startDate = LocalDate.parse(startDateStr.trim());
+                    startDate = LocalDateTime.parse(startDateStr.trim() + "T00:00:00");
                 } catch (DateTimeParseException e) {
-                    System.out.println("ERROR: Cannot parse start date: " + startDateStr);
+                    System.out.println("LỖI: Không thể parse ngày bắt đầu: " + startDateStr);
                     redirectAttributes.addFlashAttribute("error", "Định dạng ngày bắt đầu không hợp lệ (yyyy-MM-dd)");
                     return "redirect:/movies/add";
                 }
@@ -849,53 +685,53 @@ public class MovieController {
 
             if (endDateStr != null && !endDateStr.trim().isEmpty()) {
                 try {
-                    endDate = LocalDate.parse(endDateStr.trim());
+                    endDate = LocalDateTime.parse(endDateStr.trim() + "T23:59:59");
                 } catch (DateTimeParseException e) {
-                    System.out.println("ERROR: Cannot parse end date: " + endDateStr);
+                    System.out.println("LỖI: Không thể parse ngày kết thúc: " + endDateStr);
                     redirectAttributes.addFlashAttribute("error", "Định dạng ngày kết thúc không hợp lệ (yyyy-MM-dd)");
                     return "redirect:/movies/add";
                 }
             }
 
-            // Validate date range nếu cả hai đều không null
+            // Validate khoảng ngày nếu cả hai đều không null
             if (startDate != null && endDate != null) {
                 if (startDate.isAfter(endDate) || startDate.isEqual(endDate)) {
-                    System.out.println("ERROR: Invalid date range - Start: " + startDate + ", End: " + endDate);
+                    System.out.println("LỖI: Khoảng ngày không hợp lệ - Bắt đầu: " + startDate + ", Kết thúc: " + endDate);
                     redirectAttributes.addFlashAttribute("error", "Ngày bắt đầu phải trước ngày kết thúc");
                     return "redirect:/movies/add";
                 }
             }
 
-            // Validate genres - CHO PHÉP EMPTY
+            // Validate thể loại - CHO PHÉP EMPTY
             if (genreIds != null && !genreIds.isEmpty()) {
                 if (genreIds.size() > 5) {
-                    System.out.println("ERROR: Too many genres selected: " + genreIds.size());
+                    System.out.println("LỖI: Quá nhiều thể loại được chọn: " + genreIds.size());
                     redirectAttributes.addFlashAttribute("error", "Chỉ được chọn tối đa 5 thể loại");
                     return "redirect:/movies/add";
                 }
 
-                // Validate genres exist
+                // Validate thể loại có tồn tại
                 for (Integer genreId : genreIds) {
                     if (!genreService.existsById(genreId)) {
-                        System.out.println("ERROR: Genre not found: " + genreId);
+                        System.out.println("LỖI: Không tìm thấy thể loại: " + genreId);
                         redirectAttributes.addFlashAttribute("error", "Thể loại không tồn tại");
                         return "redirect:/movies/add";
                     }
                 }
             }
 
-            // Validate actors - CHO PHÉP EMPTY
+            // Validate diễn viên - CHO PHÉP EMPTY
             if (actorIds != null && !actorIds.isEmpty()) {
                 for (Integer actorId : actorIds) {
                     if (actorService.getActorById(actorId) == null) {
-                        System.out.println("ERROR: Actor not found: " + actorId);
+                        System.out.println("LỖI: Không tìm thấy diễn viên: " + actorId);
                         redirectAttributes.addFlashAttribute("error", "Diễn viên không tồn tại");
                         return "redirect:/movies/add";
                     }
                 }
             }
 
-            // Tạo Movie object - FIXED
+            // Tạo đối tượng Movie - ĐÃ SỬA
             Movie newMovie = new Movie();
             newMovie.setMovieName(movieName.trim());
             newMovie.setDescription(description); // có thể null
@@ -904,17 +740,13 @@ public class MovieController {
             newMovie.setStudio(studio); // có thể null
             newMovie.setDuration(duration); // có thể null - sẽ được set default
             newMovie.setTrailer(trailer); // có thể null
-            newMovie.setMovieRate(movieRate); // Double type - có thể null
+            newMovie.setMovieRate(movieRate); // Kiểu Double - có thể null
 
-            // Convert LocalDate to LocalDateTime for entity
-            if (startDate != null) {
-                newMovie.setStartDate(startDate.atStartOfDay());
-            }
-            if (endDate != null) {
-                newMovie.setEndDate(endDate.atTime(23, 59, 59));
-            }
+            // Sử dụng LocalDateTime cho entity
+            newMovie.setStartDate(startDate);
+            newMovie.setEndDate(endDate);
 
-            // Set status - FIXED to use proper enum
+            // Đặt trạng thái - ĐÃ SỬA để sử dụng enum đúng
             if ("Active".equals(status)) {
                 newMovie.setStatus(Movie_Status.Active);
             } else if ("Removed".equals(status)) {
@@ -923,39 +755,38 @@ public class MovieController {
                 newMovie.setStatus(null); // sẽ được set default
             }
 
-            System.out.println("=== NEW MOVIE DATA ===");
-            System.out.println("Name: " + newMovie.getMovieName());
-            System.out.println("Duration: " + newMovie.getDuration());
-            System.out.println("Rating: " + newMovie.getMovieRate());
-            System.out.println("Start date: " + newMovie.getStartDate());
-            System.out.println("End date: " + newMovie.getEndDate());
-            System.out.println("Status: " + newMovie.getStatus());
-            System.out.println("Genres: " + genreIds);
-            System.out.println("Actors: " + actorIds);
+            System.out.println("=== DỮ LIỆU PHIM MỚI ===");
+            System.out.println("Tên: " + newMovie.getMovieName());
+            System.out.println("Thời lượng: " + newMovie.getDuration());
+            System.out.println("Đánh giá: " + newMovie.getMovieRate());
+            System.out.println("Ngày bắt đầu: " + newMovie.getStartDate());
+            System.out.println("Ngày kết thúc: " + newMovie.getEndDate());
+            System.out.println("Trạng thái: " + newMovie.getStatus());
+            System.out.println("Thể loại: " + genreIds);
+            System.out.println("Diễn viên: " + actorIds);
 
             // Thực hiện thêm phim mới
-            System.out.println("Calling movieService.addMovie...");
-            MovieDTO addedMovie = movieService
-                    .addMovie(newMovie, genreIds, actorIds);
+            System.out.println("Đang gọi movieService.addMovie...");
+            MovieDTO addedMovie = movieService.addMovie(newMovie, genreIds, actorIds);
 
             if (addedMovie != null) {
-                System.out.println("SUCCESS: Movie added successfully with ID: " + addedMovie.getMovieId());
+                System.out.println("THÀNH CÔNG: Phim đã được thêm thành công với ID: " + addedMovie.getMovieId());
                 redirectAttributes.addFlashAttribute("success",
                         "Thêm phim '" + movieName + "' thành công! Các thông tin chưa nhập sẽ được set giá trị mặc định.");
                 return "redirect:/movies/" + addedMovie.getMovieId();
             } else {
-                System.out.println("ERROR: Movie add failed - service returned null");
+                System.out.println("LỖI: Thêm phim thất bại - service trả về null");
                 redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi thêm phim");
                 return "redirect:/movies/add";
             }
 
         } catch (IllegalArgumentException e) {
-            System.err.println("VALIDATION ERROR: " + e.getMessage());
+            System.err.println("LỖI VALIDATION: " + e.getMessage());
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             return "redirect:/movies/add";
 
         } catch (Exception e) {
-            System.err.println("CRITICAL ERROR in addMovie: " + e.getMessage());
+            System.err.println("LỖI NGHIÊM TRỌNG trong addMovie: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error",
                     "Có lỗi hệ thống xảy ra: " + e.getMessage());
@@ -964,7 +795,7 @@ public class MovieController {
     }
 
     /**
-     * Helper method để lấy parameter hoặc null nếu empty
+     * Phương thức hỗ trợ để lấy parameter hoặc null nếu empty
      */
     private String getParameterOrNull(Map<String, String> params, String key) {
         String value = params.get(key);
@@ -974,52 +805,52 @@ public class MovieController {
         return value.trim();
     }
 
-    // ==================== DELETE FUNCTIONALITY - FIXED ====================
+    // ==================== CHỨC NĂNG XÓA - ĐÃ SỬA ====================
 
     /**
-     * Xóa vĩnh viễn phim khỏi database (chỉ cho phim có status "Removed")
+     * Xóa vĩnh viễn phim khỏi database (chỉ cho phim có trạng thái "Removed")
      */
     @PostMapping("/{id}/hard-delete")
     public String hardDeleteMovie(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
 
-        System.out.println("=== HARD DELETE MOVIE ===");
-        System.out.println("Movie ID: " + id);
+        System.out.println("=== XÓA VĨNH VIỄN PHIM ===");
+        System.out.println("ID phim: " + id);
 
         try {
             // Kiểm tra phim có tồn tại không
             MovieDTO movie = movieService.getMovieById(id);
             if (movie == null) {
-                System.out.println("ERROR: Movie not found with ID: " + id);
+                System.out.println("LỖI: Không tìm thấy phim với ID: " + id);
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim");
                 return "redirect:/movies";
             }
 
-            // Kiểm tra status phải là "Removed"
+            // Kiểm tra trạng thái phải là "Removed"
             if (!"Removed".equals(movie.getStatus())) {
-                System.out.println("ERROR: Movie status is not 'Removed': " + movie.getStatus());
+                System.out.println("LỖI: Trạng thái phim không phải 'Removed': " + movie.getStatus());
                 redirectAttributes.addFlashAttribute("error", "Chỉ có thể xóa vĩnh viễn những phim có trạng thái 'Removed'");
                 return "redirect:/movies/" + id;
             }
 
             String movieName = movie.getMovieName();
-            System.out.println("Attempting to hard delete movie: " + movieName);
+            System.out.println("Đang cố gắng xóa vĩnh viễn phim: " + movieName);
 
             // Thực hiện xóa vĩnh viễn
             boolean deleteSuccess = movieService.hardDeleteMovieComplete(id);
 
             if (deleteSuccess) {
-                System.out.println("SUCCESS: Movie hard deleted successfully!");
+                System.out.println("THÀNH CÔNG: Phim đã được xóa vĩnh viễn thành công!");
                 redirectAttributes.addFlashAttribute("success",
                         "Đã xóa vĩnh viễn phim '" + movieName + "' khỏi hệ thống!");
                 return "redirect:/movies";
             } else {
-                System.out.println("ERROR: Hard delete failed");
+                System.out.println("LỖI: Xóa vĩnh viễn thất bại");
                 redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi xóa phim");
                 return "redirect:/movies/" + id;
             }
 
         } catch (Exception e) {
-            System.err.println("ERROR in hardDeleteMovie: " + e.getMessage());
+            System.err.println("LỖI trong hardDeleteMovie: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             return "redirect:/movies/" + id;

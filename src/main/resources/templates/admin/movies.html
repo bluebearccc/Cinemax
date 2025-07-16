@@ -378,15 +378,6 @@
             font-weight: 500;
         }
 
-        .rating-stars {
-            color: #ffd700;
-            margin-bottom: 4px;
-        }
-
-        .rating-value {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-        }
 
         .status-badge {
             padding: 6px 12px;
@@ -537,10 +528,7 @@
             <div class="stat-number">5</div>
             <div class="stat-label">Upcoming</div>
         </div>
-        <div class="stat-card">
-            <div class="stat-number">4.8</div>
-            <div class="stat-label">Avg Rating</div>
-        </div>
+
     </div>
 
     <!-- Search & Filter Section -->
@@ -636,7 +624,6 @@
                     <th>Movie Name</th>
                     <th>Genres</th>
                     <th>Duration</th>
-                    <th>Rating</th>
                     <th>Date Range</th>
                     <th>Status</th>
                     <th>Actions</th>
@@ -662,15 +649,7 @@
                         <small th:if="${movie.genres == null or #lists.isEmpty(movie.genres)}" class="text-muted">No genres</small>
                     </td>
                     <td>
-                        <span class="duration-badge" th:text="${movie.formattedDuration}">3h 1m</span>
-                    </td>
-                    <td>
-                        <div class="rating-stars">
-                                    <span th:each="i : ${#numbers.sequence(1, 5)}"
-                                          th:class="${i <= (movie.movieRate ?: 0)} ? 'fas fa-star' : 'far fa-star'">
-                                    </span>
-                        </div>
-                        <div class="rating-value" th:text="${movie.formattedRating}">4.8/5</div>
+                        <span class="duration-badge" th:text="${movie.duration} + ' phút'">3h 1m</span>
                     </td>
                     <td>
                         <div th:text="${#temporals.format(movie.startDate, 'MMM dd, yyyy')}">Jan 15, 2024</div>

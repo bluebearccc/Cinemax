@@ -1,8 +1,10 @@
 package com.bluebear.cinemax.entity;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -11,7 +13,6 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class Genre {
 
     @Id
@@ -19,10 +20,11 @@ public class Genre {
     @Column(name = "GenreID")
     private Integer genreID;
 
-    @Column(name = "GenreName", nullable = false, length = 255)
+    @Column(name = "GenreName", nullable = false, length = 50)
     private String genreName;
 
+    // THÊM: Quan hệ ngược với Movie
     @ManyToMany(mappedBy = "genres", fetch = FetchType.LAZY)
-    @JsonIgnore
+    @JsonIgnore // Tránh circular reference khi serialize JSON
     private List<Movie> movies;
 }

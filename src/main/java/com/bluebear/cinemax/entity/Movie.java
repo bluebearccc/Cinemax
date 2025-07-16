@@ -63,7 +63,8 @@ public class Movie {
     @Enumerated(EnumType.STRING)
     private Movie_Status status;
 
-    @ManyToMany(fetch = FetchType.EAGER)
+    // SIMPLIFIED: Sử dụng @ManyToMany trực tiếp thay vì thông qua MovieGenre entity
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "Movie_Genre",
             joinColumns = @JoinColumn(name = "MovieID"),
@@ -71,7 +72,8 @@ public class Movie {
     )
     private List<Genre> genres;
 
-    @ManyToMany
+    // UPDATED: Sử dụng @ManyToMany trực tiếp thay vì thông qua MovieActor entity
+    @ManyToMany(fetch = FetchType.LAZY, cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
             name = "Movie_Actor",
             joinColumns = @JoinColumn(name = "MovieID"),
@@ -84,10 +86,4 @@ public class Movie {
 
     @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Schedule> scheduleList;
-
-
-
-
-
-
 }

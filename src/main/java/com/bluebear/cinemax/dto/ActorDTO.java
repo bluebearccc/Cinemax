@@ -15,10 +15,5 @@ public class ActorDTO {
     private String image;
     private List<String> movies;
 
-    // Additional constructor for creating without movies list
-    public ActorDTO(Integer actorId, String actorName, String image) {
-        this.actorId = actorId;
-        this.actorName = actorName;
-        this.image = image;
-    }
+
 }

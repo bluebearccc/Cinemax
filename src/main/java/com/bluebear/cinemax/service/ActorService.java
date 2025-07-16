@@ -3,9 +3,7 @@ package com.bluebear.cinemax.service;
 import com.bluebear.cinemax.dto.ActorDTO;
 import com.bluebear.cinemax.entity.Actor;
 import com.bluebear.cinemax.entity.Movie;
-import com.bluebear.cinemax.entity.MovieActor;
 import com.bluebear.cinemax.repository.ActorRepository;
-import com.bluebear.cinemax.repository.MovieActorRepository;
 import com.bluebear.cinemax.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,9 +18,6 @@ public class ActorService {
 
     @Autowired
     private ActorRepository actorRepository;
-
-    @Autowired
-    private MovieActorRepository movieActorRepository;
 
     @Autowired
     private MovieRepository movieRepository;
@@ -55,12 +50,15 @@ public class ActorService {
     public List<ActorDTO> getActorsByMovie(Integer movieId) {
         if (movieId == null) return List.of();
 
-        // Sử dụng MovieActorRepository để tìm actorIds theo movieId
-        List<Integer> actorIds = movieActorRepository.findactorIDsBymovieID(movieId);
+        // Tìm movie trước, sau đó lấy actors từ relationship
+        Optional<Movie> movie = movieRepository.findById(movieId);
+        if (movie.isPresent() && movie.get().getActors() != null) {
+            return movie.get().getActors().stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList());
+        }
 
-        return actorRepository.findAllById(actorIds).stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+        return List.of();
     }
 
     // FIXED: Thêm method để lưu actor mới
@@ -111,123 +109,124 @@ public class ActorService {
         if (actorId == null) return;
 
         try {
-            // Xóa tất cả quan hệ cũ của actor này
-            List<MovieActor> existingRelations = movieActorRepository.findByactorID(actorId);
-            if (!existingRelations.isEmpty()) {
-                movieActorRepository.deleteAll(existingRelations);
+            Optional<Actor> actorOpt = actorRepository.findById(actorId);
+            if (actorOpt.isEmpty()) {
+                throw new RuntimeException("Không tìm thấy diễn viên với ID: " + actorId);
             }
 
-            // Thêm quan hệ mới
-            if (movieIds != null && !movieIds.isEmpty()) {
-                Optional<Actor> actor = actorRepository.findById(actorId);
-                if (actor.isPresent()) {
-                    for (Integer movieId : movieIds) {
-                        Optional<Movie> movie = movieRepository.findById(movieId);
-                        if (movie.isPresent()) {
-                            MovieActor movieActor = new MovieActor();
-                            movieActor.setActor(actor.get());
-                            movieActor.setMovie(movie.get());
-                            movieActorRepository.save(movieActor);
-                        }
+            Actor actor = actorOpt.get();
+
+            // 1. Xóa actor khỏi tất cả movies hiện tại
+            if (actor.getMovies() != null) {
+                for (Movie movie : new ArrayList<>(actor.getMovies())) {
+                    if (movie.getActors() != null) {
+                        movie.getActors().remove(actor);
+                        movieRepository.save(movie);
                     }
                 }
             }
+
+            // 2. Thêm actor vào movies mới
+            if (movieIds != null && !movieIds.isEmpty()) {
+                for (Integer movieId : movieIds) {
+                    Optional<Movie> movieOpt = movieRepository.findById(movieId);
+                    if (movieOpt.isPresent()) {
+                        Movie movie = movieOpt.get();
+                        if (movie.getActors() == null) {
+                            movie.setActors(new ArrayList<>());
+                        }
+                        movie.getActors().add(actor);
+                        movieRepository.save(movie);
+                    }
+                }
+            }
+
+            System.out.println("Successfully updated actor movies");
+
         } catch (Exception e) {
             System.err.println("Error updating actor movies: " + e.getMessage());
             throw new RuntimeException("Không thể cập nhật danh sách phim: " + e.getMessage());
         }
     }
 
-    public void deleteActor(Integer actorId) {
-        if (actorId == null) {
-            throw new IllegalArgumentException("Actor ID không được null");
-        }
-
-        try {
-            // Kiểm tra actor có tồn tại không
-            Optional<Actor> actor = actorRepository.findById(actorId);
-            if (actor.isEmpty()) {
-                throw new RuntimeException("Không tìm thấy diễn viên với ID: " + actorId);
+        public void deleteActor (Integer actorId){
+            if (actorId == null) {
+                throw new IllegalArgumentException("Actor ID không được null");
             }
 
-            // Xóa tất cả quan hệ MovieActor trước
-            List<MovieActor> movieActors = movieActorRepository.findByactorID(actorId);
-            if (!movieActors.isEmpty()) {
-                movieActorRepository.deleteAll(movieActors);
-            }
+            try {
+                // Kiểm tra actor có tồn tại không
+                Optional<Actor> actorOpt = actorRepository.findById(actorId);
+                if (actorOpt.isEmpty()) {
+                    throw new RuntimeException("Không tìm thấy diễn viên với ID: " + actorId);
+                }
 
-            // Xóa actor
-            actorRepository.deleteById(actorId);
+                Actor actor = actorOpt.get();
 
-            System.out.println("Successfully deleted actor with ID: " + actorId);
-
-        } catch (Exception e) {
-            System.err.println("Error deleting actor: " + e.getMessage());
-            throw new RuntimeException("Không thể xóa diễn viên: " + e.getMessage());
-        }
-    }
-
-    // Đếm tổng số diễn viên
-    public long countAllActors() {
-        return actorRepository.count();
-    }
-
-    // Convert Entity to DTO - FIXED VERSION
-    private ActorDTO convertToDTO(Actor actor) {
-        if (actor == null) return null;
-
-        ActorDTO dto = new ActorDTO();
-
-        try {
-            // FIXED: Kiểm tra null và cast an toàn
-            Object actorIdObj = actor.getActorId();
-            Integer actorId = null;
-
-            if (actorIdObj != null) {
-                if (actorIdObj instanceof Integer) {
-                    actorId = (Integer) actorIdObj;
-                } else if (actorIdObj instanceof Number) {
-                    actorId = ((Number) actorIdObj).intValue();
-                } else {
-                    // Thử parse từ String
-                    try {
-                        actorId = Integer.parseInt(actorIdObj.toString());
-                    } catch (NumberFormatException e) {
-                        System.err.println("Cannot convert actorId to Integer: " + actorIdObj);
-                        return null; // Hoặc bỏ qua actor này
+                // Xóa actor khỏi tất cả movies trước khi xóa actor
+                if (actor.getMovies() != null) {
+                    for (Movie movie : new ArrayList<>(actor.getMovies())) {
+                        if (movie.getActors() != null) {
+                            movie.getActors().remove(actor);
+                            movieRepository.save(movie);
+                        }
                     }
                 }
+
+                // Xóa actor
+                actorRepository.deleteById(actorId);
+
+                System.out.println("Successfully deleted actor with ID: " + actorId);
+
+            } catch (Exception e) {
+                System.err.println("Error deleting actor: " + e.getMessage());
+                throw new RuntimeException("Không thể xóa diễn viên: " + e.getMessage());
             }
+        }
 
-            dto.setActorId(actorId);
+        // Đếm tổng số diễn viên
+        public long countAllActors () {
+            return actorRepository.count();
+        }
 
-            // DEBUG: Kiểm tra actorName trước khi set
-            String actorName = actor.getActorName();
-            System.out.println("DEBUG - Raw actorName from entity: [" + actorName + "]");
-            System.out.println("DEBUG - ActorName is null: " + (actorName == null));
-            System.out.println("DEBUG - ActorName is empty: " + (actorName != null && actorName.isEmpty()));
-            System.out.println("DEBUG - ActorName length: " + (actorName != null ? actorName.length() : "null"));
+        // Convert Entity to DTO - FIXED VERSION
+        private ActorDTO convertToDTO (Actor actor){
+            if (actor == null) return null;
 
-            dto.setActorName(actorName);
-            dto.setImage(actor.getImage());
+            ActorDTO dto = new ActorDTO();
 
-            // DEBUG: Kiểm tra sau khi set vào DTO
-            System.out.println("DEBUG - DTO actorName after set: [" + dto.getActorName() + "]");
-            System.out.println("Converting Actor - ID: " + actorId + ", Name: " + actorName);
+            try {
+                // FIXED: Kiểm tra null và cast an toàn
+                Object actorIdObj = actor.getActorId();
+                Integer actorId = null;
 
-            // FIXED: Lấy danh sách phim theo actorId
-            if (actorId != null) {
-                List<Integer> movieIds = movieActorRepository.findmovieIDsByactorID(actorId);
+                if (actorIdObj != null) {
+                    if (actorIdObj instanceof Integer) {
+                        actorId = (Integer) actorIdObj;
+                    } else if (actorIdObj instanceof Number) {
+                        actorId = ((Number) actorIdObj).intValue();
+                    } else {
+                        try {
+                            actorId = Integer.parseInt(actorIdObj.toString());
+                        } catch (NumberFormatException e) {
+                            System.err.println("Cannot convert actorId to Integer: " + actorIdObj);
+                            return null;
+                        }
+                    }
+                }
+
+                dto.setActorId(actorId);
+                dto.setActorName(actor.getActorName());
+                dto.setImage(actor.getImage());
+
+                // SIMPLIFIED: Lấy danh sách phim trực tiếp từ relationship
                 List<String> movieNames = new ArrayList<>();
-
-                for (Integer movieId : movieIds) {
-                    Optional<Movie> movie = movieRepository.findById(movieId);
-                    if (movie.isPresent()) {
-                        Movie m = movie.get();
+                if (actor.getMovies() != null) {
+                    for (Movie movie : actor.getMovies()) {
                         // Chỉ lấy phim active
-                        if (m.getStatus() != null && "Active".equals(m.getStatus().toString())) {
-                            if (m.getMovieName() != null && !m.getMovieName().trim().isEmpty()) {
-                                movieNames.add(m.getMovieName());
+                        if (movie.getStatus() != null && "Active".equals(movie.getStatus().toString())) {
+                            if (movie.getMovieName() != null && !movie.getMovieName().trim().isEmpty()) {
+                                movieNames.add(movie.getMovieName());
                             }
                         }
                     }
@@ -235,16 +234,13 @@ public class ActorService {
 
                 // Loại bỏ trùng lặp nếu có
                 dto.setMovies(movieNames.stream().distinct().collect(Collectors.toList()));
-            } else {
-                dto.setMovies(new ArrayList<>());
+
+            } catch (Exception e) {
+                System.err.println("Error converting Actor to DTO: " + e.getMessage());
+                e.printStackTrace();
+                return null;
             }
 
-        } catch (Exception e) {
-            System.err.println("Error converting Actor to DTO: " + e.getMessage());
-            e.printStackTrace();
-            return null;
+            return dto;
         }
-
-        return dto;
     }
-}

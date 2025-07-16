@@ -19,11 +19,6 @@ public class GenreService {
         return genreRepository.findAllByOrderByGenreNameAsc();
     }
 
-    // Lấy thể loại theo ID - Long version
-    public Genre getGenreById(Long id) {
-        if (id == null) return null;
-        return getGenreById(id.intValue());
-    }
 
     // Lấy thể loại theo ID - Integer version
     public Genre getGenreById(Integer id) {
@@ -32,13 +27,6 @@ public class GenreService {
         return genre.orElse(null);
     }
 
-    // Tìm kiếm thể loại theo tên
-    public List<Genre> searchGenresByName(String name) {
-        if (name == null || name.trim().isEmpty()) {
-            return getAllGenres();
-        }
-        return genreRepository.findByGenreNameContainingIgnoreCase(name);
-    }
 
     // Lấy thể loại theo phim
     public List<Genre> getGenresByMovie(Integer movieId) {
@@ -57,8 +45,4 @@ public class GenreService {
         return genreRepository.existsById(id);
     }
 
-    public boolean existsById(Long id) {
-        if (id == null) return false;
-        return existsById(id.intValue());
-    }
 }

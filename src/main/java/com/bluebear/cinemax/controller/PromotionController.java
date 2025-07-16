@@ -1,8 +1,8 @@
 package com.bluebear.cinemax.controller;
 
-import com.bluebear.cinemax.dto.VoucherDTO;
+import com.bluebear.cinemax.dto.PromotionDTO;
 import com.bluebear.cinemax.entity.Promotion;
-import com.bluebear.cinemax.service.VoucherService;
+import com.bluebear.cinemax.service.PromotionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -14,16 +14,16 @@ import java.util.Optional;
 
 @Controller
 @RequestMapping("/admin/vouchers")
-public class VoucherController {
+public class PromotionController {
 
     @Autowired
-    private VoucherService voucherService;
+    private PromotionService promotionService;
 
     // Display all vouchers
     @GetMapping
     public String listVouchers(Model model) {
-        List<Promotion> vouchers = voucherService.getAllVouchers();
-        VoucherService.VoucherStats stats = voucherService.getVoucherStats();
+        List<Promotion> vouchers = promotionService.getAllVouchers();
+        PromotionService.VoucherStats stats = promotionService.getVoucherStats();
 
         model.addAttribute("vouchers", vouchers);
         model.addAttribute("stats", stats);
@@ -37,8 +37,8 @@ public class VoucherController {
     public String searchVouchers(@RequestParam(required = false) String keyword,
                                  @RequestParam(required = false) String status,
                                  Model model) {
-        List<Promotion> vouchers = voucherService.searchVouchers(keyword, status);
-        VoucherService.VoucherStats stats = voucherService.getVoucherStats();
+        List<Promotion> vouchers = promotionService.searchVouchers(keyword, status);
+        PromotionService.VoucherStats stats = promotionService.getVoucherStats();
 
         model.addAttribute("vouchers", vouchers);
         model.addAttribute("stats", stats);
@@ -52,7 +52,7 @@ public class VoucherController {
     // Show voucher details
     @GetMapping("/{id}")
     public String viewVoucher(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
-        Optional<Promotion> voucher = voucherService.getVoucherById(id);
+        Optional<Promotion> voucher = promotionService.getVoucherById(id);
         if (!voucher.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Voucher not found");
             return "redirect:/admin/vouchers";
@@ -67,7 +67,7 @@ public class VoucherController {
     // Show add voucher form
     @GetMapping("/add")
     public String showAddForm(Model model) {
-        model.addAttribute("voucher", new VoucherDTO());
+        model.addAttribute("voucher", new PromotionDTO());
         model.addAttribute("pageTitle", "Add New Voucher");
         model.addAttribute("isEdit", false);
 
@@ -76,10 +76,10 @@ public class VoucherController {
 
     // Process add voucher
     @PostMapping("/add")
-    public String addVoucher(@ModelAttribute VoucherDTO voucherDTO,
+    public String addVoucher(@ModelAttribute PromotionDTO voucherDTO,
                              RedirectAttributes redirectAttributes) {
         try {
-            voucherService.createVoucher(voucherDTO);
+            promotionService.createVoucher(voucherDTO);
             redirectAttributes.addFlashAttribute("success", "Voucher created successfully");
             return "redirect:/admin/vouchers";
         } catch (IllegalArgumentException e) {
@@ -92,14 +92,14 @@ public class VoucherController {
     // Show edit voucher form - FIXED VERSION
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
-        Optional<Promotion> voucherOpt = voucherService.getVoucherById(id);
+        Optional<Promotion> voucherOpt = promotionService.getVoucherById(id);
         if (!voucherOpt.isPresent()) {
             redirectAttributes.addFlashAttribute("error", "Voucher not found");
             return "redirect:/admin/vouchers";
         }
 
         Promotion voucher = voucherOpt.get();
-        VoucherDTO voucherDTO = new VoucherDTO(
+        PromotionDTO voucherDTO = new PromotionDTO(
                 voucher.getPromotionID(),
                 voucher.getPromotionCode(),
                 voucher.getDiscount(),
@@ -119,10 +119,10 @@ public class VoucherController {
     // Process edit voucher
     @PostMapping("/edit/{id}")
     public String editVoucher(@PathVariable Integer id,
-                              @ModelAttribute VoucherDTO voucherDTO,
+                              @ModelAttribute PromotionDTO voucherDTO,
                               RedirectAttributes redirectAttributes) {
         try {
-            voucherService.updateVoucher(id, voucherDTO);
+            promotionService.updateVoucher(id, voucherDTO);
             redirectAttributes.addFlashAttribute("success", "Voucher updated successfully");
             return "redirect:/admin/vouchers";
         } catch (IllegalArgumentException e) {
@@ -136,7 +136,7 @@ public class VoucherController {
     @PostMapping("/delete/{id}")
     public String deleteVoucher(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
         try {
-            voucherService.deleteVoucher(id);
+            promotionService.deleteVoucher(id);
             redirectAttributes.addFlashAttribute("success", "Voucher deleted successfully");
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
@@ -144,17 +144,5 @@ public class VoucherController {
         return "redirect:/admin/vouchers";
     }
 
-    // Get active vouchers (API endpoint)
-    @GetMapping("/api/active")
-    @ResponseBody
-    public List<Promotion> getActiveVouchers() {
-        return voucherService.getActiveVouchers();
-    }
 
-    // Validate voucher code (API endpoint)
-    @GetMapping("/api/validate/{code}")
-    @ResponseBody
-    public boolean validateVoucher(@PathVariable String code) {
-        return voucherService.validateVoucher(code);
-    }
 }

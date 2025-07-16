@@ -1,9 +1,9 @@
 package com.bluebear.cinemax.service;
 
-import com.bluebear.cinemax.dto.VoucherDTO;
+import com.bluebear.cinemax.dto.PromotionDTO;
 import com.bluebear.cinemax.entity.Promotion;
 import com.bluebear.cinemax.enumtype.Promotion_Status;
-import com.bluebear.cinemax.repository.VoucherRepository;
+import com.bluebear.cinemax.repository.PromotionRepository;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,10 +13,59 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-public class VoucherService {
+public class PromotionService {
 
     @Autowired
-    private VoucherRepository voucherRepository;
+    private PromotionRepository voucherRepository;
+
+    // ==================== VALIDATION METHODS ====================
+
+    // Validation for create mode (all fields required)
+    public boolean isValidForCreate(PromotionDTO voucherDTO) {
+        return voucherDTO.getPromotionCode() != null && !voucherDTO.getPromotionCode().trim().isEmpty() &&
+                voucherDTO.getDiscount() != null && voucherDTO.getDiscount() >= 0 && voucherDTO.getDiscount() <= 100 &&
+                voucherDTO.getStartTime() != null && voucherDTO.getEndTime() != null && voucherDTO.getStartTime().isBefore(voucherDTO.getEndTime()) &&
+                voucherDTO.getQuantity() != null && voucherDTO.getQuantity() >= 0 &&
+                voucherDTO.getStatus() != null && !voucherDTO.getStatus().trim().isEmpty() &&
+                isValidStatus(voucherDTO.getStatus());
+    }
+
+    // Validation for edit mode (some fields can be null)
+    public boolean isValidForUpdate(PromotionDTO voucherDTO) {
+        // If promotion code is provided, it must be valid
+        if (voucherDTO.getPromotionCode() != null && voucherDTO.getPromotionCode().trim().isEmpty()) {
+            return false;
+        }
+
+        // If discount is provided, it must be between 0-100
+        if (voucherDTO.getDiscount() != null && (voucherDTO.getDiscount() < 0 || voucherDTO.getDiscount() > 100)) {
+            return false;
+        }
+
+        // If both start and end time are provided, start must be before end
+        if (voucherDTO.getStartTime() != null && voucherDTO.getEndTime() != null && !voucherDTO.getStartTime().isBefore(voucherDTO.getEndTime())) {
+            return false;
+        }
+
+        // If quantity is provided, it must be >= 0
+        if (voucherDTO.getQuantity() != null && voucherDTO.getQuantity() < 0) {
+            return false;
+        }
+
+        // If status is provided, it must be valid
+        if (voucherDTO.getStatus() != null && !voucherDTO.getStatus().trim().isEmpty() && !isValidStatus(voucherDTO.getStatus())) {
+            return false;
+        }
+
+        return true;
+    }
+
+    // Helper method to validate status
+    private boolean isValidStatus(String status) {
+        return "Available".equals(status) || "Expired".equals(status);
+    }
+
+    // ==================== BUSINESS METHODS ====================
 
     // Get all vouchers
     public List<Promotion> getAllVouchers() {
@@ -29,8 +78,8 @@ public class VoucherService {
     }
 
     // Create new voucher
-    public Promotion createVoucher(VoucherDTO voucherDTO) {
-        if (!voucherDTO.isValid()) {
+    public Promotion createVoucher(PromotionDTO voucherDTO) {
+        if (!isValidForCreate(voucherDTO)) {
             throw new IllegalArgumentException("Invalid voucher data");
         }
 
@@ -60,8 +109,8 @@ public class VoucherService {
     }
 
     // Update voucher
-    public Promotion updateVoucher(Integer id, VoucherDTO voucherDTO) {
-        if (!voucherDTO.isValidForUpdate()) {
+    public Promotion updateVoucher(Integer id, PromotionDTO voucherDTO) {
+        if (!isValidForUpdate(voucherDTO)) {
             throw new IllegalArgumentException("Invalid voucher data for update");
         }
 
@@ -124,12 +173,6 @@ public class VoucherService {
         return voucherRepository.findActiveVouchers(Promotion_Status.Available, now);
     }
 
-    // Get expired vouchers
-    public List<Promotion> getExpiredVouchers() {
-        LocalDateTime now = LocalDateTime.now();
-        return voucherRepository.findExpiredVouchers(now, Promotion_Status.Expired);
-    }
-
     // Search vouchers
     public List<Promotion> searchVouchers(String keyword, String status) {
         Promotion_Status enumStatus = null;
@@ -170,7 +213,6 @@ public class VoucherService {
         return isStatusValid && isQuantityValid && isTimeValid;
     }
 
-
     // Get voucher statistics
     public VoucherStats getVoucherStats() {
         long totalVouchers = voucherRepository.count();
@@ -181,8 +223,6 @@ public class VoucherService {
         return new VoucherStats(totalVouchers, activeVouchers, expiredVouchers,
                 averageDiscount != null ? averageDiscount : 0.0);
     }
-
-
 
     // Inner class for voucher statistics
     @Data
@@ -198,8 +238,5 @@ public class VoucherService {
             this.expiredVouchers = expiredVouchers;
             this.averageDiscount = averageDiscount;
         }
-
-
     }
-
 }
