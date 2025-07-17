@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+
+
+
+<head>
+
+  <meta charset="UTF-8">
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Food And Drink</title>
+
+  <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+
+  <link rel="stylesheet" th:href="@{/staff/css/add_update_item.css}">
+
+</head>
+
+
+
+<body>
+
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="user-info">
+    <div class="user-avatar" th:text="${#strings.substring(name,0,1)}"></div>
+    <div class="user-name" th:text="${name}"></div>
+  </div>
+  <a th:href="@{/staff/home}" class="sidebar-item">
+    <div class="sidebar-icon">🏠</div>
+    <div class="sidebar-text">Home</div>
+  </a>
+  <a th:href="@{/staff/theater_stock}" class="sidebar-item active">
+    <div class="sidebar-icon">🍿</div>
+    <div class="sidebar-text">Food and Drinks</div>
+  </a>
+  <a th:href="@{/staff/movie_schedule}" class="sidebar-item">
+    <div class="sidebar-icon">📅</div>
+    <div class="sidebar-text">Set Schedule</div>
+  </a>
+  <a th:href="@{/staff/theater}" class="sidebar-item">
+    <div class="sidebar-icon">🎬</div>
+    <div class="sidebar-text">Manage Theater</div>
+  </a>
+</div>
+<!-- Main Content -->
+<div class="main-content">
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="breadcrumb">
+        <a th:href="@{/staff/theater_stock}">Food and Drinks</a> >
+        <span> Update Item</span>
+      </div>
+    </div>
+  </div>
+  <!-- Form Container -->
+  <div class="form-container">
+    <div th:if="${error}" class="alert alert-error">
+      <span th:text="${error}"></span>
+    </div>
+    <div th:if="${isMultiTheaterItem}" class="alert alert-warning">
+      <strong>⚠️ Warning:</strong> This product exists in multiple theaters. Any changes to Name, Price will be applied to all theaters that have this product.
+    </div>
+    <div class="form-header">
+      <p class="form-subtitle">Complete the item information</p>
+    </div>
+    <form th:action="@{/staff/theater_stock/edit_stock}"
+          th:object="${theaterStock}"
+          method="post"
+          enctype="multipart/form-data"
+          id="stockForm"
+          onsubmit="return validateForm()">
+      <input type="hidden" th:field="*{theaterStockId}">
+      <div class="form-row">
+        <!-- Left Column - General Information -->
+        <div class="form-column">
+          <!-- Name -->
+          <div class="form-group">
+            <label class="form-label">Name</label>
+            <input type="text"
+                   class="form-input"
+                   th:field="*{foodName}"
+                   maxlength="20"
+                   placeholder="Enter item name"
+                   required>
+            <div class="error-message" id="nameError"></div>
+          </div>
+          <!-- Quantity -->
+          <div class="form-group">
+            <label class="form-label">Quantity</label>
+            <input type="number"
+                   class="form-input"
+                   th:field="*{quantity}"
+                   min="1"
+                   step="1"
+                   placeholder="Enter quantity"
+                   required>
+            <div class="error-message" id="quantityError"></div>
+          </div>
+          <!-- Price -->
+          <div class="form-group">
+            <label class="form-label">Price</label>
+            <input type="number"
+                   step="0.01"
+                   class="form-input"
+                   th:field="*{unitPrice}"
+                   min="1000"
+                   max="99999999.99"
+                   placeholder="Enter price(VND)"
+                   required>
+            <div class="error-message" id="priceError"></div>
+          </div>
+          <!-- Status -->
+          <div class="form-group">
+            <label class="form-label">Set Status</label>
+            <div class="radio-group">
+              <div class="radio-item">
+                <input type="radio"
+                       id="statusActive"
+                       name="status"
+                       value="Active"
+                       th:field="*{status}"
+                       th:checked="${theaterStock.status == 'Active'}"
+                       checked
+                >
+                <label for="statusActive">Active</label>
+              </div>
+              <div class="radio-item">
+                <input type="radio"
+                       id="statusInactive"
+                       name="status"
+                       value="Inactive"
+                       th:field="*{status}"
+                       th:checked="${theaterStock.status == 'Inactive'}">
+                <label for="statusInactive">Inactive</label>
+              </div>
+            </div>
+            <div class="error-message" id="statusError"></div>
+          </div>
+        </div>
+        <!-- Right Column - Image Upload -->
+        <!-- Current Upload -->
+        <div class="form-column">
+          <div class="form-group">
+            <label class="form-label">Current Image:</label>
+            <img th:if="${theaterStock.image}"
+                 th:src="${theaterStock.image}"
+                 class="current-image"
+                 alt="Current Image">
+            <input type="hidden" th:field="*{image}">
+          </div>
+          <!-- Image Upload -->
+          <div class="form-group">
+            <label class="form-label">Upload New Image</label>
+            <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+              <div>📸</div>
+              <p>Click to upload</p>
+            </div>
+            <input type="file"
+                   id="imageInput"
+                   name="imageInput"
+                   accept="image/*"
+                   style="display: none;"
+                   onchange="previewImage(this)">
+            <div id="imagePreview" class="image-preview"></div>
+            <div class="error-message" id="imageError"></div>
+          </div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Theater</label>
+        <select class="form-input" th:field="*{theater.theaterID}" required>
+          <option th:each="theater : ${allTheaters}"
+                  th:value="${theater.theaterID}"
+                  th:text="${theater.theaterName}">
+          </option>
+        </select>
+        <div class="error-message" id="theaterError"></div>
+      </div>
+      <!-- Buttons -->
+      <div class="form-buttons">
+        <button type="submit" class="btn btn-primary">Save</button>
+        <a th:href="@{/staff/theater_stock}" class="btn btn-danger">Cancel</a>
+      </div>
+    </form>
+  </div>
+</div>
+<script>
+  function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        input.value = '';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+  function validateForm() {
+  let isValid = true;
+  // Xóa các thông báo lỗi cũ
+  document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+  const nameInput = document.querySelector('input[name="foodName"]');
+  const quantityInput = document.querySelector('input[name="quantity"]');
+  const priceInput = document.querySelector('input[name="unitPrice"]');
+  const imageInput = document.getElementById('imageInput');
+  const currentImage = document.querySelector('input[name="image"]');
+
+  const name = nameInput ? nameInput.value.trim() : '';
+  const quantity = quantityInput ? quantityInput.value : '';
+  const price = priceInput ? priceInput.value : '';
+
+  const status = document.querySelector('input[name="status"]:checked');
+
+  const theaterSelect = document.querySelector('select[name="theater.theaterID"]');
+  if (theaterSelect && !theaterSelect.value) {
+    document.getElementById('theaterError').textContent = 'Please select a theater.';
+    isValid = false;
+  }
+
+  const nameRegex = /^[a-zA-Z0-9\s]+$/;
+  if (!name) {
+    document.getElementById('nameError').textContent = 'Name is required';
+    isValid = false;
+  } else if (!nameRegex.test(name)) {
+    document.getElementById('nameError').textContent = 'Name must not contain special characters';
+    isValid = false;
+  }
+
+  // Validate Quantity và Price (giữ nguyên)
+  if (quantity === '') {
+    document.getElementById('quantityError').textContent = 'Quantity is required';
+    isValid = false;
+  } else if (!/^\d+$/.test(quantity) || parseInt(quantity) < 0) {
+    document.getElementById('quantityError').textContent = 'Quantity must be a non-negative whole number';
+    isValid = false;
+  }
+  if (price === '') {
+    document.getElementById('priceError').textContent = 'Price is required';
+    isValid = false;
+  } else if (parseFloat(price) < 0) {
+    document.getElementById('priceError').textContent = 'Price must be a positive number';
+    isValid = false;
+  }
+
+
+  // Validate Status (giữ nguyên)
+  if (!status) {
+    document.getElementById('statusError').textContent = 'Please select a status';
+    isValid = false;
+  }
+
+  // Validate Image (giữ nguyên)
+  if (!imageInput.files || imageInput.files.length === 0) {
+    if (!currentImage || !currentImage.value) {
+      document.getElementById('imageError').textContent = 'Please upload an image.';
+      isValid = false;
+    }
+  } else {
+    const file = imageInput.files[0];
+    if (!file.type.startsWith('image/')) {
+      document.getElementById('imageError').textContent = 'Please upload a valid image file (PNG, JPG, etc.).';
+      isValid = false;
+    }
+  }
+
+  return isValid;
+}</script>
+</body>
+</html>

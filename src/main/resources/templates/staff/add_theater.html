@@ -197,7 +197,6 @@
 </div>
 
 <script>
-  // Hàm xem trước ảnh (giữ nguyên)
   function previewImage(input) {
     const preview = document.getElementById('imagePreview');
     preview.innerHTML = '';
@@ -220,7 +219,6 @@
     }
   }
 
-  // Hàm reset form (giữ nguyên)
   function resetForm() {
     document.getElementById('stockForm').reset();
     document.getElementById('imagePreview').innerHTML = '';
@@ -228,7 +226,6 @@
     document.getElementById('statusActive').checked = true;
   }
 
-  // Hàm validate (giữ nguyên)
   function validateForm() {
     let isValid = true;
     document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
@@ -369,11 +366,7 @@
       // Cập nhật các trường ẩn chứa tọa độ
       longitudeField.value = lng.toFixed(6);
       latitudeField.value = lat.toFixed(6);
-
-      // --- DÒNG MỚI ĐƯỢC THÊM VÀO ---
-      // Cập nhật ô nhập liệu địa chỉ để người dùng thấy địa chỉ mới
       document.getElementById('search-input').value = placeName;
-
       console.log('Đã cập nhật tọa độ và địa chỉ:', {
         address: placeName,
         longitude: lng.toFixed(6),
@@ -389,7 +382,6 @@
       unit: 'metric'
     }));
 
-    // Validation trước khi submit
     document.querySelector('form').addEventListener('submit', function(event) {
       const lng = longitudeField.value;
       const lat = latitudeField.value;

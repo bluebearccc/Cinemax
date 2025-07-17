@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Theater Room Management</title>
+    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <link rel="stylesheet" th:href="@{/staff/css/add_update_item.css}">
+    <style>
+
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: center;
+        }
+
+        .alert-error {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+
+    </style>
+</head>
+
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="user-info">
+        <div class="user-avatar" th:text="${#strings.substring(employeeName,0,1)}"></div>
+        <div class="user-name" th:text="${employeeName}"></div>
+    </div>
+
+    <a th:href="@{/staff/home}" class="sidebar-item">
+        <div class="sidebar-icon">🏠</div>
+        <div class="sidebar-text">Home</div>
+    </a>
+    <a th:href="@{/staff/theater_stock}" class="sidebar-item ">
+        <div class="sidebar-icon">🍿</div>
+        <div class="sidebar-text">Food and Drinks</div>
+    </a>
+    <a th:href="@{/staff/movie_schedule}" class="sidebar-item ">
+        <div class="sidebar-icon">📅</div>
+        <div class="sidebar-text">Set Schedule</div>
+    </a>
+    <a th:href="@{/staff/theater}" class="sidebar-item active">
+        <div class="sidebar-icon">🎬</div>
+        <div class="sidebar-text">Manage Theater</div>
+    </a>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Header -->
+    <div class="header">
+        <div class="header-left">
+            <div class="breadcrumb">
+                <a href="#" th:href="@{/staff/theater/theater_detail(id=${param.theaterID})}">Theater details</a> >
+                <span>Edit room</span></div>
+        </div>
+        <div class="header-right">
+            <a th:href="@{/staff/theater/update_seat(roomId=${room.roomID})}">
+                Edit Seats
+            </a>
+        </div>
+    </div>
+
+    <div th:if="${error}" class="alert alert-error">
+        <span th:text="${error}"></span>
+    </div>
+
+    <!-- Form Container -->
+    <div class="form-container">
+        <div class="form-header">
+            <p class="form-subtitle" th:text="${room.roomID == null} ? 'Complete the room information' : 'Update the room information'"></p>
+        </div>
+        <div th:if="${message}" class="alert"
+             th:classappend="${messageType == 'success'} ? 'alert-success' : 'alert-error'">
+            <span th:text="${message}"></span>
+        </div>
+        <!-- Left column - Form -->
+        <div class="left-column">
+
+            <form th:action="@{/staff/theater/edit_room}"
+                  th:object="${room}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="roomForm"
+                  onsubmit="return validateForm()">
+                <input type="hidden" th:field="*{roomID}" th:value="${room.roomID}" />
+                <input type="hidden" th:field="*{name}" th:value="${room.name}" />
+                <input type="hidden" th:field="*{theaterID}" th:value="${room.theaterID}"/>
+                <div class="form-row">
+                    <div class="form-column">
+
+                        <!-- column -->
+                        <div class="form-group">
+                            <label class="form-label">Number of columns</label>
+                            <input type="number"
+                                   class="form-input"
+                                   th:field="*{collumn}"
+                                   min="1"
+                                   max="20"
+                                   step="1"
+                                   placeholder="Enter number of columns"
+                                   required>
+                            <div class="error-message" id="columnError"></div>
+                        </div>
+
+                        <!-- Row -->
+                        <div class="form-group">
+                            <label class="form-label">Number of Rows</label>
+                            <input type="number"
+                                   class="form-input"
+                                   th:field="*{row}"
+                                   min="1"
+                                   max="15"
+                                   step="1"
+                                   placeholder="Enter number of rows"
+                                   required>
+                            <div class="error-message" id="rowError"></div>
+                        </div>
+
+                        <!-- Room type -->
+                        <div class="form-group">
+                            <label class="form-label">Room Type</label>
+                            <select name="roomType" id="roomType" class="form-input" th:field="*{typeOfRoom}">
+                                <option value="Single" th:selected="${room.typeOfRoom == 'Single'}">Single Seats</option>
+                                <option value="Couple" th:selected="${room.typeOfRoom == 'Couple'}">Couple Seats</option>
+                            </select>
+                            <div class="error-message" id="roomTypeError"></div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="form-group">
+                            <label class="form-label">Set Status</label>
+                            <div class="radio-group">
+                                <div class="radio-item">
+                                    <input type="radio"
+                                           id="statusActive"
+                                           name="status"
+                                           value="Active"
+                                           th:field="*{status}"
+                                           th:checked="${room.status == 'Active'}"
+                                           checked
+                                    required>
+                                    <label for="statusActive">Active</label>
+                                </div>
+                                <div class="radio-item">
+                                    <input type="radio"
+                                           id="statusInactive"
+                                           name="status"
+                                           value="Inactive"
+                                           th:field="*{status}"
+                                           th:checked="${room.status == 'Inactive'}"
+                                    required>
+                                    <label for="statusInactive">Inactive</label>
+                                </div>
+                            </div>
+                            <div class="error-message" id="statusError"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Buttons -->
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">Save Room</button>
+                    <button type="reset" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+                    <a th:href="@{/staff/theater/theater_detail(id=${room.theaterID})}" class="btn btn-danger">Cancel</a>
+                </div>
+            </form>
+
+        </div>
+
+    </div>
+</div>
+
+<script>
+    // Reset form function
+    function resetForm() {
+        document.getElementById('roomForm').reset();
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+        const activeRadio = document.getElementById('statusActive');
+        if(activeRadio) {
+            activeRadio.checked = true;
+        }
+    }
+    // Validate form
+    function validateForm() {
+        let isValid = true;
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+        const columnInput = document.querySelector('input[name="column"]');
+        const rowInput = document.querySelector('input[name="row"]');
+        const typeSelect = document.querySelector('select[name="typeOfRoom"]');
+        const status = document.querySelector('input[name="status"]:checked');
+
+
+        // Validate column
+        if (!columnInput.value || columnInput.value <= 0) {
+            document.getElementById('columnError').textContent = 'Number of columns must be greater than 0';
+            isValid = false;
+        }
+
+        // Validate Row
+        if (!rowInput.value || rowInput.value <= 0) {
+            document.getElementById('rowError').textContent = 'Number of rows must be greater than 0';
+            isValid = false;
+        }
+
+        // Validate Room Type
+        if (!typeSelect.value) {
+            document.getElementById('roomTypeError').textContent = 'Please select a room type';
+            isValid = false;
+        }
+
+        // Validate Status
+        if (!status) {
+            document.getElementById('statusError').textContent = 'Please select a status';
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+</script>
+</body>
+</html>

@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Theater</title>
+    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <link rel="stylesheet" th:href="@{/staff/css/add_update_item.css}">
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet'/>
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
+    <style>
+        .alert {
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: center;
+        }
+        .alert-error {
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
+        }
+        .alert-success {
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
+        }
+        #map {
+            height: 400px;
+            width: 100%;
+            border-radius: 8px;
+            margin-top: 15px;
+            border: 1px solid #ddd;
+        }
+        .current-image {
+            max-width: 200px;
+            max-height: 150px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            display: block;
+        }
+        .address-input-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .address-input-group .form-input {
+            flex-grow: 1;
+        }
+        .address-input-group .search-button,
+        .address-input-group .btn-secondary {
+            flex-shrink: 0;
+            padding: 8px 16px;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        .address-input-group .search-button {
+            background-color: #007bff;
+        }
+        .address-input-group .search-button:hover {
+            background-color: #0056b3;
+        }
+        .address-input-group .btn-secondary {
+            background-color: #6c757d;
+        }
+        .address-input-group .btn-secondary:hover {
+            background-color: #5a6268;
+        }
+    </style>
+</head>
+
+<body>
+<div class="sidebar">
+    <div class="user-info">
+        <div class="user-avatar" th:text="${#strings.substring(employeeName,0,1)}"></div>
+        <div class="user-name" th:text="${employeeName}"></div>
+    </div>
+
+    <a th:href="@{/staff/home}" class="sidebar-item">
+        <div class="sidebar-icon">🏠</div>
+        <div class="sidebar-text">Home</div>
+    </a>
+    <a th:href="@{/staff/theater_stock}" class="sidebar-item ">
+        <div class="sidebar-icon">🍿</div>
+        <div class="sidebar-text">Food and Drinks</div>
+    </a>
+    <a th:href="@{/staff/movie_schedule}" class="sidebar-item ">
+        <div class="sidebar-icon">📅</div>
+        <div class="sidebar-text">Set Schedule</div>
+    </a>
+    <a th:href="@{/staff/theater}" class="sidebar-item active">
+        <div class="sidebar-icon">🎬</div>
+        <div class="sidebar-text">Manage Theater</div>
+    </a>
+</div>
+
+<div class="main-content">
+    <div class="header">
+        <div class="header-left">
+            <div class="breadcrumb">
+                <a th:href="@{/staff/theater}">Manage Theater</a> >
+                <span> Edit Theater</span>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'alert-success' : 'alert-error'">
+        <span th:text="${message}"></span>
+    </div>
+
+    <div class="form-container">
+        <div class="form-header">
+            <p class="form-subtitle">Edit theater information</p>
+        </div>
+
+        <form th:action="@{/staff/theater/edit_theater}"
+              th:object="${theater}"
+              method="post"
+              enctype="multipart/form-data"
+              id="stockForm"
+              onsubmit="return validateForm()">
+
+            <input type="hidden" th:field="*{roomQuantity}" />
+            <input type="hidden" th:field="*{theaterID}" />
+            <input type="hidden" th:field="*{latitude}" id="latitude-field">
+            <input type="hidden" th:field="*{longitude}" id="longitude-field">
+            <input type="hidden" th:value="${theater.latitude}" id="original-latitude">
+            <input type="hidden" th:value="${theater.longitude}" id="original-longitude">
+            <input type="hidden" th:value="${theater.address}" id="original-address">
+
+            <div class="form-row">
+                <div class="form-column">
+                    <div class="form-group">
+                        <label class="form-label">Theater Name</label>
+                        <input type="text"
+                               class="form-input"
+                               th:field="*{theaterName}"
+                               placeholder="Enter theater name begin with CGV"
+                               required>
+                        <div class="error-message" id="nameError"></div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Theater Address</label>
+                        <div class="address-input-group">
+                            <input type="text"
+                                   class="form-input"
+                                   th:field="*{address}"
+                                   id="address-input"
+                                   placeholder="Enter theater address to search or drag map marker"
+                                   required>
+                            <button type="button" id="search-btn" class="search-button">Search</button>
+                            <button type="button" id="reset-location-btn" class="btn-secondary">Reset</button>
+                        </div>
+                        <div class="error-message" id="addressError"></div>
+                        <div id="map"></div>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label class="form-label">Set Availability</label>
+                        <div class="radio-group">
+                            <div class="radio-item">
+                                <input type="radio"
+                                       id="statusActive"
+                                       name="status"
+                                       value="Active"
+                                       th:field="*{status}"
+                                       th:checked="${theater.status == 'Active'}">
+                                <label for="statusActive">Active</label>
+                            </div>
+                            <div class="radio-item">
+                                <input type="radio"
+                                       id="statusInactive"
+                                       name="status"
+                                       value="Inactive"
+                                       th:field="*{status}"
+                                       th:checked="${theater.status == 'Inactive'}">
+                                <label for="statusInactive">Inactive</label>
+                            </div>
+                        </div>
+                        <div class="error-message" id="statusError"></div>
+                    </div>
+                </div>
+
+                <div class="form-column">
+                    <div class="form-group">
+                        <label class="form-label">Current Image:</label>
+                        <img th:if="${theater.image}"
+                             th:src="${theater.image}"
+                             class="current-image"
+                             alt="Current Theater Image">
+                        <input type="hidden" th:field="*{image}">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Upload New Image (Optional)</label>
+                        <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+                            <div>📸</div>
+                            <p>Click to upload new image</p>
+                        </div>
+                        <input type="file"
+                               id="imageInput"
+                               name="imageInput"
+                               accept="image/*"
+                               style="display: none;"
+                               onchange="previewImage(this)">
+                        <div id="imagePreview" class="image-preview"></div>
+                        <div class="error-message" id="imageError"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Update Theater</button>
+                <a th:href="@{/staff/theater}" class="btn btn-danger">Go Back</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    // Các hàm previewImage và validateForm giữ nguyên như cũ
+    function previewImage(input) {
+        const preview = document.getElementById('imagePreview');
+        preview.innerHTML = '';
+        if (input.files && input.files[0]) {
+            const file = input.files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Please upload an image file');
+                input.value = '';
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.maxWidth = '100%';
+                img.style.borderRadius = '8px';
+                preview.appendChild(img);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+    function validateForm() {
+        let isValid = true;
+        document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+
+        const theaterNameInput = document.querySelector('input[name="theaterName"]');
+        const addressInput = document.getElementById('address-input');
+        const statusInput = document.querySelector('input[name="status"]:checked');
+        const latitudeField = document.getElementById('latitude-field');
+        const longitudeField = document.getElementById('longitude-field');
+
+        if (theaterNameInput.value.trim() === '') {
+            document.getElementById('nameError').textContent = 'Theater Name is required.';
+            isValid = false;
+        } else if (!theaterNameInput.value.trim().toLowerCase().startsWith('cgv')) {
+            document.getElementById('nameError').textContent = 'Theater Name must begin with "CGV".';
+            isValid = false;
+        }
+
+        if (addressInput.value.trim() === '') {
+            document.getElementById('addressError').textContent = 'Address is required.';
+            isValid = false;
+        }
+
+        if (!latitudeField.value || !longitudeField.value) {
+            document.getElementById('addressError').textContent = 'Please select a location on the map.';
+            isValid = false;
+        }
+
+        if (!statusInput) {
+            document.getElementById('statusError').textContent = 'Please select an availability status.';
+            isValid = false;
+        }
+
+        return isValid;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const originalLatValue = document.getElementById('original-latitude').value;
+        const originalLngValue = document.getElementById('original-longitude').value;
+        const ORIGINAL_LAT = originalLatValue !== 'null' ? parseFloat(originalLatValue) : null;
+        const ORIGINAL_LNG = originalLngValue !== 'null' ? parseFloat(originalLngValue) : null;
+        const ORIGINAL_ADDR = document.getElementById('original-address').value;
+
+        mapboxgl.accessToken = 'pk.eyJ1IjoiYmx1ZWJlYXIxMjMiLCJhIjoiY21jcnQzYzVqMDZkNjJvczkyem5qcDYyNCJ9.4qcFRtXFMsoTuDCxr1aMyw';
+
+        const initialCenter = (ORIGINAL_LAT && ORIGINAL_LNG) ? [ORIGINAL_LNG, ORIGINAL_LAT] : [105.84, 21.02];
+        const initialZoom = (ORIGINAL_LAT && ORIGINAL_LNG) ? 16 : 10;
+
+        const map = new mapboxgl.Map({
+            container: 'map',
+            style: 'mapbox://styles/mapbox/streets-v12',
+            center: initialCenter,
+            zoom: initialZoom
+        });
+
+        const searchBtn = document.getElementById('search-btn');
+        const resetLocationBtn = document.getElementById('reset-location-btn');
+        const addressInput = document.getElementById('address-input');
+        const longitudeField = document.getElementById('longitude-field');
+        const latitudeField = document.getElementById('latitude-field');
+
+        let currentMarker = null;
+
+        function addDraggableMarker(lat, lng, placeName) {
+            if (currentMarker) {
+                currentMarker.remove();
+            }
+            currentMarker = new mapboxgl.Marker({ color: '#d9534f', draggable: true })
+                .setLngLat([lng, lat])
+                .setPopup(new mapboxgl.Popup().setText(placeName))
+                .addTo(map);
+
+            currentMarker.on('dragend', function() {
+                const newLngLat = currentMarker.getLngLat();
+                updateLocationAndAddress(newLngLat.lat, newLngLat.lng);
+            });
+        }
+
+        function updateLocationAndAddress(lat, lng) {
+            latitudeField.value = lat.toFixed(6);
+            longitudeField.value = lng.toFixed(6);
+
+            const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}&country=VN&language=vi`;
+            fetch(url)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.features && data.features.length > 0) {
+                        const placeName = data.features[0].place_name;
+                        addressInput.value = placeName; // Cập nhật ô địa chỉ
+                        if (currentMarker) {
+                            currentMarker.getPopup().setText(placeName);
+                        }
+                    }
+                })
+                .catch(error => console.error('Lỗi khi lấy địa chỉ:', error));
+        }
+
+        function searchAddress(address) {
+            const encodedAddress = encodeURIComponent(address);
+            fetch(`/staff/theater/search/${encodedAddress}`)
+                .then(response => {
+                    if (response.ok) return response.json();
+                    throw new Error('Không tìm thấy địa chỉ');
+                })
+                .then(location => {
+                    addDraggableMarker(location.lat, location.lng, location.placeName);
+                    latitudeField.value = location.lat.toFixed(6);
+                    longitudeField.value = location.lng.toFixed(6);
+                    addressInput.value = location.placeName;
+                    map.flyTo({ center: [location.lng, location.lat], zoom: 17 });
+                })
+                .catch(error => {
+                    console.error('Lỗi tìm kiếm:', error);
+                    alert('Không thể tìm thấy địa chỉ bạn yêu cầu.');
+                });
+        }
+
+        function loadOriginalLocation() {
+            if (ORIGINAL_LAT && ORIGINAL_LNG) {
+                console.log( {lat: ORIGINAL_LAT, lng: ORIGINAL_LNG});
+                latitudeField.value = ORIGINAL_LAT.toFixed(6);
+                longitudeField.value = ORIGINAL_LNG.toFixed(6);
+                addressInput.value = ORIGINAL_ADDR;
+                addDraggableMarker(ORIGINAL_LAT, ORIGINAL_LNG, ORIGINAL_ADDR);
+                map.flyTo({ center: [ORIGINAL_LNG, ORIGINAL_LAT], zoom: initialZoom });
+            } else {
+                console.log('Không có tọa độ gốc để tải.');
+            }
+        }
+
+        searchBtn.addEventListener('click', () => {
+            const address = addressInput.value.trim();
+            if (address) searchAddress(address);
+            else alert('Select adress on map');
+        });
+
+        addressInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                event.preventDefault();
+                searchBtn.click();
+            }
+        });
+
+        resetLocationBtn.addEventListener('click', loadOriginalLocation);
+
+        map.on('click', (e) => {
+            const { lng, lat } = e.lngLat;
+            addDraggableMarker(lat, lng, 'Vị trí đã chọn');
+            updateLocationAndAddress(lat, lng);
+        });
+
+        map.on('load', loadOriginalLocation);
+
+        map.addControl(new mapboxgl.NavigationControl());
+        map.addControl(new mapboxgl.FullscreenControl());
+    });
+</script>
+</body>
+</html>
