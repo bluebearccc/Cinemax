@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
@@ -21,18 +22,27 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     Movie findTop1ByStatusOrderByMovieRateDesc(Movie_Status status);
 
+    List<Movie> findMoviesByActors_ActorNameIgnoreCaseAndStatus(String actorName, Movie_Status status);
+
     @Query("SELECT m FROM Movie m WHERE m.status = :status AND CAST(m.startDate AS DATE) <= CAST(:today AS DATE) ORDER BY m.movieRate desc")
     Page<Movie> findTopCurrentlyShowByStatusOrderByMovieRateDesc(Movie_Status status, LocalDateTime today, Pageable pageable);
 
-    Page<Movie> findMoviesByStartDateBeforeAndEndDateAfter(LocalDateTime currentDate, LocalDateTime nowDate, Pageable pageable);
+    Page<Movie> findMoviesByStartDateBeforeAndEndDateAfterAndStatus(LocalDateTime currentDate, LocalDateTime nowDate, Pageable pageable, Movie_Status status);
 
-    Page<Movie> findMoviesByStartDateAfter(LocalDateTime currentDate, Pageable pageable);
+    Page<Movie> findMoviesByStartDateAfterAndStatus(LocalDateTime currentDate, Pageable pageable, Movie_Status status);
 
-    @Query("SELECT DISTINCT s.movie FROM Schedule s WHERE CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
-    Page<Movie> findMoviesWithScheduleToday(LocalDateTime today, Pageable pageable);
+    @Query("SELECT DISTINCT s.movie FROM Schedule s WHERE CAST(s.startTime AS DATE) = CAST(:today AS DATE) AND s.movie.status = :status")
+    Page<Movie> findMoviesWithScheduleToday(LocalDateTime today, Pageable pageable, Movie_Status status);
 
-    @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND LOWER(r.typeOfRoom) = LOWER(:roomType) AND CAST(s.startTime AS DATE) = CAST(:today AS DATE)")
-    Page<Movie> findMoviesWithScheduleTodayWithTheaterAndRoomType(int theaterId, LocalDateTime today, String roomType, Pageable pageable);
+    @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND LOWER(r.typeOfRoom) = LOWER(:roomType) AND CAST(s.startTime AS DATE) = CAST(:today AS DATE) AND s.movie.status = :status")
+    Page<Movie> findMoviesWithScheduleTodayWithTheaterAndRoomType(int theaterId, LocalDateTime today, String roomType, Pageable pageable, Movie_Status status);
+
+    @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t JOIN s.movie.genres g WHERE t.theaterID = :theaterId AND LOWER(r.typeOfRoom) = LOWER(:roomType) AND CAST(s.startTime AS DATE) = CAST(:today AS DATE) AND s.movie.status = :status AND g.genreName = :genrename")
+    Page<Movie> findMoviesWithScheduleTodayWithTheaterAndRoomTypeAndGenre(int theaterId, LocalDateTime today, String roomType, Pageable pageable, Movie_Status status, String genrename);
+
+
+    @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND CAST(s.startTime AS DATE) = CAST(:today AS DATE) AND s.movie.status = :status")
+    Page<Movie> findMoviesWithScheduleTodayWithTheater(int theaterId, LocalDateTime today, Pageable pageable, Movie_Status status);
 
     //Movie-Controller-Filter
     @Query("SELECT m FROM Movie m WHERE LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%')) AND m.status = :status")

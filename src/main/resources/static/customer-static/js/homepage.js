@@ -59,7 +59,6 @@ document.querySelectorAll('.carouselMovie-container').forEach(container => {
     init();
 });
 
-
 function generateDates(selectedIndex = 0) {
     const dateSelector = document.getElementById('date-selector');
     dateSelector.innerHTML = '';
@@ -115,6 +114,7 @@ function attachDateItemEvents() {
 
     dateItems.forEach(item => {
         item.addEventListener('click', function () {
+            const isNearest = document.querySelector('.custom-button-item-theater.active') !== null;
             const selectedIndex = parseInt(this.dataset.index);
             const theaterId = parseInt(document.querySelector('div.cinema-item.active input').value);
             const roomType = document.querySelector('.custom-button-item.active span').innerText;
@@ -123,6 +123,7 @@ function attachDateItemEvents() {
                 url: "/home/loadBookMovie",
                 type: "get",
                 data: {
+                    isNearest: isNearest,
                     selectedIndex: selectedIndex,
                     theaterId: theaterId,
                     roomType: roomType
@@ -150,7 +151,7 @@ function attachCinemaItemEvents() {
         item.addEventListener('click', function () {
             cinemaItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-
+            const isNearest = false;
             const selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
             const theaterId = parseInt(item.querySelector('input').value);
             const roomType = document.querySelector('.custom-button-item.active span').innerText;
@@ -159,6 +160,7 @@ function attachCinemaItemEvents() {
                 url: "/home/loadBookMovie",
                 type: "get",
                 data: {
+                    isNearest: isNearest,
                     selectedIndex: selectedIndex,
                     theaterId: theaterId,
                     roomType: roomType
@@ -187,7 +189,7 @@ function attachRoomItemEvents() {
         item.addEventListener('click', () => {
             roomButtonItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-
+            const isNearest = document.querySelector('.custom-button-item-theater.active') !== null;
             const selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
             const theaterId = parseInt(document.querySelector('div.cinema-item.active input').value);
             const roomType = document.querySelector('.custom-button-item.active span').innerText;
@@ -196,6 +198,7 @@ function attachRoomItemEvents() {
                 url: "/home/loadBookMovie",
                 type: "get",
                 data: {
+                    isNearest: isNearest,
                     selectedIndex: selectedIndex,
                     theaterId: theaterId,
                     roomType: roomType
@@ -218,9 +221,109 @@ function attachRoomItemEvents() {
     });
 }
 
+function toggleActive(element) {
+    element.classList.toggle('active')
+    getLocation();
+}
+
 document.addEventListener('DOMContentLoaded', attachLoadMoreEvent);
 document.addEventListener('DOMContentLoaded', attachDateItemEvents);
 document.addEventListener('DOMContentLoaded', attachCinemaItemEvents);
 document.addEventListener('DOMContentLoaded', attachRoomItemEvents);
+
+function getLocation() {
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            let nearest = null;
+            let nearestLat = null;
+            let nearestLng = null;
+            let minDistance = Infinity;
+            cinemas.forEach(cinema => {
+                const d = haversineDistance(userLat, userLng, cinema.latitude, cinema.longitude);
+                if (d < minDistance) {
+                    minDistance = d;
+                    nearest = cinema;
+                    console.log('cinema: ' + cinema.theaterName);
+                    nearestLat = cinema.latitude;
+                    nearestLng = cinema.longitude;
+                }
+            });
+
+            const selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
+            const theaterId = parseInt(nearest.theaterID);
+            const roomType = document.querySelector('.custom-button-item.active span').innerText;
+            const isNearest = document.querySelector('.custom-button-item-theater.active') !== null;
+
+            $.ajax({
+                url: "/home/loadBookMovie",
+                type: "get",
+                data: {
+                    isNearest: isNearest,
+                    selectedIndex: selectedIndex,
+                    theaterId: theaterId,
+                    roomType: roomType
+                },
+                success: function (data) {
+                    console.log(data);
+                    document.querySelector('.book-movie-area').innerHTML = data;
+
+                    generateDates(selectedIndex);
+                    attachDateItemEvents();
+                    attachCinemaItemEvents();
+                    attachRoomItemEvents();
+                },
+                error: function (e) {
+                    alert("Lỗi khi tải lịch chiếu");
+                }
+            });
+
+
+        },
+        (error) => {
+            console.error("Failed to retrieve user location", error);
+            showCustomAlert("📍 To use this feature, please allow us to access your location.");
+        }
+    );
+}
+
+function toRadians(degrees) {
+    return degrees * (Math.PI / 180);
+}
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+
+    const lat1Rad = toRadians(lat1);
+    const lat2Rad = toRadians(lat2);
+    const deltaLat = toRadians(lat2 - lat1);
+    const deltaLon = toRadians(lon2 - lon1);
+
+    const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c;
+    return distance;
+}
+
+function showCustomAlert(message) {
+    const alertBox = document.createElement('div');
+    alertBox.className = 'custom-alert';
+    alertBox.innerText = message;
+
+    const closeBtn = document.createElement('span');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.onclick = () => alertBox.remove();
+
+    alertBox.appendChild(closeBtn);
+    document.body.appendChild(alertBox);
+}
+
 
 

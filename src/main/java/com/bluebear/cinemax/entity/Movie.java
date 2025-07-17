@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.AgeLimit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,7 +28,8 @@ public class Movie {
     private String movieName;
 
     @Column(name = "Age_limit", length = 10)
-    private String ageLimit;
+    @Enumerated(EnumType.STRING)
+    private AgeLimit ageLimit;
 
     @Column(name = "Description", length = 1000)
     private String description;
@@ -76,9 +78,9 @@ public class Movie {
     )
     private List<Actor> actors;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<MovieFeedback> feedbackList;
 
-    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "movie", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Schedule> scheduleList;
 }

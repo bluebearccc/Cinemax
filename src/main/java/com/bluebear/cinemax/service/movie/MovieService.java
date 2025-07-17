@@ -6,6 +6,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 public interface MovieService {
@@ -43,9 +44,15 @@ public interface MovieService {
 
     Page<MovieDTO> findMoviesByScheduleAndTheaterAndRoomType(LocalDateTime schedule, int theaterId, String roomType);
 
+    Page<MovieDTO> findMoviesByScheduleAndTheaterAndRoomTypeAndGenre(LocalDateTime schedule, int theaterId, String roomType, String genreName);
+
+    Page<MovieDTO> findMoviesByScheduleAndTheater(LocalDateTime schedule, String theaterName);
+
     Page<MovieDTO> findMovies(Integer theaterId, Integer genreId, String movieName, Pageable pageable);
 
     Page<MovieDTO> findMoviesThatHaveFeedback(Pageable pageable);
+
+    List<MovieDTO> getMoviesByActor(String actorName);
 
     MovieDTO toDTO(Movie movie);
 

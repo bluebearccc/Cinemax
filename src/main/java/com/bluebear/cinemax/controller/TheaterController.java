@@ -62,7 +62,15 @@ public class TheaterController {
 
     @GetMapping("/loadSchedule")
     public String loadSchedule(Model model, @RequestParam(name = "theaterId") int theaterId, @RequestParam(name = "selectedIndex") int selectedIndex, @RequestParam(name = "roomType") String roomType) {
-        return "customer/fragments/theater-detail/book-detail :: book-detail";
+        LocalDateTime dateTime = LocalDateTime.now();
+        if (selectedIndex > 0) {
+            dateTime = LocalDateTime.now().plusDays(selectedIndex).toLocalDate().atStartOfDay();
+        }
+        theaterMovies = movieService.findMoviesByScheduleAndTheaterAndRoomType(dateTime, theaterId, roomType);
+        model.addAttribute("roomType", roomType);
+        model.addAttribute("theaterMovies", theaterMovies);
+        model.addAttribute("selectedIndex", selectedIndex);
+        return "customer/fragments/theater-detail/book-theater-detail :: book-theater-detail";
     }
 
 }

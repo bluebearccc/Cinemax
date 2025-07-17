@@ -19,5 +19,7 @@ public interface GenreService {
 
     Optional<GenreDTO> updateGenre(Integer id, GenreDTO dto);
 
+    GenreDTO findGenreByName(String genreName);
+
     void deleteGenre(Integer id);
 }

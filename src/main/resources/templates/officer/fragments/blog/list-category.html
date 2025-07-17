@@ -1,0 +1,20 @@
+<div class="category-list" id="categoryList" th:fragment="list-category">
+    <div th:if="${announce}">
+        <div id="customAlert" th:text="${announce}"></div>
+    </div>
+    <div th:if="${error}">
+        <div id="customError" th:text="${error}"></div>
+    </div>
+    <div class="category-item" th:each="category : ${categories}">
+        <div class="category-name" th:text="${category.categoryName}"></div>
+        <input type="hidden" th:value="${category.categoryID}" class="category-id">
+        <div>
+            <button class="btn btn-warning" style="padding: 5px 10px; margin-right: 5px;"
+                    onclick="editCategory(this)">Edit
+            </button>
+            <button class="btn btn-danger" style="padding: 5px 10px;"
+                    th:onclick="'deleteCategory(' + ${category.categoryID} + ')'">Delete
+            </button>
+        </div>
+    </div>
+</div>

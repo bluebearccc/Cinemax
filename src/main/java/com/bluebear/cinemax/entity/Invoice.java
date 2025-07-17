@@ -54,7 +54,7 @@ public class Invoice {
     @Column(name = "Status", nullable = false, length = 20)
     private Invoice_Status status;
 
-    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL)
     private List<DetailSeat> detailSeats;
 
 }

@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Management</title>
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/officer-static/css/blog-add.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+</head>
+<body>
+<div class="container">
+    <div class="sidebar" th:replace="officer/fragments/side-bar :: sidebar">
+    </div>
+    <div class="modal" id="blogModal" style="display: block;">
+        <div class="modal-content">
+            <div class="modal-form">
+                <div class="modal-header">
+                    <h2 id="blogModalTitle">Editting Blog</h2>
+                </div>
+                <form id="blogForm" th:object="${blog}" th:action="@{/officer/blog-management/edit-blog}" method="POST" onsubmit="setImageName()">
+                    <div class="form-group">
+                        <label>Title:</label>
+                        <input type="hidden" th:field="*{blogID}">
+                        <input type="hidden" th:field="*{authorID}">
+                        <input type="hidden" th:field="*{createdAt}">
+                        <input type="hidden" th:field="*{updatedAt}">
+                        <input type="hidden" th:field="*{likeCount}">
+                        <input type="hidden" th:field="*{viewCount}">
+                        <input type="text" class="form-control" th:field="*{title}" oninput="updatePreview()" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="blogImage">Image:</label>
+                        <div class="image-input-container">
+                            <div class="image-input-wrapper">
+                                <input type="file" class="image-input" id="blogImage"
+                                       onchange="previewImage(this)">
+                                <input type="hidden" th:field="*{image}" id="imageName">
+                            </div>
+                            <div class="image-preview" id="imagePreview">
+                                <span th:if="${blog.image == null}">No image selected</span>
+                                <img th:if="${blog.image != null}" th:src="@{${blog.image}}" alt="Preview">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Author:</label>
+                        <input type="text" class="form-control" required th:field="*{authorName}"
+                               oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>Overview Content:</label>
+                        <textarea class="form-control" rows="4" required th:field="*{content}"
+                                  oninput="updatePreview()"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Categories:</label>
+                        <div id="blogCategoriesContainer"
+                             style="border: 1px solid #ddd; border-radius: 5px; padding: 10px; max-height: 150px; overflow-y: auto;">
+                            <div th:each="category : ${categories}">
+                                <label th:for="${'category_' + category.categoryID}" th:text="${category.categoryName}">Technology</label>
+                                <input th:id="${'category_' + category.categoryID}" type="checkbox"
+                                       th:field="*{categories}" th:value="${category.categoryID}">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="blogSectionCount">Number of Blog Sections:</label>
+                        <input type="number" class="form-control" id="blogSectionCount" min="1" value="1"
+                               onchange="generateBlogSections(this.value)">
+                    </div>
+                    <div class="blog-sections" id="blogSections">
+                        <div class="section-item"
+                             th:each="section, stat : *{sections}"
+                             th:id="${'section_' + section.sectionID}">
+                            <div class="section-header">
+                                <h4 th:text="'Section ' + ${stat.index + 1}"></h4>
+                                <button type="button" class="btn btn-danger btn-sm" onclick="deleteBlogSection(this)">Delete</button>
+                            </div>
+
+                            <div class="form-group">
+                                <label th:for="'sectionTitle' + ${stat.index}">Section Title:</label>
+                                <input type="text"
+                                       class="form-control"
+                                       th:field="*{sections[__${stat.index}__].sectionTitle}"
+                                       required/>
+                            </div>
+
+                            <div class="form-group">
+                                <label th:for="'sectionContent' + ${stat.index}">Section Content:</label>
+                                <textarea class="form-control"
+                                          th:field="*{sections[__${stat.index}__].sectionContent}"
+                                          rows="4"
+                                          required>
+                                </textarea>
+                            </div>
+
+                            <input type="hidden"
+                                   th:field="*{sections[__${stat.index}__].sectionOrder}"
+                                   th:value="${stat.index + 1}"/>
+                            <input type="hidden"
+                                   th:field="*{sections[__${stat.index}__].sectionID}"
+                                   th:value="${stat.index + 1}"/>
+                            <input type="hidden"
+                                   th:field="*{sections[__${stat.index}__].blogID}"
+                                   th:value="${stat.index + 1}"/>
+                        </div>
+                    </div>
+
+                    <div class="add-section-container">
+                        <button type="button" class="btn btn-success" onclick="addBlogSection()">Add New Section
+                        </button>
+                    </div>
+
+                    <div style="margin-top: 20px; text-align: right;">
+                        <button type="button" class="btn btn-secondary" onclick="cancelEdit()">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="modal-sidebar" th:replace="officer/fragments/blog/modal-sidebar :: modal-sidebar">
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/officer-static/js/blog-edit.js}"></script>
+</body>
+</html>

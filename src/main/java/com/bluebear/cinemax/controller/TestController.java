@@ -1,6 +1,8 @@
 package com.bluebear.cinemax.controller;
 
 import com.bluebear.cinemax.dto.*;
+import com.bluebear.cinemax.entity.Movie;
+import com.bluebear.cinemax.repository.MovieRepository;
 import com.bluebear.cinemax.service.movie.MovieService;
 import com.bluebear.cinemax.service.moviefeedback.MovieFeedbackService;
 import com.bluebear.cinemax.service.moviefeedbackcomment.MovieFeedbackCommentService;
@@ -38,6 +40,8 @@ public class TestController {
     private MovieFeedbackService movieFeedbackService;
     @Autowired
     private MovieFeedbackCommentService movieFeedbackCommentService;
+    @Autowired
+    private MovieRepository movieRepository;
 
     @GetMapping("/movieToday")
     public Page<MovieDTO> getMovieToday() {
@@ -52,15 +56,15 @@ public class TestController {
     @GetMapping("/movieByScheduleAndTheater/{theaterId}/{date}")
     public Page<MovieDTO> getMovieByScheduleAndTheater(@PathVariable int theaterId, @PathVariable int date) {
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, + date);
+        calendar.add(Calendar.DATE, +date);
         Page<MovieDTO> movieDTOS = movieService.findMoviesByScheduleAndTheaterAndRoomType(LocalDateTime.now(), theaterId, "Single");
         return movieDTOS;
     }
 
     @GetMapping("/getMoviedetail/{movieId}/{day}/{theaterId}")
-    public Page<ScheduleDTO> getMovieDetailMovieTheater (@PathVariable int movieId, @PathVariable int day, @PathVariable int theaterId) {
+    public Page<ScheduleDTO> getMovieDetailMovieTheater(@PathVariable int movieId, @PathVariable int day, @PathVariable int theaterId) {
         Calendar calendar = Calendar.getInstance();
-        calendar.add(Calendar.DATE, + day);
+        calendar.add(Calendar.DATE, +day);
         return scheduleService.getScheduleByMovieIdAndTheaterIdAndDateAndRoomType(movieId, theaterId, LocalDateTime.now(), "Single");
     }
 
@@ -70,22 +74,22 @@ public class TestController {
     }
 
     @GetMapping("/testgetAllMovies/{day}/{room}")
-    public List<MovieDTO> getAllMovies (@PathVariable int day, @PathVariable String room) {
+    public List<MovieDTO> getAllMovies(@PathVariable int day, @PathVariable String room) {
         return movieService.findMoviesByScheduleAndTheaterAndRoomType(LocalDateTime.now().plusDays(day), 1, room).getContent();
     }
 
     @GetMapping("/testGetFeedbackCommentList/{movieId}")
-    public List<MovieFeedbackDTO> getMovieFeedbackTestCommentList (@PathVariable int movieId) {
+    public List<MovieFeedbackDTO> getMovieFeedbackTestCommentList(@PathVariable int movieId) {
         return movieFeedbackService.getAllByMovieIdWithComments(movieId, Pageable.unpaged()).toList();
     }
 
     @GetMapping("/testGetFeedbackCommentCount/{movieId}")
-    public List<MovieFeedbackDTO> getMovieFeedbackTestCommentCount (@PathVariable int movieId) {
+    public List<MovieFeedbackDTO> getMovieFeedbackTestCommentCount(@PathVariable int movieId) {
         return movieFeedbackService.getAllByMovieIdWithCommentCount(movieId, Pageable.unpaged()).toList();
     }
 
     @GetMapping("/testInsertFeedback/{movieId}/{customerId}/{content}/{rate}")
-    public List<MovieFeedbackDTO> insertMovieFeedbackTest (@PathVariable int movieId, @PathVariable int customerId, @PathVariable String content, @PathVariable Integer rate) {
+    public List<MovieFeedbackDTO> insertMovieFeedbackTest(@PathVariable int movieId, @PathVariable int customerId, @PathVariable String content, @PathVariable Integer rate) {
         rate = null;
         MovieFeedbackDTO movieFeedbackDTO = MovieFeedbackDTO.builder().movieId(movieId).customerId(customerId).content(content).movieRate(rate).build();
         movieFeedbackService.create(movieFeedbackDTO);
@@ -99,7 +103,9 @@ public class TestController {
         return movieFeedbackService.getFeedBackWithCommentByFeedbackId(feedbackId);
     }
 
-
-
+    @GetMapping("/testGetMovieByActor/{actorName}")
+    public List<MovieDTO> getMovieByActor(@PathVariable String actorName) {
+        return movieService.getMoviesByActor(actorName);
+    }
 
 }

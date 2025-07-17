@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/customer-static/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/odometer.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/chatbot.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/blog-list.css}">
+
+
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <title>Blogs</title>
+</head>
+<body>
+<!-- ==========Preloader========== -->
+<div th:replace="common/fragments/preloader :: preloader">
+</div>
+<!-- ==========Preloader========== -->
+<!-- ==========Overlay========== -->
+<a href="#0" class="scrollToTop">
+    <i class="fas fa-angle-up"></i>
+</a>
+<!-- ==========Overlay========== -->
+<div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
+<!-- ==========Header-Section========== -->
+<header th:replace="common/fragments/header :: header-section">
+</header>
+<!-- ==========Header-Section========== -->
+<section class="hero" id="home">
+    <div class="hero-content">
+        <h1>Movie News</h1>
+        <p>Discover the latest articles about the world of cinema, film reviews, celebrity news, and other exciting content.</p>
+    </div>
+</section>
+
+<section class="filter-section">
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search for articles..." id="searchInput"
+               onchange="filterBlog(null);">
+    </div>
+    <div class="filter-bar">
+        <button class="filter-btn active" data-genre-id="0">All</button>
+        <button class="filter-btn" data-category="review" th:each="category : ${categories}"
+                th:text="${category.categoryName}" th:data-genre-id="${category.categoryID}"></button>
+    </div>
+</section>
+
+<div class="blog-list-main-section">
+    <div class="blog-list-container" th:replace="customer/fragments/blog-list/list-blog :: list-blog" id="list-blog-wrapper">
+    </div>
+</div>
+<!-- ==========ChatBot-Section========== -->
+<div class="chatbot-container" th:replace="common/fragments/chatbot :: chatbot"></div>
+<!-- ==========ChatBot-Section========== -->
+<!-- ==========Footer-Section========== -->
+<footer class="footer-section" th:replace="common/fragments/footer :: footer">
+</footer>
+<!-- ==========Footer-Section========== -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/customer-static/js/blog-list.js}"></script>
+<script th:src="@{/customer-static/js/chatbot.js}"></script>
+<script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
+<script th:src="@{/customer-static/js/plugins.js}"></script>
+<script th:src="@{/customer-static/js/bootstrap.min.js}"></script>
+<script th:src="@{/customer-static/js/isotope.pkgd.min.js}"></script>
+<script th:src="@{/customer-static/js/magnific-popup.min.js}"></script>
+<script th:src="@{/customer-static/js/owl.carousel.min.js}"></script>
+<script th:src="@{/customer-static/js/wow.min.js}"></script>
+<script th:src="@{/customer-static/js/countdown.min.js}"></script>
+<script th:src="@{/customer-static/js/odometer.min.js}"></script>
+<script th:src="@{/customer-static/js/viewport.jquery.js}"></script>
+<script th:src="@{/customer-static/js/main.js}"></script>
+</body>
+</html>

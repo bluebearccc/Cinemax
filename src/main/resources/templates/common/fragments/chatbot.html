@@ -1,0 +1,21 @@
+<div class="chatbot-container" th:fragment="chatbot">
+    <button class="chatbot-button" onclick="toggleChat()">
+        🤖
+    </button>
+    <div class="chat-window" id="chatWindow">
+        <div class="chat-header">
+            <h3>🤖 Cinemax AI Assistant</h3>
+            <button class="close-chat" onclick="toggleChat()">×</button>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+            <div class="message bot">
+                Hello! I am the Cinemax AI assistant.
+                <br><br>How can I help you today?
+            </div>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="chatInput" placeholder="Type your message..." onkeypress="handleEnter(event)">
+            <button class="send-btn" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+</div>

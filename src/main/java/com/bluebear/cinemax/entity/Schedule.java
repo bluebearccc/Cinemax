@@ -39,6 +39,6 @@ public class Schedule {
     @Enumerated(EnumType.STRING)
     private Schedule_Status status;
 
-    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL)
     private List<DetailSeat> detailSeatList;
 }

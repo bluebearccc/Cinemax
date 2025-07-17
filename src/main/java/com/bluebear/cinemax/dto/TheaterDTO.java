@@ -18,6 +18,8 @@
         private Double serviceRate;
         private Integer numberOfRate;
         private Theater_Status status;
+        private Double latitude;
+        private Double longitude;
 
         private List<RoomDTO> rooms;
     }

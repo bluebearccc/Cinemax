@@ -1,0 +1,15 @@
+<div class="sidebar" th:fragment="sidebar">
+    <div class="admin-info">
+        <div class="admin-avatar"><i class="fas fa-user"></i></div>
+        <h3>Admin</h3>
+    </div>
+    <ul class="nav-menu">
+        <li class="nav-item">
+            <a th:href="@{/officer/blog-management}"
+               th:classappend="${currentWebPage == 'blog-management'} ? 'active' : ''"
+               class="nav-link">
+                Blog Management
+            </a>
+        </li>
+    </ul>
+</div>

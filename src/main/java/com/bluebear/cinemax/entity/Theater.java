@@ -38,6 +38,12 @@ public class Theater {
     @Enumerated(EnumType.STRING)
     private Theater_Status status;
 
-    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Column(name = "Latitude")
+    private Double latitude;
+
+    @Column(name = "Longitude")
+    private Double longitude;
+
+    @OneToMany(mappedBy = "theater", cascade = CascadeType.ALL)
     private List<Room> rooms;
 }

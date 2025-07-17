@@ -45,7 +45,7 @@ input, select {
     cursor: pointer;
     transition: all 0.3s ease;
     appearance: none;
-}
+    }
 
 .filter-select:hover {
     background: rgba(26, 40, 80, 0.9);

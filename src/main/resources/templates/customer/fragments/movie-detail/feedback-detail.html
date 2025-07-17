@@ -48,7 +48,7 @@
                                   th:text="${#temporals.format(feedback.createdDate, 'dd/MM/yyyy HH:mm')}"></span>
                         </div>
                         <p class="comment-text-movie-detail" th:text="${feedback.content}"></p>
-                        <div class="comment-actions-movie-detail">
+                        <div class="comment-actions-movie-detail" th:if="${session.customer != null}">
                             <a href="#" class="reply-btn-movie-detail"
                                th:data-author-id="${feedback.customerId}">Reply</a>
                         </div>

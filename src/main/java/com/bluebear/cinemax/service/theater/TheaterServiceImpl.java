@@ -6,6 +6,7 @@ import com.bluebear.cinemax.enumtype.Theater_Status;
 import com.bluebear.cinemax.repository.RoomRepository;
 import com.bluebear.cinemax.repository.TheaterRepository;
 import com.bluebear.cinemax.service.room.RoomService;
+import com.bluebear.cinemax.service.servicefeedback.ServiceFeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +23,8 @@ public class TheaterServiceImpl implements TheaterService {
     private RoomRepository roomRepository;
     @Autowired
     private RoomService roomService;
+    @Autowired
+    private ServiceFeedbackService serviceFeedbackService;
 
     public TheaterDTO createTheater(TheaterDTO dto) {
         Theater theater = toEntity(dto);
@@ -55,13 +58,17 @@ public class TheaterServiceImpl implements TheaterService {
                 .orElse(null);
     }
 
+    @Override
+    public TheaterDTO getTheaterByName(String name) {
+        return toDTO(theaterRepository.findByTheaterNameContainingIgnoreCase(name));
+    }
+
     public TheaterDTO getTheaterByIdWithRateCounts(Integer id) {
         TheaterDTO theaterDTO = theaterRepository.findById(id)
                 .map(this::toDTO)
                 .orElse(null);
 
-        theaterDTO.setServiceRate(4.5);
-        theaterDTO.setNumberOfRate(24);
+        theaterDTO.setNumberOfRate(serviceFeedbackService.countByTheaterId(theaterDTO.getTheaterID()));
 
         return theaterDTO;
     }
@@ -79,6 +86,8 @@ public class TheaterServiceImpl implements TheaterService {
         dto.setRoomQuantity(entity.getRoomQuantity());
         dto.setServiceRate(entity.getServiceRate());
         dto.setStatus(entity.getStatus());
+        dto.setLatitude(entity.getLatitude());
+        dto.setLongitude(entity.getLongitude());
         return dto;
     }
 
@@ -91,6 +100,8 @@ public class TheaterServiceImpl implements TheaterService {
         entity.setRoomQuantity(dto.getRoomQuantity());
         entity.setServiceRate(dto.getServiceRate());
         entity.setStatus(dto.getStatus());
+        entity.setLatitude(dto.getLatitude());
+        entity.setLongitude(dto.getLongitude());
         if (dto.getRooms() != null) {entity.setRooms(dto.getRooms().stream().map(roomDTO -> roomService.toEntity(roomDTO)).collect(Collectors.toList()));}
         return entity;
     }

@@ -14,6 +14,7 @@ import com.bluebear.cinemax.service.verifytoken.VerifyTokenServiceImpl;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -46,6 +47,9 @@ public class AuthenticationController {
     private List<GenreDTO> genres;
     private Page<TheaterDTO> theaters;
 
+    @Value("${app.base-url}")
+    private String baseUrl;
+
     @PostConstruct
     public void init() {
         genres = genreService.getAllGenres();
@@ -61,13 +65,14 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public String login(@RequestParam("email") String email, @RequestParam("password") String password, Model model, HttpSession session) {
+        model.addAttribute("genres", genres);
+        model.addAttribute("theaters", theaters);
         AccountDTO account = accountService.findAccountByEmail(email);
-        System.out.println("account: " + account.getId());
         if (account == null || !account.getPassword().equals(password)) {
             model.addAttribute("error", "Invalid email or password");
             return "common/login";
         } else if (account.getStatus() == Account_Status.Banned) {
-            model.addAttribute("error", "opps! this account is banned");
+            model.addAttribute("error", "opps! this account has been banned");
             return "common/login";
         } else {
             session.setAttribute("account", account);
@@ -85,7 +90,7 @@ public class AuthenticationController {
 
             return switch (account.getRole()) {
                 case Admin -> "redirect:/admin/dashboard";
-                case Customer -> "redirect:/";
+                case Customer -> "redirect:";
                 case Staff -> "redirect:/staff/home";
                 case Cashier -> "redirect:/cashier/home";
                 case Customer_Officer -> "redirect:/officer/home";
@@ -113,23 +118,27 @@ public class AuthenticationController {
             model.addAttribute("error", "Existed User");
             return "common/register";
         } else {
-            String token = UUID.randomUUID().toString();
-            VerifyTokenDTO verifyTokenDTO = VerifyTokenDTO.builder().email(email.trim()).token(token).expiresAt(new Date(System.currentTimeMillis() + 5 * 60 * 1000)).fullName(fullName.trim()).password(password.trim()).build();
-            verifyTokenService.create(verifyTokenDTO);
-            String verifyLink = "http://localhost:8080/verifytoken?token=" + token;
-            String subject = "Email Verification";
-            String content = "Hi, please verify your email by clicking this link: " + verifyLink;
-            emailService.sendMailTime(email, subject, content);
-            model.addAttribute("inform", "Verification email sent. Please check your inbox.");
+            if (verifyTokenService.getTokenByEmail(email.trim()) == null) {
+                String token = UUID.randomUUID().toString();
+                VerifyTokenDTO verifyTokenDTO = VerifyTokenDTO.builder().email(email.trim()).token(token).expiresAt(new Date(System.currentTimeMillis() + 5 * 60 * 1000)).fullName(fullName.trim()).password(password.trim()).build();
+                verifyTokenService.create(verifyTokenDTO);
+                String verifyLink = baseUrl + "/verifytoken?token=" + token;
+                String subject = "Email Verification";
+                String content = emailService.buildEmailContent(fullName, verifyLink);
+                emailService.sendMailTime(email, subject, content);
+                model.addAttribute("inform", "Verification email sent. Please check your inbox.");
+            } else {
+                model.addAttribute("error", "Existed Token");
+            }
+
             return "common/register";
+
         }
     }
 
     @GetMapping("/verifytoken")
     public String verifyToken(@RequestParam("token") String token, HttpSession session, Model model) {
         VerifyTokenDTO verifyTokenDTO = verifyTokenService.findByToken(token);
-        model.addAttribute("genres", genres);
-        model.addAttribute("theaters", theaters);
         if (verifyTokenDTO == null) {
             model.addAttribute("error", "Invalid token");
             return "common/register";
@@ -137,8 +146,7 @@ public class AuthenticationController {
             verifyTokenService.deleteTokenByEmail(verifyTokenDTO.getEmail());
             model.addAttribute("error", "Expired token");
             return "common/register";
-        }
-        else {
+        } else {
             AccountDTO accountDTO = AccountDTO.builder().email(verifyTokenDTO.getEmail()).password(verifyTokenDTO.getPassword()).role(Role.Customer).status(Account_Status.Active).build();
             AccountDTO accountDTO1 = accountService.save(accountDTO);
             session.setAttribute("account", accountDTO1);
@@ -146,38 +154,33 @@ public class AuthenticationController {
             CustomerDTO customerDTO1 = customerService.save(customerDTO);
             session.setAttribute("customer", customerDTO1);
             verifyTokenService.deleteTokenByEmail(verifyTokenDTO.getEmail());
-            return "redirect:/";
+            return "redirect:";
         }
     }
 
     @GetMapping("/forgotpassword")
     public String forgotpassword(Model model) {
-        model.addAttribute("genres", genres);
-        model.addAttribute("theaters", theaters);
         return "common/verify-email";
     }
 
     @GetMapping("/resendotp")
     public String resendotp(@RequestParam("email") String email, HttpSession session, Model model) {
-        model.addAttribute("genres", genres);
-        model.addAttribute("theaters", theaters);
         AccountDTO account = (AccountDTO) session.getAttribute("account");
         ForgotPasswordDTO forgotPasswordDTO = forgotPasswordService.findForgotPasswordByAccountId(account.getId());
         if (forgotPasswordDTO != null) {
             forgotPasswordService.deleteForgotPassword(forgotPasswordDTO.getId());
         }
-
-        int otp = otpGenerator();
+        List<Integer> otpDigits = generateOtpDigits();
+        int otp = convertDigitsToInteger(otpDigits);
         forgotPasswordDTO = ForgotPasswordDTO.builder().accountId(account.getId()).otp(otp).expiryDate(new Date(System.currentTimeMillis() + 5 * 60 * 1000)).build();
         forgotPasswordService.createForgotPassword(forgotPasswordDTO);
-        emailService.sendMailTime(email, "Reset Password", "Your verification code is: " + otp);
+        String content = emailService.builEmailContentForResetPassword(otpDigits);
+        emailService.sendMailTime(email, "Reset Password", content);
         return "common/verify-otp";
     }
 
     @GetMapping("/verifyemail")
     public String verifyemail(@RequestParam("email") String email, RedirectAttributes redirectAttributes, Model model, HttpSession session) {
-        model.addAttribute("genres", genres);
-        model.addAttribute("theaters", theaters);
         AccountDTO account = accountService.findAccountByEmail(email);
         if (account != null && account.getStatus() == Account_Status.Active) {
             session.setAttribute("account", account);
@@ -190,11 +193,12 @@ public class AuthenticationController {
                     return "common/verify-otp";
                 }
             }
-
-            int otp = otpGenerator();
+            List<Integer> otpDigits = generateOtpDigits();
+            int otp = convertDigitsToInteger(otpDigits);
             forgotPasswordDTO = ForgotPasswordDTO.builder().accountId(account.getId()).otp(otp).expiryDate(new Date(System.currentTimeMillis() + 5 * 60 * 1000)).build();
             forgotPasswordService.createForgotPassword(forgotPasswordDTO);
-            emailService.sendMailTime(email, "Reset Password", "Your verification code is: " + otp);
+            String content = emailService.builEmailContentForResetPassword(otpDigits);
+            emailService.sendMailTime(email, "Reset Password", content);
             return "common/verify-otp";
         } else {
             redirectAttributes.addFlashAttribute("error", "Invalid email");
@@ -204,8 +208,6 @@ public class AuthenticationController {
 
     @PostMapping("/otp")
     public String otp(@RequestParam("email") String email, @RequestParam("otp") String otp, Model model, HttpSession session) {
-        model.addAttribute("genres", genres);
-        model.addAttribute("theaters", theaters);
         Integer otpInt = null;
 
         try {
@@ -236,15 +238,11 @@ public class AuthenticationController {
 
     @GetMapping("/newpass")
     public String newpass(Model model) {
-        model.addAttribute("genres", genres);
-        model.addAttribute("theaters", theaters);
         return "common/reset-password";
     }
 
     @PostMapping("/updatepassword")
     public String updatePassword(@RequestParam("password") String password, HttpSession session, Model model) {
-        model.addAttribute("genres", genres);
-        model.addAttribute("theaters", theaters);
         AccountDTO account = (AccountDTO) session.getAttribute("account");
         if (account != null) {
             account.setPassword(password);
@@ -258,7 +256,7 @@ public class AuthenticationController {
             }
             return switch (account.getRole()) {
                 case Admin -> "redirect:/admin/dashboard";
-                case Customer -> "redirect:/";
+                case Customer -> "redirect:";
                 case Staff -> "redirect:/staff/home";
                 case Cashier -> "redirect:/cashier/home";
                 case Customer_Officer -> "redirect:/officer/home";
@@ -272,13 +270,24 @@ public class AuthenticationController {
     @GetMapping("/logout")
     public String logout(HttpSession session) {
         session.invalidate();
-        return "redirect:/";
+        return "redirect:";
     }
 
-    public int otpGenerator() {
+    public List<Integer> generateOtpDigits() {
         Random rand = new Random();
-        Integer otp = rand.nextInt(100000, 999999);
-        return otp;
+        List<Integer> otpDigits = new ArrayList<>();
+        for (int i = 0; i < 6; i++) {
+            otpDigits.add(rand.nextInt(10));
+        }
+        return otpDigits;
+    }
+
+    public int convertDigitsToInteger(List<Integer> otpDigits) {
+        StringBuilder sb = new StringBuilder();
+        for (Integer digit : otpDigits) {
+            sb.append(digit);
+        }
+        return Integer.parseInt(sb.toString());
     }
 
 }

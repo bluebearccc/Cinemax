@@ -46,14 +46,14 @@ public class MovieController {
     public void preInit() {
         topMovie = movieService.findMovieByHighestRate();
         theaters = theaterService.getAllTheaters();
+        genres = genreService.getAllGenres();
     }
 
     @GetMapping
-    public String toString(Model model, @RequestParam(name = "movieGenre", required = false) Integer genreId, @RequestParam(name = "movieName", required = false) String movieName, @RequestParam(name = "page", required = false) Integer page, @RequestParam(name = "sortBy", required = false) String sort, @RequestParam(name = "isFirst", required = false) Boolean isFirst, @RequestParam(name = "selectedTheater", required = false) Integer theaterId) {
+    public String Movies(Model model, @RequestParam(name = "movieGenre", required = false) Integer genreId, @RequestParam(name = "movieName", required = false) String movieName, @RequestParam(name = "page", required = false) Integer page, @RequestParam(name = "sortBy", required = false) String sort, @RequestParam(name = "isFirst", required = false) Boolean isFirst, @RequestParam(name = "selectedTheater", required = false) Integer theaterId) {
 
         int currentPage = page == null ? 1 : page;
         Pageable pageable = PageRequest.of(currentPage - 1, Constant.MOVIES_PER_PAGE);
-        genres = genreService.getAllGenres();
         movieName = movieName == null ? "" : movieName.trim();
 
         if ("rating".equals(sort)) {

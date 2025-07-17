@@ -159,6 +159,8 @@ function attachDateItemEvents() {
         item.addEventListener('click', function () {
             dateItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
+
+            const isNearest = document.querySelector('.custom-button-item-theater.active') !== null;
             let selectedIndex = parseInt(this.dataset.index);
             let theaterId = parseInt(document.querySelector('div.cinema-item.active input').value);
             let roomType = document.querySelector('.custom-button-item.active span').innerText;
@@ -168,6 +170,7 @@ function attachDateItemEvents() {
                 url: "/customer/movie-detail/loadSchedule",
                 type: "get",
                 data: {
+                    isNearest: isNearest,
                     selectedIndex: selectedIndex,
                     theaterId: theaterId,
                     roomType: roomType,
@@ -196,7 +199,7 @@ function attachCinemaItemEvents() {
         item.addEventListener('click', function () {
             cinemaItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
-
+            const isNearest = false;
             let selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
             let theaterId = parseInt(item.querySelector('input').value);
             let roomType = document.querySelector('.custom-button-item.active span').innerText;
@@ -206,6 +209,7 @@ function attachCinemaItemEvents() {
                 url: "/customer/movie-detail/loadSchedule",
                 type: "get",
                 data: {
+                    isNearest: isNearest,
                     selectedIndex: selectedIndex,
                     theaterId: theaterId,
                     roomType: roomType,
@@ -235,6 +239,7 @@ function attachRoomItemEvents() {
             roomButtonItems.forEach(i => i.classList.remove('active'));
             item.classList.add('active');
 
+            const isNearest = document.querySelector('.custom-button-item-theater.active') !== null;
             let selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
             let theaterId = parseInt(document.querySelector('div.cinema-item.active input').value);
             let roomType = document.querySelector('.custom-button-item.active span').innerText;
@@ -244,6 +249,7 @@ function attachRoomItemEvents() {
                 url: "/customer/movie-detail/loadSchedule",
                 type: "get",
                 data: {
+                    isNearest: isNearest,
                     selectedIndex: selectedIndex,
                     theaterId: theaterId,
                     roomType: roomType,
@@ -265,6 +271,110 @@ function attachRoomItemEvents() {
         });
     });
 }
+
+function toggleActive(element) {
+    element.classList.toggle('active');
+    getLocation();
+}
+
+function getLocation() {
+    navigator.geolocation.getCurrentPosition(
+        (position) => {
+            const userLat = position.coords.latitude;
+            const userLng = position.coords.longitude;
+
+            let nearest = null;
+            let nearestLat = null;
+            let nearestLng = null;
+            let minDistance = Infinity;
+            cinemas.forEach(cinema => {
+                const d = haversineDistance(userLat, userLng, cinema.latitude, cinema.longitude);
+                if (d < minDistance) {
+                    minDistance = d;
+                    nearest = cinema;
+                    console.log('cinema: ' + nearest.theaterName);
+                    nearestLat = cinema.latitude;
+                    nearestLng = cinema.longitude;
+                }
+            });
+
+            const selectedIndex = parseInt(document.querySelector('.date-item.active')?.dataset.index || 0);
+            const theaterId = parseInt(nearest.theaterID);
+            const roomType = document.querySelector('.custom-button-item.active span').innerText;
+            const isNearest = document.querySelector('.custom-button-item-theater.active') !== null;
+            let movieId = parseInt(document.getElementById('movieId').value);
+
+            $.ajax({
+                url: "/customer/movie-detail/loadSchedule",
+                type: "get",
+                data: {
+                    isNearest: isNearest,
+                    selectedIndex: selectedIndex,
+                    theaterId: theaterId,
+                    roomType: roomType,
+                    movieId: movieId
+                },
+                success: function (data) {
+                    document.getElementById('book-detail-showtimes').innerHTML = data;
+
+                    // Gọi lại generateDates để gắn active đúng ngày
+                    generateDates(selectedIndex);
+                    attachDateItemEvents();
+                    attachCinemaItemEvents();
+                    attachRoomItemEvents();
+                },
+                error: function (e) {
+                    alert("Lỗi khi tải lịch chiếu");
+                }
+            });
+        },
+        (error) => {
+            console.error("Failed to retrieve user location", error);
+            showCustomAlert("📍 To use this feature, please allow us to access your location.");
+        }
+    );
+}
+
+function toRadians(degrees) {
+    return degrees * (Math.PI / 180);
+}
+
+function haversineDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371e3;
+
+    const lat1Rad = toRadians(lat1);
+    const lat2Rad = toRadians(lat2);
+    const deltaLat = toRadians(lat2 - lat1);
+    const deltaLon = toRadians(lon2 - lon1);
+
+    const a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+        Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+    const distance = R * c;
+    return distance;
+}
+
+function showCustomAlert(message) {
+    const alertBox = document.createElement('div');
+    alertBox.className = 'custom-alert';
+    alertBox.innerText = message;
+
+    const closeBtn = document.createElement('span');
+    closeBtn.className = 'close-btn';
+    closeBtn.innerHTML = '&times;';
+    closeBtn.onclick = () => alertBox.remove();
+
+    alertBox.appendChild(closeBtn);
+    document.body.appendChild(alertBox);
+}
+
+document.addEventListener('DOMContentLoaded', attachDateItemEvents);
+document.addEventListener('DOMContentLoaded', attachCinemaItemEvents);
+document.addEventListener('DOMContentLoaded', attachRoomItemEvents);
+
 
 function attachLoadMoreEvent() {
     document.getElementById('load-feedback')?.addEventListener('click', function () {
@@ -316,12 +426,6 @@ function attachShowMoreCommentEvent() {
         });
     });
 }
-
-document.addEventListener('DOMContentLoaded', attachLoadMoreEvent);
-document.addEventListener('DOMContentLoaded', attachDateItemEvents);
-document.addEventListener('DOMContentLoaded', attachCinemaItemEvents);
-document.addEventListener('DOMContentLoaded', attachRoomItemEvents);
-document.addEventListener('DOMContentLoaded', attachShowMoreCommentEvent);
 
 function toggleReplyForm(button, authorId) {
     let parentComment = button.closest('.comment-content-movie-detail');
@@ -468,7 +572,7 @@ function handleReplySubmit(form, repliedId) {
     let bigDiv = form.closest('.bigger-comment-movie-detail');
     let content = form.querySelector('.comment-input-movie-detail').value;
     let feedbackId = parseInt(bigDiv.querySelector('.feedbackId').value);
-    let authorId= document.getElementById("customerId").value
+    let authorId = document.getElementById("customerId").value
     let currentNumOfComment = parseInt(bigDiv.querySelector('.currentNumOfComment').value);
     repliedId = parseInt(repliedId);
 
@@ -531,6 +635,7 @@ function initializeCommentSection() {
 }
 
 document.addEventListener('DOMContentLoaded', initializeCommentSection);
-
+document.addEventListener('DOMContentLoaded', attachShowMoreCommentEvent);
+document.addEventListener('DOMContentLoaded', attachLoadMoreEvent);
 
 

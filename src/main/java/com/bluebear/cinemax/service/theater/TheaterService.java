@@ -4,7 +4,6 @@ import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.entity.Theater;
 import org.springframework.data.domain.Page;
 
-import java.util.List;
 
 public interface TheaterService {
     TheaterDTO createTheater(TheaterDTO dto);
@@ -15,11 +14,13 @@ public interface TheaterService {
 
     TheaterDTO getTheaterById(Integer id);
 
+    TheaterDTO getTheaterByName(String name);
+
     TheaterDTO getTheaterByIdWithRateCounts(Integer id);
 
     Page<TheaterDTO> getAllTheaters();
 
-    TheaterDTO toDTO(com.bluebear.cinemax.entity.Theater entity);
+    TheaterDTO toDTO(Theater entity);
 
-    com.bluebear.cinemax.entity.Theater toEntity(TheaterDTO dto);
+    Theater toEntity(TheaterDTO dto);
 }
