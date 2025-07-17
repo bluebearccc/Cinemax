@@ -6,6 +6,7 @@ import com.bluebear.cinemax.enumtype.Theater_Status;
 import com.bluebear.cinemax.repository.RoomRepository;
 import com.bluebear.cinemax.repository.TheaterRepository;
 import com.bluebear.cinemax.service.room.RoomService;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -17,6 +18,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -133,19 +135,18 @@ public class TheaterServiceImpl implements TheaterService {
 
     @Override
     public TheaterDTO addTheater(TheaterDTO theaterDTO, MultipartFile imageFile) throws Exception {
-        // Validation 1: Tên rạp phải bắt đầu bằng "CGV" (không phân biệt hoa/thường)
         if (!theaterDTO.getTheaterName().trim().toLowerCase().startsWith("cgv")) {
-            throw new Exception("Tên rạp chiếu phải bắt đầu bằng 'CGV'.");
+            throw new Exception("Theater 's name must start with 'CGV'.");
         }
 
         // Validation 2: Tên rạp không được trùng
         if (theaterRepository.existsByTheaterNameIgnoreCase(theaterDTO.getTheaterName().trim())) {
-            throw new Exception("Tên rạp chiếu đã tồn tại. Vui lòng chọn tên khác.");
+            throw new Exception("This theater name is already taken. Please choose another name.");
         }
 
         // Validation 3: Địa chỉ không được trùng
         if (theaterRepository.existsByAddressIgnoreCase(theaterDTO.getAddress().trim())) {
-            throw new Exception("Địa chỉ rạp chiếu đã tồn tại. Vui lòng kiểm tra lại.");
+            throw new Exception("Theater address is already taken. Please choose another address.");
         }
 
         Theater theater = toEntity(theaterDTO);
@@ -153,8 +154,7 @@ public class TheaterServiceImpl implements TheaterService {
         // Xử lý upload ảnh nếu có
         if (imageFile != null && !imageFile.isEmpty()) {
             String fileName = saveImage(imageFile);
-            // Lưu đường dẫn tương đối để truy cập từ web
-            theater.setImage("/uploads/theaters/" + fileName);
+            theater.setImage("/uploads/theater_images/" + fileName);
         }
 
         // Thiết lập giá trị mặc định cho rạp mới
@@ -165,20 +165,27 @@ public class TheaterServiceImpl implements TheaterService {
         return toDTO(savedTheater);
     }
 
-    // Phương thức private để lưu ảnh và trả về tên file
-    private String saveImage(MultipartFile imageFile) throws IOException {
-        // Bây giờ Paths.get() sẽ hoạt động chính xác với biến UPLOAD_DIR kiểu String
-        Path uploadPath = Paths.get(UPLOAD_DIR);
+
+    public String saveImage(MultipartFile img) throws IOException {
+        String uploadDir = "uploads/theater_images";
+        Path uploadPath = Paths.get(uploadDir);
         if (!Files.exists(uploadPath)) {
             Files.createDirectories(uploadPath);
         }
-
-        // Tạo tên file duy nhất để tránh trùng lặp
-        String fileName = UUID.randomUUID().toString() + "_" + imageFile.getOriginalFilename();
-        Path filePath = uploadPath.resolve(fileName);
-        Files.copy(imageFile.getInputStream(), filePath);
-
-        return fileName;
+        String filename = img.getOriginalFilename();
+        Path filePath = uploadPath.resolve(filename);
+        if (Files.exists(filePath)) {
+            int counter = 1;
+            String nameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
+            String extension = filename.substring(filename.lastIndexOf('.'));
+            while (Files.exists(filePath)) {
+                filename = nameWithoutExtension + "(" + counter + ")" + extension;
+                filePath = uploadPath.resolve(filename);
+                counter++;
+            }
+        }
+        Files.copy(img.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return filename;
     }
 
     public TheaterDTO toDTO(Theater entity) {
@@ -190,6 +197,8 @@ public class TheaterServiceImpl implements TheaterService {
         dto.setRoomQuantity(entity.getRoomQuantity());
         dto.setServiceRate(entity.getServiceRate());
         dto.setStatus(entity.getStatus());
+        dto.setLatitude(entity.getLatitude());
+        dto.setLongitude(entity.getLongitude());
         return dto;
     }
 
@@ -202,9 +211,61 @@ public class TheaterServiceImpl implements TheaterService {
         entity.setRoomQuantity(dto.getRoomQuantity());
         entity.setServiceRate(dto.getServiceRate());
         entity.setStatus(dto.getStatus());
+        entity.setLatitude(dto.getLatitude());
+        entity.setLongitude(dto.getLongitude());
         if (dto.getRooms() != null) {
             entity.setRooms(dto.getRooms().stream().map(roomDTO -> roomService.toEntity(roomDTO)).collect(Collectors.toList()));
         }
         return entity;
     }
+    @Override
+    public Page<TheaterDTO> findByKeywordAndStatusPaginated(String keyword, String status, Pageable pageable) {
+        try {
+            Theater_Status statusEnum = Theater_Status.valueOf(status);
+            return theaterRepository.findByTheaterNameContainingIgnoreCaseAndStatus(keyword, statusEnum, pageable).map(this::toDTO);
+        } catch (Exception e) {
+            return Page.empty(pageable);
+        }
+    }
+    @Override
+    public Page<TheaterDTO> findByKeywordPaginated(String keyword, Pageable pageable) {
+        return theaterRepository.findByTheaterNameContainingIgnoreCase(keyword, pageable).map(this::toDTO);
+    }
+    @Override
+    public Page<TheaterDTO> findByStatusPaginated(String status, Pageable pageable) {
+        try {
+            Theater_Status statusEnum = Theater_Status.valueOf(status);
+            return theaterRepository.findByStatus(statusEnum, pageable).map(this::toDTO);
+        } catch (Exception e) {
+            return Page.empty(pageable);
+        }
+    }
+    @Override
+    public Page<TheaterDTO> findAllPaginated(Pageable pageable) {
+        return theaterRepository.findAll(pageable).map(this::toDTO);
+    }
+    @Override
+    @Transactional
+    public void updateTheater(TheaterDTO theaterDTO) throws IOException {
+        Theater theaterToUpdate = theaterRepository.findById(theaterDTO.getTheaterID())
+                .orElseThrow(() -> new IllegalArgumentException("Theater not found with ID: " + theaterDTO.getTheaterID()));
+
+        if (theaterRepository.existsByTheaterNameIgnoreCaseAndTheaterIDNot(theaterDTO.getTheaterName(), theaterDTO.getTheaterID())) {
+            throw new IllegalArgumentException("Another theater with the name '" + theaterDTO.getTheaterName() + "' already exists.");
+        }
+
+        theaterToUpdate.setTheaterName(theaterDTO.getTheaterName());
+        theaterToUpdate.setAddress(theaterDTO.getAddress());
+        theaterToUpdate.setRoomQuantity(theaterDTO.getRoomQuantity());
+        theaterToUpdate.setStatus(theaterDTO.getStatus());
+        theaterToUpdate.setLatitude(theaterDTO.getLatitude());
+        theaterToUpdate.setLongitude(theaterDTO.getLongitude());
+        MultipartFile newImageFile = theaterDTO.getNewImage();
+        if (newImageFile != null && !newImageFile.isEmpty()) {
+            String newFileName = saveImage(newImageFile);
+            theaterToUpdate.setImage("/uploads/theaters_images/" + newFileName);
+        }
+
+    }
+
 }

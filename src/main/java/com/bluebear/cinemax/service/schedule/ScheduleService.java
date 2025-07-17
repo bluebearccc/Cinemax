@@ -45,4 +45,5 @@ public interface ScheduleService {
     Page<ScheduleDTO> getSchedulesByMovieIdAndDate(Integer theaterId, Integer movieId,
                                                    LocalDateTime startDate, LocalDateTime endDate,
                                                    Pageable pageable);
+    public List<ScheduleDTO> findSchedulesByTheaterAndDate(Integer theaterId, LocalDate date);
 }

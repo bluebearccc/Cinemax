@@ -1,10 +1,14 @@
 package com.bluebear.cinemax.service.seat;
 
 import com.bluebear.cinemax.dto.SeatDTO;
+import com.bluebear.cinemax.dto.SeatUpdateRequest;
 import com.bluebear.cinemax.entity.Seat;
+import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public interface SeatService {
     SeatDTO createSeat(SeatDTO dto);
@@ -27,4 +31,10 @@ public interface SeatService {
 
     List<SeatDTO> getSeatsByIds(List<Integer> selectedSeatIds);
 
+    public void updateSeatsVipAndPrice(SeatUpdateRequest request) throws Exception;
+
+    public List<SeatDTO> deleteSeatById(Integer seatId) throws Exception;
+
+    public void resetSeatNamesInRoom(Integer roomId);
+    public void updateSeatsInRoom(SeatUpdateRequest request);
 }

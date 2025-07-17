@@ -19,4 +19,8 @@ public interface TheaterRepository extends JpaRepository<Theater, Integer> {
     // Kiểm tra xem địa chỉ đã tồn tại chưa (không phân biệt chữ hoa/thường)
     boolean existsByAddressIgnoreCase(String address);
     Page<Theater> findByStatus(Theater_Status status, Pageable pageable);
+    Page<Theater> findByTheaterNameContainingIgnoreCaseAndStatus(String keyword, Theater_Status status, Pageable pageable);
+    Page<Theater> findByTheaterNameContainingIgnoreCase(String keyword, Pageable pageable);
+    boolean existsByTheaterNameIgnoreCaseAndTheaterIDNot(String theaterName, Integer theaterID);
+
 }

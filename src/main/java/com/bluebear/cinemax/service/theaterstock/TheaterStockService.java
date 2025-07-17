@@ -3,8 +3,16 @@ package com.bluebear.cinemax.service.theaterstock;
 import com.bluebear.cinemax.dto.TheaterStockDTO;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public interface TheaterStockService {
     public List<TheaterStockDTO> findByTheaterId(Integer theaterId);
@@ -28,4 +36,15 @@ public interface TheaterStockService {
     List<TheaterStockDTO> getAvailableTheaterStockByTheater(Integer theaterId);
 
     public boolean isDeleted(Integer id);
+
+    Page<TheaterStockDTO> findByTheaterIdAndItemName(Integer theaterId, String trim, Pageable pageable);
+    Page<TheaterStockDTO> findByItemName(String trim, Pageable pageable);
+    Page<TheaterStockDTO> findByTheaterId(Integer theaterId, Pageable pageable);
+    Page<TheaterStockDTO> getAllTheaterStock(Pageable pageable);
+    public Optional<TheaterStockDTO> findFirstByItemName(String itemName);
+    public boolean itemExistsInTheater(String itemName, Integer theaterId);
+    public String saveImage(MultipartFile img) throws IOException;
+    public List<TheaterStockDTO> findAllByItemName(String itemName);
+    void updateItemAcrossAllTheaters(TheaterStockDTO formDataWithChanges) throws IOException;
+
 }

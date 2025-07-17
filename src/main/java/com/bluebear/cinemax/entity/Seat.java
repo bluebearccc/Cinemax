@@ -32,6 +32,9 @@ public class Seat {
     @Column(name = "Position", nullable = false, length = 10)
     private String position;
 
+    @Column(name = "Name", length = 10)
+    private String name;
+
     @Column(name = "IsVIP", nullable = false)
     private Boolean isVIP;
 

@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface TheaterStockRepository extends JpaRepository<TheaterStock, Integer> {
@@ -30,4 +31,14 @@ public interface TheaterStockRepository extends JpaRepository<TheaterStock, Inte
             Integer theaterId, String itemName, TheaterStock_Status status, Pageable pageable);
 
     List<TheaterStock> findByStatus(TheaterStock_Status theaterStockStatus);
+    Page<TheaterStock> findByTheater_TheaterIDAndItemNameContainingIgnoreCase(
+            Integer theaterId, String itemName, Pageable pageable);
+    Page<TheaterStock> findByItemNameContainingIgnoreCase(
+            String itemName, Pageable pageable);
+    Page<TheaterStock> findByTheater_TheaterID(
+            Integer theaterId, Pageable pageable);
+    Optional<TheaterStock> findFirstByItemNameIgnoreCase(String itemName);
+    boolean existsByItemNameIgnoreCaseAndTheater_TheaterID(String itemName, Integer theaterId);
+    List<TheaterStock> findByItemNameIgnoreCase(String itemName);
+
 }

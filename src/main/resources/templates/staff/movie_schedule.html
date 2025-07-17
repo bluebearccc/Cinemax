@@ -1,59 +1,319 @@
-<!DOCTYPE html>
-<html
-        xmlns:th="http://www.thymeleaf.org"
-        lang="en"
->
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Movies List</title>
-    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <!DOCTYPE html>
+    <html
+            xmlns:th="http://www.thymeleaf.org"
+            lang="en"
+    >
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Movies List</title>
+        <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <style>
+        .pagination-container {
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-top: 1px solid #e0e0e0;
+            background: #f8f9fa;
+        }
 
-</head>
-<body>
-<div class="sidebar">
-    <div class="user-info">
-        <div class="user-avatar">M</div>
-        <div class="user-name">Mary Johnson</div>
+        .pagination {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .page-btn {
+            padding: 8px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #333;
+            text-decoration: none;
+            font-size: 14px;
+            min-width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .page-btn:hover:not(.disabled) {
+            background: #f0f0f0;
+            border-color: #bbb;
+        }
+
+        .page-btn.active {
+            background: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+
+        .page-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            .pagination {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+        }
+        .filter-container {
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            border: 1px solid #e5e7eb;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .filter-form {
+            display: flex;
+            gap: 16px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            min-width: 140px;
+        }
+
+        .filter-group.search-group {
+            flex: 1;
+            min-width: 250px;
+        }
+
+        .filter-group label {
+            font-size: 13px;
+            font-weight: 600;
+            color: #374151;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .search-input {
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .search-input::placeholder {
+            color: #9ca3af;
+            font-style: italic;
+        }
+
+        .date-input {
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fafafa;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .date-input:focus {
+            outline: none;
+            border-color: #10b981;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+
+        #end_date:focus {
+            border-color: #f59e0b;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.1);
+        }
+
+        .genre-select {
+            padding: 10px 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 6px;
+            font-size: 14px;
+            background-color: #fafafa;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+            min-width: 160px;
+        }
+
+        .genre-select:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.1);
+        }
+
+        .search-button {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 120px;
+            justify-content: center;
+            box-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+            height: 46px;
+        }
+
+        .search-button:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .filter-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .filter-group.search-group {
+                min-width: auto;
+            }
+
+            .filter-group {
+                min-width: auto;
+            }
+        }
+
+        @media (max-width: 640px) {
+            .filter-container {
+                padding: 16px;
+                border-radius: 8px;
+            }
+
+            .filter-form {
+                gap: 12px;
+            }
+        }
+    </style>
+    </head>
+    <body>
+    <div class="sidebar">
+        <div class="user-info">
+            <div class="user-avatar" th:text="${#strings.substring(employeeName,0,1)}"></div>
+            <div class="user-name" th:text="${employeeName}"></div>
+        </div>
+
+        <a th:href="@{/staff/home}" class="sidebar-item">
+            <div class="sidebar-icon">🏠</div>
+            <div class="sidebar-text">Home</div>
+        </a>
+        <a th:href="@{/staff/theater_stock}" class="sidebar-item ">
+            <div class="sidebar-icon">🍿</div>
+            <div class="sidebar-text">Food and Drinks</div>
+        </a>
+        <a th:href="@{/staff/movie_schedule}" class="sidebar-item active">
+            <div class="sidebar-icon">📅</div>
+            <div class="sidebar-text">Set Schedule</div>
+        </a>
+        <a th:href="@{/staff/theater}" class="sidebar-item">
+            <div class="sidebar-icon">🎬</div>
+            <div class="sidebar-text">Manage Theater</div>
+        </a>
     </div>
+    <div class="main-content">
+        <h1 class="page-title">Movies List</h1>
 
-    <a href="#" class="sidebar-item">
-        <div class="sidebar-icon">🏠</div>
-        <div class="sidebar-text">Home</div>
-    </a>
-    <a th:href="@{/theater_stock}" class="sidebar-item ">
-        <div class="sidebar-icon">🍿</div>
-        <div class="sidebar-text">Food and Drinks</div>
-    </a>
-    <a th:href="@{/movie_schedule}" class="sidebar-item active">
-        <div class="sidebar-icon">📅</div>
-        <div class="sidebar-text">Set Schedule</div>
-    </a>
-    <a th:href="@{/theater}" class="sidebar-item ">
-        <div class="sidebar-icon">🎬</div>
-        <div class="sidebar-text">Manage Theater</div>
-    </a>
-</div>
-<div class="main-content">
-    <h1 class="page-title">Movies List</h1>
+        <div class="search-container">
+            <form th:action="@{/staff/movie_schedule}" method="get" class="filter-form" id="filterForm">
 
-    <div class="search-container">
-        <form th:action="@{/movie_schedule/search}" method="get" class="search-form">
-            <input type="text" name="name" class="search-input" th:value="${param.keyword}" placeholder="Search for movies by name...">
-            <button type="submit" class="search-button">🔍 Tìm kiếm</button>
-        </form>
-    </div>
-    <div class="movie-grid">
+                <div class="filter-group search-group">
+                    <label for="name">Movie Name</label>
+                    <input type="text" id="name" name="name" class="search-input" th:value="${param.name}" placeholder="Search by name...">
+                </div>
 
-        <div th:each="x : ${movies}" class="movie-column">
-            <div class="movie-card" style="height: 352px;">
-                <a th:href="@{/movie_schedule/show_schedule(movieId=${x.movieID})}">
-                    <div class="movie-poster"><img th:src="${x.image}" alt="Movie Poster"></div>
-                    <div class="movie-title" th:text="${x.movieName}"></div>
-                </a>
+                <div class="filter-group">
+                    <label for="genre">Genre</label>
+                    <select id="genre" name="genre" class="genre-select" onchange="document.getElementById('filterForm').submit()">
+                        <option value="">All Genres</option>
+                        <option th:each="g : ${genres}"
+                                th:value="${g.genreID}"
+                                th:text="${g.genreName}"
+                                th:selected="${param.genre != null && #strings.equals(param.genre, g.genreID)}">
+                        </option>
+                    </select>
+                </div>
+
+                <div class="filter-group">
+                    <label for="start_date">From Date</label>
+                    <input type="date" name="start_date" id="start_date" class="date-input" th:value="${param.start_date}">
+                </div>
+
+                <div class="filter-group">
+                    <label for="end_date">To Date</label>
+                    <input type="date" name="end_date" id="end_date" class="date-input" th:value="${param.end_date}">
+                </div>
+
+                <div class="filter-group">
+                    <button type="submit" class="search-button">
+                        <span>🔍 Search</span>
+                    </button>
+                </div>
+
+            </form>
+        </div>
+        <div class="movie-grid" >
+
+            <div th:each="x : ${movies}" class="movie-column">
+                <div class="movie-card" style="height: 450px">
+                    <a th:href="@{/staff/movie_schedule/show_schedule(movieId=${x.movieID})}">
+                        <div class="movie-poster"><img th:src="${x.image}" alt="Movie Poster"></div>
+                        <div class="movie-title" th:text="${x.movieName}"></div>
+                        <div class="movie-start-time">Start Date: <span th:text="${x.formattedStartDate()}"></span></div>
+                        <div class="movie-end-time">End Date: <span th:text="${x.formattedEndDate()}"></span></div>
+                     </a>
+                </div>
+            </div>
+
+        </div>
+        <div class="pagination-container" th:if="${totalPages > 1}">
+            <div class="pagination">
+                <a th:href="@{/staff/movie_schedule(page=${currentPage - 1}, name=${param.name}, genre=${param.genre}, start_date=${param.start_date}, end_date=${param.end_date})}"
+                   th:classappend="${currentPage == 0} ? 'disabled' : ''"
+                   class="page-btn">‹</a>
+
+                <th:block th:each="i : ${#numbers.sequence(0, totalPages - 1)}">
+                    <a th:href="@{/staff/movie_schedule(page=${i}, name=${param.name}, genre=${param.genre}, start_date=${param.start_date}, end_date=${param.end_date})}"
+                       th:text="${i + 1}"
+                       th:classappend="${i == currentPage} ? 'active' : ''"
+                       class="page-btn"></a> </th:block>
+
+                <a th:href="@{/staff/movie_schedule(page=${currentPage + 1}, name=${param.name}, genre=${param.genre}, start_date=${param.start_date}, end_date=${param.end_date})}"
+                   th:classappend="${currentPage >= totalPages - 1} ? 'disabled' : ''"
+                   class="page-btn">›</a>
             </div>
         </div>
     </div>
-</div>
-</body>
-</html>
+    </body>
+    </html>

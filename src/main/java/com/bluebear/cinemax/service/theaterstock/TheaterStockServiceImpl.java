@@ -13,7 +13,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -122,10 +128,12 @@ public class TheaterStockServiceImpl implements TheaterStockService {
         TheaterStock theaterStockToSave = convertToEntity(theaterStockDTO);
         theaterStockRepository.save(theaterStockToSave);
     }
+    @Override
+    public Optional<TheaterStockDTO> findFirstByItemName(String itemName) {
+        Optional<TheaterStock> stockOptionalEntity = theaterStockRepository.findFirstByItemNameIgnoreCase(itemName);
+        return stockOptionalEntity.map(this::convertToDTO);
+    }
 
-    // You had an extra findById, consolidating it into getTheaterStockById
-    // The previous findById(Integer id) in your interface will now just call getTheaterStockById(id)
-    // to maintain compatibility with your existing interface.
     @Override
     public TheaterStockDTO findById(Integer id) {
         return getTheaterStockById(id);
@@ -166,6 +174,29 @@ public class TheaterStockServiceImpl implements TheaterStockService {
         }
     }
 
+    @Override
+    public Page<TheaterStockDTO> findByTheaterIdAndItemName(Integer theaterId, String itemName, Pageable pageable) {
+        Page<TheaterStock> theaterStockPage = theaterStockRepository.findByTheater_TheaterIDAndItemNameContainingIgnoreCase(
+                theaterId, itemName, pageable);
+
+        return theaterStockPage.map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<TheaterStockDTO> findByItemName(String itemName, Pageable pageable) {
+        return theaterStockRepository.findByItemNameContainingIgnoreCase(itemName, pageable).map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<TheaterStockDTO> findByTheaterId(Integer theaterId, Pageable pageable) {
+        return theaterStockRepository.findByTheater_TheaterID(theaterId, pageable).map(this::convertToDTO);
+    }
+
+    @Override
+    public Page<TheaterStockDTO> getAllTheaterStock(Pageable pageable) {
+        return theaterStockRepository.findAll(pageable).map(this::convertToDTO);
+    }
+
     public Page<TheaterStockDTO> findAvailableByTheaterId(Integer theaterId, Pageable pageable) {
         Page<TheaterStock> theaterStocks = theaterStockRepository.findByTheater_TheaterIDAndStatus(
                 theaterId, TheaterStock_Status.Active, pageable
@@ -194,5 +225,78 @@ public class TheaterStockServiceImpl implements TheaterStockService {
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
     }
+    @Override
+    public boolean itemExistsInTheater(String itemName, Integer theaterId) {
+        return theaterStockRepository.existsByItemNameIgnoreCaseAndTheater_TheaterID(itemName, theaterId);
+    }
+    @Override
+    public String saveImage(MultipartFile img) throws IOException {
+        String uploadDir = "uploads/theater_stocks_images";
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        String filename = img.getOriginalFilename();
+        Path filePath = uploadPath.resolve(filename);
+        if (Files.exists(filePath)) {
+            int counter = 1;
+            String nameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
+            String extension = filename.substring(filename.lastIndexOf('.'));
+            while (Files.exists(filePath)) {
+                filename = nameWithoutExtension + "(" + counter + ")" + extension;
+                filePath = uploadPath.resolve(filename);
+                counter++;
+            }
+        }
+        Files.copy(img.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return filename;
+    }
+    @Override
+    public List<TheaterStockDTO> findAllByItemName(String itemName) {
+        return theaterStockRepository.findByItemNameIgnoreCase(itemName)
+                .stream()
+                .map(this::convertToDTO)
+                .collect(Collectors.toList());
+    }
+    @Transactional
+    @Override
+    public void updateItemAcrossAllTheaters(TheaterStockDTO formData) throws IOException {
+        TheaterStock ts = convertToEntity(formData);
+        TheaterStock originalItem = theaterStockRepository.findById(formData.getTheaterStockId())
+                .orElseThrow(() -> new IllegalArgumentException("Item not found with ID: " + formData.getTheaterStockId()));
 
+        String originalItemName = originalItem.getItemName();
+        Integer newTheaterId = formData.getTheater().getTheaterID();
+        String theaterName = theaterRepository.findById(newTheaterId).get().getTheaterName();
+        Integer originalTheaterId = originalItem.getTheater().getTheaterID();
+        if (!originalTheaterId.equals(newTheaterId)) {
+            if (theaterStockRepository.existsByItemNameIgnoreCaseAndTheater_TheaterID(originalItemName, newTheaterId)) {
+                throw new IllegalArgumentException
+                        ("Cannot move. "+ originalItem.getItemName() +" item name already exists in " + theaterName + " theater ");
+            }
+        }
+        if (!originalItemName.equalsIgnoreCase(formData.getFoodName())) {
+            if (theaterStockRepository.findFirstByItemNameIgnoreCase(formData.getFoodName()).isPresent()) {
+                throw new IllegalArgumentException("Item name '" + formData.getFoodName() + "' already exists.");
+            }
+        }
+        List<TheaterStock> itemsToUpdate = theaterStockRepository.findByItemNameIgnoreCase(originalItemName);
+        String imagePathToSet = originalItem.getImage(); // Mặc định giữ ảnh cũ
+        MultipartFile newImageFile = formData.getNewImageFile();
+        if (newImageFile != null && !newImageFile.isEmpty()) {
+            String newFileName = saveImage(newImageFile);
+            imagePathToSet = "/uploads/theater_stocks_images/" + newFileName;
+        }
+        for (TheaterStock item : itemsToUpdate) {
+            item.setItemName(formData.getFoodName());
+            item.setPrice(formData.getUnitPrice());
+            item.setImage(imagePathToSet);
+        }
+        if (!originalTheaterId.equals(newTheaterId)) {
+            Theater newTheater = theaterRepository.findById(newTheaterId).get();
+            originalItem.setTheater(newTheater);
+        }
+        originalItem.setQuantity(formData.getQuantity());
+        originalItem.setStatus(TheaterStock_Status.valueOf(formData.getStatus()));
+    }
 }

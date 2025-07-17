@@ -1,519 +1,407 @@
 <!DOCTYPE html>
+
 <html xmlns:th="http://www.thymeleaf.org" lang="vi">
 
+
+
 <head>
+
   <meta charset="UTF-8">
+
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Add New Theater - Theater Management</title>
+
+  <title>Food And Drink</title>
+
   <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+  <link rel="stylesheet" th:href="@{/staff/css/add_update_item.css}">
+  <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet'/>
+  <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
   <style>
-    /* Form Container Styles */
-    .form-container {
-      background: white;
-      border-radius: 12px;
-      padding: 30px;
-      margin-bottom: 30px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      max-width: 800px;
-    }
-
-    .form-header {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
-      border-radius: 12px;
-      padding: 25px;
-      margin: -30px -30px 30px -30px;
-      box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
-    }
-
-    .form-title {
-      font-size: 28px;
-      font-weight: 700;
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .form-subtitle {
-      font-size: 14px;
-      opacity: 0.9;
-      margin: 0;
-    }
-
-    /* Navigation Bar */
-    .nav-bar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 30px;
-      padding: 15px 0;
-      border-bottom: 2px solid #f8f9fa;
-    }
-
-    .nav-links {
-      display: flex;
-      gap: 15px;
-    }
-
-    .nav-link {
-      background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 25px;
-      text-decoration: none;
-      font-weight: 500;
-      transition: all 0.3s ease;
-      font-size: 14px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-
-    .nav-link:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
-      color: white;
-    }
-
-    .nav-link.primary {
-      background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-    }
-
-    .nav-link.primary:hover {
-      box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
-    }
-
-    /* Form Styles */
-    .form-group {
-      margin-bottom: 25px;
-    }
-
-    .form-label {
-      display: block;
-      font-weight: 600;
-      color: #495057;
-      margin-bottom: 8px;
-      font-size: 14px;
-    }
-
-    .form-label.required::after {
-      content: " *";
-      color: #dc3545;
-      font-weight: bold;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 12px 16px;
-      border: 2px solid #e9ecef;
-      border-radius: 8px;
-      font-size: 14px;
-      transition: all 0.3s ease;
-      background: #fff;
-    }
-
-    .form-input:focus {
-      outline: none;
-      border-color: #667eea;
-      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-      transform: translateY(-1px);
-    }
-
-    .form-input.error {
-      border-color: #dc3545;
-      background: #fff5f5;
-    }
-
-    .form-textarea {
-      min-height: 100px;
-      resize: vertical;
-      font-family: inherit;
-    }
-
-    .form-help {
-      font-size: 12px;
-      color: #6c757d;
-      margin-top: 5px;
-    }
-
-    .form-error {
-      font-size: 12px;
-      color: #dc3545;
-      margin-top: 5px;
-      display: none;
-    }
-
-    /* Image Upload Styles */
-    .image-upload-container {
-      border: 2px dashed #e9ecef;
-      border-radius: 8px;
-      padding: 30px;
+    .alert {
+      padding: 15px;
+      margin-bottom: 20px;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      font-size: 16px;
       text-align: center;
-      transition: all 0.3s ease;
-      background: #fafafa;
-      position: relative;
-      cursor: pointer;
     }
 
-    .image-upload-container:hover {
-      border-color: #667eea;
-      background: #f8f9ff;
+    .alert-error {
+      color: #a94442;
+      background-color: #f2dede;
+      border-color: #ebccd1;
     }
 
-    .image-upload-container.dragover {
-      border-color: #667eea;
-      background: #f0f8ff;
-      transform: scale(1.02);
+    .alert-success {
+      color: #3c763d;
+      background-color: #dff0d8;
+      border-color: #d6e9c6;
     }
-
-    .upload-icon {
-      font-size: 48px;
-      color: #adb5bd;
+    #map {
+      height: 400px;
+      width: 100%;
+      border-radius: 8px;
       margin-bottom: 15px;
     }
 
-    .upload-text {
-      font-size: 16px;
-      color: #495057;
-      margin-bottom: 8px;
-      font-weight: 500;
-    }
-
-    .upload-hint {
-      font-size: 12px;
-      color: #6c757d;
-    }
-
-    .file-input {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    .image-preview {
-      display: none;
-      max-width: 200px;
-      max-height: 150px;
-      border-radius: 8px;
-      margin: 15px auto;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-
-    .remove-image {
-      background: #dc3545;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 30px;
-      height: 30px;
-      cursor: pointer;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      display: none;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-    }
-
-    /* Form Actions */
-    .form-actions {
+    .address-input-group {
       display: flex;
-      gap: 15px;
-      justify-content: flex-end;
-      margin-top: 40px;
-      padding-top: 25px;
-      border-top: 2px solid #f8f9fa;
-    }
-
-    .btn {
-      padding: 12px 24px;
-      border: none;
-      border-radius: 8px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.3s ease;
-      text-decoration: none;
-      display: inline-flex;
       align-items: center;
-      gap: 8px;
-      font-size: 14px;
     }
 
-    .btn-primary {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+    .address-input-group .form-input {
+      flex-grow: 1;
+      margin-right: 10px;
     }
 
-    .btn-primary:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
-    }
-
-    .btn-primary:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: none;
-    }
-
-    .btn-secondary {
-      background: #6c757d;
-      color: white;
-    }
-
-    .btn-secondary:hover {
-      background: #5a6268;
-      transform: translateY(-1px);
-      color: white;
+    .address-input-group .search-button {
+      flex-shrink: 0;
     }
   </style>
 </head>
 
+
+
 <body>
 <div class="sidebar">
   <div class="user-info">
-    <div class="user-avatar">M</div>
-    <div class="user-name">Mary Johnson</div>
+    <div class="user-avatar" th:text="${#strings.substring(employeeName,0,1)}"></div>
+    <div class="user-name" th:text="${employeeName}"></div>
   </div>
 
-  <a href="#" class="sidebar-item">
+  <a th:href="@{/staff/home}" class="sidebar-item">
     <div class="sidebar-icon">🏠</div>
     <div class="sidebar-text">Home</div>
   </a>
-  <a th:href="@{/theater_stock}" class="sidebar-item">
+  <a th:href="@{/staff/theater_stock}" class="sidebar-item ">
     <div class="sidebar-icon">🍿</div>
     <div class="sidebar-text">Food and Drinks</div>
   </a>
-  <a th:href="@{/movie_schedule}" class="sidebar-item">
+  <a th:href="@{/staff/movie_schedule}" class="sidebar-item ">
     <div class="sidebar-icon">📅</div>
     <div class="sidebar-text">Set Schedule</div>
   </a>
-  <a th:href="@{/theater}" class="sidebar-item active">
+  <a th:href="@{/staff/theater}" class="sidebar-item active">
     <div class="sidebar-icon">🎬</div>
     <div class="sidebar-text">Manage Theater</div>
   </a>
 </div>
-
 <div class="main-content">
   <div class="header">
     <div class="header-left">
-      <h1>Add New Theater</h1>
+      <div class="breadcrumb">
+        <a href="#" th:href="@{/staff/theater}">Manage Theater</a> >
+        <span> Add new theater</span>
+      </div>
     </div>
   </div>
-
-  <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'success' : (${messageType == 'error'} ? 'error' : 'warning')">
+  <div th:if="${message}" class="alert" th:classappend="${messageType == 'success'} ? 'alert-success' : 'alert-error'">
     <span th:text="${message}"></span>
   </div>
-
-  <div class="nav-bar">
-    <div class="nav-links">
-      <a th:href="@{/theater}" class="nav-link">
-        ← Back to Theater List
-      </a>
-    </div>
-    <div class="nav-links">
-      <a href="#" class="nav-link primary">
-        ➕ Add new room
-      </a>
-    </div>
-  </div>
-
   <div class="form-container">
     <div class="form-header">
-      <div class="form-title">
-        🎬 Create New Theater
-      </div>
+      <p class="form-subtitle">Complete the item information</p>
     </div>
+    <form th:action="@{/staff/theater/add_theater}"
+          th:object="${theater}"
+          method="post"
+          enctype="multipart/form-data"
+          id="stockForm"
+          onsubmit="return validateForm()">
+      <div class="form-row">
+        <div class="form-column">
 
-    <form th:action="@{/theater/add_process}" method="post" enctype="multipart/form-data" id="theaterForm" onsubmit="return validateForm()">
-      <div class="form-group">
-        <label for="theaterName" class="form-label required">Theater Name</label>
-        <input type="text"
-               id="theaterName"
-               name="theaterName"
-               class="form-input"
-               placeholder="Enter theater name (e.g., CGV Vincom Ba Trieu)"
-               th:value="${theater?.theaterName}"
-               required
-               maxlength="100">
-        <div class="form-help">Choose a descriptive name that includes location for easy identification.</div>
-        <div class="form-error" id="theaterNameError">Theater name is required and must be between 3-100 characters.</div>
-      </div>
-
-      <div class="form-group">
-        <label for="address" class="form-label required">Address</label>
-        <textarea id="address"
-                  name="address"
-                  class="form-input form-textarea"
-                  placeholder="Enter complete address including street, district, city"
-                  th:text="${theater?.address}"
-                  required
-                  maxlength="500"></textarea>
-        <div class="form-help">Provide the full address including street number, district, and city.</div>
-        <div class="form-error" id="addressError">Address is required and must be between 10-500 characters.</div>
-      </div>
-
-      <div class="form-group">
-        <label for="image" class="form-label">Theater Image</label>
-        <div class="image-upload-container" id="imageUploadContainer">
-          <input type="file"
-                 id="image"
-                 name="image"
-                 class="file-input"
-                 accept="image/*"
-                 onchange="previewImage(this)">
-          <div class="upload-content" id="uploadContent">
-            <div class="upload-icon">📸</div>
-            <div class="upload-text">Click to upload theater image</div>
-            <div class="upload-hint">Or drag and drop image here<br>Supported formats: JPG, PNG, GIF (Max 5MB)</div>
+          <div class="form-group">
+            <label class="form-label">Theater Name</label>
+            <input type="text"
+                   class="form-input"
+                   th:field="*{theaterName}"
+                   placeholder="Enter theater name begin with CGV"
+                   required>
+            <div class="error-message" id="nameError"></div>
           </div>
-          <img id="imagePreview" class="image-preview" alt="Theater preview">
-          <button type="button" class="remove-image" id="removeImage" onclick="removeImage()">×</button>
-        </div>
-        <div class="form-help">Upload a high-quality image of the theater exterior or lobby (optional).</div>
-        <div class="form-error" id="imageError">Please select a valid image file (JPG, PNG, GIF) under 5MB.</div>
-      </div>
 
+          <input type="hidden" name="name" />
+          <input type="hidden" th:field="*{latitude}" id="latitude-field">
+          <input type="hidden" th:field="*{longitude}" id="longitude-field">
+          <div class="form-column">
+            <div class="form-group">
+              <label class="form-label">Theater Address</label>
+              <div class="address-input-group">
+                <input type="text"
+                       class="form-input"
+                       th:field="*{address}"
+                       id="search-input"
+                       placeholder="Enter theater address "
+                       required>
+                <button type="button" class="search-button" id="search-btn">Search</button>
+              </div>
+              <div class="error-message" id="addressError"></div>
+              <div id="map"></div>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Set Availbility</label>
+              <div class="radio-group">
+                <div class="radio-item">
+                  <input type="radio"
+                         id="statusActive"
+                         name="status"
+                         value="Active"
+                         th:field="*{status}"
+                         th:checked="${theater.status == 'Active'}"
+                         checked
+                  >
+                  <label for="statusActive">Active</label>
+                </div>
+                <div class="radio-item">
+                  <input type="radio"
+                         id="statusInactive"
+                         name="status"
+                         value="Inactive"
+                         th:field="*{status}"
+                         th:checked="${theater.status == 'Inactive'}">
+                  <label for="statusInactive">Inactive</label>
+                </div>
+
+              </div>
+              <div class="error-message" id="statusError"></div>
+            </div>
+          </div>
+          <div class="form-column">
+            <div class="form-group">
+              <label class="form-label">Upload New Image</label>
+              <div class="image-upload-area" onclick="document.getElementById('imageInput').click()">
+                <div>📸</div>
+                <p>Click to upload or drag and drop</p>
+              </div>
+              <input type="file"
+                     id="imageInput"
+                     name="imageInput"
+                     accept="image/*"
+                     style="display: none;"
+                     onchange="previewImage(this)">
+
+              <div id="imagePreview" class="image-preview"></div>
+              <div class="error-message" id="imageError"></div>
+            </div>
+          </div>
+        </div>
+      </div>
       <div class="form-actions">
-        <a th:href="@{/theater}" class="btn btn-secondary">
-          ✕ Cancel
-        </a>
-        <button type="submit" class="btn btn-primary" id="submitBtn">
-          💾 Save Theater
-        </button>
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="reset" class="btn btn-secondary" onclick="resetForm()">Reset</button>
+        <a th:href="@{/staff/theater}" class="btn btn-danger">Cancel</a>
       </div>
     </form>
   </div>
 </div>
 
 <script>
-  // Form validation
+  // Hàm xem trước ảnh (giữ nguyên)
+  function previewImage(input) {
+    const preview = document.getElementById('imagePreview');
+    preview.innerHTML = '';
+    if (input.files && input.files[0]) {
+      const file = input.files[0];
+      if (!file.type.startsWith('image/')) {
+        alert('Please upload an image file');
+        input.value = '';
+        return;
+      }
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        const img = document.createElement('img');
+        img.src = e.target.result;
+        img.style.maxWidth = '100%';
+        img.style.borderRadius = '8px';
+        preview.appendChild(img);
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  // Hàm reset form (giữ nguyên)
+  function resetForm() {
+    document.getElementById('stockForm').reset();
+    document.getElementById('imagePreview').innerHTML = '';
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+    document.getElementById('statusActive').checked = true;
+  }
+
+  // Hàm validate (giữ nguyên)
   function validateForm() {
     let isValid = true;
+    document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
+    const theaterNameInput = document.querySelector('input[name="theaterName"]');
+    const addressInput = document.querySelector('input[name="address"]');
+    const statusInput = document.querySelector('input[name="status"]:checked');
+    const imageInput = document.getElementById('imageInput');
 
-    // Reset all error states
-    document.querySelectorAll('.form-input').forEach(input => {
-      input.classList.remove('error');
-    });
-    document.querySelectorAll('.form-error').forEach(error => {
-      error.style.display = 'none';
-    });
-
-    // Validate theater name
-    const theaterNameInput = document.getElementById('theaterName');
-    const theaterNameValue = theaterNameInput.value.trim();
-    const theaterNameError = document.getElementById('theaterNameError');
-
-    if (!theaterNameValue || theaterNameValue.length < 3) {
-      theaterNameError.textContent = 'Theater name is required and must be at least 3 characters long.';
-      showError('theaterName', 'theaterNameError');
+    if (theaterNameInput.value.trim() === '') {
+      document.getElementById('nameError').textContent = 'Theater Name is required.';
       isValid = false;
-    } else if (theaterNameValue.toLowerCase().startsWith('cgv') === false) {
-      theaterNameError.textContent = 'Theater name must start with "CGV".';
-      showError('theaterName', 'theaterNameError');
+    } else if (!theaterNameInput.value.trim().toLowerCase().startsWith('cgv')) {
+      document.getElementById('nameError').textContent = 'Theater Name must begin with "CGV".';
       isValid = false;
     }
-
-    // Validate address
-    const addressInput = document.getElementById('address');
-    const addressError = document.getElementById('addressError');
-    if (!addressInput.value.trim() || addressInput.value.trim().length < 10) {
-      addressError.textContent = 'Address is required and must be at least 10 characters long.';
-      showError('address', 'addressError');
+    if (addressInput.value.trim() === '') {
+      document.getElementById('addressError').textContent = 'Address is required.';
       isValid = false;
     }
-
-    // Validate image if provided
-    const imageInput = document.getElementById('image');
-    const imageError = document.getElementById('imageError');
-    if (imageInput.files.length > 0) {
-      const file = imageInput.files[0];
-      const maxSize = 5 * 1024 * 1024; // 5MB
-      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-
-      if (!allowedTypes.includes(file.type)) {
-        imageError.textContent = 'Invalid file type. Please select a JPG, PNG, or GIF.';
-        showError('image', 'imageError');
-        isValid = false;
-      } else if (file.size > maxSize) {
-        imageError.textContent = 'File is too large. Maximum size is 5MB.';
-        showError('image', 'imageError');
-        isValid = false;
-      }
+    if (!statusInput) {
+      document.getElementById('statusError').textContent = 'Please select an availability status.';
+      isValid = false;
     }
-
+    if (imageInput.files.length === 0) {
+      document.getElementById('imageError').textContent = 'Please upload an image for the theater.';
+      isValid = false;
+    }
     return isValid;
   }
 
-  function showError(inputId, errorId) {
-    document.getElementById(inputId).classList.add('error');
-    document.getElementById(errorId).style.display = 'block';
-  }
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Khởi tạo bản đồ
+    mapboxgl.accessToken = 'pk.eyJ1IjoiYmx1ZWJlYXIxMjMiLCJhIjoiY21jcnQzYzVqMDZkNjJvczkyem5qcDYyNCJ9.4qcFRtXFMsoTuDCxr1aMyw';
+    const map = new mapboxgl.Map({
+      container: 'map',
+      style: 'mapbox://styles/mapbox/streets-v12',
+      center: [105.84, 21.02],
+      zoom: 10
+    });
 
-  // Image preview functionality
-  function previewImage(input) {
-    const preview = document.getElementById('imagePreview');
-    const uploadContent = document.getElementById('uploadContent');
-    const removeBtn = document.getElementById('removeImage');
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const longitudeField = document.getElementById('longitude-field');
+    const latitudeField = document.getElementById('latitude-field');
 
-    if (input.files && input.files[0]) {
-      const reader = new FileReader();
+    let currentMarker = null;
 
-      reader.onload = function(e) {
-        preview.src = e.target.result;
-        preview.style.display = 'block';
-        uploadContent.style.display = 'none';
-        removeBtn.style.display = 'flex';
-      };
+    searchBtn.addEventListener('click', function() {
+      const address = searchInput.value.trim();
+      if (address) {
+        searchAddress(address);
+      } else {
+        alert('Vui lòng nhập địa chỉ để tìm kiếm.');
+      }
+    });
 
-      reader.readAsDataURL(input.files[0]);
+    searchInput.addEventListener('keypress', function(event) {
+      if (event.key === 'Enter') {
+        event.preventDefault();
+        searchBtn.click();
+      }
+    });
+
+    map.on('click', function(e) {
+      const { lng, lat } = e.lngLat;
+      addDraggableMarker(lat, lng, 'Vị trí được chọn');
+      reverseGeocode(lat, lng);
+    });
+
+    function searchAddress(address) {
+      const encodedAddress = encodeURIComponent(address);
+      fetch(`/staff/theater/search/${encodedAddress}`)
+              .then(response => {
+                if (response.ok) return response.json();
+                throw new Error('Address not found');
+              })
+              .then(location => {
+                addDraggableMarker(location.lat, location.lng, location.placeName);
+                updateLocationInfo(location.placeName, location.lat, location.lng);
+              })
+              .catch(error => {
+                console.error('Lỗi tìm kiếm:', error);
+                alert('Không tìm thấy địa chỉ bạn yêu cầu.');
+              });
     }
-  }
 
-  function removeImage() {
-    const input = document.getElementById('image');
-    const preview = document.getElementById('imagePreview');
-    const uploadContent = document.getElementById('uploadContent');
-    const removeBtn = document.getElementById('removeImage');
+    function addDraggableMarker(lat, lng, placeName) {
+      if (currentMarker) {
+        currentMarker.remove();
+      }
+      currentMarker = new mapboxgl.Marker({
+        color: '#d9534f',
+        draggable: true
+      })
+              .setLngLat([lng, lat])
+              .setPopup(new mapboxgl.Popup().setText(placeName))
+              .addTo(map);
 
-    input.value = '';
-    preview.style.display = 'none';
-    uploadContent.style.display = 'block';
-    removeBtn.style.display = 'none';
-  }
+      currentMarker.on('dragend', function() {
+        const newLngLat = currentMarker.getLngLat();
+        console.log('Marker được di chuyển tới:', newLngLat);
+        reverseGeocode(newLngLat.lat, newLngLat.lng);
+        currentMarker.getPopup().setText('Vị trí đã chọn');
+      });
 
-  // Drag and drop functionality
-  const uploadContainer = document.getElementById('imageUploadContainer');
-
-  uploadContainer.addEventListener('dragover', function(e) {
-    e.preventDefault();
-    uploadContainer.classList.add('dragover');
-  });
-
-  uploadContainer.addEventListener('dragleave', function(e) {
-    e.preventDefault();
-    uploadContainer.classList.remove('dragover');
-  });
-
-  uploadContainer.addEventListener('drop', function(e) {
-    e.preventDefault();
-    uploadContainer.classList.remove('dragover');
-
-    const files = e.dataTransfer.files;
-    if (files.length > 0) {
-      const input = document.getElementById('image');
-      input.files = files;
-      previewImage(input);
+      map.flyTo({
+        center: [lng, lat],
+        zoom: 17
+      });
+      updateLocationInfo(placeName, lat, lng);
     }
+
+    function reverseGeocode(lat, lng) {
+      const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${mapboxgl.accessToken}&country=VN&language=vi`;
+
+      fetch(url)
+              .then(response => response.json())
+              .then(data => {
+                if (data.features && data.features.length > 0) {
+                  const placeName = data.features[0].place_name;
+                  updateLocationInfo(placeName, lat, lng);
+                  if (currentMarker) {
+                    currentMarker.getPopup().setText(placeName);
+                  }
+                } else {
+                  updateLocationInfo('Không xác định được địa chỉ', lat, lng);
+                }
+              })
+              .catch(error => {
+                console.error('Lỗi reverse geocoding:', error);
+                updateLocationInfo('Không thể lấy thông tin địa chỉ', lat, lng);
+              });
+    }
+
+    function updateLocationInfo(placeName, lat, lng) {
+      // Cập nhật các trường ẩn chứa tọa độ
+      longitudeField.value = lng.toFixed(6);
+      latitudeField.value = lat.toFixed(6);
+
+      // --- DÒNG MỚI ĐƯỢC THÊM VÀO ---
+      // Cập nhật ô nhập liệu địa chỉ để người dùng thấy địa chỉ mới
+      document.getElementById('search-input').value = placeName;
+
+      console.log('Đã cập nhật tọa độ và địa chỉ:', {
+        address: placeName,
+        longitude: lng.toFixed(6),
+        latitude: lat.toFixed(6)
+      });
+    }
+
+    // Thêm controls cho bản đồ
+    map.addControl(new mapboxgl.NavigationControl());
+    map.addControl(new mapboxgl.FullscreenControl());
+    map.addControl(new mapboxgl.ScaleControl({
+      maxWidth: 80,
+      unit: 'metric'
+    }));
+
+    // Validation trước khi submit
+    document.querySelector('form').addEventListener('submit', function(event) {
+      const lng = longitudeField.value;
+      const lat = latitudeField.value;
+
+      if (!lng || !lat) {
+        event.preventDefault();
+        alert('Please select a location on the map or enter an address.');
+        return false;
+      }
+    });
   });
 
 </script>
-
 </body>
 </html>

@@ -31,6 +31,11 @@ public class Theater {
     @Column(name = "RoomQuantity", nullable = false)
     private Integer roomQuantity;
 
+    @Column(name= "Longitude")
+    private Double longitude;
+    @Column(name= "Latitude")
+    private Double latitude;
+
     @Column(name = "ServiceRate", nullable = true)
     private Double serviceRate;
 

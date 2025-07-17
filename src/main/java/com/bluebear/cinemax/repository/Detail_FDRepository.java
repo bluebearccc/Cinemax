@@ -11,7 +11,5 @@ import java.util.List;
 @Repository
 public interface Detail_FDRepository extends JpaRepository<Detail_FD, Integer> {
 
-    @Query(value = "SELECT * FROM Detail_FD fd WHERE fd.Theater_StockID = :Theater_StockID ", nativeQuery = true)
-    public List<Detail_FD> findAllByTheaterStock_TheaterStockId(@Param("Theater_StockID") Integer Theater_StockID);
 
 }

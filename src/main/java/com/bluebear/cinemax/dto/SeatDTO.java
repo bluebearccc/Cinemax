@@ -15,6 +15,7 @@ public class SeatDTO {
     private Integer roomID;
     private TypeOfSeat seatType;
     private String position;
+    private String name;
     private Boolean isVIP;
     private Double unitPrice;
     private Seat_Status status;

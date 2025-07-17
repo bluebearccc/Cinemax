@@ -2,6 +2,7 @@ package com.bluebear.cinemax.service.schedule;
 
 import com.bluebear.cinemax.entity.Theater;
 import com.bluebear.cinemax.repository.DetailSeatRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -18,6 +19,7 @@ import com.bluebear.cinemax.repository.ScheduleRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,10 +57,20 @@ public class ScheduleServiceImpl implements ScheduleService {
         }
         return null;
     }
-
+    @Override
+    @Transactional
     public boolean deleteSchedule(Integer scheduleID) {
-        scheduleRepository.deleteById(scheduleID);
-        return false;
+        try {
+            if (isExisted(scheduleID)) {
+                return false;
+            }
+
+            int deletedRows = scheduleRepository.deleteByScheduleId(scheduleID);
+            return deletedRows > 0;
+        } catch (Exception e) {
+            System.err.println("Error deleting schedule: " + e.getMessage());
+            return false;
+        }
     }
 
     public Page<ScheduleDTO> getScheduleByMovieIdAndDate(Integer movieID, LocalDateTime date) {
@@ -91,12 +103,11 @@ public class ScheduleServiceImpl implements ScheduleService {
         dto.setMovieID(schedule.getMovie().getMovieID());
         dto.setRoomID(schedule.getRoom().getRoomID());
         dto.setStatus(schedule.getStatus());
-
+        dto.setMovieName(schedule.getMovie().getMovieName());
         if (schedule.getRoom() != null) {
             dto.setRoomName(schedule.getRoom().getName());
             dto.setRoomType(schedule.getRoom().getTypeOfRoom().name());
         }
-
         return dto;
     }
 
@@ -223,6 +234,15 @@ public class ScheduleServiceImpl implements ScheduleService {
                 .collect(Collectors.toList());
 
         return new PageImpl<>(scheduleDTOs, pageable, schedulesPage.getTotalElements());
+    }
+
+    public List<ScheduleDTO> findSchedulesByTheaterAndDate(Integer theaterId, LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+        List<Schedule> schedules = scheduleRepository.findSchedulesByTheaterAndDateRange(theaterId, startOfDay, endOfDay);
+        return schedules.stream()
+                .map(this::toDTO)
+                .collect(Collectors.toList());
     }
 }
 

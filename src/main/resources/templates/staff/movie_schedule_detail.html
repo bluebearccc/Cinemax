@@ -29,23 +29,23 @@
 <body>
 <div class="sidebar">
     <div class="user-info">
-        <div class="user-avatar" >M</div>
-        <div class="user-name" >Mary Johnson</div>
+        <div class="user-avatar" th:text="${#strings.substring(name,0,1)}"></div>
+        <div class="user-name" th:text="${name}"></div>
     </div>
 
-    <a href="#" class="sidebar-item">
+    <a th:href="@{/staff/home}" class="sidebar-item">
         <div class="sidebar-icon">🏠</div>
         <div class="sidebar-text">Home</div>
     </a>
-    <a th:href="@{/theater_stock}" class="sidebar-item">
+    <a th:href="@{/staff/theater_stock}" class="sidebar-item ">
         <div class="sidebar-icon">🍿</div>
         <div class="sidebar-text">Food and Drinks</div>
     </a>
-    <a th:href="@{/movie_schedule}" class="sidebar-item  active">
+    <a th:href="@{/staff/movie_schedule}" class="sidebar-item active">
         <div class="sidebar-icon">📅</div>
         <div class="sidebar-text">Set Schedule</div>
     </a>
-    <a th:href="@{/theater}" class="sidebar-item ">
+    <a th:href="@{/staff/theater}" class="sidebar-item">
         <div class="sidebar-icon">🎬</div>
         <div class="sidebar-text">Manage Theater</div>
     </a>
@@ -126,7 +126,7 @@
             <button class="close-btn" onclick="closeModal()">&times;</button>
         </div>
 
-        <form th:action="@{/movie_schedule/add_schedule}"  id="scheduleForm" method="POST" class="modal-body">
+        <form th:action="@{/staff/movie_schedule/add_schedule}"  id="scheduleForm" method="POST" class="modal-body">
             <input type="hidden" name="movieId" id="movieId" th:value="${movie.getMovieID()}">
             <div class="form-group">
                 <label class="form-label">Select Date</label>
@@ -185,7 +185,7 @@
         </div>
         <div id="editScheduleMessage" class="modal-message-box error" style="display: none;"></div>
 
-        <form id="editScheduleForm" method="POST" action="/movie_schedule/update_schedule">
+        <form id="editScheduleForm" method="POST" action="/staff/movie_schedule/update_schedule">
             <input type="hidden" name="movieID" id="movieIDUpdate" th:value="${movie.getMovieID()}">
             <input type="hidden" name="scheduleID" id="scheduleIDUpdate">
             <div class="form-group">
@@ -255,7 +255,7 @@
 <script th:inline="javascript">
     const serverData = {
         schedules: [(${schedules})],
-    startTime: [[${startTime}]],
+        startTime: [[${startTime}]],
         endTime: [[${endTime}]]
     }
 </script>
@@ -294,7 +294,7 @@
                 // Gửi yêu cầu AJAX
                 $.ajax({
                     type: 'GET',
-                    url: '/movie_schedule/available_rooms_fragment',
+                    url: '/staff/movie_schedule/available_rooms_fragment',
                     data: {
                         theaterId: theater,
                         movieId: movieId,
@@ -320,7 +320,7 @@
         if (confirm('Do you want to delete this schedule? This action cannot be undone.')) {
             $.ajax({
                 type: 'POST',
-                url: '/movie_schedule/delete_schedule',
+                url: '/staff/movie_schedule/delete_schedule',
                 data: { scheduleId: scheduleId },
                 success: function(response) {
                     if (response.success) {
@@ -347,14 +347,13 @@
 </script>
 <script>
     function updateScheduleAjax() {
-        // Không cần dòng này nữa: $('#editScheduleMessage').hide().text('');
         $('#saveChangesBtn').prop('disabled', false);
 
         const formData = $('#editScheduleForm').serialize();
 
         $.ajax({
             type: 'POST',
-            url: '/movie_schedule/update_schedule_ajax',
+            url: '/staff/movie_schedule/update_schedule_ajax',
             data: formData,
             success: function(response) {
                 if (response.success) {
@@ -368,7 +367,6 @@
             },
             error: function(xhr) {
                 const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'An unexpected error occurred. Please try again.';
-                // THAY ĐỔI: Hiển thị thông báo lỗi bằng alert
                 alert(errorMessage);
             }
         });

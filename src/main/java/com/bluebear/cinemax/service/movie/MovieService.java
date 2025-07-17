@@ -6,9 +6,12 @@ import com.bluebear.cinemax.enumtype.Age_Limit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.enumtype.Theater_Status;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,8 +63,6 @@ public interface MovieService {
 
     List<MovieDTO> searchExistingMovieByName(String name);
 
-    // ==================== [PHẦN ĐƯỢC SỬA] - Bắt đầu ====================
-    // Thay đổi kiểu của `ageLimit` thành `List<Age_Limit>`
     Page<MovieDTO> findMoviesByTheaterAndGenreAndKeywordAndDateRange(Integer theaterId, Integer genreId,
                                                                      String keyword, Movie_Status status,
                                                                      Theater_Status theaterStatus,
@@ -88,4 +89,6 @@ public interface MovieService {
                                                    Pageable pageable);
 
     MovieDTO findById(Integer movieID);
+    public Page<MovieDTO> findShowingMoviesWithFilters(String name, Integer genreId, String startDateStr, String endDateStr, int page, int size);
+
 }

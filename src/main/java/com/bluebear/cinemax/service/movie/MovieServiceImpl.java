@@ -17,7 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -249,6 +251,24 @@ public class MovieServiceImpl implements MovieService {
     public MovieDTO findById(Integer movieID) {
         Optional<Movie> found = movieRepository.findById(movieID);
         return found.map(this::toDTO).orElse(null);
+    }
+
+    public Page<MovieDTO> findShowingMoviesWithFilters(String name, Integer genreId, String startDateStr, String endDateStr, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+
+        LocalDate startDateVal = (startDateStr != null && !startDateStr.isEmpty()) ? LocalDate.parse(startDateStr) : null;
+        LocalDate endDateVal = (endDateStr != null && !endDateStr.isEmpty()) ? LocalDate.parse(endDateStr) : null;
+
+        LocalDateTime startDateTime = (startDateVal != null) ? startDateVal.atStartOfDay() : null;
+        LocalDateTime endDateTime = (endDateVal != null) ? endDateVal.atTime(LocalTime.MAX) : null;
+
+        LocalDateTime currentDate = LocalDateTime.now();
+
+        Page<Movie> moviePage = movieRepository.findShowingMoviesWithFilters(
+                currentDate, name, genreId, startDateTime, endDateTime, pageable
+        );
+
+        return moviePage.map(this::toDTO);
     }
 
     @Override

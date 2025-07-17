@@ -277,13 +277,6 @@ function nextMonthMini() {
 
 document.getElementById('scheduleModal').addEventListener('click', function(e) { if (e.target === this) { closeModal(); } });
 
-// ==================================================================================
-// PHẦN LOGIC CHO MODAL EDIT - ĐÂY LÀ PHẦN CẦN THÊM VÀO
-// ==================================================================================
-
-/**
- * Hàm editSchedule: Được gọi khi nhấn vào một thẻ lịch trình.
- */
 function editSchedule(id) {
     addNewUpdateSchedule();
 
@@ -297,7 +290,7 @@ function editSchedule(id) {
     // 4. Gọi AJAX để lấy thông tin chi tiết
     $.ajax({
         type: 'GET',
-        url: '/movie_schedule/get_schedule_details',
+        url: '/staff/movie_schedule/get_schedule_details',
         data: {
             scheduleID: id
         },
@@ -363,7 +356,7 @@ $(function(){
         if (theaterId && startTime && date && movieId && scheduleId) {
             $.ajax({
                 type: 'GET',
-                url: '/movie_schedule/get_rooms_for_edit',
+                url: '/staff/movie_schedule/get_rooms_for_edit',
                 data: {
                     theaterId: theaterId,
                     startTime: startTime,
@@ -384,8 +377,5 @@ $(function(){
     });
 });
 
-// ==================================================================================
-// PHẦN KHỞI TẠO BAN ĐẦU (KHÔNG ĐỔI)
-// ==================================================================================
 generateCalendar();
 updateDailySchedule();

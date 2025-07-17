@@ -17,7 +17,6 @@ function addNewUpdateSchedule() {
     startDate.setHours(0, 0, 0, 0);
     endDate.setHours(0, 0, 0, 0);
 
-    // Xác định ngày bắt đầu cho lịch mini
     if (originalScheduleDate) {
         modalCurrentDateUpdate = new Date(originalScheduleDate);
     } else if (today < startDate) {
@@ -38,21 +37,18 @@ function closeEditModal() {
 }
 
 function generateMiniCalendarUpdate() {
-    // SỬA LỖI 1: Thay đổi ID thành 'miniCalendarUpdate'
     const calendar = document.getElementById('miniCalendarUpdate');
     if (!calendar) return; // Dừng lại nếu không tìm thấy calendar
 
     const year = modalCurrentDateUpdate.getFullYear();
     const month = modalCurrentDateUpdate.getMonth();
 
-    // SỬA LỖI 3: Sử dụng các biến ...Update
     const startDate = new Date(startTimeUpdate);
     const endDate = new Date(endTimeUpdate);
 
     // Xóa các ngày cũ
     calendar.innerHTML = '';
 
-    // Thêm header (Mo, Tu, We...)
     const headers = ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'];
     headers.forEach(header => {
         const headerElement = document.createElement('div');
@@ -82,11 +78,9 @@ function generateMiniCalendarUpdate() {
         todayDate.setHours(0, 0, 0, 0);
         currentDayDate.setHours(0, 0, 0, 0);
 
-        // --- BẮT ĐẦU THAY ĐỔI LOGIC ---
-        // Biến kiểm tra xem ngày đang xét có phải là ngày gốc của lịch trình không
+
         const isOriginalScheduleDate = originalScheduleDate &&
             (currentDayDate.getTime() === new Date(originalScheduleDate).setHours(0, 0, 0, 0));
-        // --- KẾT THÚC THAY ĐỔI LOGIC ---
 
         const isInValidRange = currentDayDate >= startDate && currentDayDate <= endDate;
         const isPastDate = currentDayDate < todayDate;
@@ -96,14 +90,11 @@ function generateMiniCalendarUpdate() {
             dayElement.style.cssText = 'opacity: 0.3; cursor: not-allowed; background-color: #f5f5f5; color: #ccc;';
             dayElement.title = 'Out of range date';
         }
-            // --- BẮT ĐẦU THAY ĐỔI LOGIC ---
-        // Chỉ vô hiệu hóa ngày quá khứ NẾU nó KHÔNG PHẢI là ngày gốc
         else if (isPastDate && !isOriginalScheduleDate) {
             dayElement.classList.add('past-date');
             dayElement.style.cssText = 'opacity: 0.4; cursor: not-allowed; color: #999; background-color: #fafafa;';
             dayElement.title = 'Cannot select past dates';
         }
-        // --- KẾT THÚC THAY ĐỔI LOGIC ---
         else {
             if (modalSelectedDateUpdate && year === modalSelectedDateUpdate.getFullYear() &&
                 month === modalSelectedDateUpdate.getMonth() && day === modalSelectedDateUpdate.getDate()) {
@@ -139,18 +130,11 @@ function selectMiniDateUpdate(year, month, day) {
     // SỬA LỖI 3 & 4: Cập nhật đúng biến và (tạm thời) không cập nhật input ẩn vì chưa rõ ID
     modalSelectedDateUpdate = new Date(year, month, day);
 
-    // Chú ý: Dòng dưới đây sẽ gây lỗi vì 'selectedDateInput' không có trong modal edit.
-    // Bạn cần xác định input nào trong modal "Edit" dùng để lưu ngày và thay ID vào đây.
-    // Ví dụ, nếu bạn có input ẩn <input type="hidden" id="selectedDateUpdateInput" name="dateUpdate">
-    // thì sẽ dùng: document.getElementById('selectedDateUpdateInput').value = dateStr;
-    // const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    // document.getElementById('selectedDateInput').value = dateStr;
 
     generateMiniCalendarUpdate();
 }
 
 function previousMonthMiniUpdate() {
-    // SỬA LỖI 3: Sử dụng các biến ...Update
     const newDate = new Date(modalCurrentDateUpdate);
     newDate.setMonth(newDate.getMonth() - 1);
     const startDate = new Date(startTimeUpdate);
@@ -163,7 +147,6 @@ function previousMonthMiniUpdate() {
 }
 
 function nextMonthMiniUpdate() {
-    // SỬA LỖI 3: Sử dụng các biến ...Update
     const newDate = new Date(modalCurrentDateUpdate);
     newDate.setMonth(newDate.getMonth() + 1);
     const endDate = new Date(endTimeUpdate);

@@ -1,13 +1,19 @@
 package com.bluebear.cinemax.service.detail_fd;
 
 import com.bluebear.cinemax.dto.Detail_FDDTO;
+import com.bluebear.cinemax.dto.ItemRevenue;
+import com.bluebear.cinemax.dto.RevenueDataDTO;
 import com.bluebear.cinemax.entity.Detail_FD;
+import com.bluebear.cinemax.repository.DetailFDRepository;
 import com.bluebear.cinemax.repository.Detail_FDRepository;
 import com.bluebear.cinemax.repository.InvoiceRepository; // Inject InvoiceRepository
 import com.bluebear.cinemax.repository.TheaterStockRepository; // Inject TheaterStockRepository
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,7 +21,7 @@ import java.util.stream.Collectors;
 public class DetailFD_ServiceImpl implements DetaillFD_Service {
 
     @Autowired
-    private Detail_FDRepository detail_FDRepository;
+    private DetailFDRepository detail_FDRepository;
 
     @Autowired
     private InvoiceRepository invoiceRepository; // Inject InvoiceRepository
@@ -76,6 +82,31 @@ public class DetailFD_ServiceImpl implements DetaillFD_Service {
         return details.stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+    public List<Detail_FDDTO> getAllFoodSalesForTheater(Integer theaterId, int year, int month) {
+        YearMonth yearMonth = YearMonth.of(year, month);
+        LocalDateTime startDate = yearMonth.atDay(1).atStartOfDay();
+        LocalDateTime endDate = yearMonth.atEndOfMonth().atTime(23, 59, 59);
+
+        List<Detail_FD> sales = detail_FDRepository.findAllSalesByTheaterAndDateRange(theaterId, startDate, endDate);
+
+        // Chuyển đổi từ List<Detail_FD> sang List<Detail_FDDTO>
+        return sales.stream().map(this::convertToDTO).collect(Collectors.toList());
+    }
+    @Override
+    public RevenueDataDTO getRevenueByItemForMonth(Integer theaterId, int year, int month) {
+        List<ItemRevenue> itemRevenues = detail_FDRepository.findRevenueByItem(theaterId, year, month);
+
+        List<String> labels = itemRevenues.stream()
+                .map(ItemRevenue::getItemName)
+                .collect(Collectors.toList());
+
+        List<BigDecimal> data = itemRevenues.stream()
+                .map(ItemRevenue::getTotalRevenue)
+                .collect(Collectors.toList());
+
+        return new RevenueDataDTO(labels, data);
     }
 
 }
