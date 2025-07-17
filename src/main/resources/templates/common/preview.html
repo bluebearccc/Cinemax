@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <title>Xem vé xem phim</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/booking.css}">
+</head>
+<body>
+<div class="container my-5">
+    <div class="card shadow-lg border-0 rounded-4">
+        <div class="card-header bg-primary text-white rounded-top-4">
+            <h2 class="mb-0"><i class="bi bi-ticket-perforated"></i> Xác nhận đặt vé</h2>
+        </div>
+
+        <div class="card-body">
+            <div th:if="${promotionError != null}" class="alert alert-danger">
+                [[${promotionError}]]
+            </div>
+            <!-- Nếu chưa có mã giảm giá thì hiển thị ô nhập -->
+            <div class="mb-3">
+                <form method="post" th:action="@{/booking/step2}">
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                    <input type="hidden" name="roomId" th:value="${room.roomID}">
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
+                    <input type="hidden" th:each="combo : ${comboList}"
+                           th:if="${comboQuantities[combo.theaterStockId] != null}"
+                           th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                           th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                    <label for="promotionCode" class="form-label"><strong>Nhập mã giảm giá:</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="promotionCode" class="form-control" name="promotionCode"
+                               placeholder="Mã giảm giá" th:value="${param.promotionCode}">
+                        <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                    </div>
+
+                    <!-- Hiện lỗi nếu có -->
+                    <div th:if="${promotionError != null}" class="form-text text-danger mt-1">
+                        [[${promotionError}]]
+                    </div>
+
+                    <!-- Hiện mã nếu áp dụng thành công -->
+                    <div th:if="${promotion != null}" class="form-text text-success mt-1">
+                        Mã [[${promotion.promotionCode}]] đã được áp dụng ([[${promotion.discount}]]%).
+                    </div>
+                </form>
+            </div>
+
+            <div class="mb-3">
+                <strong>Lịch chiếu:</strong>
+                <span class="text-muted">[[${schedule.movie.movieName}]] - [[${#temporals.format(schedule.startTime, 'dd/MM/yyyy HH:mm')}]]</span>
+            </div>
+
+            <div class="mb-3">
+                <strong>Phòng:</strong>
+                <span class="text-muted">[[${room.name}]]</span>
+            </div>
+
+            <!-- Ghế đã chọn -->
+            <div class="mb-3">
+                <strong>Ghế đã chọn:</strong>
+                <span th:each="seat, iterStat : ${selectedSeats}">
+        <span class="badge bg-success">
+            [[${seat.position}]] ([[${#numbers.formatDecimal(seat.unitPrice, 0, 0)}]]đ)
+        </span>
+        <span th:if="${!iterStat.last}">, </span>
+    </span>
+            </div>
+
+            <!-- Combo đã chọn -->
+            <div class="mb-3" th:if="${comboList != null and !comboList.isEmpty()}">
+                <strong>Combo đã chọn:</strong>
+                <span th:each="combo, iterStat : ${comboList}"
+                      th:if="${comboQuantities[combo.theaterStockId] != null and comboQuantities[combo.theaterStockId] > 0}">
+        <span class="badge bg-warning text-dark">
+            [[${combo.foodName}]] - SL: [[${comboQuantities[combo.theaterStockId]}]] ([[${#numbers.formatDecimal(combo.unitPrice, 0, 0)}]]đ)
+        </span>
+        <span th:if="${!iterStat.last}">, </span>
+    </span>
+            </div>
+
+
+            <div class="mb-3">
+                <strong>Tổng tiền:</strong>
+                <span class="fs-5 text-primary fw-bold">[[${#numbers.formatDecimal(totalPrice, 0, 0)}]]đ</span>
+            </div>
+
+            <div class="mb-3" th:if="${promotion != null}">
+                <strong>Khuyến mãi:</strong>
+                <span class="text-success">
+                    [[${promotion.promotionCode}]] ([[${promotion.discount}]]%)
+                </span>
+            </div>
+
+            <div class="mb-3" th:if="${promotion == null}">
+                <strong>Khuyến mãi:</strong>
+                <span class="text-muted">Không có</span>
+            </div>
+
+            <div class="mb-3">
+                <strong>Thành tiền sau khuyến mãi:</strong>
+                <span class="fs-4 text-danger fw-bold">
+                    [[${#numbers.formatDecimal(finalPrice, 0, 0)}]]đ
+                </span>
+            </div>
+            <div class="text-center mt-4">
+                <h5><i class="bi bi-qr-code-scan"></i> Quét mã VietQR để chuyển khoản</h5>
+
+                <img th:src="'https://img.vietqr.io/image/MB-0969823151-compact2.png?amount=' + ${#numbers.formatDecimal(finalPrice, 0, 0)} + '&addInfo=CINEMAX-HD' + ${schedule.scheduleID}"
+                     alt="VietQR" class="img-fluid border rounded-4 p-2 shadow"
+                     style="max-width: 300px;">
+
+                <div class="mt-2 text-muted small">
+                    <p>Sau khi chuyển khoản, bạn vẫn cần nhấn "Xác nhận và thanh toán" để hoàn tất đặt vé.</p>
+                </div>
+            </div>
+
+            <div class="text-start mt-4">
+                <form th:action="@{/booking/step1}" method="post">
+                    <!-- Hidden fields -->
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                    <input type="hidden" name="roomId" th:value="${room.roomID}">
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}">
+                    <input type="hidden" name="promotionCode" th:value="${promotion}">
+
+                    <button type="submit" class="btn btn-secondary btn-lg">
+                        <i class="bi bi-arrow-left"></i> Quay lại trang đặt đồ ăn
+                    </button>
+                </form>
+            </div>
+            <form method="post" th:action="@{/booking/confirm}">
+                <!-- Hidden fields -->
+                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                <input type="hidden" name="roomId" th:value="${room.roomID}">
+
+                <!-- Chỉ hiển thị promotionCode nếu promotion != null -->
+                <div th:if="${promotion != null}">
+                    <input type="hidden" name="promotionCode" th:value="${promotion.promotionCode}">
+                </div>
+                <div th:if="${promotion == null}">
+                    <input type="hidden" name="promotionCode" value="">
+                </div>
+
+                <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
+                <input type="hidden" th:each="combo : ${comboList}"
+                       th:if="${comboQuantities[combo.theaterStockId] != null}"
+                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                       th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                <div class="text-end mt-4">
+
+
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> thanh toán với VNPay
+                    </button>
+                </div>
+            </form>
+            <form method="post" th:action="@{/webhook/sepay}">
+                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                <input type="hidden" name="roomId" th:value="${room.roomID}">
+
+                <div th:if="${promotion != null}">
+                    <input type="hidden" name="promotionCode" th:value="${promotion.promotionCode}">
+                </div>
+                <div th:if="${promotion == null}">
+                    <input type="hidden" name="promotionCode" value="">
+                </div>
+
+                <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
+                <input type="hidden" th:each="combo : ${comboList}"
+                       th:if="${comboQuantities[combo.theaterStockId] != null}"
+                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                       th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                <div class="text-end mt-2">
+                    <button type="submit" class="btn btn-info btn-lg text-white">
+                        <i class="fa-solid fa-money-check-dollar"></i> Thanh toán với SePay
+                    </button>
+                </div>
+            </form>
+
+        </div>
+    </div>
+</div>
+</body>
+</html>

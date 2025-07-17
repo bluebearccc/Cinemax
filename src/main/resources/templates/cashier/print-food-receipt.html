@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Hóa Đơn Đồ Ăn</title>
+    <style>
+        body { font-family: monospace; }
+        .receipt {
+            width: 300px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px dashed #555;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        table { width: 100%; border-collapse: collapse; }
+        td, th { padding: 5px; }
+        .total-row td { border-top: 1px solid #000; font-weight: bold; }
+        @media print {
+            .no-print { display: none; }
+            body { margin: 0; }
+            .receipt { margin: 0; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="receipt" th:if="${bookingResult != null and bookingResult.foodItems != null and !bookingResult.foodItems.isEmpty()}">
+    <div class="text-center">
+        <h3>CINEMAX F&B</h3>
+        <p>================================</p>
+        <h4>HÓA ĐƠN ĐỒ ĂN</h4>
+    </div>
+
+    <p><strong>Mã HĐ:</strong> <span th:text="${bookingResult.invoiceId}"></span></p>
+    <p><strong>Ngày:</strong> <span th:text="${#temporals.format(bookingResult.bookingDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+
+    <p>================================</p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Món</th>
+            <th class="text-center">SL</th>
+            <th class="text-right">Thành tiền</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="food : ${bookingResult.foodItems}">
+            <td th:text="${food.name}"></td>
+            <td class="text-center" th:text="${food.quantity}"></td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(food.unitPrice * food.quantity, 0, 'COMMA', 0, 'POINT')} + 'đ'"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p>================================</p>
+
+    <table>
+        <tr class="total-row">
+            <td colspan="2"><strong>TỔNG CỘNG:</strong></td>
+            <td class="text-right">
+                <strong th:text="${#numbers.formatDecimal(bookingResult.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + 'đ'"></strong>
+            </td>
+        </tr>
+    </table>
+
+    <div class="text-center" style="margin-top: 20px;">
+        <p>Chúc quý khách ngon miệng!</p>
+    </div>
+</div>
+
+<div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()">In Hóa Đơn</button>
+    <button onclick="window.close()">Đóng</button>
+</div>
+
+</body>
+</html>

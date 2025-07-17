@@ -1,0 +1,800 @@
+.custom-container {
+    margin-left: 5%;
+    margin-right: 5%;
+    padding: 0;
+    display: grid;
+    grid-template-columns: 1fr 350px;
+    gap: 30px;
+}
+
+.hero-banner {
+    width: 100%;
+    height: 60vh;
+    background: linear-gradient(135deg, rgba(10, 25, 41, 0.8), rgba(26, 35, 62, 0.8));
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    margin-bottom: 30px;
+    border-radius: 0 0 20px 20px;
+}
+
+.hero-banner::before {
+    position: absolute;
+    content: "";
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.6);
+    z-index: 1;
+}
+
+.hero-content {
+    text-align: center;
+    z-index: 2;
+}
+
+.theater-name {
+    font-size: 4rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 15px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.theater-address {
+    font-size: 1.4rem;
+    color: #b0bec5;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    margin-bottom: 20px;
+}
+
+.theater-rating {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.rating-stars {
+    color: #ffd700;
+    font-size: 1.5rem;
+}
+
+.rating-score {
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.main-content-theater {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border-radius: 20px;
+    padding: 30px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    margin: 0 20px;
+}
+
+.theater-header {
+    border-bottom: 3px solid #1976d2;
+    padding-bottom: 20px;
+    margin-bottom: 30px;
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.info-card {
+    background: linear-gradient(135deg, #1976d2 0%, #1565c0 100%);
+    padding: 20px;
+    border-radius: 15px;
+    color: white;
+    text-align: center;
+    transform: translateY(0);
+    transition: all 0.3s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+.info-card h3 {
+    font-size: 1.1rem;
+    margin-bottom: 10px;
+    opacity: 0.9;
+}
+
+.info-card p {
+    font-size: 1.3rem;
+    font-weight: bold;
+}
+
+.schedule-section {
+    margin-bottom: 30px;
+}
+
+.section-title {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #ffffff;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-tabs {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 25px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
+
+.date-tab {
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    white-space: nowrap;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    opacity: 0.7;
+}
+
+.date-tab.active,
+.date-tab:hover {
+    opacity: 1;
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(25, 118, 210, 0.3);
+}
+
+.movie-schedule {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 25px;
+    margin-bottom: 20px;
+    border-left: 5px solid #1976d2;
+    transition: all 0.3s ease;
+}
+
+.movie-schedule:hover {
+    transform: translateX(5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+}
+
+.movie-info {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.movie-poster {
+    width: 60px;
+    height: 90px;
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    color: white;
+    text-align: center;
+}
+
+.movie-details h3 {
+    font-size: 1.3rem;
+    color: #ffffff;
+    margin-bottom: 5px;
+}
+
+.movie-meta {
+    color: #b0bec5;
+    font-size: 0.9rem;
+}
+
+.showtimes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 10px;
+}
+
+.showtime {
+    padding: 10px 15px;
+    border-radius: 10px;
+    text-align: center;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+}
+
+.showtime.available {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+    color: white;
+}
+
+.showtime.available:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
+}
+
+.showtime.full {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+    color: white;
+    cursor: not-allowed;
+}
+
+.room-info {
+    font-size: 0.8rem;
+    opacity: 0.9;
+}
+
+
+.top-movie {
+    display: flex;
+    gap: 15px;
+    padding: 15px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.top-movie:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.movie-rank {
+    background: linear-gradient(135deg, #ffd700, #ff8c00);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    font-size: 0.9rem;
+}
+
+.top-movie-poster {
+    width: 50px;
+    height: 75px;
+    background: linear-gradient(135deg, #1976d2, #1565c0);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.7rem;
+    color: white;
+    text-align: center;
+}
+
+.top-movie-info h4 {
+    color: #ffffff;
+    margin-bottom: 5px;
+    font-size: 1rem;
+}
+
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    color: #ff8c00;
+    font-weight: bold;
+}
+
+.legend {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #e9ecef;
+}
+
+.legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+}
+
+.legend-color {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+.available-color {
+    background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+}
+
+.full-color {
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a52 100%);
+}
+
+/* Address */
+.address-section {
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 2rem;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+.map-container {
+    height: 300px;
+    background: #e9ecef;
+    border-radius: 10px;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.sidebar {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+    padding: 30px;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    height: fit-content;
+    position: sticky;
+    top: 20px;
+    width: 100%;
+    margin: 50px auto;
+}
+
+.sidebar-title {
+    font-size: 1.5em;
+    margin-bottom: 25px;
+    color: #fff;
+    border-left: 4px solid #00D4FF;
+    padding-left: 15px;
+}
+
+.recommended-movie {
+    display: flex;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding: 15px;
+    border-radius: 10px;
+    background: rgba(255, 255, 255, 0.03);
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.recommended-movie:hover {
+    background: rgba(255, 255, 255, 0.08);
+    transform: translateY(-2px);
+}
+
+.recommended-poster {
+    width: 30%;
+    height: 40%;
+    background: linear-gradient(135deg, #333, #222);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8em;
+    color: #666;
+    text-align: center;
+    flex-shrink: 0;
+}
+
+.recommended-info h4 {
+    color: #fff;
+    font-size: 1em;
+    margin-bottom: 8px;
+    line-height: 1.3;
+}
+
+.recommended-info p {
+    color: #999;
+    font-size: 0.9em;
+    margin-bottom: 5px;
+}
+
+.recommended-rating {
+    color: #ffd700;
+    font-size: 0.9em;
+}
+
+.img-poster {
+    font-size: 0.7em;
+    text-align: center;
+    width: 100%;
+    height: 100%;
+}
+
+@media (max-width: 1024px) {
+    .custom-container {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+
+}
+
+@media (max-width: 768px) {
+    .theater-name {
+        font-size: 2rem;
+    }
+
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .showtimes {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    }
+}
+
+.booking-container {
+    margin-top: 2rem;
+}
+
+.cinema-list {
+    background: rgba(26, 35, 50, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.cinema-list h3 {
+    margin-bottom: 1rem;
+    font-size: 1.2rem;
+}
+
+.search-box {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    margin-bottom: 1rem;
+}
+
+.search-box::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.cinema-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.cinema-item:hover {
+    background: #154C6C;
+    border-color: #154C6C;
+}
+
+.cinema-item.active {
+    background: #154C6C;
+    border-color: #07A3CA;
+}
+
+.cinema-logo {
+    width: 30px;
+    height: 30px;
+    background: #e53e3e;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 0.8rem;
+}
+
+.schedule-section {
+    background: rgba(26, 35, 50, 0.8);
+    backdrop-filter: blur(10px);
+    border-radius: 16px;
+    padding-left: 2rem;
+    padding-right: 2rem;
+    padding-bottom: 2rem;
+    padding-top: 1rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.schedule-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.schedule-title {
+    font-size: 1.5rem;
+    background: linear-gradient(135deg, #ffffff, #00d4ff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 0 30px rgba(0, 212, 255, 0.3);
+}
+
+.cinema-address {
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.date-selector {
+    display: flex;
+    gap: 1rem;
+    max-width: 950px;
+    margin-bottom: 2rem;
+    padding: 0.5rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.date-item {
+    min-width: 90px;
+    padding: 0.6rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 2px solid transparent;
+}
+
+.date-item:hover {
+    background: #154C6C;
+    border-color: #1483B9;
+}
+
+.date-item.active {
+    background: #1483B9;
+    border-color: #00D4FF;
+    transform: scale(1.05);
+}
+
+.date-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.date-day {
+    font-size: 0.8rem;
+    opacity: 0.8;
+}
+
+.movie-listbook-session {
+    overflow-y: auto;
+    display: grid;
+    gap: 1.5rem;
+    max-height: 500px;
+    padding-top: 10px;
+    scrollbar-width: none;
+    /* Firefox */
+    -ms-overflow-style: none;
+    /* IE and Edge */
+}
+
+.movie-cardbook-session {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 12px;
+    padding: 1.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s;
+}
+
+.movie-cardbook-session:hover {
+    transform: translateY(-2px);
+    border-color: #29ADDD;
+    box-shadow: 0 8px 32px #1483B9;
+}
+
+.movie-infobook-session {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.movie-posterbook-session {
+    width: 80px;
+    height: 120px;
+}
+
+.movie-details h4 {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+    color: white;
+}
+
+.movie-meta {
+    display: flex;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+    color: rgba(255, 255, 255, 0.7);
+    margin-bottom: 0.5rem;
+}
+
+.movie-genrebook-session {
+    background: #154C6C;
+    padding: 0.2rem 0.8rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.movie-ratingbook-session {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.starsbook-session {
+    color: #ffd700;
+}
+
+.showtimes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+}
+
+.showtime-btn {
+    padding: 0.4rem 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+    font-size: 0.9rem;
+    width: fit-content;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.showtime-btn:hover {
+    background: #29ADDD;
+    transform: scale(1.05);
+}
+
+.time-slot {
+    font-weight: bold;
+    font-size: 15px;
+}
+
+.rem-seat {
+    color: aqua;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    opacity: 0.3;
+}
+
+.button-container {
+    margin-right: 60px;
+    display: flex;
+    gap: 30px;
+}
+
+.custom-button-item:active::after {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    transition: 0s;
+}
+
+.custom-button-item {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.custom-button-item:hover {
+    background: #154C6C;
+    border-color: #154C6C;
+}
+
+.custom-button-item.active {
+    background: #154C6C;
+    border-color: #07A3CA;
+}
+
+
+.floating-shapes {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: -1;
+}
+
+.shape {
+    position: absolute;
+    opacity: 0.1;
+    animation: float 6s ease-in-out infinite;
+}
+
+.shape:nth-child(1) {
+    top: 10%;
+    left: 10%;
+    width: 100px;
+    height: 100px;
+    background: #ff6b6b;
+    border-radius: 50%;
+    animation-delay: 0s;
+}
+
+.shape:nth-child(2) {
+    top: 60%;
+    right: 10%;
+    width: 80px;
+    height: 80px;
+    background: #4ecdc4;
+    border-radius: 30% 70% 70% 30% / 30% 30% 70% 70%;
+    animation-delay: 2s;
+}
+
+.shape:nth-child(3) {
+    bottom: 20%;
+    left: 20%;
+    width: 60px;
+    height: 60px;
+    background: #45b7d1;
+    border-radius: 20%;
+    animation-delay: 4s;
+}
+
+@keyframes float {
+
+    0%,
+    100% {
+        transform: translateY(0px) rotate(0deg);
+    }
+
+    50% {
+        transform: translateY(-20px) rotate(180deg);
+    }
+}
+

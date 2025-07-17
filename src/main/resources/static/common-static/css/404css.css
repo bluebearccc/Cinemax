@@ -1,0 +1,227 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #0c2f5b 0%, #1a4a7a 50%, #0a2952 100%);
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+/* Animated background bubbles */
+.bubble {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 50%;
+    animation: float 8s ease-in-out infinite;
+}
+
+.bubble:nth-child(1) {
+    width: 80px;
+    height: 80px;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.bubble:nth-child(2) {
+    width: 120px;
+    height: 120px;
+    left: 20%;
+    animation-delay: 2s;
+}
+
+.bubble:nth-child(3) {
+    width: 60px;
+    height: 60px;
+    left: 70%;
+    animation-delay: 4s;
+}
+
+.bubble:nth-child(4) {
+    width: 100px;
+    height: 100px;
+    left: 80%;
+    animation-delay: 6s;
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(100vh) rotate(0deg);
+        opacity: 0;
+    }
+    10%, 90% {
+        opacity: 1;
+    }
+    50% {
+        transform: translateY(-100px) rotate(180deg);
+    }
+}
+
+/* Main container */
+.custom-container {
+    text-align: center;
+    z-index: 10;
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    padding: 60px 40px;
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    animation: slideIn 1s ease-out;
+}
+
+@keyframes slideIn {
+    from {
+        opacity: 0;
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.error-code {
+    font-size: 8rem;
+    font-weight: bold;
+    color: #64b5f6;
+    text-shadow: 0 0 30px rgba(100, 181, 246, 0.5);
+    margin-bottom: 20px;
+    animation: glow 2s ease-in-out infinite alternate;
+}
+
+@keyframes glow {
+    from {
+        text-shadow: 0 0 30px rgba(100, 181, 246, 0.5);
+    }
+    to {
+        text-shadow: 0 0 50px rgba(100, 181, 246, 0.8);
+    }
+}
+
+.error-title {
+    font-size: 2.5rem;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-weight: 300;
+}
+
+.error-message {
+    font-size: 1.2rem;
+    color: #b3d9ff;
+    margin-bottom: 40px;
+    line-height: 1.6;
+}
+
+/* Animated home button */
+.home-btn {
+    display: inline-block;
+    padding: 15px 40px;
+    background: linear-gradient(45deg, #2196f3, #21cbf3);
+    color: white;
+    text-decoration: none;
+    border-radius: 50px;
+    font-size: 1.1rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(33, 150, 243, 0.3);
+}
+
+.home-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s ease;
+}
+
+.home-btn:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(33, 150, 243, 0.5);
+}
+
+.home-btn:hover::before {
+    left: 100%;
+}
+
+.home-btn:active {
+    transform: translateY(-1px);
+}
+
+/* Fish animation */
+.fish {
+    position: absolute;
+    font-size: 50px;
+    color: rgba(100, 181, 246, 0.6);
+    animation: swim 15s linear infinite;
+}
+
+.fish:nth-child(5) {
+    top: 20%;
+    animation-delay: 0s;
+}
+
+.fish:nth-child(6) {
+    top: 60%;
+    animation-delay: 5s;
+}
+
+@keyframes swim {
+    0% {
+        left: calc(100% + 50px);
+        transform: translateY(0px) scaleX(-1);
+    }
+    25% {
+        transform: translateY(-20px) scaleX(-1);
+    }
+    50% {
+        transform: translateY(20px) scaleX(-1);
+    }
+    75% {
+        transform: translateY(-10px) scaleX(-1);
+    }
+    100% {
+        left: -50px;
+        transform: translateY(0px) scaleX(-1);
+    }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .container {
+        padding: 40px 30px;
+        margin: 20px;
+    }
+
+    .error-code {
+        font-size: 6rem;
+    }
+
+    .error-title {
+        font-size: 2rem;
+    }
+
+    .error-message {
+        font-size: 1.1rem;
+    }
+
+    .home-btn {
+        padding: 12px 30px;
+        font-size: 1rem;
+    }
+}

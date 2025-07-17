@@ -1,0 +1,123 @@
+<div class="card card-custom mb-4" th:if="${currentStep == 1}" th:fragment="movie-selection">
+    <div class="card-header">
+        <div class="row align-items-center">
+            <div class="col-md-4">
+                <h5 class="mb-0">
+                    <i class="fas fa-film me-2"></i>Đang Chiếu
+                </h5>
+            </div>
+            <div class="col-md-8">
+                <form th:action="@{/cashier/movie/}" method="get" class="d-flex gap-2">
+                    <div class="flex-grow-1">
+                        <div class="input-group">
+                            <input type="text" name="keyword" class="form-control"
+                                   placeholder="Tìm kiếm phim theo tên..." th:value="${keyword}">
+                            <button type="submit" class="btn btn-outline-warning">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div style="min-width: 200px;">
+                        <select name="genreId" class="form-select" onchange="this.form.submit()">
+                            <option value="">Tất cả thể loại</option>
+                            <option th:each="genre, iterStat : ${availableGenres}"
+                                    th:value="${iterStat.index + 1}" th:text="${genre}"
+                                    th:selected="${selectedGenreId != null and selectedGenreId == (iterStat.index + 1)}">
+                            </option>
+                        </select>
+                    </div>
+                    <div th:if="${hasSearchCriteria}">
+                        <a th:href="@{/cashier/movie/}" class="btn btn-outline-secondary">
+                            <i class="fas fa-times me-1"></i>Xóa bộ lọc
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div th:if="${hasSearchCriteria}" class="mt-2">
+            <small class="text-muted">
+                <i class="fas fa-filter me-1"></i>Đang lọc:
+                <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge bg-info me-1">
+                                    Từ khóa: "<span th:text="${keyword}"></span>"
+                                </span>
+                <span th:if="${selectedGenreId != null}" class="badge bg-success">
+                                    Thể loại: <span th:text="${availableGenres[selectedGenreId - 1]}"></span>
+                                </span>
+            </small>
+        </div>
+
+        <div th:if="${hasSearchCriteria}" class="mt-2">
+            <small class="text-info">
+                <i class="fas fa-info-circle me-1"></i>
+                Tìm thấy <strong th:text="${totalMovies}"></strong> phim
+            </small>
+        </div>
+    </div>
+
+    <div class="card-body">
+        <div th:if="${movies != null and !movies.isEmpty()}" class="row">
+            <div class="col-md-4 mb-4" th:each="movie : ${movies}">
+                <a th:href="@{'/cashier/' + ${movie.movieId} + '/select-schedule'}"
+                   style="text-decoration: none;">
+                    <div class="card movie-card">
+                        <img th:src="@{${movie.image}}" class="card-img-top" alt="Ảnh phim"
+                             style="height: 300px; object-fit: cover;">
+                        <div class="card-body">
+                            <h5 class="card-title text-dark" th:text="${movie.movieName}"></h5>
+                            <p class="card-text text-muted">
+                                <i class="fas fa-clock me-1"></i><span
+                                    th:text="${movie.duration + ' phút'}"></span><br>
+                                <i class="fas fa-tags me-1"></i>
+                                <span th:if="${movie.genres != null and !movie.genres.isEmpty()}"
+                                      th:text="${movie.genres[0].genreName}"></span>
+                                <span
+                                        th:unless="${movie.genres != null and !movie.genres.isEmpty()}">Chưa
+                                                    phân loại</span>
+                            </p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+
+        <div th:if="${movies == null or movies.isEmpty()}" class="text-center py-5">
+            <i class="fas fa-film fa-3x text-muted mb-3"></i>
+            <h5 class="text-muted">Không tìm thấy phim nào</h5>
+            <p class="text-muted" th:if="${hasSearchCriteria}">
+                Không có phim nào phù hợp với bộ lọc hiện tại. Thử thay đổi điều kiện tìm kiếm.
+            </p>
+            <p class="text-muted" th:unless="${hasSearchCriteria}">
+                Hiện tại không có phim nào đang chiếu.
+            </p>
+            <a th:href="@{/cashier/movie/}" class="btn btn-outline-warning mt-2"
+               th:if="${hasSearchCriteria}">
+                <i class="fas fa-refresh me-1"></i>Xem tất cả phim
+            </a>
+        </div>
+
+        <!-- Pagination -->
+        <div th:if="${moviesPage != null and moviesPage.totalPages > 1}"
+             class="d-flex justify-content-center mt-4">
+            <nav>
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${moviesPage.first} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/cashier/movie/(page=${moviesPage.number - 1}, keyword=${keyword}, genreId=${selectedGenreId})}">Previous</a>
+                    </li>
+                    <li class="page-item"
+                        th:each="i : ${#numbers.sequence(0, moviesPage.totalPages - 1)}"
+                        th:classappend="${i == moviesPage.number} ? 'active'">
+                        <a class="page-link"
+                           th:href="@{/cashier/movie/(page=${i}, keyword=${keyword}, genreId=${selectedGenreId})}"
+                           th:text="${i + 1}"></a>
+                    </li>
+                    <li class="page-item" th:classappend="${moviesPage.last} ? 'disabled'">
+                        <a class="page-link"
+                           th:href="@{/cashier/movie/(page=${moviesPage.number + 1}, keyword=${keyword}, genreId=${selectedGenreId})}">Next</a>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

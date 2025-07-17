@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <title>Vé xem phim - Cinemax</title>
+
+    <style>
+        body {
+            font-family: 'Georgia', serif;
+            background-color: #fefefe;
+            padding: 40px;
+        }
+
+        .ticket-box {
+            background-color: #fdf6f0;
+            border: 1px solid #ccc;
+            width: 500px;
+            margin: auto;
+            padding: 20px 25px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .ticket-header {
+            text-align: left;
+            margin-bottom: 10px;
+        }
+
+        .ticket-header h3 {
+            margin: 0;
+            font-size: 20px;
+        }
+
+        .ticket-header p {
+            margin: 5px 0;
+            font-size: 16px;
+        }
+
+        .poster {
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        .details {
+            margin: 15px 0;
+            font-size: 18px;
+        }
+
+        .details p {
+            margin: 6px 0;
+        }
+
+        .details .label {
+            font-weight: bold;
+        }
+
+        .barcode {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .barcode img {
+            height: 60px;
+        }
+
+        .barcode-code {
+            font-size: 14px;
+            letter-spacing: 2px;
+            margin-top: 5px;
+        }
+
+    </style>
+</head>
+<body>
+<div class="ticket-box">
+    <h2>🎟️ Vé xem phim - Cinemax</h2>
+
+    <div class="info">
+        <p><span class="label">🎬 Tên phim:</span> <span th:text="${movieName}"></span></p>
+        <p><span class="label">🏢 Phòng chiếu:</span> <span th:text="${room}"></span></p>
+        <p><span class="label">💺 Ghế ngồi:</span> <span th:text="${seats}"></span></p>
+        <p><span class="label">🕒 Thời gian chiếu:</span> <span th:text="${showtime}"></span></p>
+    </div>
+
+    <hr/>
+
+    <div class="info">
+        <p><span class="label">🧾 Mã hóa đơn:</span> <span th:text="${invoiceId}"></span></p>
+        <p><span class="label">💵 Số tiền:</span> <span th:text="${amount}"></span> VND</p>
+        <p><span class="label">🏦 Ngân hàng:</span> <span th:text="${bankCode}"></span></p>
+    </div>
+
+    <div class="qr-code">
+        <img th:src="@{https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=VNPAY-${invoiceId}}" alt="QR Code"/>
+        <p>Mã QR vé của bạn</p>
+    </div>
+
+    <div class="footer">
+        Cảm ơn bạn đã đặt vé tại <strong>Cinemax</strong>! <br>
+        Vui lòng xuất trình mã QR khi vào rạp.
+    </div>
+</div>
+</body>
+</html>
+

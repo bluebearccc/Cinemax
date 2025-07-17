@@ -1,0 +1,22 @@
+<div th:fragment="editRoomsFragment">
+  <div class="radio-group-vertical" th:if="${not #lists.isEmpty(availableRooms)}">
+    <div class="radio-item" th:each="room : ${availableRooms}">
+      <input type="radio"
+             th:id="'edit-room-' + ${room.roomID}"
+
+             name="roomId"
+
+             th:value="${room.roomID}"
+
+             th:checked="${selectedRoomId != null and room.roomID.equals(selectedRoomId)}"
+
+             required>
+
+      <label th:for="'edit-room-' + ${room.roomID}" th:text="${room.name}"></label>
+    </div>
+  </div>
+
+  <div th:if="${#lists.isEmpty(availableRooms)}">
+    <p>No rooms found for this theater.</p>
+  </div>
+</div>
