@@ -8,6 +8,7 @@ import com.bluebear.cinemax.service.detailseat.DetailSeatService;
 import com.bluebear.cinemax.service.genre.GenreService;
 import com.bluebear.cinemax.service.movie.MovieService;
 import com.bluebear.cinemax.service.promotion.PromotionService;
+import com.bluebear.cinemax.service.room.RoomService; // IMPORT THÊM
 import com.bluebear.cinemax.service.schedule.ScheduleService;
 import com.bluebear.cinemax.service.seat.SeatService;
 import com.bluebear.cinemax.service.theaterstock.TheaterStockService;
@@ -44,11 +45,14 @@ public class BookingProcessController {
     private TheaterStockService theaterStockService;
     @Autowired
     private PromotionService promotionService;
+    @Autowired
+    private RoomService roomService; // INJECT RoomService
 
     private final LocalDateTime currentDate = LocalDateTime.now();
     private final LocalDateTime sevenDate = currentDate.plusDays(7);
     private Integer theaterId = 1;
 
+    // ... (Các phương thức khác không thay đổi)
     @GetMapping("/movie/")
     public String getMovie(@RequestParam(required = false) String keyword,
                            @RequestParam(required = false) Integer genreId,
@@ -187,18 +191,17 @@ public class BookingProcessController {
                 return "redirect:/cashier/" + selectedMovie.getMovieID() + "/select-schedule";
             }
 
+            // Lấy thông tin phòng chiếu để biết số hàng và cột
+            RoomDTO room = roomService.getRoomById(selectedSchedule.getRoomID());
             List<SeatDTO> allSeatsInRoom = seatService.getSeatsByRoomId(selectedSchedule.getRoomID()).getContent();
             List<Integer> bookedSeatIds = detailSeatService.findBookedSeatIdsByScheduleId(scheduleId);
-
-            Map<String, List<SeatDTO>> seatsByRow = allSeatsInRoom.stream()
-                    .sorted(Comparator.comparing(s -> Integer.parseInt(s.getPosition().substring(1))))
-                    .collect(Collectors.groupingBy(s -> s.getPosition().substring(0, 1), LinkedHashMap::new, Collectors.toList()));
 
             session.setAttribute("selectedSchedule", selectedSchedule);
             model.addAttribute("currentStep", 3);
             model.addAttribute("selectedMovie", selectedMovie);
             model.addAttribute("selectedSchedule", selectedSchedule);
-            model.addAttribute("seatsByRow", seatsByRow);
+            model.addAttribute("room", room); // Truyền đối tượng room
+            model.addAttribute("allSeatsInRoom", allSeatsInRoom); // Truyền danh sách ghế phẳng
             model.addAttribute("bookedSeatIds", bookedSeatIds);
         } catch (Exception e) {
             e.printStackTrace();

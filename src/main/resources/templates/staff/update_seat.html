@@ -383,31 +383,27 @@
                     const hiddenInput = document.getElementById('status-input-' + seatId);
                     const seatContainer = button.closest('.seat-container');
 
-                    // Nếu nút đang có class 'active' (tức là ghế đang Inactive)
                     if (button.classList.contains('active')) {
-                        hiddenInput.value = 'Active'; // Cập nhật giá trị để gửi đi
-                        seatContainer.classList.remove('seat-inactive'); // Bỏ làm mờ ghế
-                        button.classList.remove('active'); // Đổi trạng thái nút
+                        hiddenInput.value = 'Active';
+                        seatContainer.classList.remove('seat-inactive');
+                        button.classList.remove('active');
                         button.classList.add('inactive');
-                        button.title = 'Set Inactive'; // Cập nhật tooltip
-                    } else { // Ngược lại, nếu nút đang có class 'inactive'
-                        hiddenInput.value = 'Inactive'; // Cập nhật giá trị
-                        seatContainer.classList.add('seat-inactive'); // Làm mờ ghế
-                        button.classList.remove('inactive'); // Đổi trạng thái nút
+                        button.title = 'Set Inactive';
+                    } else {
+                        hiddenInput.value = 'Inactive';
+                        seatContainer.classList.add('seat-inactive');
+                        button.classList.remove('inactive');
                         button.classList.add('active');
-                        button.title = 'Set Active'; // Cập nhật tooltip
+                        button.title = 'Set Active';
                     }
                 }
             });
             seatGrid.addEventListener('change', function(event) {
-                // Chỉ xử lý nếu phần tử thay đổi là một checkbox VIP
                 if (event.target.classList.contains('vip-checkbox-hidden')) {
                     const checkbox = event.target;
-                    // Tìm thẻ <label> là ô ghế tương ứng
                     const seatLabel = checkbox.closest('.seat-container').querySelector('.seat');
 
                     if (seatLabel) {
-                        // Nếu checkbox được chọn, thêm class 'vip'. Ngược lại, xóa class 'vip'.
                         if (checkbox.checked) {
                             seatLabel.classList.add('vip');
                         } else {
@@ -421,12 +417,10 @@
         }
 
         function redrawSeatGrid(seats) {
-            // Cập nhật lại các ô tên ghế trên giao diện
             seats.forEach(seat => {
-                // Tìm phần tử hiển thị tên ghế tương ứng
                 const seatNameSpan = document.querySelector(`#seat-container-${seat.seatID} .seat-name`);
                 if (seatNameSpan) {
-                    seatNameSpan.textContent = seat.name; // Cập nhật lại tên mới
+                    seatNameSpan.textContent = seat.name;
                 }
             });
 
@@ -444,13 +438,11 @@
         }
 
 
-        // --- Xử lý các nút bấm khác ---
         mainContent.addEventListener('click', function(event) {
             const targetId = event.target.id;
 
 
 
-            // --- Logic Set VIP theo vùng ---
             if (targetId === 'applyVipRangeBtn') {
                 const fromRow = document.getElementById('fromRow').value.trim().toUpperCase();
                 const toRow = document.getElementById('toRow').value.trim().toUpperCase();

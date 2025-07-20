@@ -299,101 +299,92 @@
             <div class="card card-custom mb-4" th:if="${currentStep == 3}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-chair me-2"></i>Select Seats</h5>
-                    <a th:href="@{'/cashier/' + ${selectedMovie.movieID} + '/select-schedule'}"
-                       class="btn btn-outline-secondary btn-sm">
+                    <a th:href="@{'/cashier/' + ${selectedMovie.movieID} + '/select-schedule'}" class="btn btn-outline-secondary btn-sm">
                         <i class="fas fa-arrow-left me-1"></i>Choose another schedule
                     </a>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-lg-9">
-                            <div class="row">
-                                <div class="col-12 text-center">
-                                    <div class="screen mb-3">Screen</div>
-                                    <div class="seat-map-container mb-4" style="position: relative;">
-
-                                        <div class="exit-left">
-                                            <i class="fas fa-door-open"></i><br>
-                                            Entrance/Exit
+                            <div class="text-center">
+                                <div class="screen mb-3">Screen</div>
+                                <div class="seat-map-container mb-4" th:if="${room != null}">
+                                    <div class="column-headers d-flex justify-content-center mb-2">
+                                        <div class="me-3" style="width: 30px;"></div>
+                                        <div class="d-flex justify-content-center" style="gap: 5px;">
+                                            <th:block th:each="col : ${#numbers.sequence(1, room.collumn)}">
+                                                <div style="width: 28px; text-align: center; color: #aaa; font-size: 12px;" th:text="${col}"></div>
+                                            </th:block>
                                         </div>
+                                        <div class="ms-3" style="width: 30px;"></div>
+                                    </div>
 
-                                        <div class="exit-right">
-                                            <i class="fas fa-door-open"></i><br>
-                                            Entrance/Exit
+                                    <div class="seat-grid">
+                                        <div th:each="row : ${#numbers.sequence(1, room.row)}" class="seat-row d-flex justify-content-center align-items-center mb-2">
+                                            <span class="row-label me-3 fw-bold text-muted" style="width: 30px; text-align: center;" th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row)}"></span>
+                                            <div class="d-flex justify-content-center" style="gap: 5px;">
+                                                <th:block th:each="col : ${#numbers.sequence(1, room.collumn)}">
+                                                    <th:block th:with="seatPosition=${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row) + col}">
+                                                        <th:block th:with="currentSeats=${allSeatsInRoom.?[position == #vars.seatPosition]}">
+                                                            <div th:if="${not #lists.isEmpty(currentSeats)}" th:with="seat=${currentSeats[0]}">
+                                                                <div th:id="'seat-' + ${seat.seatID}"
+                                                                     th:data-seat-id="${seat.seatID}"
+                                                                     th:data-seat-position="${seat.position}"
+                                                                     th:data-seat-price="${seat.unitPrice}"
+                                                                     th:data-seat-type="${seat.seatType}"
+                                                                     th:classappend="${#lists.contains(bookedSeatIds, seat.seatID) ? 'occupied' : 'available'} +
+                                                                        ${seat.isVIP ? ' vip' : ''} +
+                                                                        ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
+                                                                     class="seat d-flex align-items-center justify-content-center"
+                                                                     style="width: 28px; height: 28px; font-size: 11px; cursor: pointer;">
+                                                                    <span th:text="${#strings.substring(seat.position, 1)}"></span>
+                                                                </div>
+                                                            </div>
+                                                            <div th:if="${#lists.isEmpty(currentSeats)}" class="seat-empty" style="width: 28px; height: 28px;"></div>
+                                                        </th:block>
+                                                    </th:block>
+                                                </th:block>
+                                            </div>
+                                            <span class="row-label ms-3 fw-bold text-muted" style="width: 30px; text-align: center;" th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row)}"></span>
                                         </div>
-
-                                        <div th:each="rowEntry : ${seatsByRow}"
-                                             class="seat-row d-flex justify-content-center align-items-center mb-2">
-                                <span class="row-label me-3 fw-bold text-muted"
-                                      style="width: 30px; text-align: center;"
-                                      th:text="${rowEntry.key}"></span>
-                                            <div class="d-flex justify-content-center">
-                                                <div th:each="seat, iterStat : ${rowEntry.value}"
-                                                     th:id="'seat-' + ${seat.seatID}"
-                                                     th:data-seat-id="${seat.seatID}"
-                                                     th:data-seat-position="${seat.position}"
-                                                     th:data-seat-price="${seat.unitPrice}"
-                                                     th:data-seat-type="${seat.seatType}"
-                                                     th:classappend="${#lists.contains(bookedSeatIds, seat.seatID) ? 'occupied' : 'available'} +
-                                                ${seat.isVIP ? ' vip' : ''} +
-                                                ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
-                                                     class="seat me-1 d-flex align-items-center justify-content-center">
-                                                    <span th:text="${#strings.substring(seat.position, 1)}"></span>
-                                                </div>
-                                            </div>
-
-                                            <span class="row-label ms-3 fw-bold text-muted"
-                                                  style="width: 30px; text-align: center;"
-                                                  th:text="${rowEntry.key}"></span>
-                                        </div>
-                                        <div class="seat-legend d-flex justify-content-center mt-4">
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #28a745; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Available</small>
-                                            </div>
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #ffc107; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Selected</small>
-                                            </div>
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #dc3545; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Booked</small>
-                                            </div>
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #6f42c1; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>VIP</small>
-                                            </div>
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 30px; height: 20px; background: #e91e63; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Couple</small>
-                                            </div>
-                                        </div>
+                                    </div>
+                                </div>
+                                <div class="seat-legend d-flex justify-content-center mt-4">
+                                    <div class="d-flex align-items-center me-3">
+                                        <div class="seat-example" style="width: 20px; height: 20px; background: #28a745; border-radius: 3px; margin-right: 5px;"></div>
+                                        <small>Available</small>
+                                    </div>
+                                    <div class="d-flex align-items-center me-3">
+                                        <div class="seat-example" style="width: 20px; height: 20px; background: #ffc107; border-radius: 3px; margin-right: 5px;"></div>
+                                        <small>Selected</small>
+                                    </div>
+                                    <div class="d-flex align-items-center me-3">
+                                        <div class="seat-example" style="width: 20px; height: 20px; background: #dc3545; border-radius: 3px; margin-right: 5px;"></div>
+                                        <small>Booked</small>
+                                    </div>
+                                    <div class="d-flex align-items-center me-3">
+                                        <div class="seat-example" style="width: 20px; height: 20px; background: #6f42c1; border-radius: 3px; margin-right: 5px;"></div>
+                                        <small>VIP</small>
+                                    </div>
+                                    <div class="d-flex align-items-center me-3">
+                                        <div class="seat-example" style="width: 30px; height: 20px; background: #e91e63; border-radius: 3px; margin-right: 5px;"></div>
+                                        <small>Couple</small>
                                     </div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="col-lg-3">
-                            <div class="booking-summary p-3"
-                                 style="background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid #444;">
+                            <div class="booking-summary p-3" style="background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid #444;">
                                 <h6 th:text="${selectedMovie.movieName}"></h6>
                                 <p class="text-muted small">
-                                    <i class="far fa-clock"></i> <span
-                                        th:text="${#temporals.format(selectedSchedule.startTime, 'HH:mm')}"></span> |
-                                    <i class="far fa-calendar-alt"></i> <span
-                                        th:text="${#temporals.format(selectedSchedule.startTime, 'dd/MM/yyyy')}"></span><br>
-                                    <i class="fas fa-desktop"></i> Room <span
-                                        th:text="${selectedSchedule.roomID}"></span>
+                                    <i class="far fa-clock"></i> <span th:text="${#temporals.format(selectedSchedule.startTime, 'HH:mm')}"></span> |
+                                    <i class="far fa-calendar-alt"></i> <span th:text="${#temporals.format(selectedSchedule.startTime, 'dd/MM/yyyy')}"></span><br>
+                                    <i class="fas fa-desktop"></i> Room <span th:text="${selectedSchedule.roomID}"></span>
                                 </p>
                                 <hr>
                                 <h6>Selected Seats (<span id="selected-seat-count">0</span>)</h6>
-                                <ul id="selected-seats-list" class="list-unstyled mb-2"
-                                    style="max-height: 200px; overflow-y: auto;"></ul>
+                                <ul id="selected-seats-list" class="list-unstyled mb-2" style="max-height: 200px; overflow-y: auto;"></ul>
                                 <hr>
                                 <form action="/cashier/cus-info" method="post" id="seat-selection-form">
                                     <input type="hidden" name="seatIDs" id="selected-seat-ids-input">
@@ -407,7 +398,6 @@
                     </div>
                 </div>
             </div>
-
             <div class="card card-custom mb-4" th:if="${currentStep == 4}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-user me-2"></i>Customer Information</h5>
