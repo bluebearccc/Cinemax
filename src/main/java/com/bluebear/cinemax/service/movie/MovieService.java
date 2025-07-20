@@ -91,4 +91,31 @@ public interface MovieService {
     MovieDTO findById(Integer movieID);
     public Page<MovieDTO> findShowingMoviesWithFilters(String name, Integer genreId, String startDateStr, String endDateStr, int page, int size);
 
+
+    List<LocalDate> getAvailableScheduleDatesForCashier(Integer theaterId, LocalDateTime startDate, LocalDateTime endDate);
+
+    Page<MovieDTO> findMoviesForCashierByAllFilters(Integer theaterId, Integer genreId,
+                                                    String keyword, Movie_Status status,
+                                                    Theater_Status theaterStatus,
+                                                    LocalDateTime startDate, LocalDateTime endDate,
+                                                    List<Age_Limit> ageLimits,
+                                                    Pageable pageable);
+
+    Page<MovieDTO> findMoviesForCashierByKeyword(Integer theaterId, String keyword,
+                                                 Movie_Status status, Theater_Status theaterStatus,
+                                                 LocalDateTime startDate, LocalDateTime endDate,
+                                                 List<Age_Limit> ageLimits,
+                                                 Pageable pageable);
+
+    Page<MovieDTO> findMoviesForCashierByGenre(Integer theaterId, Integer genreId,
+                                               Movie_Status status, Theater_Status theaterStatus,
+                                               LocalDateTime startDate, LocalDateTime endDate,
+                                               List<Age_Limit> ageLimits,
+                                               Pageable pageable);
+
+    Page<MovieDTO> findMoviesForCashier(Integer theaterId, Movie_Status status,
+                                        Theater_Status theaterStatus,
+                                        LocalDateTime startDate, LocalDateTime endDate,
+                                        List<Age_Limit> ageLimits,
+                                        Pageable pageable);
 }

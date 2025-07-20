@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
@@ -177,6 +178,121 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("genreId") Integer genreId,
             @Param("startDate") LocalDateTime startDate,
             @Param("endDate") LocalDateTime endDate,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT DISTINCT CAST(s.startTime as LocalDate) FROM Movie m
+        JOIN m.scheduleList s
+        JOIN s.room r
+        WHERE r.theater.theaterID = :theaterId
+        AND m.status = com.bluebear.cinemax.enumtype.Movie_Status.Active
+        AND r.theater.status = com.bluebear.cinemax.enumtype.Theater_Status.Active
+        AND s.startTime >= :startDate
+        AND (:endDate IS NULL OR s.startTime <= :endDate)
+        ORDER BY CAST(s.startTime as LocalDate) ASC
+    """)
+    List<LocalDate> findDistinctScheduleDatesForCashier(
+            @Param("theaterId") Integer theaterId,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate
+    );
+
+    @Query("""
+    SELECT DISTINCT m FROM Movie m
+    JOIN m.scheduleList s
+    JOIN s.room r
+    JOIN r.theater t
+    WHERE t.theaterID = :theaterId
+    AND m.status = :status
+    AND t.status = :theaterStatus
+    AND s.startTime >= :startDate
+    AND (:endDate IS NULL OR s.startTime <= :endDate)
+    AND (:ageLimits IS NULL OR m.ageLimit IN :ageLimits)
+    """)
+    Page<Movie> findForCashierByTheater(
+            @Param("theaterId") Integer theaterId,
+            @Param("status") Movie_Status status,
+            @Param("theaterStatus") Theater_Status theaterStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("ageLimits") List<Age_Limit> ageLimits,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT DISTINCT m FROM Movie m
+        JOIN m.genres g
+        JOIN m.scheduleList s
+        JOIN s.room r
+        JOIN r.theater t
+        WHERE g.genreID = :genreId
+        AND t.theaterID = :theaterId
+        AND m.status = :status
+        AND t.status = :theaterStatus
+        AND s.startTime >= :startDate
+        AND (:endDate IS NULL OR s.startTime <= :endDate)
+        AND (:ageLimits IS NULL OR m.ageLimit IN :ageLimits)
+    """)
+    Page<Movie> findForCashierByGenre(
+            @Param("theaterId") Integer theaterId,
+            @Param("genreId") Integer genreId,
+            @Param("status") Movie_Status status,
+            @Param("theaterStatus") Theater_Status theaterStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("ageLimits") List<Age_Limit> ageLimits,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT DISTINCT m FROM Movie m
+        JOIN m.scheduleList s
+        JOIN s.room r
+        JOIN r.theater t
+        WHERE t.theaterID = :theaterId
+        AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        AND m.status = :status
+        AND t.status = :theaterStatus
+        AND s.startTime >= :startDate
+        AND (:endDate IS NULL OR s.startTime <= :endDate)
+        AND (:ageLimits IS NULL OR m.ageLimit IN :ageLimits)
+    """)
+    Page<Movie> findForCashierByKeyword(
+            @Param("theaterId") Integer theaterId,
+            @Param("keyword") String keyword,
+            @Param("status") Movie_Status status,
+            @Param("theaterStatus") Theater_Status theaterStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("ageLimits") List<Age_Limit> ageLimits,
+            Pageable pageable
+    );
+
+    @Query("""
+        SELECT DISTINCT m FROM Movie m
+        JOIN m.genres g
+        JOIN m.scheduleList s
+        JOIN s.room r
+        JOIN r.theater t
+        WHERE g.genreID = :genreId
+        AND t.theaterID = :theaterId
+        AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :keyword, '%'))
+        AND m.status = :status
+        AND t.status = :theaterStatus
+        AND s.startTime >= :startDate
+        AND (:endDate IS NULL OR s.startTime <= :endDate)
+        AND (:ageLimits IS NULL OR m.ageLimit IN :ageLimits)
+    """)
+    Page<Movie> findForCashierByAllFilters(
+            @Param("theaterId") Integer theaterId,
+            @Param("genreId") Integer genreId,
+            @Param("keyword") String keyword,
+            @Param("status") Movie_Status status,
+            @Param("theaterStatus") Theater_Status theaterStatus,
+            @Param("startDate") LocalDateTime startDate,
+            @Param("endDate") LocalDateTime endDate,
+            @Param("ageLimits") List<Age_Limit> ageLimits,
             Pageable pageable
     );
 }

@@ -333,4 +333,30 @@ public class MovieServiceImpl implements MovieService {
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
+
+    // --- CÁC HÀM MỚI DÀNH RIÊNG CHO CASHIER ---
+    @Override
+    public List<LocalDate> getAvailableScheduleDatesForCashier(Integer theaterId, LocalDateTime startDate, LocalDateTime endDate) {
+        return movieRepository.findDistinctScheduleDatesForCashier(theaterId, startDate, endDate);
+    }
+
+    @Override
+    public Page<MovieDTO> findMoviesForCashierByAllFilters(Integer theaterId, Integer genreId, String keyword, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<Age_Limit> ageLimits, Pageable pageable) {
+        return movieRepository.findForCashierByAllFilters(theaterId, genreId, keyword, status, theaterStatus, startDate, endDate, ageLimits, pageable).map(this::toDTO);
+    }
+
+    @Override
+    public Page<MovieDTO> findMoviesForCashierByKeyword(Integer theaterId, String keyword, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<Age_Limit> ageLimits, Pageable pageable) {
+        return movieRepository.findForCashierByKeyword(theaterId, keyword, status, theaterStatus, startDate, endDate, ageLimits, pageable).map(this::toDTO);
+    }
+
+    @Override
+    public Page<MovieDTO> findMoviesForCashierByGenre(Integer theaterId, Integer genreId, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<Age_Limit> ageLimits, Pageable pageable) {
+        return movieRepository.findForCashierByGenre(theaterId, genreId, status, theaterStatus, startDate, endDate, ageLimits, pageable).map(this::toDTO);
+    }
+
+    @Override
+    public Page<MovieDTO> findMoviesForCashier(Integer theaterId, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<Age_Limit> ageLimits, Pageable pageable) {
+        return movieRepository.findForCashierByTheater(theaterId, status, theaterStatus, startDate, endDate, ageLimits, pageable).map(this::toDTO);
+    }
 }

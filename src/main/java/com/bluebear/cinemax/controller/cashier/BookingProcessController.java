@@ -22,6 +22,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -46,7 +47,6 @@ public class BookingProcessController {
     private PromotionService promotionService;
 
     private final LocalDateTime currentDate = LocalDateTime.now();
-    private final LocalDateTime sevenDate = currentDate.plusDays(7);
     private Integer theaterId = 1;
 
     @GetMapping("/movie/")
@@ -62,8 +62,17 @@ public class BookingProcessController {
         session.setAttribute("theaterId", theaterId);
         try {
             String normalizedKeyword = normalizeSearchParam(keyword);
-            LocalDateTime startDate = (date != null) ? date.toLocalDate().atStartOfDay() : currentDate;
-            LocalDateTime endDate = (date != null) ? date.toLocalDate().atTime(23, 59, 59) : sevenDate;
+
+            LocalDateTime queryStartDate;
+            LocalDateTime queryEndDate;
+
+            if (date != null) {
+                queryStartDate = date.toLocalDate().atStartOfDay();
+                queryEndDate = date.toLocalDate().atTime(23, 59, 59);
+            } else {
+                queryStartDate = currentDate;
+                queryEndDate = null;
+            }
 
             List<Age_Limit> applicableAgeLimits = null;
             if (ageLimit != null) {
@@ -71,13 +80,10 @@ public class BookingProcessController {
                 switch (ageLimit) {
                     case AGE_18_PLUS:
                         applicableAgeLimits.add(Age_Limit.AGE_18_PLUS);
-
                     case AGE_16_PLUS:
                         applicableAgeLimits.add(Age_Limit.AGE_16_PLUS);
-
                     case AGE_13_PLUS:
                         applicableAgeLimits.add(Age_Limit.AGE_13_PLUS);
-
                     case AGE_P: applicableAgeLimits.add(Age_Limit.AGE_P);
                         break;
                 }
@@ -87,22 +93,18 @@ public class BookingProcessController {
             Page<MovieDTO> moviesPage;
 
             if (normalizedKeyword != null && genreId != null) {
-                moviesPage = movieService.findMoviesByTheaterAndGenreAndKeywordAndDateRange(theaterId, genreId, normalizedKeyword, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
+                moviesPage = movieService.findMoviesForCashierByAllFilters(theaterId, genreId, normalizedKeyword, Movie_Status.Active, Theater_Status.Active, queryStartDate, queryEndDate, applicableAgeLimits, pageable);
             } else if (normalizedKeyword != null) {
-                moviesPage = movieService.findMoviesByTheaterAndKeywordAndDateRange(theaterId, normalizedKeyword, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
+                moviesPage = movieService.findMoviesForCashierByKeyword(theaterId, normalizedKeyword, Movie_Status.Active, Theater_Status.Active, queryStartDate, queryEndDate, applicableAgeLimits, pageable);
             } else if (genreId != null) {
-                moviesPage = movieService.findMoviesByTheaterAndGenreAndDateRange(theaterId, genreId, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
+                moviesPage = movieService.findMoviesForCashierByGenre(theaterId, genreId, Movie_Status.Active, Theater_Status.Active, queryStartDate, queryEndDate, applicableAgeLimits, pageable);
             } else {
-                moviesPage = movieService.findMoviesByTheaterAndDateRange(theaterId, Movie_Status.Active, Theater_Status.Active, startDate, endDate, applicableAgeLimits, pageable);
+                moviesPage = movieService.findMoviesForCashier(theaterId, Movie_Status.Active, Theater_Status.Active, queryStartDate, queryEndDate, applicableAgeLimits, pageable);
             }
 
             List<GenreDTO> availableGenres = genreService.getAllGenres();
-            String selectedGenreName = genreId != null ? availableGenres.stream().filter(g -> genreId.equals(g.getGenreID())).map(GenreDTO::getGenreName).findFirst().orElse(null) : null;
 
-            List<LocalDateTime> availableDates = new ArrayList<>();
-            for (int i = 0; i < 7; i++) {
-                availableDates.add(LocalDateTime.now().plusDays(i).toLocalDate().atStartOfDay());
-            }
+            List<LocalDate> availableDates = movieService.getAvailableScheduleDatesForCashier(theaterId, currentDate, null);
 
             model.addAttribute("movies", moviesPage.getContent());
             model.addAttribute("moviesPage", moviesPage);
@@ -118,7 +120,7 @@ public class BookingProcessController {
             model.addAttribute("hasSearchCriteria", (normalizedKeyword != null && !normalizedKeyword.isEmpty()) || genreId != null || date != null || ageLimit != null);
         } catch (Exception e) {
             e.printStackTrace();
-            model.addAttribute("errorMessage", "Error to load film, pls reload page");
+            model.addAttribute("errorMessage", "Error loading films, please reload the page.");
         }
         return "cashier/cashier-booking";
     }
@@ -137,41 +139,70 @@ public class BookingProcessController {
                 return "redirect:/cashier/movie/";
             }
 
-            List<LocalDateTime> availableDates = new ArrayList<>();
-            for (int i = 0; i < 7; i++) {
-                availableDates.add(LocalDateTime.now().plusDays(i).toLocalDate().atStartOfDay());
-            }
-
-            Page<ScheduleDTO> schedules = scheduleService.getSchedulesByMovieIdAndDate(theaterId, movieID, currentDate, sevenDate, Pageable.unpaged());
+            LocalDateTime farFutureDate = currentDate.plusYears(10);
+            Page<ScheduleDTO> schedules = scheduleService.getSchedulesByMovieIdAndDate(theaterId, movieID, currentDate, farFutureDate, Pageable.unpaged());
 
             for (ScheduleDTO schedule : schedules.getContent()) {
                 List<SeatDTO> allSeatsInRoom = seatService.getSeatsByRoomId(schedule.getRoomID()).getContent();
-                List<Integer> bookedSeatIds = detailSeatService.findBookedSeatIdsByScheduleId(schedule.getScheduleID());
-                SeatAvailabilityDTO availability = new SeatAvailabilityDTO();
-                int totalSeats = allSeatsInRoom.size();
-                int totalVipSeats = (int) allSeatsInRoom.stream().filter(SeatDTO::getIsVIP).count();
-                int bookedVipSeats = (int) allSeatsInRoom.stream().filter(seat -> bookedSeatIds.contains(seat.getSeatID()) && seat.getIsVIP()).count();
+                List<Integer> bookedSeatIdList = detailSeatService.findBookedSeatIdsByScheduleId(schedule.getScheduleID());
+                Map<Integer, SeatDTO> allSeatsMap = allSeatsInRoom.stream().collect(Collectors.toMap(SeatDTO::getSeatID, s -> s));
 
-                availability.setTotalSeats(totalSeats);
-                availability.setAvailableSeats(totalSeats - bookedSeatIds.size());
-                availability.setTotalVipSeats(totalVipSeats);
-                availability.setAvailableVipSeats(totalVipSeats - bookedVipSeats);
-                availability.setTotalRegularSeats(totalSeats - totalVipSeats);
-                availability.setAvailableRegularSeats((totalSeats - totalVipSeats) - (bookedSeatIds.size() - bookedVipSeats));
+                long getSeatCapacity = allSeatsInRoom.stream()
+                        .mapToLong(seat -> (seat.getSeatType() != null && "Couple".equals(seat.getSeatType().name())) ? 2 : 1)
+                        .sum();
+
+                int totalCapacity = (int) getSeatCapacity;
+
+                int totalVipCapacity = (int) allSeatsInRoom.stream()
+                        .filter(SeatDTO::getIsVIP)
+                        .mapToLong(seat -> (seat.getSeatType() != null && "Couple".equals(seat.getSeatType().name())) ? 2 : 1)
+                        .sum();
+
+                int totalRegularCapacity = totalCapacity - totalVipCapacity;
+
+                int bookedCapacity = (int) bookedSeatIdList.stream()
+                        .map(allSeatsMap::get)
+                        .filter(Objects::nonNull)
+                        .mapToLong(seat -> (seat.getSeatType() != null && "Couple".equals(seat.getSeatType().name())) ? 2 : 1)
+                        .sum();
+
+                int bookedVipCapacity = (int) bookedSeatIdList.stream()
+                        .map(allSeatsMap::get)
+                        .filter(Objects::nonNull)
+                        .filter(SeatDTO::getIsVIP)
+                        .mapToLong(seat -> (seat.getSeatType() != null && "Couple".equals(seat.getSeatType().name())) ? 2 : 1)
+                        .sum();
+
+                int bookedRegularCapacity = bookedCapacity - bookedVipCapacity;
+
+                SeatAvailabilityDTO availability = new SeatAvailabilityDTO();
+                availability.setTotalSeats(totalCapacity);
+                availability.setAvailableSeats(totalCapacity - bookedCapacity);
+                availability.setTotalVipSeats(totalVipCapacity);
+                availability.setAvailableVipSeats(totalVipCapacity - bookedVipCapacity);
+                availability.setTotalRegularSeats(totalRegularCapacity);
+                availability.setAvailableRegularSeats(totalRegularCapacity - bookedRegularCapacity);
                 schedule.setSeatAvailability(availability);
             }
 
+            Map<LocalDate, List<ScheduleDTO>> schedulesByDate = schedules.getContent().stream()
+                    .collect(Collectors.groupingBy(
+                            schedule -> schedule.getStartTime().toLocalDate(),
+                            TreeMap::new,
+                            Collectors.toList()
+                    ));
+
             session.setAttribute("selectedMovie", selectedMovie);
             model.addAttribute("currentStep", 2);
-            model.addAttribute("schedules", schedules);
+            model.addAttribute("schedulesByDate", schedulesByDate);
             model.addAttribute("selectedMovie", selectedMovie);
-            model.addAttribute("availableDates", availableDates);
         } catch (Exception e) {
             e.printStackTrace();
             return "redirect:/cashier/movie/";
         }
         return "cashier/cashier-booking";
     }
+
 
     @PostMapping("/select-seats")
     public String selectSeats(@RequestParam Integer scheduleId, HttpSession session, Model model, RedirectAttributes redirectAttributes) {
@@ -212,7 +243,7 @@ public class BookingProcessController {
     public String goBackToSeats(HttpSession session, Model model, RedirectAttributes redirectAttributes) {
         ScheduleDTO selectedSchedule = (ScheduleDTO) session.getAttribute("selectedSchedule");
         if (selectedSchedule == null) {
-            redirectAttributes.addFlashAttribute("errorMessage", "Session is expried");
+            redirectAttributes.addFlashAttribute("errorMessage", "Session expired");
             return "redirect:/cashier/movie/";
         }
         return selectSeats(selectedSchedule.getScheduleID(), session, model, redirectAttributes);

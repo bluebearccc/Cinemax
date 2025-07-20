@@ -7,8 +7,9 @@
     <title>Cinemax - Cashier System</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link th:href="@{/cashier-static/cashier.css}"  rel="stylesheet">
+    <link th:href="@{/cashier-static/cashier.css}" rel="stylesheet">
 </head>
+
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark navbar-custom" th:fragment="navigation">
     <div class="container-fluid">
@@ -30,47 +31,43 @@
 
 <div class="container-fluid py-4">
     <div class="step-indicator" th:fragment="step-indicator">
-        <div class="progress-line" th:style="'width:' + (${currentStep} > 1 ? ((${currentStep} - 1) / 4 * 100) : 0) + '%;'"></div>
-
+        <div class="progress-line"
+             th:style="'width:' + (${currentStep} > 1 ? ((${currentStep} - 1) / 4 * 100) : 0) + '%;'"></div>
         <div class="step" th:classappend="${currentStep == 1} ? 'active' : (${currentStep > 1} ? 'completed' : '')">
-            <div class="step-number">1</div>
-            <small>Film Selection</small>
+            <div class="step-number">1</div><small>Film Selection</small>
         </div>
         <div class="step" th:classappend="${currentStep == 2} ? 'active' : (${currentStep > 2} ? 'completed' : '')">
-            <div class="step-number">2</div>
-            <small>Schedule Selection</small>
+            <div class="step-number">2</div><small>Schedule Selection</small>
         </div>
         <div class="step" th:classappend="${currentStep == 3} ? 'active' : (${currentStep > 3} ? 'completed' : '')">
-            <div class="step-number">3</div>
-            <small>Seat Selection</small>
+            <div class="step-number">3</div><small>Seat Selection</small>
         </div>
         <div class="step" th:classappend="${currentStep == 4} ? 'active' : (${currentStep > 4} ? 'completed' : '')">
-            <div class="step-number">4</div>
-            <small>Information</small>
+            <div class="step-number">4</div><small>Information</small>
         </div>
         <div class="step" th:classappend="${currentStep == 5} ? 'active' : ''">
-            <div class="step-number">5</div>
-            <small>Payment</small>
+            <div class="step-number">5</div><small>Payment</small>
         </div>
     </div>
 
-    <div class="row">
-        <div class="col-lg-8">
+    <div class="row justify-content-center">
+        <div class="col-xl-11">
+
             <div class="card card-custom mb-4" th:if="${currentStep == 1}">
                 <div class="card-header">
                     <div class="row align-items-center">
-                        <div class="col-md-3">
+                        <div class="col-lg-3 col-md-12 mb-3 mb-lg-0">
                             <h5 class="mb-0">
-                                <i class="fas fa-film me-2"></i>Movies Showing in 7 days
+                                <i class="fas fa-film me-2"></i>Movies Showing
                             </h5>
                         </div>
-                        <div class="col-md-9">
-                            <form th:action="@{/cashier/movie/}" method="get" class="d-flex gap-2">
-                                <div class="flex-grow-1">
+                        <div class="col-lg-9 col-md-12">
+                            <form th:action="@{/cashier/movie/}" method="get" class="d-flex gap-2 flex-wrap">
+                                <div class="flex-grow-1" style="min-width: 200px;">
                                     <div class="input-group">
                                         <input type="text" name="keyword" class="form-control"
                                                placeholder="Search Movie by name" th:value="${keyword}">
-                                        <button type="submit" class="btn btn-outline-warning">
+                                        <button type="submit" class="btn btn-warning">
                                             <i class="fas fa-search"></i>
                                         </button>
                                     </div>
@@ -78,8 +75,7 @@
                                 <div style="min-width: 150px;">
                                     <select name="genreId" class="form-select" onchange="this.form.submit()">
                                         <option value="">All categories</option>
-                                        <option th:each="genre : ${availableGenres}"
-                                                th:value="${genre.genreID}"
+                                        <option th:each="genre : ${availableGenres}" th:value="${genre.genreID}"
                                                 th:text="${genre.genreName}"
                                                 th:selected="${genre.genreID == selectedGenreId}">
                                         </option>
@@ -91,75 +87,49 @@
                                         <option th:each="dateTime : ${availableDates}"
                                                 th:value="${#temporals.format(dateTime, 'yyyy-MM-dd''T''HH:mm')}"
                                                 th:text="${#temporals.format(dateTime, 'dd/MM/yyyy - EEEE')}"
-                                                th:selected="${#temporals.format(dateTime, 'yyyy-MM-dd') == #temporals.format(selectedDate, 'yyyy-MM-dd')}">
+                                                th:selected="${selectedDate != null and #temporals.format(dateTime, 'yyyy-MM-dd') == #temporals.format(selectedDate, 'yyyy-MM-dd')}">
                                         </option>
                                     </select>
                                 </div>
                                 <div style="min-width: 160px;">
                                     <select name="ageLimit" class="form-select" onchange="this.form.submit()">
                                         <option value="">Age limitation</option>
-                                        <option th:each="limit : ${availableAgeLimits}"
-                                                th:value="${limit}"
-                                                th:text="${limit.name()}"
-                                                th:selected="${limit == selectedAgeLimit}">
+                                        <option th:each="limit : ${availableAgeLimits}" th:value="${limit}"
+                                                th:text="${limit.name()}" th:selected="${limit == selectedAgeLimit}">
                                         </option>
                                     </select>
                                 </div>
                                 <div th:if="${hasSearchCriteria}">
                                     <a th:href="@{/cashier/movie/}" class="btn btn-outline-secondary">
-                                        <i class="fas fa-times me-1"></i><span>Clear filter</span>
+                                        <i class="fas fa-times me-1"></i><span>Clear</span>
                                     </a>
                                 </div>
                             </form>
                         </div>
                     </div>
-
-                    <div th:if="${hasSearchCriteria}" class="mt-2">
-                        <small class="text-muted">
-                            <i class="fas fa-filter me-1"></i>Filter:
-                            <span th:if="${keyword != null and !keyword.isEmpty()}" class="badge bg-info me-1">
-                    Keyword: "<span th:text="${keyword}"></span>"
-                </span>
-                            <span th:if="${selectedGenreId != null}" class="badge bg-success me-1">
-                     Category: <span th:text="${selectedGenreName}"></span>
-                            </span>
-                            </span>
-                            <span th:if="${selectedDate != null}" class="badge bg-warning text-dark me-1">
-                    Date: <span th:text="${#temporals.format(selectedDate, 'dd/MM/yyyy')}"></span>
-                </span>
-                            <span th:if="${selectedAgeLimit != null}" class="badge bg-danger me-1">
-                    Age: <span th:text="${selectedAgeLimit.name()}"></span>
-                </span>
-                        </small>
-                    </div>
-
-                    <div th:if="${hasSearchCriteria}" class="mt-2">
-                        <small class="text-info">
-                            <i class="fas fa-info-circle me-1"></i>
-                            Found <strong th:text="${totalMovies}"></strong> movie(s)
-                        </small>
-                    </div>
                 </div>
 
                 <div class="card-body">
                     <div th:if="${movies != null and !movies.isEmpty()}" class="row">
-                        <div class="col-md-4 mb-4" th:each="movie : ${movies}">
+                        <div class="col-sm-6 col-md-4 col-xl-3 mb-4" th:each="movie : ${movies}">
                             <a th:href="@{'/cashier/' + ${movie.movieID} + '/select-schedule'}"
-                               style="text-decoration: none;">
-                                <div class="card movie-card">
+                               class="text-decoration-none">
+                                <div class="card movie-card h-100">
                                     <img th:src="@{${movie.image}}" class="card-img-top" alt="Movie Poster"
-                                         style="height: 300px; object-fit: cover;">
-                                    <div class="card-body">
+                                         style="height: 320px; object-fit: cover;">
+                                    <div class="card-body d-flex flex-column">
                                         <h5 class="card-title" th:text="${movie.movieName}"></h5>
-                                        <p class="card-text text-muted">
-                                            <i class="fas fa-clock me-1"></i><span
-                                                th:text="${movie.duration + ' minutes'}"></span><br>
-                                            <i class="fas fa-tags me-1"></i>
-                                            <span th:if="${movie.genres != null and !movie.genres.isEmpty()}"
-                                                  th:text="${movie.genres[0].genreName}"></span>
-                                            <span
-                                                    th:unless="${movie.genres != null and !movie.genres.isEmpty()}">Not Specified</span>
-                                        </p>
+                                        <div class="mt-auto">
+                                            <p class="card-text text-muted small mb-0">
+                                                <i class="fas fa-clock me-1"></i><span
+                                                    th:text="${movie.duration + ' min'}"></span>
+                                            </p>
+                                            <p class="card-text text-muted small">
+                                                <i class="fas fa-tags me-1"></i>
+                                                <span th:if="${movie.genres != null and !movie.genres.isEmpty()}"
+                                                      th:text="${movie.genres[0].genreName}"></span>
+                                            </p>
+                                        </div>
                                     </div>
                                 </div>
                             </a>
@@ -168,17 +138,7 @@
 
                     <div th:if="${movies == null or movies.isEmpty()}" class="text-center py-5">
                         <i class="fas fa-film fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">No Movies Found</h5>
-                        <p class="text-muted" th:if="${hasSearchCriteria}">
-                            There are no available movies matching your criteria.
-                        </p>
-                        <p class="text-muted" th:unless="${hasSearchCriteria}">
-                            There are currently no movies available.
-                        </p>
-                        <a th:href="@{/cashier/movie/}" class="btn btn-outline-warning mt-2"
-                           th:if="${hasSearchCriteria}">
-                            <i class="fas fa-refresh me-1"></i>Show All Movies
-                        </a>
+                        <h5>No Movies Found</h5>
                     </div>
 
                     <div th:if="${moviesPage != null and moviesPage.totalPages > 1}"
@@ -209,90 +169,50 @@
             <div class="card card-custom mb-4" th:if="${currentStep == 2}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-calendar me-2"></i>Schedule Selection</h5>
-                    <a href="/cashier/movie/" class="btn btn-outline-secondary btn-sm">
+                    <a href="/cashier/movie/" class="btn btn-outline-light btn-sm">
                         <i class="fas fa-arrow-left me-1"></i>Choose another movie
                     </a>
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
                         <h6 th:text="${selectedMovie.movieName}"></h6>
-                        <p class="text-muted" th:text="${selectedMovie.duration + ' minutes'}"></p>
+                        <p class="text-white-50" th:text="${selectedMovie.duration + ' minutes'}"></p>
                     </div>
                     <hr>
-
-                    <div th:each="date : ${availableDates}" class="mb-4">
-                        <h6 th:text="${#temporals.format(date, 'EEEE, dd/MM/yyyy')}"></h6>
-
-                        <th:block th:with="dailySchedules=${new java.util.ArrayList()}">
-                            <th:block th:each="schedule : ${schedules.content}">
-                                <th:block
-                                        th:if="${#temporals.format(schedule.startTime, 'yyyy-MM-dd') == #temporals.format(date, 'yyyy-MM-dd')}">
-                                    <span th:with="dummy=${dailySchedules.add(schedule)}" th:remove="tag"></span>
-                                </th:block>
-                            </th:block>
-
-                            <div class="row">
-                                <div class="col-md-4 mb-2" th:each="schedule : ${dailySchedules}">
-                                    <form action="/cashier/select-seats" method="post">
-                                        <input type="hidden" name="time"
-                                               th:value="${#temporals.format(schedule.startTime, 'HH:mm')}">
-                                        <input type="hidden" name="roomName" th:value="${schedule.roomName}">
-                                        <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
-                                        <button type="submit" class="btn btn-outline-primary w-100">
-                                            <div>
-                                                <strong th:text="${#temporals.format(schedule.startTime, 'HH:mm')}"></strong>
-                                                -
-                                                <span th:text="${#temporals.format(schedule.endTime, 'HH:mm')}"></span>
+                    <div th:each="entry : ${schedulesByDate}" class="mb-4">
+                        <h6 th:text="${#temporals.format(entry.key, 'EEEE, dd/MM/yyyy')}"></h6>
+                        <div class="row">
+                            <div class="col-md-4 mb-2" th:each="schedule : ${entry.value}">
+                                <form action="/cashier/select-seats" method="post">
+                                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                                    <button type="submit" class="btn btn-outline-primary w-100 p-3">
+                                        <div class="fw-bold fs-5"
+                                             th:text="${#temporals.format(schedule.startTime, 'HH:mm')}"></div>
+                                        <div class="small"
+                                             th:text="${'Room ' + schedule.roomName + ' - ' + schedule.roomType}">
+                                        </div>
+                                        <hr class="my-2">
+                                        <div th:if="${schedule.seatAvailability != null}"
+                                             class="availability-info">
+                                            <div class="small">
+                                                <i class="fas fa-chair"></i>
+                                                Available:
+                                                <strong
+                                                        th:text="${schedule.seatAvailability.availableSeats + ' / ' + schedule.seatAvailability.totalSeats}"></strong>
                                             </div>
-
-                                            <small>
-                                                Room <span th:text="${schedule.roomID}"></span> - <span
-                                                    th:text="${schedule.roomType}"></span>
-                                            </small>
-
-                                            <th:block th:if="${schedule.seatAvailability != null}">
-                                                <hr class="my-1">
-                                                <div class="mb-1">
-                                                    <i class="fas fa-chair"></i>
-                                                    Available Seats:
-                                                    <strong th:text="${schedule.seatAvailability.availableSeats}"></strong>
-                                                    /
-                                                    <span th:text="${schedule.seatAvailability.totalSeats}"></span>
-                                                </div>
-
-                                                <div style="font-size: 0.75rem;">
-                                                    <span>Regular: </span>
-                                                    <span th:text="${schedule.seatAvailability.availableRegularSeats}"></span>
-                                                    <span>/</span>
-                                                    <span th:text="${schedule.seatAvailability.totalRegularSeats}"></span>
-
-                                                    <span class="mx-1">|</span>
-
-                                                    <span style="color: #ffc107;">VIP: </span>
-                                                    <span th:text="${schedule.seatAvailability.availableVipSeats}"
-                                                          style="color: #ffc107;"></span>
-                                                    <span>/</span>
-                                                    <span th:text="${schedule.seatAvailability.totalVipSeats}"
-                                                          style="color: #ffc107;"></span>
-                                                </div>
-                                            </th:block>
-                                        </button>
-                                    </form>
-                                </div>
+                                            <div class="small text-white-50" style="font-size: 0.7rem;">
+                                                    <span
+                                                            th:text="${'Regular: ' + schedule.seatAvailability.availableRegularSeats}"></span>
+                                                <span class="mx-1">|</span>
+                                                <span class="text-warning"
+                                                      th:text="${'VIP: ' + schedule.seatAvailability.availableVipSeats}"></span>
+                                            </div>
+                                        </div>
+                                    </button>
+                                </form>
                             </div>
-
-                            <div th:if="${#lists.isEmpty(dailySchedules)}" class="text-center py-2">
-                                <small class="text-muted">No schedules available for this day.</small>
-                            </div>
-                        </th:block>
+                        </div>
                     </div>
-
-                    <div th:if="${schedules == null or schedules.content.isEmpty()}" class="text-center py-4">
-                        <i class="fas fa-calendar-times fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">No Schedules</h5>
-                        <p class="text-muted">This movie does not have any schedules yet.</p>
-                    </div>
-
                 </div>
             </div>
 
@@ -300,95 +220,69 @@
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-chair me-2"></i>Select Seats</h5>
                     <a th:href="@{'/cashier/' + ${selectedMovie.movieID} + '/select-schedule'}"
-                       class="btn btn-outline-secondary btn-sm">
+                       class="btn btn-outline-light btn-sm">
                         <i class="fas fa-arrow-left me-1"></i>Choose another schedule
                     </a>
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-lg-9">
-                            <div class="row">
-                                <div class="col-12 text-center">
-                                    <div class="screen mb-3">Screen</div>
-                                    <div class="seat-map-container mb-4" style="position: relative;">
-
-                                        <div class="exit-left">
-                                            <i class="fas fa-door-open"></i><br>
-                                            Entrance/Exit
+                            <div class="text-center">
+                                <div class="screen mb-3">Screen</div>
+                                <div class="seat-map-container mb-4">
+                                    <div th:each="rowEntry : ${seatsByRow}"
+                                         class="seat-row d-flex justify-content-center align-items-center mb-2">
+                                        <span class="row-label me-3 fw-bold" th:text="${rowEntry.key}"></span>
+                                        <div class="d-flex justify-content-center">
+                                            <div th:each="seat : ${rowEntry.value}"
+                                                 th:id="'seat-' + ${seat.seatID}"
+                                                 th:data-seat-id="${seat.seatID}"
+                                                 th:data-seat-position="${seat.position}"
+                                                 th:data-seat-price="${seat.unitPrice}"
+                                                 th:data-seat-type="${seat.seatType}"
+                                                 th:classappend="${#lists.contains(bookedSeatIds, seat.seatID) ? 'occupied' : 'available'} + ${seat.isVIP ? ' vip' : ''} + ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
+                                                 class="seat me-1 d-flex align-items-center justify-content-center">
+                                                <span th:text="${#strings.substring(seat.position, 1)}"></span>
+                                            </div>
                                         </div>
-
-                                        <div class="exit-right">
-                                            <i class="fas fa-door-open"></i><br>
-                                            Entrance/Exit
+                                        <span class="row-label ms-3 fw-bold" th:text="${rowEntry.key}"></span>
+                                    </div>
+                                    <div class="seat-legend d-flex justify-content-center mt-4">
+                                        <div class="d-flex align-items-center me-3">
+                                            <div class="seat-example" style="background: #4CAF50;"></div>
+                                            <small>Available</small>
                                         </div>
-
-                                        <div th:each="rowEntry : ${seatsByRow}"
-                                             class="seat-row d-flex justify-content-center align-items-center mb-2">
-                                <span class="row-label me-3 fw-bold text-muted"
-                                      style="width: 30px; text-align: center;"
-                                      th:text="${rowEntry.key}"></span>
-                                            <div class="d-flex justify-content-center">
-                                                <div th:each="seat, iterStat : ${rowEntry.value}"
-                                                     th:id="'seat-' + ${seat.seatID}"
-                                                     th:data-seat-id="${seat.seatID}"
-                                                     th:data-seat-position="${seat.position}"
-                                                     th:data-seat-price="${seat.unitPrice}"
-                                                     th:data-seat-type="${seat.seatType}"
-                                                     th:classappend="${#lists.contains(bookedSeatIds, seat.seatID) ? 'occupied' : 'available'} +
-                                                ${seat.isVIP ? ' vip' : ''} +
-                                                ${(seat.seatType != null and seat.seatType.name() == 'Couple') ? ' couple' : ''}"
-                                                     class="seat me-1 d-flex align-items-center justify-content-center">
-                                                    <span th:text="${#strings.substring(seat.position, 1)}"></span>
-                                                </div>
-                                            </div>
-
-                                            <span class="row-label ms-3 fw-bold text-muted"
-                                                  style="width: 30px; text-align: center;"
-                                                  th:text="${rowEntry.key}"></span>
+                                        <div class="d-flex align-items-center me-3">
+                                            <div class="seat-example" style="background: #ffc107;"></div>
+                                            <small>Selected</small>
                                         </div>
-                                        <div class="seat-legend d-flex justify-content-center mt-4">
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #28a745; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Available</small>
-                                            </div>
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #ffc107; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Selected</small>
-                                            </div>
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #dc3545; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Booked</small>
-                                            </div>
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 20px; height: 20px; background: #6f42c1; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>VIP</small>
-                                            </div>
-                                            <div class="d-flex align-items-center me-3">
-                                                <div class="seat-example"
-                                                     style="width: 30px; height: 20px; background: #e91e63; border-radius: 3px; margin-right: 5px;"></div>
-                                                <small>Couple</small>
-                                            </div>
+                                        <div class="d-flex align-items-center me-3">
+                                            <div class="seat-example" style="background: #dc3545;"></div>
+                                            <small>Booked</small>
+                                        </div>
+                                        <div class="d-flex align-items-center me-3">
+                                            <div class="seat-example" style="background: #6f42c1;"></div>
+                                            <small>VIP</small>
+                                        </div>
+                                        <div class="d-flex align-items-center">
+                                            <div class="seat-example" style="width: 40px; background: #e91e63;">
+                                            </div><small>Couple</small>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                         <div class="col-lg-3">
-                            <div class="booking-summary p-3"
-                                 style="background: rgba(0,0,0,0.3); border-radius: 10px; border: 1px solid #444;">
+                            <div class="booking-summary p-3">
                                 <h6 th:text="${selectedMovie.movieName}"></h6>
-                                <p class="text-muted small">
+                                <p class="small text-white-50">
                                     <i class="far fa-clock"></i> <span
-                                        th:text="${#temporals.format(selectedSchedule.startTime, 'HH:mm')}"></span> |
+                                        th:text="${#temporals.format(selectedSchedule.startTime, 'HH:mm')}"></span>
+                                    |
                                     <i class="far fa-calendar-alt"></i> <span
                                         th:text="${#temporals.format(selectedSchedule.startTime, 'dd/MM/yyyy')}"></span><br>
                                     <i class="fas fa-desktop"></i> Room <span
-                                        th:text="${selectedSchedule.roomID}"></span>
+                                        th:text="${selectedSchedule.roomName}"></span>
                                 </p>
                                 <hr>
                                 <h6>Selected Seats (<span id="selected-seat-count">0</span>)</h6>
@@ -397,10 +291,9 @@
                                 <hr>
                                 <form action="/cashier/cus-info" method="post" id="seat-selection-form">
                                     <input type="hidden" name="seatIDs" id="selected-seat-ids-input">
-                                    <input type="hidden" name="scheduleId" th:value="${selectedSchedule.scheduleID}">
-                                    <button type="submit" class="btn btn-warning w-100 mt-3">
-                                        <i class="fas fa-arrow-right"></i> Continue
-                                    </button>
+                                    <input type="hidden" name="scheduleId"
+                                           th:value="${selectedSchedule.scheduleID}">
+                                    <button type="submit" class="btn btn-warning w-100 mt-3">Continue</button>
                                 </form>
                             </div>
                         </div>
@@ -411,443 +304,295 @@
             <div class="card card-custom mb-4" th:if="${currentStep == 4}">
                 <div class="card-header d-flex justify-content-between align-items-center">
                     <h5 class="mb-0"><i class="fas fa-user me-2"></i>Customer Information</h5>
-                    <a href="/cashier/back-to-seats" class="btn btn-outline-secondary btn-sm">
+                    <a href="/cashier/back-to-seats" class="btn btn-outline-light btn-sm">
                         <i class="fas fa-arrow-left me-1"></i>Choose other seats
                     </a>
                 </div>
                 <div class="card-body">
-                    <form id="customerInfoForm" action="/cashier/booking/confirm" method="post"><input type="hidden"
-                                                                                                       name="selectedSeats"
-                                                                                                       th:value="${#strings.listJoin(session.selectedSeatIds, ',')}">
+                    <form id="customerInfoForm" action="/cashier/booking/confirm" method="post">
+                        <input type="hidden" name="selectedSeats" th:value="${selectedSeatIds}">
                         <input type="hidden" name="scheduleId" th:value="${selectedSchedule.scheduleID}">
-
-                        <div class="mb-4">
-                            <h6 th:text="${selectedMovie.movieName}"></h6>
-                            <p class="text-muted">
-                                <span th:text="${#temporals.format(selectedSchedule.startTime, 'HH:mm')} + ' - ' + ${#temporals.format(selectedSchedule.endTime, 'HH:mm')}"></span> -
-                                Room <span th:text="${selectedSchedule.roomName}"></span><br>
-                                <strong>Selected Seats:</strong>
-                                <span th:each="seat, iterStat : ${selectedSeats}">
-                        <span class="badge bg-warning text-dark" th:text="${seat}"></span><span th:if="${!iterStat.last}">, </span>
-                    </span>
-                            </p>
-                        </div>
-                        <hr>
-
                         <div class="row">
                             <div class="col-md-6">
-                                <h6 class="mb-3"><i class="fas fa-user-circle me-2"></i>Customer Information</h6>
-                                <div class="row">
-                                    <div class="col-md-6 mb-3">
-                                        <label for="customerName" class="form-label">Full Name</label>
-                                        <input type="text" class="form-control" id="customerName" name="customerName" placeholder="Enter customer's name">
-                                    </div>
-                                    <div class="col-md-6 mb-3">
-                                        <label for="customerPhone" class="form-label">Phone (Optional)</label>
-                                        <input type="tel" class="form-control" id="customerPhone" name="customerPhone" placeholder="Enter phone number...">
-                                    </div>
+                                <h6 class="mb-3">Customer Information</h6>
+                                <div class="mb-3">
+                                    <label for="customerName" class="form-label">Full Name</label>
+                                    <input type="text" class="form-control" id="customerName" name="customerName"
+                                           placeholder="Enter customer's name">
                                 </div>
                                 <div class="mb-3">
-                                    <label for="customerEmail" class="form-label">Email (Optional)</label>
-                                    <input type="email" class="form-control" id="customerEmail" name="customerEmail" placeholder="Enter email">
+                                    <label for="customerPhone" class="form-label">Phone (Optional)</label>
+                                    <input type="tel" class="form-control" id="customerPhone" name="customerPhone"
+                                           placeholder="Enter phone number">
                                 </div>
                                 <div class="mb-3">
                                     <label for="promotion" class="form-label">Promotion (Optional)</label>
                                     <select id="promotion" name="promotionId" class="form-select">
                                         <option value="">-- Choose promotion --</option>
-                                        <option th:each="pro : ${promotions}"
-                                                th:value="${pro.promotionID}"
-                                                th:text="${pro.promotionCode}">
-                                        </option>
+                                        <option th:each="pro : ${promotions}" th:value="${pro.promotionID}"
+                                                th:text="${pro.promotionCode}"></option>
                                     </select>
                                 </div>
                             </div>
-
                             <div class="col-md-6">
-                                <h6 class="mb-3"><i class="fas fa-hamburger me-2"></i>Food & Drink</h6>
-
+                                <h6 class="mb-3">Food & Drink</h6>
                                 <div class="input-group mb-3">
-                                    <input type="text" name="foodKeyword" class="form-control" placeholder="Search for food..." th:value="${foodKeyword}">
-                                    <input type="hidden" name="seatIDs" th:value="${selectedSeatIds}">
-                                    <button class="btn btn-outline-primary" type="submit" formaction="/cashier/cus-info" formnovalidate>
-                                        <i class="fas fa-search"></i>
-                                    </button>
+                                    <input type="text" name="foodKeyword" class="form-control"
+                                           placeholder="Search for food..." th:value="${foodKeyword}">
+                                    <button class="btn btn-outline-primary" type="submit"
+                                            formaction="/cashier/cus-info" formnovalidate><i
+                                            class="fas fa-search"></i></button>
                                 </div>
-
                                 <div th:if="${theaterStockPage != null and !theaterStockPage.isEmpty()}">
-                                    <div class="row">
-                                        <div class="col-12 mb-3" th:each="food : ${theaterStockPage.content}">
-                                            <div class="card h-100" style="background: rgba(0,0,0,0.2);">
-                                                <div class="card-body d-flex justify-content-between align-items-center p-2">
-                                                    <div class="flex-grow-1 me-3">
-                                                        <h6 class="mb-1" th:text="${food.foodName}">Food Name</h6>
-                                                        <p class="mb-1">Price: <span class="text-warning" th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' đ'"></span></p>
-                                                        <p class="text-muted small mb-0">In Stock: <span th:text="${food.quantity}"></span></p>
-                                                    </div>
-                                                    <div class="input-group" style="max-width: 130px;">
-                                                        <button class="btn btn-outline-secondary btn-sm" type="button" th:onclick="updateQuantity([[${food.theaterStockId}]], -1)">-</button>
-                                                        <input type="text" class="form-control text-center px-1" th:id="'quantity-display-' + ${food.theaterStockId}" value="0" readonly style="background: #333; color: white;">
-                                                        <button class="btn btn-outline-secondary btn-sm" type="button" th:onclick="updateQuantity([[${food.theaterStockId}]], 1, [[${food.quantity}]])">+</button>
-                                                    </div>
-                                                    <input type="hidden" th:id="'food-quantity-' + ${food.theaterStockId}" th:name="'foodQuantities[' + ${food.theaterStockId} + ']'" value="0">
+                                    <div th:each="food : ${theaterStockPage.content}" class="mb-3">
+                                        <div class="card h-100 food-card">
+                                            <div
+                                                    class="card-body d-flex justify-content-between align-items-center p-2">
+                                                <div class="flex-grow-1 me-3">
+                                                    <h6 class="mb-1" th:text="${food.foodName}"></h6>
+                                                    <p class="mb-1">Price: <span class="text-warning"
+                                                                                 th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                                    </p>
                                                 </div>
+                                                <div class="input-group" style="max-width: 130px;">
+                                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                                            th:onclick="updateQuantity([[${food.theaterStockId}]], -1)">-</button>
+                                                    <input type="text" class="form-control text-center px-1"
+                                                           th:id="'quantity-display-' + ${food.theaterStockId}"
+                                                           value="0" readonly>
+                                                    <button class="btn btn-outline-secondary btn-sm" type="button"
+                                                            th:onclick="updateQuantity([[${food.theaterStockId}]], 1, [[${food.quantity}]])">+</button>
+                                                </div>
+                                                <input type="hidden"
+                                                       th:id="'food-quantity-' + ${food.theaterStockId}"
+                                                       class="food-quantity-input"
+                                                       th:data-stock-id="${food.theaterStockId}"
+                                                       th:name="'foodQuantities[' + ${food.theaterStockId} + ']'"
+                                                       value="0">
                                             </div>
                                         </div>
                                     </div>
-
-                                    <div th:if="${theaterStockPage.totalPages > 1}" class="d-flex justify-content-center mt-3">
-                                        <nav>
-                                            <ul class="pagination pagination-sm">
-                                                <li class="page-item" th:classappend="${theaterStockPage.first} ? 'disabled'">
-                                                    <a class="page-link" href="#" th:onclick="'changeFoodPage(' + ${theaterStockPage.number - 1} + ')'">Previous</a>
-                                                </li>
-                                                <li class="page-item" th:each="i : ${#numbers.sequence(0, theaterStockPage.totalPages - 1)}" th:classappend="${i == theaterStockPage.number} ? 'active'">
-                                                    <a class="page-link" href="#" th:onclick="'changeFoodPage(' + ${i} + ')'" th:text="${i + 1}"></a>
-                                                </li>
-                                                <li class="page-item" th:classappend="${theaterStockPage.last} ? 'disabled'">
-                                                    <a class="page-link" href="#" th:onclick="'changeFoodPage(' + ${theaterStockPage.number + 1} + ')'">Next</a>
-                                                </li>
-                                            </ul>
-                                        </nav>
+                                    <div th:if="${theaterStockPage.totalPages > 1}"
+                                         class="d-flex justify-content-center mt-3">
                                     </div>
-                                </div>
-
-                                <div th:if="${theaterStockPage == null or theaterStockPage.isEmpty()}">
-                                    <p class="text-center text-muted mt-4">No matching food found.</p>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-md-12 mt-4">
-                            <h6 class="mb-3"><i class="fas fa-money-check-alt me-2"></i>Payment Method</h6>
+                        <div class="mt-4">
+                            <h6 class="mb-3">Payment Method</h6>
                             <div class="card card-custom p-3">
                                 <div class="row">
                                     <div class="col-md-6">
                                         <div class="form-check">
-                                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentCash" value="cash" checked>
-                                            <label class="form-check-label" for="paymentCash" style="color: white">
-                                                <i class="fas fa-money-bill-wave me-2"></i><span>Cash</span>
-                                            </label>
+                                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                                   id="paymentCash" value="cash" checked>
+                                            <label class="form-check-label" for="paymentCash"><i
+                                                    class="fas fa-money-bill-wave me-2"></i>Cash</label>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
-                                        <div class="form-check" style="color: white">
-                                            <input class="form-check-input" type="radio" name="paymentMethod" id="paymentBank" value="bank">
-                                            <label class="form-check-label" for="paymentBank">
-                                                <i class="fas fa-university me-2"></i><span>Bank Transfer</span>
-                                            </label>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="paymentMethod"
+                                                   id="paymentBank" value="bank">
+                                            <label class="form-check-label" for="paymentBank"><i
+                                                    class="fas fa-university me-2"></i>Bank Transfer</label>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="col-12 text-center mt-4">
+                        <div class="text-center mt-4">
                             <button type="submit" class="btn btn-primary w-100">Confirm and Continue</button>
                         </div>
                     </form>
-
-                    <form id="foodPaginationForm" action="/cashier/cus-info" method="post" class="d-none">
-                        <input type="hidden" name="seatIDs" th:value="${selectedSeatIds}">
-                        <input type="hidden" name="foodKeyword" th:value="${foodKeyword}">
-                        <input type="hidden" id="foodPageInput" name="foodPage" value="">
-                    </form>
                 </div>
             </div>
 
-            <div th:if="${currentStep == 5}" class="step-content">
-                <div class="row">
-                    <div class="col-12">
-                        <div class="text-center mb-4">
-                            <div class="success-icon mb-3">
-                                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
-                            </div>
-                            <h2 class="text-success mb-2">Booking Successful!</h2>
-                            <p class="text-muted">Thank you for using our service.</p>
+            <div th:if="${currentStep == 5}">
+                <div class="row justify-content-center">
+                    <div class="col-lg-10 text-center mb-4">
+                        <div class="success-icon mb-3">
+                            <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
                         </div>
+                        <h2 class="text-success mb-2">Booking Successful!</h2>
+                        <p class="text-white-50">Thank you for using our service.</p>
                     </div>
                 </div>
 
-                <div th:if="${bookingResult != null}" class="row">
-                    <div class="col-lg-8">
+                <div th:if="${bookingResult != null}" class="row justify-content-center">
+                    <div class="col-lg-7 col-md-12 mb-4 mb-lg-0">
                         <div class="card card-custom">
                             <div class="card-header d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-receipt me-2"></i>Invoice Information
-                                </h5>
-                                <div class="invoice-actions">
-                                    <button class="btn btn-outline-primary btn-sm"
-                                            th:onclick="'window.open(\'' + @{/cashier/print-ticket/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=400,height=600\');'">
-                                        <i class="fas fa-print me-1"></i>Print Invoice
-                                    </button>
-                                </div>
+                                <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Invoice Information</h5>
+                                <button class="btn btn-outline-light btn-sm"
+                                        th:onclick="'window.open(\'' + @{/cashier/print/invoice/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=500,height=800\');'"><i
+                                        class="fas fa-print me-1"></i>Print</button>
                             </div>
                             <div class="card-body">
-                                <div class="invoice-header mb-4">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <h6 class="text-muted mb-1">Invoice ID:</h6>
-                                            <h5 class="text-primary mb-3"
-                                                th:text="'#' + ${bookingResult.invoiceId}"></h5>
-
-                                            <h6 class="text-muted mb-1">Booking Date:</h6>
-                                            <p th:text="${bookingResult.bookingDate}"></p>
-                                        </div>
-                                        <div class="col-md-6 text-md-end">
-                                            <h6 class="text-muted mb-1">Total Amount:</h6>
-                                            <h3 class="text-warning mb-0"
-                                                th:text="${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></h3>
-                                        </div>
+                                <div class="invoice-header row mb-3">
+                                    <div class="col-md-6">
+                                        <h6 class="text-muted mb-1">Invoice ID:</h6>
+                                        <h5 class="text-primary mb-3"
+                                            th:text="'#' + ${bookingResult.invoiceId}"></h5>
+                                        <h6 class="text-muted mb-1">Customer:</h6>
+                                        <p th:text="${bookingResult.customerName ?: 'Guest'}"></p>
+                                    </div>
+                                    <div class="col-md-6 text-md-end">
+                                        <h6 class="text-muted mb-1">Booking Date:</h6>
+                                        <p
+                                                th:text="${#temporals.format(bookingResult.bookingDate, 'dd/MM/yyyy HH:mm')}">
+                                        </p>
                                     </div>
                                 </div>
 
-                                <div class="customer-info mb-4">
-                                    <h6 class="border-bottom pb-2 mb-3">
-                                        <i class="fas fa-user me-2"></i>Customer Information
-                                    </h6>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p class="mb-2">
-                                                <strong>Full Name:</strong>
-                                                <span th:text="${bookingResult.customerName}"></span>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <p class="mb-2">
-                                                <strong>Phone Number:</strong>
-                                                <span th:text="${bookingResult.customerPhone}"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="movie-info mb-4">
-                                    <h6 class="border-bottom pb-2 mb-3">
-                                        <i class="fas fa-film me-2"></i>Movie Information
-                                    </h6>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p class="mb-2">
-                                                <strong>Movie Title:</strong>
-                                                <span th:text="${bookingResult.movieName}"></span>
-                                            </p>
-                                            <p class="mb-2">
-                                                <strong>Duration:</strong>
-                                                <span th:text="${bookingResult.movieDuration} + ' minutes'"></span>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <p class="mb-2">
-                                                <strong>Showtime:</strong>
-                                                <span th:text="${bookingResult.scheduleTime}"></span>
-                                            </p>
-                                            <p class="mb-2">
-                                                <strong>Screen:</strong>
-                                                <span th:text="${bookingResult.roomName}"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="seat-info mb-4">
-                                    <h6 class="border-bottom pb-2 mb-3">
-                                        <i class="fas fa-chair me-2"></i>Seat Information
-                                    </h6>
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <p class="mb-2">
-                                                <strong>Seat Positions:</strong>
-                                            </p>
-                                            <div class="seat-list">
-                        <span th:each="seat, iterStat : ${bookingResult.seatPositions}"
-                              class="badge bg-primary me-1 mb-1"
-                              th:text="${seat}"></span>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-6">
-                                            <p class="mb-2">
-                                                <strong>Total Ticket Price:</strong>
-                                                <span class="text-success"
-                                                      th:text="${#numbers.formatDecimal(bookingResult.totalTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div th:if="${bookingResult.foodItems != null and !bookingResult.foodItems.isEmpty()}"
-                                     class="food-info mb-4">
-                                    <h6 class="border-bottom pb-2 mb-3">
-                                        <i class="fas fa-utensils me-2"></i>Concessions Information
-                                    </h6>
-                                    <div class="table-responsive">
-                                        <table class="table table-sm">
-                                            <thead class="table-light">
-                                            <tr>
-                                                <th>Item</th>
-                                                <th class="text-center">Quantity</th>
-                                                <th class="text-end">Unit Price</th>
-                                                <th class="text-end">Subtotal</th>
-                                            </tr>
-                                            </thead>
-                                            <tbody>
-                                            <tr th:each="food : ${bookingResult.foodItems}">
-                                                <td th:text="${food.name}"></td>
-                                                <td class="text-center" th:text="${food.quantity}"></td>
-                                                <td class="text-end"
-                                                    th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
-                                                <td class="text-end"
-                                                    th:text="${#numbers.formatDecimal(food.unitPrice * food.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'"></td>
-                                            </tr>
-                                            </tbody>
-                                            <tfoot class="table-light">
-                                            <tr>
-                                                <th colspan="3" class="text-end">Total Concessions Price:</th>
-                                                <th class="text-end text-success"
-                                                    th:text="${#numbers.formatDecimal(bookingResult.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></th>
-                                            </tr>
-                                            </tfoot>
-                                        </table>
-                                    </div>
-                                </div>
-
-                                <div class="total-summary">
-                                    <div class="row">
-                                        <div class="col-md-6 offset-md-6">
-                                            <div class="card bg-light">
-                                                <div class="card-body">
-                                                    <div class="d-flex justify-content-between mb-2">
-                                                        <span>Ticket Price:</span>
-                                                        <span th:text="${#numbers.formatDecimal(bookingResult.totalTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-                                                    </div>
-                                                    <div th:if="${bookingResult.totalFoodPrice != null and bookingResult.totalFoodPrice > 0}"
-                                                         class="d-flex justify-content-between mb-2">
-                                                        <span>Concessions Price:</span>
-                                                        <span th:text="${#numbers.formatDecimal(bookingResult.totalFoodPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></span>
-                                                    </div>
-                                                    <hr class="my-2">
-                                                    <div class="d-flex justify-content-between">
-                                                        <strong class="fs-5">Grand Total:</strong>
-                                                        <strong class="text-warning fs-5"
-                                                                th:text="${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'"></strong>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+                                <table class="table table-borderless invoice-details-table">
+                                    <thead>
+                                    <tr class="heading">
+                                        <td>Description</td>
+                                        <td class="text-center">Qty</td>
+                                        <td class="text-end">Price</td>
+                                        <td class="text-end">Total</td>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr class="item-row">
+                                        <td colspan="4" class="fw-bold pt-3 pb-2"
+                                            th:text="'Movie: ' + ${bookingResult.movieName}"></td>
+                                    </tr>
+                                    <tr class="item-row" th:each="seat : ${bookingResult.seatPositions}">
+                                        <td th:text="'Seat ' + ${seat}"></td>
+                                        <td class="text-center">1</td>
+                                        <td class="text-end"
+                                            th:text="${#numbers.formatDecimal(bookingResult.unitTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                        </td>
+                                        <td class="text-end"
+                                            th:text="${#numbers.formatDecimal(bookingResult.unitTicketPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${bookingResult.foodItems != null and !bookingResult.foodItems.isEmpty()}"
+                                        class="item-row">
+                                        <td colspan="4" class="fw-bold pt-3 pb-2">Food & Drinks</td>
+                                    </tr>
+                                    <tr class="item-row" th:each="food : ${bookingResult.foodItems}">
+                                        <td th:text="${food.name}"></td>
+                                        <td class="text-center" th:text="${food.quantity}"></td>
+                                        <td class="text-end"
+                                            th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                        </td>
+                                        <td class="text-end"
+                                            th:text="${#numbers.formatDecimal(food.unitPrice * food.quantity, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                        </td>
+                                    </tr>
+                                    </tbody>
+                                    <tfoot>
+                                    <tr>
+                                        <td colspan="3" class="text-end pt-4">Subtotal:</td>
+                                        <td class="text-end pt-4"
+                                            th:text="${#numbers.formatDecimal(bookingResult.subTotalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                        </td>
+                                    </tr>
+                                    <tr
+                                            th:if="${bookingResult.discountAmount != null and bookingResult.discountAmount > 0}">
+                                        <td colspan="3" class="text-end text-success">Discount (<span
+                                                th:text="${bookingResult.promotionName}"></span>):</td>
+                                        <td class="text-end text-success"
+                                            th:text="'-' + ${#numbers.formatDecimal(bookingResult.discountAmount, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                        </td>
+                                    </tr>
+                                    <tr class="total-row fw-bold">
+                                        <td colspan="3" class="text-end">TOTAL DUE:</td>
+                                        <td class="text-end text-warning"
+                                            th:text="${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 0, 'POINT')} + '₫'">
+                                        </td>
+                                    </tr>
+                                    </tfoot>
+                                </table>
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-lg-4">
+                    <div class="col-lg-5 col-md-12">
                         <div class="card card-custom">
                             <div class="card-header">
-                                <h5 class="mb-0">
-                                    <i class="fas fa-cogs me-2"></i>Quick Actions
-                                </h5>
+                                <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Quick Actions</h5>
                             </div>
                             <div class="card-body">
                                 <div class="d-grid gap-3">
-                                    <button class="btn btn-primary btn-lg"
-                                            th:onclick="'window.open(\'' + @{/cashier/print/invoice/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=500,height=800\');'">
-                                        <i class="fas fa-receipt me-2"></i>Print Main Invoice
-                                    </button>
-
-                                    <button th:if="${bookingResult.totalFoodPrice != null && bookingResult.totalFoodPrice.doubleValue() > 0}"
-                                            class="btn btn-info btn-lg"
-                                            th:onclick="'window.open(\'' + @{/cashier/print/food-receipt/{id}(id=${bookingResult.invoiceId})} + '\', \'_blank\', \'width=400,height=600\');'">
-                                        <i class="fas fa-utensils me-2"></i>Print Food Invoice
-                                    </button>
-
-                                    <a href="/cashier" class="btn btn-outline-success btn-lg">
-                                        <i class="fas fa-plus me-2"></i>New Booking
-                                    </a>
+                                    <a href="/cashier/movie/" class="btn btn-outline-success btn-lg"><i
+                                            class="fas fa-plus me-2"></i>New Booking</a>
                                 </div>
                             </div>
                         </div>
-
-                        <div class="card card-custom mt-3">
-                            <div class="card-header">
-                                <h6 class="mb-0">
-                                    <i class="fas fa-info-circle me-2"></i>Notes
-                                </h6>
-                            </div>
-                            <div class="card-body">
-                                <ul class="list-unstyled small mb-0">
-                                    <li class="mb-2">
-                                        <i class="fas fa-check-circle text-success me-1"></i>
-                                        Please arrive 15 minutes before the showtime.
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="fas fa-check-circle text-success me-1"></i>
-                                        Present the invoice at the entrance.
-                                    </li>
-                                    <li class="mb-2">
-                                        <i class="fas fa-check-circle text-success me-1"></i>
-                                        Keep your ticket safe throughout the screening.
-                                    </li>
-                                    <li class="mb-0">
-                                        <i class="fas fa-check-circle text-success me-1"></i>
-                                        Contact the ticket counter for assistance.
-                                    </li>
-                                </ul>
-                            </div>
-                        </div>
                     </div>
-
                 </div>
             </div>
-
         </div>
     </div>
 </div>
+
+<div class="modal fade" id="bankPaymentModal" tabindex="-1" aria-labelledby="bankPaymentModalLabel"
+     aria-hidden="true" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="bankPaymentModalLabel">Scan QR to Pay</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
+            </div>
+            <div class="modal-body text-center">
+                <img id="qrCodeImage" src="" alt="QR Code" class="img-fluid mb-3 bg-white p-2 rounded">
+                <div class="alert alert-info">
+                    <p class="mb-1">Transfer Content: <strong id="qrContent"></strong></p>
+                    <p class="mb-0">Amount: <strong class="text-warning" id="qrAmount"></strong></p>
+                </div>
+                <div class="mt-3">
+                    <div class="spinner-border text-warning spinner-border-sm" role="status"></div>
+                    <span class="ms-2">Waiting for payment confirmation...</span>
+                </div>
+                <div class="mt-2">
+                    <p class="small">This window will close in <span id="countdownTimer"
+                                                                     class="fw-bold">05:00</span></p>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script th:if="${currentStep == 3}">
     document.addEventListener('DOMContentLoaded', function () {
         const seatContainer = document.querySelector('.seat-map-container');
         const selectedSeatsList = document.getElementById('selected-seats-list');
         const selectedSeatCount = document.getElementById('selected-seat-count');
-        const totalPriceDisplay = document.getElementById('total-price');
         const seatIdsInput = document.getElementById('selected-seat-ids-input');
         const seatSelectionForm = document.getElementById('seat-selection-form');
-
         let selectedSeats = new Map();
-
         seatContainer.addEventListener('click', function (e) {
             const seatElement = e.target.closest('.seat');
             if (seatElement && !seatElement.classList.contains('occupied')) {
                 const seatId = seatElement.getAttribute('data-seat-id');
                 const seatPosition = seatElement.getAttribute('data-seat-position');
                 const seatPrice = parseFloat(seatElement.getAttribute('data-seat-price'));
-
                 seatElement.classList.toggle('selected');
-
                 if (seatElement.classList.contains('selected')) {
-                    selectedSeats.set(seatId, {position: seatPosition, price: seatPrice});
+                    selectedSeats.set(seatId, { position: seatPosition, price: seatPrice });
                 } else {
                     selectedSeats.delete(seatId);
                 }
                 updateSummary();
             }
         });
-
         function updateSummary() {
             selectedSeatsList.innerHTML = '';
-            let total = 0;
-
             for (const [id, seatData] of selectedSeats.entries()) {
                 const li = document.createElement('li');
                 li.className = 'd-flex justify-content-between';
-                li.innerHTML = `<span><i class="fas fa-chair fa-xs me-2"></i>${seatData.position}</span> <span>${seatData.price.toLocaleString('en-US')} VND</span>`;
+                li.innerHTML = `<span><i class="fas fa-chair fa-xs me-2"></i>${seatData.position}</span> <span class="text-warning">${seatData.price.toLocaleString('vi-VN')} ₫</span>`;
                 selectedSeatsList.appendChild(li);
-                total += seatData.price;
             }
-
             selectedSeatCount.textContent = selectedSeats.size;
             seatIdsInput.value = Array.from(selectedSeats.keys()).join(',');
         }
-
         seatSelectionForm.addEventListener('submit', function (e) {
             if (selectedSeats.size === 0) {
                 e.preventDefault();
@@ -856,30 +601,129 @@
         });
     });
 </script>
-
-<script th:inline="javascript">
+<script th:inline="javascript" th:if="${currentStep == 4}">
+    /*<![CDATA[*/
+    var selectedSeatIdsString = /*[[${selectedSeatIds}]]*/ '';
+    var scheduleId = /*[[${selectedSchedule.scheduleID}]]*/ 0;
+    /*]]>*/
     function changeFoodPage(page) {
         event.preventDefault();
         document.getElementById('foodPageInput').value = page;
         document.getElementById('foodPaginationForm').submit();
     }
-
     function updateQuantity(stockId, change, maxQuantity) {
         const display = document.getElementById('quantity-display-' + stockId);
         const hiddenInput = document.getElementById('food-quantity-' + stockId);
         let currentValue = parseInt(display.value);
         let newValue = currentValue + change;
-
-        if (newValue < 0) {
-            newValue = 0;
-        }
-        if (maxQuantity !== undefined && newValue > maxQuantity) {
-            newValue = maxQuantity;
-        }
-
+        if (newValue < 0) newValue = 0;
+        if (maxQuantity !== undefined && newValue > maxQuantity) newValue = maxQuantity;
         display.value = newValue;
         hiddenInput.value = newValue;
     }
+    let paymentPoller;
+    let countdownInterval;
+    let modalTimeout;
+    const paymentModal = new bootstrap.Modal(document.getElementById('bankPaymentModal'));
+    function cleanupTimers() {
+        if (paymentPoller) clearInterval(paymentPoller);
+        if (countdownInterval) clearInterval(countdownInterval);
+        if (modalTimeout) clearTimeout(modalTimeout);
+        paymentPoller = null;
+        countdownInterval = null;
+        modalTimeout = null;
+    }
+    function startPaymentCheck(invoiceId) {
+        cleanupTimers();
+        paymentPoller = setInterval(function () {
+            $.post("/cashier/check-payment-status", { order_id: invoiceId })
+                .done(function (data) {
+                    if (data.payment_status === "Booked" || data.payment_status === "Paid") {
+                        cleanupTimers();
+                        paymentModal.hide();
+                        window.location.href = "/cashier/booking/success/" + invoiceId;
+                    }
+                })
+                .fail(function () { console.error("Error checking payment status."); });
+        }, 3000);
+        modalTimeout = setTimeout(function () {
+            if (paymentModal._isShown) {
+                cleanupTimers();
+                paymentModal.hide();
+                alert('Payment time has expired.');
+            }
+        }, 300000);
+    }
+    function startCountdown() {
+        let duration = 300;
+        const display = document.getElementById('countdownTimer');
+        countdownInterval = setInterval(function () {
+            let minutes = parseInt(duration / 60, 10);
+            let seconds = parseInt(duration % 60, 10);
+            minutes = minutes < 10 ? "0" + minutes : minutes;
+            seconds = seconds < 10 ? "0" + seconds : seconds;
+            display.textContent = minutes + ":" + seconds;
+            if (--duration < 0) {
+                clearInterval(countdownInterval);
+            }
+        }, 1000);
+    }
+    $('#customerInfoForm').on('submit', function (e) {
+        const paymentMethod = $('input[name="paymentMethod"]:checked').val();
+        if (paymentMethod === 'bank') {
+            e.preventDefault();
+            const foodQuantities = {};
+            $('.food-quantity-input').each(function () {
+                const stockId = $(this).data('stock-id');
+                const quantity = parseInt($(this).val());
+                if (quantity > 0) {
+                    foodQuantities[stockId] = quantity;
+                }
+            });
+            const seatIdsArray = selectedSeatIdsString ? selectedSeatIdsString.split(',').map(Number) : [];
+            const bookingRequest = {
+                customerName: $('#customerName').val(),
+                customerPhone: $('#customerPhone').val(),
+                customerEmail: $('#customerEmail').val(),
+                promotionId: $('#promotion').val() || null,
+                selectedSeats: seatIdsArray,
+                scheduleId: scheduleId,
+                foodQuantities: foodQuantities
+            };
+            $.ajax({
+                type: "POST",
+                url: "/cashier/booking/initiate-bank-payment",
+                contentType: "application/json",
+                data: JSON.stringify(bookingRequest),
+                success: function (response) {
+                    if (response.success) {
+                        $('#qrCodeImage').attr('src', response.qrUrl);
+                        $('#qrContent').text('DH' + response.invoiceId);
+                        $('#qrAmount').text(response.amount.toLocaleString('vi-VN') + '₫');
+                        paymentModal.show();
+                        startPaymentCheck(response.invoiceId);
+                        startCountdown();
+                    } else {
+                        alert('Error creating QR Code: ' + response.message);
+                    }
+                },
+                error: function (xhr) {
+                    let errorMsg = "An unknown error occurred.";
+                    if (xhr.responseJSON && xhr.responseJSON.message) {
+                        errorMsg = xhr.responseJSON.message;
+                    } else if (xhr.responseText) {
+                        errorMsg = xhr.responseText;
+                    }
+                    alert('Could not initiate bank payment. Server error: ' + errorMsg);
+                }
+            });
+        }
+    });
+    document.getElementById('bankPaymentModal').addEventListener('hidden.bs.modal', function () {
+        cleanupTimers();
+    });
 </script>
+
 </body>
+
 </html>
