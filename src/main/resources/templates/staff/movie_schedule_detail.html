@@ -324,7 +324,7 @@
                 data: { scheduleId: scheduleId },
                 success: function(response) {
                     if (response.success) {
-                        alert('Schedule deleted successfully!'); // Giữ nguyên alert
+                        alert('Schedule deleted successfully!');
                         closeEditModal();
                         location.reload();
                     } else {
@@ -357,17 +357,12 @@
             data: formData,
             success: function(response) {
                 if (response.success) {
-                    alert(response.message); // Hiển thị thông báo thành công
+                    alert(response.message);
                     closeEditModal();
                     location.reload();
                 } else {
-                    // THAY ĐỔI: Hiển thị thông báo lỗi bằng alert
                     alert(response.message);
                 }
-            },
-            error: function(xhr) {
-                const errorMessage = xhr.responseJSON ? xhr.responseJSON.message : 'An unexpected error occurred. Please try again.';
-                alert(errorMessage);
             }
         });
     }

@@ -97,7 +97,6 @@ public class SeatServiceImpl implements SeatService {
         seat.setUnitPrice(dto.getUnitPrice());
         seat.setStatus(dto.getStatus());
         seat.setName(dto.getName() == null ? "" : dto.getName());
-        // Gắn Room từ roomID
         Optional<Room> room = roomRepository.findById(dto.getRoomID());
         room.ifPresent(seat::setRoom);
 
@@ -171,7 +170,13 @@ public class SeatServiceImpl implements SeatService {
         Map<Character, List<Seat>> seatsByRow = new LinkedHashMap<>();
         for (Seat seat : allSeats) {
             char rowChar = seat.getPosition().charAt(0);
-            seatsByRow.computeIfAbsent(rowChar, k -> new ArrayList<>()).add(seat);
+            if (seatsByRow.containsKey(rowChar)) {
+                seatsByRow.get(rowChar).add(seat);
+            } else {
+                List<Seat> newList = new ArrayList<>();
+                newList.add(seat);
+                seatsByRow.put(rowChar, newList);
+            }
         }
 
         for (List<Seat> rowSeats : seatsByRow.values()) {

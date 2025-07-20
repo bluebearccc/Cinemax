@@ -21,10 +21,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Controller
@@ -229,12 +226,14 @@ public class StaffTheaterController {
             return "redirect:/staff/theater";
         }
 
-        Map<Character, List<SeatDTO>> seatsByRow = room.getSeats().stream()
-                .collect(Collectors.groupingBy(
-                        seat -> seat.getPosition().charAt(0),
-                        Collectors.toList()
-                ));
-
+        Map<Character, List<SeatDTO>> seatsByRow = new HashMap<>();
+        for (SeatDTO seat : room.getSeats()) {
+            char row = seat.getPosition().charAt(0);
+            if (!seatsByRow.containsKey(row)) {
+                seatsByRow.put(row, new ArrayList<>());
+            }
+            seatsByRow.get(row).add(seat);
+        }
         List<Character> sortedRowLabels = new ArrayList<>(seatsByRow.keySet());
         java.util.Collections.sort(sortedRowLabels);
         EmployeeDTO e = (EmployeeDTO) session.getAttribute("employee");

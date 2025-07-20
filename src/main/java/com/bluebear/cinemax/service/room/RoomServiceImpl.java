@@ -181,8 +181,7 @@ public class RoomServiceImpl implements RoomService {
         room.setTheater(theater);
         Room savedRoom = roomRepository.save(room);
 
-        // --- Phần tạo ghế giữ nguyên ---
-        // ...
+
         List<Seat> seatsToCreate = new ArrayList<>();
         int rows = savedRoom.getRow();
         int columns = savedRoom.getCollumn();
@@ -222,11 +221,9 @@ public class RoomServiceImpl implements RoomService {
                 roomId, Schedule_Status.Active, today);
 
         if (!futureSchedules.isEmpty()) {
-            // (Logic tạo thông báo lỗi cho lịch chiếu tương lai giữ nguyên...)
             throw new Exception("Cannot delete this room. It has active future schedules.");
         }
 
-        // === BƯỚC 2: KIỂM TRA LỊCH CHIẾU TRONG QUÁ KHỨ ĐÃ BÁN VÉ ===
         List<Schedule> allSchedulesForRoom = scheduleRepository.findByRoom_RoomID(roomId);
         StringBuilder pastConflictsDetails = new StringBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
@@ -348,7 +345,6 @@ public class RoomServiceImpl implements RoomService {
 
             long soldSeatCount = detailSeatRepository.countBySeat_SeatIDIn(seatIdsToDelete);
 
-            // Nếu có vé đã bán, ném ra lỗi
             if (soldSeatCount > 0) {
                 throw new Exception(String.format(
                         "Cannot reduce room size. At least %d seats that would be removed have already been sold in past schedules.",

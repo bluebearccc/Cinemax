@@ -324,9 +324,7 @@
               <th:block th:each="row : ${#numbers.sequence(1, room.row)}">
                 <div class="seat-row">
                   <div class="row-label" th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row)}"></div>
-
                   <th:block th:each="col : ${#numbers.sequence(1, room.collumn)}">
-
                     <th:block th:with="seatPosition=${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row) + col}">
                       <th:block th:with="currentSeats=${room.seats.?[position == #vars.seatPosition]}">
                         <div th:if="${not #lists.isEmpty(currentSeats)}" th:with="seat=${currentSeats[0]}" class="seat-container" th:id="'seat-container-' + ${seat.seatID}">

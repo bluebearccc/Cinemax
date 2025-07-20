@@ -12,5 +12,4 @@ public class SeatUpdateRequest {
     private Double vipPrice;
     private Map<Integer, String> positions;
     private Map<Integer, Seat_Status> seatStatuses;
-
 }
