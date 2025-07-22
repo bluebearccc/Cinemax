@@ -13,9 +13,12 @@ import org.springframework.stereotype.Repository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
+    @Query("SELECT s FROM Schedule s JOIN FETCH s.movie JOIN FETCH s.room WHERE s.scheduleID = :scheduleId")
+    Optional<Schedule> findByIdWithMovieAndRoom(@Param("scheduleId") Integer scheduleId);
     Page<Schedule> findByStatus(Schedule_Status status, Pageable pageable);
 
     @Query("SELECT s FROM Movie m JOIN m.scheduleList s WHERE m.movieID = :movieId AND CAST(s.startTime AS DATE) = CAST(:day AS DATE) AND s.startTime > :day AND s.status = :status")

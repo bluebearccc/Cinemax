@@ -4,6 +4,8 @@ import com.bluebear.cinemax.dto.PromotionDTO;
 import com.bluebear.cinemax.entity.Promotion;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 public interface PromotionService {
     PromotionDTO createPromotion(PromotionDTO dto);
@@ -21,4 +23,7 @@ public interface PromotionService {
     Promotion toEntity(PromotionDTO dto);
 
     List<PromotionDTO> getActivePromotions();
+
+    Optional<PromotionDTO> validatePromotionCode(String code);
+    Map<String, Object> checkPromotionCode(String code, double totalAmount);
 }

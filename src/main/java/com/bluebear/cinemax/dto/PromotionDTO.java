@@ -23,4 +23,18 @@ public class PromotionDTO {
     private Promotion_Status status;
 
     private List<InvoiceDTO> invoiceDTOList;
+
+    public PromotionDTO(Integer promotionID, String promotionCode, Double discount, LocalDateTime startTime, LocalDateTime endTime, Integer quantity, Promotion_Status status) {
+        this.promotionID = promotionID;
+        this.promotionCode = promotionCode;
+        this.discount = discount;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.quantity = quantity;
+        this.status = status;
+    }
+
+    public boolean isValid() {
+        return quantity > 0 && endTime.isAfter(LocalDateTime.now());
+    }
 }

@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard - Cinema Management</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+</head>
+<body>
+<!-- Header -->
+<div class="header">
+    <div class="header-content">
+        <div class="logo">
+            <i class="fas fa-film"></i>
+            <span>Cinema Admin</span>
+        </div>
+        <div class="user-info">
+            <span>Xin chào, Admin</span>
+            <div class="user-avatar">
+                <i class="fas fa-user"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Container -->
+<div class="container">
+    <h1 class="page-title"></h1>
+    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
+        <form method="get" th:action="@{/admin/dashboard}" style="display: flex; align-items: center; gap: 8px;">
+            <input type="hidden" name="page" th:value="${currentPage}"/>
+            <input type="hidden" name="filter" th:value="${filter}"/>
+            <input type="hidden" name="keyword" th:value="${keyword}"/>
+            <input type="hidden" name="minRate" th:value="${minRate}"/>
+            <input type="hidden" name="maxRate" th:value="${maxRate}"/>
+            <input type="hidden" name="feedbackPage" th:value="${feedbackCurrentPage}"/>
+
+            <label for="yearFilter" style="font-weight: bold;color: white">Chọn năm:</label>
+            <select id="yearFilter" name="yearFilter" onchange="this.form.submit()">
+                <option value="now" th:selected="${yearFilter == 'now'}">Năm nay</option>
+                <option value="last" th:selected="${yearFilter == 'last'}">Năm ngoái</option>
+                <option value="twoYearsAgo" th:selected="${yearFilter == 'twoYearsAgo'}">Hai năm trước</option>
+            </select>
+        </form>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card revenue">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+            <div class="stat-title">Tổng doanh thu</div>
+            <div class="stat-value">
+                <span th:text="${dashboard.revenueYear}"></span> VNĐ
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                Doanh thu năm nay
+            </div>
+        </div>
+
+        <div class="stat-card food">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-chair"></i>
+                </div>
+            </div>
+            <div class="stat-title">Tổng số ghế đã đặt</div>
+            <div class="stat-value">
+                <span th:text="${dashboard.ticketsThisYear}"></span> ghế
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                Số ghế đã đặt trong năm
+            </div>
+        </div>
+
+        <div class="stat-card movies">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+            </div>
+            <div class="stat-title">Số phim đang chiếu</div>
+            <div class="stat-value">
+                <span th:text="${dashboard.showingMovies}"></span> phim
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                Phim hiện tại đang chiếu
+            </div>
+        </div>
+
+        <div class="stat-card shows">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="stat-title">Số vé hôm nay</div>
+            <div class="stat-value">
+                <span th:text="${dashboard.ticketsToday}"></span> vé
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                Vé bán được hôm nay
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="charts-section">
+        <div class="chart-card">
+            <h3 class="chart-title">
+                <i class="fas fa-chart-bar"></i>
+                Doanh Thu Theo Thời Gian
+            </h3>
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3 class="chart-title">
+                <i class="fas fa-ticket-alt"></i>
+                Số Vé Bán Ra
+            </h3>
+            <canvas id="ticketsChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Trend Chart -->
+    <div class="trend-section">
+        <h2 class="chart-title">
+            <i class="fas fa-chart-area"></i>
+            Xu hướng doanh thu (dựa trên ngày đặt vé)
+        </h2>
+        <div class="trend-controls">
+            <label for="revenueRange">Chọn khoảng thời gian:</label>
+            <select id="revenueRange" class="trend-select" onchange="fetchRevenueTrend()">
+                <option value="7">7 ngày gần nhất</option>
+                <option value="30">30 ngày gần nhất</option>
+                <option value="365">365 ngày</option>
+            </select>
+        </div>
+        <canvas id="trendChart" height="100"></canvas>
+    </div>
+
+    <!-- Movies Section -->
+    <div class="movies-section" style="display: flex; gap: 20px; align-items: flex-start;">
+        <div style="flex: 2;">
+            <h2 class="chart-title">
+                <i class="fas fa-list"></i>
+                Thống kê theo từng phim
+            </h2>
+
+            <form method="get" action="/admin/dashboard">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Lọc phim:</label>
+                        <select name="filter" class="filter-select">
+                            <option value="" th:selected="${filter == null or filter == ''}">Tất cả</option>
+                            <option value="showing" th:selected="${filter == 'showing'}">Đang chiếu</option>
+                            <option value="coming" th:selected="${filter == 'coming'}">Sắp chiếu</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Tìm phim:</label>
+                        <input type="text" name="keyword" class="filter-input" placeholder="Nhập tên phim..." th:value="${keyword}">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Áp dụng
+                    </button>
+                </div>
+            </form>
+
+            <form method="get" action="/admin/dashboard" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i>
+                    Làm mới
+                </button>
+            </form>
+
+            <table class="movies-table">
+                <thead>
+                <tr>
+                    <th>STT</th>
+                    <th>Ảnh</th>
+                    <th>Tên phim</th>
+                    <th>Ngày chiếu</th>
+                    <th>Vé đã bán</th>
+                    <th>Doanh thu</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="movie, iterStat : ${movies}">
+                    <td th:text="${iterStat.index + 1 + (currentPage * 5)}"></td>
+                    <td><img th:src="@{${movie.image}}" alt="Movie poster" class="movie-image"/></td>
+                    <td th:text="${movie.movieName}"></td>
+                    <td th:text="${#temporals.format(movie.startDate, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(movie.endDate, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${movie.totalTickets}"></td>
+                    <td th:text="${movie.totalRevenue} + ' VND'"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <span class="pagination-info">Trang <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span></span>
+                <div th:if="${currentPage > 0}">
+                    <a th:href="@{/dashboard(page=${currentPage - 1}, filter=${filter}, keyword=${keyword})}" class="pagination-link">
+                        <i class="fas fa-chevron-left"></i> Trước
+                    </a>
+                </div>
+                <div th:if="${currentPage + 1 < totalPages}">
+                    <a th:href="@{/dashboard(page=${currentPage + 1}, filter=${filter}, keyword=${keyword})}" class="pagination-link">
+                        Sau <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div style="flex: 1;">
+            <h2 class="chart-title">
+                <i class="fas fa-star"></i>
+                Phản hồi dịch vụ
+            </h2>
+
+            <!-- Lọc rate -->
+            <form method="get" action="/admin/dashboard" style="margin-bottom: 10px;">
+                <input type="hidden" name="page" th:value="${currentPage}"/>
+                <input type="hidden" name="filter" th:value="${filter}"/>
+                <input type="hidden" name="keyword" th:value="${keyword}"/>
+
+                <label>Rate từ:</label>
+                <select name="minRate">
+                    <option th:each="i : ${#numbers.sequence(1, 5)}" th:value="${i}" th:text="${i}" th:selected="${minRate == i}"></option>
+                </select>
+                <label>đến</label>
+                <select name="maxRate">
+                    <option th:each="i : ${#numbers.sequence(1, 5)}" th:value="${i}" th:text="${i}" th:selected="${maxRate == i}"></option>
+                </select>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Lọc
+                </button>
+            </form>
+
+            <!-- Table feedback -->
+            <table class="movies-table" style="font-size: 0.85rem;">
+                <thead>
+                <tr>
+                    <th>customer ID</th>
+                    <th>content</th>
+                    <th>Rate</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="fb : ${feedbacks}">
+                    <td th:text="${fb.customerId}"></td>
+                    <th th:text="${fb.content}"></th>
+                    <td th:text="${fb.serviceRate}"></td>
+                    <td th:text="${fb.status}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <!-- Phân trang feedback -->
+            <div class="pagination" style="margin-top: 10px;">
+                <span>Trang <span th:text="${feedbackCurrentPage + 1}"></span> / <span th:text="${feedbackTotalPages}"></span></span>
+                <div th:if="${feedbackCurrentPage > 0}">
+                    <a th:href="@{/dashboard(page=${currentPage}, feedbackPage=${feedbackCurrentPage - 1}, filter=${filter}, keyword=${keyword}, minRate=${minRate}, maxRate=${maxRate})}" class="pagination-link">
+                        <i class="fas fa-chevron-left"></i> Trước
+                    </a>
+                </div>
+                <div th:if="${feedbackCurrentPage + 1 < feedbackTotalPages}">
+                    <a th:href="@{/dashboard(page=${currentPage}, feedbackPage=${feedbackCurrentPage + 1}, filter=${filter}, keyword=${keyword}, minRate=${minRate}, maxRate=${maxRate})}" class="pagination-link">
+                        Sau <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Revenue Chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Hôm nay', 'Tháng này', 'Năm nay'],
+            datasets: [{
+                label: 'Doanh thu (VND)',
+                data: [
+                    [[${dashboard.revenueToday}]],
+                    [[${dashboard.revenueMonth}]],
+                    [[${dashboard.revenueYear}]]
+                ],
+                backgroundColor: [
+                    'rgba(102, 126, 234, 0.8)',
+                    'rgba(245, 87, 108, 0.8)',
+                    'rgba(16, 185, 129, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(102, 126, 234, 1)',
+                    'rgba(245, 87, 108, 1)',
+                    'rgba(16, 185, 129, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        color: '#6b7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6b7280'
+                    }
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+
+    // Tickets Chart
+    const ticketsToday = parseInt([[${dashboard.ticketsToday}]]);
+    const ticketsMonth = parseInt([[${dashboard.ticketsMonth}]]);
+    const ticketsYear = parseInt([[${dashboard.ticketsThisYear}]]);
+
+    const maxTickets = Math.max(ticketsToday, ticketsMonth, ticketsYear);
+    const yMax = Math.ceil(maxTickets * 1.1);
+
+    const ticketsChart = new Chart(document.getElementById('ticketsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Hôm nay', 'Tháng này', 'Năm nay'],
+            datasets: [{
+                label: 'Số vé bán ra',
+                data: [ticketsToday, ticketsMonth, ticketsYear],
+                backgroundColor: [
+                    'rgba(79, 172, 254, 0.8)',
+                    'rgba(237, 201, 72, 0.8)',
+                    'rgba(176, 122, 161, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(79, 172, 254, 1)',
+                    'rgba(237, 201, 72, 1)',
+                    'rgba(176, 122, 161, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: yMax,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        precision: 0,
+                        color: '#6b7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6b7280'
+                    }
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+
+    // Trend Chart
+    let trendChart;
+
+    async function fetchRevenueTrend() {
+        try {
+            const days = document.getElementById("revenueRange").value;
+            const res = await fetch(`/admin/dashboard/revenue-trend?days=${days}`);
+            const data = await res.json();
+
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+
+            if (trendChart) trendChart.destroy();
+
+            const ctx = document.getElementById("trendChart").getContext("2d");
+
+            trendChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Doanh thu theo ngày (VNĐ)",
+                        data: values,
+                        fill: true,
+                        borderColor: "rgba(102, 126, 234, 1)",
+                        backgroundColor: "rgba(102, 126, 234, 0.1)",
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: "rgba(102, 126, 234, 1)",
+                        pointBorderColor: "white",
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: "rgba(102, 126, 234, 1)",
+                        pointHoverBorderColor: "white",
+                        pointHoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            },
+                            title: {
+                                display: true,
+                                text: "Ngày đặt vé",
+                                color: '#6b7280'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching revenue trend:', error);
+        }
+    }
+
+    // Initialize trend chart on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        fetchRevenueTrend();
+    });
+</script>
+</body>
+</html>

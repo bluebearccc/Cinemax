@@ -2,6 +2,8 @@ package com.bluebear.cinemax.service.seat;
 
 import com.bluebear.cinemax.dto.SeatUpdateRequest;
 import com.bluebear.cinemax.entity.DetailSeat;
+import com.bluebear.cinemax.entity.Invoice;
+import com.bluebear.cinemax.enumtype.DetailSeat_Status;
 import com.bluebear.cinemax.enumtype.Seat_Status;
 import com.bluebear.cinemax.repository.DetailSeatRepository;
 import com.bluebear.cinemax.service.EmailService;
@@ -59,11 +61,7 @@ public class SeatServiceImpl implements SeatService {
         seatRepository.deleteById(seatID);
     }
 
-    public SeatDTO getSeatById(Integer seatID) {
-        return seatRepository.findById(seatID)
-                .map(this::toDTO)
-                .orElse(null);
-    }
+
 
     public Page<SeatDTO> getAllSeats() {
         return seatRepository.findByStatus(Seat_Status.Active, Pageable.unpaged())
@@ -253,6 +251,55 @@ public class SeatServiceImpl implements SeatService {
 
         seatRepository.saveAll(seatsInRoom);
     }
+    //for booking web
+    public List<SeatDTO> getSeatsWithStatus(Integer roomId, Integer scheduleId) {
+        List<Seat> seats = seatRepository.findByRoomRoomID(roomId);
+        List<SeatDTO> seatDTOs = new ArrayList<>();
+        LocalDateTime now = LocalDateTime.now();
 
+        for (Seat seat : seats) {
+            List<DetailSeat> relatedSeats = detailSeatRepository.findBySeatSeatIDAndScheduleScheduleIDAndStatusIn(
+                    seat.getSeatID(), scheduleId,
+                    List.of(DetailSeat_Status.Unpaid, DetailSeat_Status.Booked)
+            );
+
+            boolean isBooked = false;
+
+            for (DetailSeat ds : relatedSeats) {
+                Invoice invoice = ds.getInvoice();
+                if (ds.getStatus() == DetailSeat_Status.Booked) {
+                    isBooked = true;
+                    break;
+                }
+
+                if (ds.getStatus() == DetailSeat_Status.Unpaid &&
+                        invoice != null &&
+                        invoice.getBookingDate() != null &&
+                        invoice.getBookingDate().isAfter(now.minusMinutes(15))) {
+                    // Ghế vẫn đang được giữ < 15 phút => xem là booked
+                    isBooked = true;
+                    break;
+                }
+            }
+
+            SeatDTO dto = toDTO(seat);
+            dto.setBooked(isBooked); // true nếu đang bị giữ hoặc đã thanh toán
+            seatDTOs.add(dto);
+        }
+
+        return seatDTOs;
+    }
+    public List<SeatDTO> toSeatDTOList(List<Seat> seats) {
+        return seats.stream().map(this::toDTO).toList();
+    }
+    public SeatDTO getSeatById(Integer seatId) {
+        Seat seat = seatRepository.findById(seatId)
+                .orElseThrow(() -> new RuntimeException("Seat not found with ID: " + seatId));
+        return toDTO(seat);
+    }
+    @Override
+    public List<Integer> getUnpaidSeatIdsForSchedule(Integer scheduleId) {
+        return detailSeatRepository.findSeatIdsByScheduleIdAndStatus(scheduleId, DetailSeat_Status.Unpaid);
+    }
 }
 

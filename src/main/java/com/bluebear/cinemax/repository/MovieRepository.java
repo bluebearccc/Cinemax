@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.repository;
 
+import com.bluebear.cinemax.dto.Movie.MovieRevenueDTO;
 import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
@@ -22,6 +23,8 @@ import java.util.List;
 
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Integer> {
+    @Query("SELECT COUNT(m) FROM Movie m WHERE m.status = 'ACTIVE' AND m.startDate <= :now AND m.endDate >= :now")
+    Integer countCurrentlyShowing(@Param("now") LocalDateTime now);
     @Query("SELECT m FROM Movie m JOIN m.genres g WHERE g.genreID = :genreId")
     Page<Movie> findByGenreIdAndStatus(Integer genreId, Movie_Status status, Pageable pageable);
 
@@ -327,4 +330,52 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     // Đúng
     @Query("SELECT m FROM Movie m JOIN m.actors a WHERE a.actorID = :actorId")
     Collection<Movie> findMoviesByActorId(@Param("actorId") Integer actorId);
+    //
+    @Query("""
+    SELECT new com.bluebear.cinemax.dto.Movie.MovieRevenueDTO(
+     m.movieID, m.movieName, m.image,
+             COUNT(ds),
+             CAST(COALESCE(SUM(i.totalPrice), 0) - COALESCE(SUM(fd.totalPrice), 0)AS DOUBLE ),
+             m.startDate, m.endDate)
+    FROM Movie m
+        LEFT JOIN Schedule s ON s.movie = m
+        LEFT JOIN DetailSeat ds ON ds.schedule = s
+        LEFT JOIN Invoice i ON i = ds.invoice AND i.status = 'Booked'
+        LEFT JOIN Detail_FD fd ON fd.invoice = i
+        WHERE m.status = 'ACTIVE'
+          AND (
+               :filter IS NULL
+               OR (:filter = 'SHOWING' AND m.startDate <= CURRENT_TIMESTAMP AND m.endDate >= CURRENT_TIMESTAMP)
+               OR (:filter = 'COMING_SOON' AND m.startDate > CURRENT_TIMESTAMP)
+          )
+        GROUP BY m.movieID, m.movieName, m.image, m.startDate, m.endDate
+        ORDER BY\s
+            CASE WHEN (SUM(i.totalPrice) - SUM(fd.totalPrice)) IS NULL THEN 1 ELSE 0 END,
+            (SUM(i.totalPrice) - SUM(fd.totalPrice)) DESC
+    """)
+    Page<MovieRevenueDTO> getMovieStatistics(@Param("filter") String filter, Pageable pageable);
+
+    @Query("""
+    SELECT new com.bluebear.cinemax.dto.Movie.MovieRevenueDTO(
+     m.movieID, m.movieName, m.image,
+     COUNT(ds),
+     CAST(COALESCE(SUM(i.totalPrice), 0) AS DOUBLE),
+     m.startDate, m.endDate)
+    FROM Movie m
+    LEFT JOIN Schedule s ON s.movie = m
+    LEFT JOIN DetailSeat ds ON ds.schedule = s
+    LEFT JOIN Invoice i ON i = ds.invoice AND i.status = 'PAID'
+    WHERE m.status = 'ACTIVE'
+      AND LOWER(m.movieName) LIKE %:keyword%
+      AND (
+           :filter IS NULL
+           OR (:filter = 'SHOWING' AND m.startDate <= CURRENT_TIMESTAMP AND m.endDate >= CURRENT_TIMESTAMP)
+           OR (:filter = 'COMING_SOON' AND m.startDate > CURRENT_TIMESTAMP)
+      )
+    GROUP BY m.movieID, m.movieName, m.image, m.startDate, m.endDate
+    ORDER BY SUM(i.totalPrice) DESC NULLS LAST
+""")
+    Page<MovieRevenueDTO> getMovieStatisticsWithKeyword(@Param("filter") String filter,
+                                                        @Param("keyword") String keyword,
+                                                        Pageable pageable);
 }

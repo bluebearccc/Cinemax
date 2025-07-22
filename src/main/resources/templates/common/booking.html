@@ -9,6 +9,7 @@
     <link rel="stylesheet" th:href="@{/css/booking.css}">
 </head>
 <body>
+<div id="error-alert" th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 <!-- Animated background particles -->
 <div class="bg-particles">
     <div class="particle" style="left: 10%; animation-delay: 0s;"></div>
@@ -34,26 +35,10 @@
         <div class="content-section">
             <form th:action="@{/booking/step1}" method="post">
                 <input type="hidden" name="scheduleId" th:value="${scheduleId}" />
-                <input type="hidden" name="roomId" th:value="${roomID}" />
+                <input type="hidden" name="roomId" th:value="${roomId}" />
 
-                <input type="hidden" name="selectedSeats" th:each="seatId : ${selectedSeats}" th:value="${seatID}"/>
+                <input type="hidden" name="selectedSeats" th:each="seatId : ${selectedSeats}" th:value="${seatId}"/>
                 <!-- Promotion Code Section -->
-                <div class="promo-section">
-                    <label class="promo-label">
-                        <i class="fas fa-gift"></i>Mã giảm giá đặc biệt
-                    </label>
-                    <div class="input-group promo-input-group">
-                        <input type="text"
-                               name="promotionCode"
-                               id="promotionCode"
-                               class="form-control promo-input"
-                               placeholder="Nhập mã để nhận ưu đãi hấp dẫn" />
-                        <button type="button" id="applyPromoBtn" class="btn promo-btn">
-                            <i class="fas fa-magic me-2"></i>Áp dụng
-                        </button>
-                    </div>
-                    <div id="promoMessage" class="promo-message" style="display: none;"></div>
-                </div>
 
                 <!-- Screen Section -->
                 <div class="screen-section">
@@ -70,64 +55,86 @@
                         <i class="fas fa-couch"></i>Chọn ghế của bạn
                     </h3>
 
-                    <div th:each="entry : ${seatMap}" class="seat-row fade-in">
-                        <div class="row-label" th:text="${entry.key}">A</div>
-                        <div class="seat-container">
-                            <div th:each="seat, stat : ${entry.value}">
-                                <!-- lấy phần tử bên cạnh: seatNext -->
-                                <!--<th:block th:if="${seat.seatType == 'Couple'}"
-                                          th:with="seatNext=${stat.index + 1 < entry.value.size()} ? ${entry.value[stat.index + 1]} : null">
+                    <div class="d-flex justify-content-center align-items-start seat-map-wrapper">
+                        <!-- Lối ra bên trái -->
+                        <div class="exit-label text-center me-3">
+                            <i class="fas fa-door-open fa-2x text-danger"></i><br/>
+                            <strong>Exit</strong>
+                        </div>
 
-                                    <div class="seat-couple-wrapper">
-                                        <input type="checkbox"
-                                               class="btn-check couple-seat"
-                                               name="selectedSeats"
-                                               th:id="'seat-couple-' + ${seat.seatId}"
-                                               th:attr="data-seatid1=${seat.seatId}, data-seatid2=${seatNext != null ? seatNext.seatId : 0},
-                            data-price1=${seat.unitPrice}, data-price2=${seatNext != null ? seatNext.unitPrice : 0}" />
-                                        <label th:for="'seat-couple-' + ${seat.seatId}"
-                                               class="seat seat-couple"
-                                               th:text="${seat.position + (seatNext != null ? ' + ' + seatNext.position : '')}">C</label>
+                        <!-- Vùng chứa sơ đồ ghế -->
+                        <div>
+                            <div th:each="entry : ${seatMap}" class="seat-row fade-in d-flex align-items-center">
+                                <div class="row-label me-2" th:text="${entry.key}">A</div>
+                                <div class="seat-container d-flex flex-wrap">
+                                    <div th:each="seat, stat : ${entry.value}">
+                                        <!-- Ghế đôi và đơn như bạn đã viết -->
+                                        <!-- ... giữ nguyên toàn bộ nội dung cũ ... -->
+                                        <div th:if="${seat.seatType.name() == 'Couple'}" >
+                                            <input type="checkbox"
+                                                   class="btn-check couple-seat"
+                                                   name="selectedSeats"
+                                                   th:value="${seat.seatID}"
+                                                   th:disabled="${seat.booked or unpaidSeatIds.contains(seat.seatID)}"
+                                                   th:id="'seat-' + ${seat.seatID}"
+                                                   th:attr="data-price=${seat.unitPrice}, data-position=${seat.position}, data-vip=${seat.isVIP}" />
+                                            <label th:for="'seat-' + ${seat.seatID}"
+                                                   class="seat seat-couple"
+                                                   th:classappend="(${seat.booked} ? 'seat-booked ' : '') +
+                                                                   (${unpaidSeatIds.contains(seat.seatID)} ? 'seat-unpaid ' : '') +
+                                                                   (${seat.isVIP} ? 'seat-vip' : '')"
+                                                   th:text="${#strings.substring(seat.position, 1)}">C</label>
+                                        </div>
+
+                                        <!-- Ghế đơn -->
+                                        <div th:if="${seat.seatType.name() != 'Couple'}" >
+                                            <input type="checkbox"
+                                                   class="btn-check"
+                                                   name="selectedSeats"
+                                                   th:value="${seat.seatID}"
+                                                   th:disabled="${seat.booked or unpaidSeatIds.contains(seat.seatID)}"
+                                                   th:id="'seat-' + ${seat.seatID}"
+                                                   th:attr="data-price=${seat.unitPrice}, data-position=${seat.position}, data-vip=${seat.isVIP}" />
+                                            <label th:for="'seat-' + ${seat.seatID}"
+                                                   class="seat seat-available"
+                                                   th:classappend="(${seat.booked} ? 'seat-booked ' : '') +
+                                                                   (${unpaidSeatIds.contains(seat.seatID)} ? 'seat-unpaid ' : '') +
+                                                                   (${seat.isVIP} ? 'seat-vip' : '')"
+                                                   th:text="${#strings.substring(seat.position, 1)}">1</label>
+                                        </div>
                                     </div>
-                                </th:block>-->
-
-                                <!-- Ghế đơn -->
-                                <div th:if="${seat.seatType != 'couple'}" th:remove="tag">
-                                    <input type="checkbox"
-                                           class="btn-check"
-                                           name="selectedSeats"
-                                           th:value="${seat.seatID}"
-                                           th:disabled="${seat.booked}"
-                                           th:id="'seat-' + ${seat.seatID}"
-                                           th:attr="data-price=${seat.unitPrice}, data-position=${seat.position}" />
-                                    <label th:for="'seat-' + ${seat.seatID}"
-                                           class="seat seat-available"
-                                           th:classappend="(${seat.booked} ? 'seat-booked ' : '') + (${seat.isVIP} ? 'seat-vip' : '')"
-                                           th:text="${#strings.substring(seat.position, 1)}">1</label>
                                 </div>
                             </div>
+                        </div>
 
+                        <!-- Lối ra bên phải -->
+                        <div class="exit-label text-center ms-3">
+                            <i class="fas fa-door-open fa-2x text-danger" style="transform: scaleX(-1);"></i><br/>
+                            <strong>Exit</strong>
                         </div>
                     </div>
-
-
                     <div class="legend">
                         <div class="legend-item">
-                            <div class="legend-seat legend-isVIP"></div>
-                            <span>ghế VIP</span>
-                        </div>
-                        <div class="legend-item">
-                            <div class="legend-seat legend-available"></div>
+                            <i class="fa-solid fa-couch legend-icon" style="color: #dee2e6;"></i>
                             <span>Ghế trống</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-seat legend-selected"></div>
+                            <i class="fa-solid fa-couch legend-icon" style="color: #28a745;"></i>
                             <span>Ghế đã chọn</span>
                         </div>
                         <div class="legend-item">
-                            <div class="legend-seat legend-booked"></div>
+                            <i class="fa-solid fa-couch legend-icon" style="color: #070606;"></i>
                             <span>Ghế đã đặt</span>
                         </div>
+                        <div class="legend-item">
+                            <i class="fa-solid fa-couch legend-icon" style="color: #ffc107;"></i>
+                            <span>Ghế đang được đặt</span>
+                        </div>
+                        <div class="legend-item">
+                            <i class="fa-solid fa-couch legend-icon" style="color: #e74c3c;"></i>
+                            <span>Ghế VIP</span>
+                        </div>
+
                     </div>
                 </div>
                 <!-- Selected Seats Summary -->
@@ -160,188 +167,167 @@
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script th:inline="javascript">
-    let seatPrices = {};
-    let currentDiscount = 0;
+    window.addEventListener('DOMContentLoaded', function () {
+        let seatPrices = {};
+        let currentDiscount = 0;
 
-    // Khởi tạo giá ghế đơn
-    document.querySelectorAll('input[name="selectedSeats"]').forEach(cb => {
-        const price = parseFloat(cb.getAttribute('data-price'));
-        seatPrices[cb.value] = price;
-    });
-
-    function calculateTotal() {
-        let total = 0;
-        // Ghế đơn
-        document.querySelectorAll('input[name="selectedSeats"]:checked').forEach(cb => {
-            total += seatPrices[cb.value] || 0;
-        });
-        // Ghế đôi
-        document.querySelectorAll('.couple-seat:checked').forEach(cb => {
-            const price1 = parseFloat(cb.getAttribute('data-price1')) || 0;
-            const price2 = parseFloat(cb.getAttribute('data-price2')) || 0;
-            total += price1 + price2;
-        });
-        return total;
-    }
-
-    function calculateDetailedBreakdown() {
-        const breakdown = {};
-        // Ghế đơn
-        document.querySelectorAll('input[name="selectedSeats"]:checked').forEach(cb => {
+        // Khởi tạo giá ghế đơn
+        document.querySelectorAll('input[name="selectedSeats"]').forEach(cb => {
             const price = parseFloat(cb.getAttribute('data-price'));
-            breakdown[price] = (breakdown[price] || 0) + 1;
+            seatPrices[cb.value] = price;
         });
-        // Ghế đôi
-        document.querySelectorAll('.couple-seat:checked').forEach(cb => {
-            const price1 = parseFloat(cb.getAttribute('data-price1'));
-            const price2 = parseFloat(cb.getAttribute('data-price2'));
-            breakdown[price1] = (breakdown[price1] || 0) + 1;
-            breakdown[price2] = (breakdown[price2] || 0) + 1;
-        });
-        return breakdown;
-    }
 
-    function updateSelectedSeatsDisplay() {
-        const selectedSingleSeats = Array.from(document.querySelectorAll('input[name="selectedSeats"]:checked'))
-            .map(cb => cb.getAttribute('data-position'));
-        const selectedCoupleSeats = Array.from(document.querySelectorAll('.couple-seat:checked'))
-            .map(cb => {
-                const pos1 = cb.getAttribute('data-seatid1');
-                const pos2 = cb.getAttribute('data-seatid2');
-                return `Ghế đôi (${cb.labels[0].innerText})`;
+        function calculateTotal() {
+            let total = 0;
+            document.querySelectorAll('input[name="selectedSeats"]:checked').forEach(cb => {
+                total += parseFloat(cb.getAttribute('data-price')) || 0;
             });
+            return total;
+        }
 
-        const combined = selectedSingleSeats.concat(selectedCoupleSeats);
-        document.getElementById('selectedSeatsList').textContent = combined.length > 0
-            ? combined.join(', ')
-            : 'Chưa có ghế nào được chọn';
-    }
 
-    function updateTotalDisplay(total, discount = 0) {
-        const totalAfterDiscount = Math.max(total - discount, 0);
-        const breakdown = calculateDetailedBreakdown();
-        const detailedBreakdownElement = document.getElementById('detailedBreakdown');
+        function calculateDetailedBreakdown() {
+            const breakdown = {};
+            // Ghế đơn
+            document.querySelectorAll('input[name="selectedSeats"]:checked').forEach(cb => {
+                const price = parseFloat(cb.getAttribute('data-price'));
+                const isVIP = cb.getAttribute('data-vip') === 'true';
+                const type = isVIP ? 'VIP' : 'Thường';
+                const key = `${price}-${type}`;
+                breakdown[key] = (breakdown[key] || 0) + 1;
+            });
+            // Ghế đôi
 
-        document.getElementById('totalAmount').textContent = new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(totalAfterDiscount);
+            return breakdown;
+        }
 
-        let breakdownHtml = '';
-        for (const [price, count] of Object.entries(breakdown)) {
-            breakdownHtml += `
-                <div>${new Intl.NumberFormat('vi-VN', {
+        function updateSelectedSeatsDisplay() {
+            const selectedSingleSeats = Array.from(document.querySelectorAll('input[name="selectedSeats"]:checked'))
+                .map(cb => cb.getAttribute('data-position'));
+            const selectedCoupleSeats = Array.from(document.querySelectorAll('.couple-seat:checked'))
+                .map(cb => {
+                    const pos1 = cb.getAttribute('data-seatid1');
+                    const pos2 = cb.getAttribute('data-seatid2');
+                    return ` (${cb.labels[0].innerText})`;
+                });
+
+            const combined = selectedSingleSeats;
+            document.getElementById('selectedSeatsList').textContent = combined.length > 0
+                ? combined.join(', ')
+                : 'Chưa có ghế nào được chọn';
+        }
+
+        function updateTotalDisplay(total, discount = 0) {
+            const totalAfterDiscount = Math.max(total - discount, 0);
+            const breakdown = calculateDetailedBreakdown();
+            const detailedBreakdownElement = document.getElementById('detailedBreakdown');
+
+            document.getElementById('totalAmount').textContent = new Intl.NumberFormat('vi-VN', {
                 style: 'currency',
                 currency: 'VND'
-            }).format(price)} x ${count}</div>`;
-        }
-        /*breakdownHtml += `<div>= ${new Intl.NumberFormat('vi-VN', {
-            style: 'currency',
-            currency: 'VND'
-        }).format(total)}</div>`;*/
+            }).format(totalAfterDiscount);
 
-        detailedBreakdownElement.innerHTML = breakdownHtml;
-    }
-
-    // Xử lý checkbox ghế đơn
-    document.querySelectorAll('input[name="selectedSeats"]').forEach(cb => {
-        cb.addEventListener('change', function() {
-            const label = document.querySelector(`label[for="${this.id}"]`);
-            if (this.checked) {
-                label.classList.add('seat-selected');
-                label.classList.remove('seat-available');
-            } else {
-                label.classList.remove('seat-selected');
-                label.classList.add('seat-available');
+            let breakdownHtml = '';
+            for (const [key, count] of Object.entries(breakdown)) {
+                const [priceStr, type] = key.split('-');
+                const price = parseFloat(priceStr);
+                breakdownHtml += `
+        <div>
+            <strong>Ghế ${type}</strong>:
+            ${new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND'
+                }).format(price)} x ${count}
+        </div>`;
             }
 
-            const total = calculateTotal();
-            updateTotalDisplay(total, currentDiscount);
+
+            /*breakdownHtml += `<div>= ${new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(total)}</div>`;*/
+
+            detailedBreakdownElement.innerHTML = breakdownHtml;
+        }
+
+        // Xử lý checkbox ghế đơn
+        document.querySelectorAll('input[name="selectedSeats"]').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const label = document.querySelector(`label[for="${this.id}"]`);
+                if (this.checked) {
+                    label.classList.add('seat-selected');
+                    label.classList.remove('seat-available');
+                } else {
+                    label.classList.remove('seat-selected');
+                    label.classList.add('seat-available');
+                }
+
+                const total = calculateTotal();
+                updateTotalDisplay(total, currentDiscount);
+                updateSelectedSeatsDisplay();
+            });
+        });
+
+        // Xử lý checkbox ghế đôi
+        document.querySelectorAll('.couple-seat').forEach(cb => {
+            cb.addEventListener('change', function() {
+                const label = document.querySelector(`label[for="${this.id}"]`);
+                if (this.checked) {
+                    label.classList.add('seat-selected');
+                } else {
+                    label.classList.remove('seat-selected');
+                }
+
+                const total = calculateTotal();
+                updateTotalDisplay(total, currentDiscount);
+                updateSelectedSeatsDisplay();
+            });
+        });
+
+
+        document.getElementById('clearSeatsBtn').addEventListener('click', function () {
+            const checkboxes = document.querySelectorAll('input[name="selectedSeats"]');
+            checkboxes.forEach(cb => {
+                if (!cb.disabled && cb.checked) {
+                    cb.checked = false;
+
+                    const label = document.querySelector(`label[for="${cb.id}"]`);
+                    if (label) {
+                        label.classList.remove('seat-selected');
+                        label.classList.add('seat-available');
+                    }
+                }
+            });
+
+            updateTotalDisplay(0, 0);
             updateSelectedSeatsDisplay();
         });
-    });
 
-    // Xử lý checkbox ghế đôi
-    document.querySelectorAll('.couple-seat').forEach(cb => {
-        cb.addEventListener('change', function() {
-            const label = document.querySelector(`label[for="${this.id}"]`);
-            if (this.checked) {
-                label.classList.add('seat-selected');
-            } else {
-                label.classList.remove('seat-selected');
-            }
 
-            const total = calculateTotal();
-            updateTotalDisplay(total, currentDiscount);
-            updateSelectedSeatsDisplay();
-        });
-    });
-
-    // Xử lý nút áp dụng mã khuyến mãi
-    document.getElementById('applyPromoBtn').addEventListener('click', function() {
-        const promoCode = document.getElementById('promotionCode').value;
-        const totalAmount = calculateTotal();
-
-        if (!promoCode.trim()) {
-            showPromoMessage('Vui lòng nhập mã giảm giá!', false);
-            return;
-        }
-
-        this.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Đang xử lý...';
-        this.disabled = true;
-
-        // Giả lập gọi API
-        setTimeout(() => {
-            const mockResponse = {
-                valid: promoCode.toUpperCase() === 'DISCOUNT10',
-                discount: promoCode.toUpperCase() === 'DISCOUNT10' ? totalAmount * 0.1 : 0,
-                message: promoCode.toUpperCase() === 'DISCOUNT10'
-                    ? 'Áp dụng mã giảm giá thành công! Giảm 10%'
-                    : 'Mã giảm giá không hợp lệ'
-            };
-
-            currentDiscount = mockResponse.discount;
-            showPromoMessage(mockResponse.message, mockResponse.valid);
-
-            updateTotalDisplay(totalAmount, currentDiscount);
-
-            this.innerHTML = '<i class="fas fa-magic me-2"></i>Áp dụng';
-            this.disabled = false;
-        }, 1500);
-    });
-
-    function showPromoMessage(message, isSuccess) {
-        const promoMessage = document.getElementById('promoMessage');
-        promoMessage.textContent = message;
-        promoMessage.style.display = 'block';
-        promoMessage.classList.remove('success', 'error');
-        promoMessage.classList.add(isSuccess ? 'success' : 'error');
-    }
-
-    document.getElementById('clearSeatsBtn').addEventListener('click', function () {
-        document.querySelectorAll('input:checked').forEach(cb => {
-            cb.checked = false;
-            const label = document.querySelector(`label[for="${cb.id}"]`);
-            if (label) {
-                label.classList.remove('seat-selected');
-                label.classList.add('seat-available');
+        window.addEventListener('DOMContentLoaded', () => {
+            const errorAlert = document.getElementById('error-alert');
+            if (errorAlert) {
+                setTimeout(() => {
+                    errorAlert.style.transition = 'opacity 0.5s ease';
+                    errorAlert.style.opacity = '0';
+                    setTimeout(() => errorAlert.remove(), 500); // remove sau khi mờ dần
+                }, 10000); // 10 giây
             }
         });
 
-        const total = calculateTotal();
-        updateTotalDisplay(total, currentDiscount);
-        updateSelectedSeatsDisplay();
-    });
 
-    document.querySelector('form').addEventListener('submit', function(e) {
-        const hasAnySeatSelected = document.querySelectorAll('input:checked').length > 0;
-        if (!hasAnySeatSelected) {
-            e.preventDefault();
-            alert('Vui lòng chọn ít nhất một ghế trước khi tiếp tục!');
-        }
-    });
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const selected = document.querySelectorAll('input[name="selectedSeats"]:checked').length;
+            if (selected === 0) {
+                e.preventDefault();
+                alert('Vui lòng chọn ít nhất một ghế trước khi tiếp tục!');
+                return false;
+            }
+        });
 
-    updateTotalDisplay(0);
+
+        updateTotalDisplay(0);
+    });
 </script>
 
 </body>

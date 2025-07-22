@@ -1,23 +1,26 @@
 package com.bluebear.cinemax.service;
-
-import com.bluebear.cinemax.dto.AccountDTO;
-import com.bluebear.cinemax.dto.CustomerDTO;
-import com.bluebear.cinemax.dto.InvoiceDTO;
-import com.bluebear.cinemax.dto.WatchedMovieDTO;
+import com.bluebear.cinemax.dto.*;
+import com.bluebear.cinemax.dto.Movie.InvoiceDetailDTO;
 import com.bluebear.cinemax.entity.*;
-
+import com.bluebear.cinemax.enumtype.FeedbackStatus;
 import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import com.bluebear.cinemax.repository.*;
+import com.bluebear.cinemax.service.serviceFeedback.ServiceFeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class UserProfileService {
-
+    @Autowired
+    private FeedbackServiceRepository serviceFeedbackRepository;
+    @Autowired
+    private ServiceFeedbackService serviceFeedbackService;
+    @Autowired
+    private DetailFDRepository detailFDRepository;
     @Autowired
     private AccountRepository accountRepository;
 
@@ -28,8 +31,6 @@ public class UserProfileService {
     private InvoiceRepository invoiceRepository;
 
     @Autowired
-    private DetailSeatRepository detailSeatRepository;
-    @Autowired
     private TheaterRepository theaterRepository;
     public CustomerDTO toDTO(Customer customer) {
         return CustomerDTO.builder()
@@ -38,21 +39,8 @@ public class UserProfileService {
                 .fullName(customer.getFullName())
                 .phone(customer.getPhone())
                 .point(customer.getPoint())
+                .email(customer.getAccount() != null ? customer.getAccount().getEmail() : null)
                 .build();
-    }
-
-    public Customer toEntity(CustomerDTO dto) {
-        Customer customer = new Customer();
-        customer.setId(dto.getId());
-        customer.setFullName(dto.getFullName());
-        customer.setPhone(dto.getPhone());
-        customer.setPoint(dto.getPoint());
-
-        if (dto.getAccountID() != null) {
-            accountRepository.findById(dto.getId());
-        }
-
-        return customer;
     }
 
     public AccountDTO toDTO(Account account) {
@@ -65,23 +53,18 @@ public class UserProfileService {
                 .build();
     }
 
-    public Account toEntity(AccountDTO dto) {
-        return Account.builder()
-                .id(dto.getId())
-                .email(dto.getEmail())
-                .password(dto.getPassword())
-                .role(dto.getRole())
-                .status(dto.getStatus())
-                .build();
-    }
-    public Account getAccountByEmail(String email) {
-        return accountRepository.findByEmail(email).get();
-    }
-    public void saveCustomer(CustomerDTO dto) {
-        Customer customer = toEntity(dto);
-        customerRepository.save(customer);
+    public Optional<Account> getAccountByEmail(String email) {
+        return accountRepository.findByEmail(email);
     }
 
+    public void saveCustomer(CustomerDTO dto) {
+        Customer customer = customerRepository.findById(dto.getId()).orElseThrow();
+        customer.setFullName(dto.getFullName());
+        customer.setPhone(dto.getPhone());
+        customer.setPoint(dto.getPoint());
+
+        customerRepository.save(customer);
+    }
 
     public AccountDTO getAccountById(Integer id) {
         return accountRepository.findById(id).map(this::toDTO).orElse(null);
@@ -92,10 +75,13 @@ public class UserProfileService {
     }
 
     public void saveAccount(AccountDTO dto) {
-        Account account = toEntity(dto);
+        Account account = accountRepository.findById(dto.getId()).orElseThrow();
+        account.setEmail(dto.getEmail());
+        account.setPassword(dto.getPassword());
+        account.setStatus(dto.getStatus());
+        account.setRole(dto.getRole());
         accountRepository.save(account);
     }
-
 
     public Customer getCustomerByAccount(Account account) {
         return customerRepository.findByAccount(account);
@@ -112,7 +98,7 @@ public class UserProfileService {
             dto.setInvoiceID(invoice.getInvoiceID());
             dto.setBookingDate(invoice.getBookingDate());
             dto.setTotalPrice(invoice.getTotalPrice());
-            dto.setDiscount(invoice.getPromotion().getDiscount());
+            dto.setDiscount(invoice.getDiscount());
             dto.setStatus(invoice.getStatus()); // hoặc giữ nguyên enum nếu DTO dùng enum
             return dto;
         }).collect(Collectors.toList());
@@ -144,14 +130,93 @@ public class UserProfileService {
         return bookedInvoices.stream()
                 .flatMap(invoice -> invoice.getDetailSeats().stream())
                 .filter(detailSeat -> detailSeat.getSchedule().getEndTime().isBefore(LocalDateTime.now()))
-                .map(detailSeat -> {
-                    Movie movie = detailSeat.getSchedule().getMovie();
-                    Theater theater = detailSeat.getSchedule().getRoom().getTheater();
-
-                    return new WatchedMovieDTO(movie, theater);
-                })
-                .distinct() // tránh bị trùng nếu nhiều ghế trong cùng suất chiếu
+                .map(this::toWatchedMovieDTO) // sử dụng hàm toDTO thay vì constructor
+                .distinct() // nếu cần loại trùng, cần override equals/hashCode
                 .collect(Collectors.toList());
+    }
+
+    public InvoiceDetailDTO getInvoiceDetailById(Integer invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId).orElseThrow();
+
+        DetailSeat firstSeat = invoice.getDetailSeats().stream().findFirst()
+                .orElseThrow(() -> new RuntimeException("Invoice has no seats"));
+
+        Room room = firstSeat.getSchedule().getRoom();
+        Theater theater = room.getTheater();
+
+        List<String> seatNames = invoice.getDetailSeats()
+                .stream()
+                .map(ds -> ds.getSeat().getPosition())
+                .collect(Collectors.toList());
+
+        List<String> foodNames = invoice.getDetail_FD()
+                .stream()
+                .map(detailFD -> {
+                    TheaterStock stock = detailFD.getTheaterStock();
+                    return stock != null ? stock.getItemName() : "Không rõ";
+                })
+                .collect(Collectors.toList());
+
+        return InvoiceDetailDTO.builder()
+                .invoiceId(invoice.getInvoiceID())
+                .theaterName(theater.getTheaterName())
+                .roomName(room.getName())
+                .bookingDate(invoice.getBookingDate())
+                .seats(seatNames)
+                .foodName(foodNames)
+                .theaterstock(foodNames)
+                .totalPrice(invoice.getTotalPrice())
+                .discount(invoice.getDiscount())
+                .status(invoice.getStatus())
+                .build();
+    }
+    public WatchedMovieDTO toWatchedMovieDTO(DetailSeat detailSeat) {
+        Schedule schedule = detailSeat.getSchedule();
+        Movie movie = schedule.getMovie();
+        Theater theater = schedule.getRoom().getTheater();
+        Integer invoiceId = detailSeat.getInvoice().getInvoiceID();
+
+        return WatchedMovieDTO.builder()
+                .movie(movie)
+                .theater(theater)
+                .schedule(schedule)
+                .invoiceId(invoiceId) // BẮT BUỘC phải có dòng này
+                .build();
+    }
+    public ServiceFeedbackDTO prepareFeedbackFromInvoice(Integer invoiceId) {
+        Invoice invoice = invoiceRepository.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Invoice not found"));
+
+        Customer customer = invoice.getCustomer();
+        Integer theaterId = invoice.getDetailSeats().get(0)
+                .getSchedule().getRoom().getTheater().getTheaterID();
+
+        ServiceFeedbackDTO dto = new ServiceFeedbackDTO();
+        dto.setCustomerId(customer.getId());
+        dto.setTheaterId(theaterId);
+        return dto;
+    }
+
+
+    public void submitFeedback(ServiceFeedbackDTO dto) {
+        Customer customer = customerRepository.findById(dto.getCustomerId())
+                .orElseThrow(() -> new RuntimeException("Customer not found"));
+
+        FeedbackService feedback = new FeedbackService();
+        feedback.setCustomer(customer);
+        feedback.setContent(dto.getContent());
+        feedback.setCreatedDate(LocalDateTime.now());
+        feedback.setServiceRate(dto.getServiceRate());
+        feedback.setTheaterId(dto.getTheaterId());
+
+        // ✅ Logic được chuyển từ controller xuống đây:
+        if (dto.getServiceRate() < 4) {
+            feedback.setStatus(FeedbackStatus.Not_Suported);
+        } else {
+            feedback.setStatus(FeedbackStatus.Suported);
+        }
+
+        serviceFeedbackRepository.save(feedback);
     }
 
 

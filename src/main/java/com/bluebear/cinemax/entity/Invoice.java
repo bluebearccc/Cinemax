@@ -34,6 +34,9 @@ public class Invoice {
     @JoinColumn(name = "PromotionID", referencedColumnName = "PromotionID")
     private Promotion promotion;
 
+    @Column(name = "Discount")
+    private Double discount;
+
     @Column(name = "BookingDate")
     private LocalDateTime bookingDate;
 

@@ -13,6 +13,7 @@ import java.util.List;
 
 @Repository
 public interface DetailFDRepository extends JpaRepository<Detail_FD, Integer> {
+    List<Detail_FD> findByInvoiceInvoiceID(Integer invoiceId);
     @Query("SELECT df FROM Detail_FD df WHERE df.invoice = :invoice")
     List<Detail_FD> findByInvoice(Invoice invoice);
     @Query(value = "SELECT * FROM Detail_FD fd WHERE fd.Theater_StockID = :Theater_StockID ", nativeQuery = true)

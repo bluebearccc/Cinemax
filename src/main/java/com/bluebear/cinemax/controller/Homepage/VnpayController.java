@@ -4,10 +4,12 @@ import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.repository.InvoiceRepository;
 import com.bluebear.cinemax.repository.MovieRepository;
 import com.bluebear.cinemax.repository.RoomRepository;
-import com.bluebear.cinemax.service.EmailService;
 import com.bluebear.cinemax.service.VnpayService;
+import com.bluebear.cinemax.service.bookingSF.BookingServiceSF;
+import com.bluebear.cinemax.service.email.EmailService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -22,11 +24,19 @@ import java.util.stream.Collectors;
 @RequestMapping("")
 @RequiredArgsConstructor
 public class VnpayController {
-    private final InvoiceRepository invoiceRepo;
-    private final VnpayService vnpayService;
-    private final EmailService emailService;
-    private final MovieRepository movieRepository;
+    @Autowired
+    private  InvoiceRepository invoiceRepo;
+    @Autowired
+    private  VnpayService vnpayService;
+    @Autowired
+    private EmailService emailService;
+    @Autowired
+    private MovieRepository movieRepository;
+    @Autowired
     private RoomRepository roomRepository;
+    @Autowired
+    private BookingServiceSF  bookingService;
+
 
     @GetMapping("/vnpay_return")
     public String handleVnpayReturn(HttpServletRequest request, Model model) {
@@ -50,9 +60,10 @@ public class VnpayController {
             model.addAttribute("message", "Thanh toán thành công!");
 
             try {
+                int invoiceId = Integer.parseInt(txnRef);
                 String email = "nguyentavan188@gmail.com"; // ← thay bằng email thật
                 String subject = "🎟️ Vé xem phim thành công - Hóa đơn #" + txnRef;
-
+                vnpayService.confirmInvoiceAfterPayment(invoiceId);
                 InvoiceDTO invoiceDTO = vnpayService.getInvoiceDTOById(Integer.parseInt(txnRef));
 
                 // Lấy lịch chiếu từ ghế đầu tiên
@@ -61,9 +72,6 @@ public class VnpayController {
 
                 // Gọi service (hoặc tự mở rộng getInvoiceDTOById để trả luôn dữ liệu này)
                 ScheduleDTO schedule = vnpayService.getScheduleDTO(scheduleId);
-
-                RoomDTO room = roomRepository.getRoomsByRoomID(schedule.getRoomID());
-                MovieDTO movie = movieRepository.getMovieByMovieID(schedule.getMovieID());
 
                 // Lấy danh sách vị trí ghế
                 List<String> seatPositions = invoiceDTO.getDetailSeats().stream()
@@ -77,7 +85,7 @@ public class VnpayController {
                         "amount", Long.parseLong(amount) / 100,
                         "bankCode", bankCode,
                         "movieName", schedule.getMovieName(),
-                        "room", room.getName(),
+                        "room", schedule.getRoomName(),
                         "seats", seatString,
                         "showtime", schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm - dd/MM/yyyy"))
                 );
@@ -90,7 +98,17 @@ public class VnpayController {
 
         } else {
             model.addAttribute("message", "Thanh toán thất bại. Mã lỗi: " + responseCode);
+
+            try {
+                int invoiceId = Integer.parseInt(txnRef);
+                // Cập nhật trạng thái hóa đơn
+                bookingService.cancelInvoice(invoiceId);
+                System.out.println("🚫 Cập nhật trạng thái CANCELLED cho hóa đơn #" + invoiceId);
+            } catch (Exception e) {
+                System.err.println("❌ Lỗi khi cập nhật trạng thái cancelled: " + e.getMessage());
+            }
         }
+
 
         return "common/vnpay_return";
     }

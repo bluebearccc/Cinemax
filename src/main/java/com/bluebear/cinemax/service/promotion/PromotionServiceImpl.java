@@ -8,7 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -78,5 +80,27 @@ public class PromotionServiceImpl implements PromotionService{
                 .quantity(dto.getQuantity())
                 .status(dto.getStatus())
                 .build();
+    }
+    //
+    public Optional<PromotionDTO> validatePromotionCode(String code) {
+        return promotionRepository.findByPromotionCode(code)
+                .filter(Promotion::isValid)
+                .map(this::toDTO);
+    }
+    public Map<String, Object> checkPromotionCode(String code, double totalAmount) {
+        Optional<PromotionDTO> promoOpt = validatePromotionCode(code);
+        Map<String, Object> response = new HashMap<>();
+
+        if (promoOpt.isPresent()) {
+            PromotionDTO promo = promoOpt.get();
+            double discount = totalAmount * promo.getDiscount() / 100.0;
+            response.put("valid", true);
+            response.put("discount", discount);
+            response.put("message", "Mã hợp lệ! Bạn được giảm: " + discount + " VNĐ.");
+        } else {
+            response.put("valid", false);
+            response.put("message", "Mã giảm giá không tồn tại hoặc đã hết hạn.");
+        }
+        return response;
     }
 }

@@ -1,6 +1,7 @@
 package com.bluebear.cinemax.service.theaterstock;
 
 import com.bluebear.cinemax.dto.TheaterStockDTO;
+import com.bluebear.cinemax.entity.TheaterStock;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.web.multipart.MultipartFile;
@@ -15,6 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public interface TheaterStockService {
+    TheaterStockDTO convertToDTO(TheaterStock theaterStock);
+
     public List<TheaterStockDTO> findByTheaterId(Integer theaterId);
 
     public TheaterStockDTO getTheaterStockById(Integer id);

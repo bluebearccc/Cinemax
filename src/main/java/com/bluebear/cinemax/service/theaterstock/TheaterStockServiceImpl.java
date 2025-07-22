@@ -72,7 +72,7 @@ public class TheaterStockServiceImpl implements TheaterStockService {
      * @param theaterStock Đối tượng Entity đầu vào.
      * @return Đối tượng DTO.
      */
-    private TheaterStockDTO convertToDTO(TheaterStock theaterStock) {
+    public TheaterStockDTO convertToDTO(TheaterStock theaterStock) {
         if (theaterStock == null) {
             return null;
         }

@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.entity;
 
+import com.bluebear.cinemax.enumtype.DetailFD_Status;
 import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -33,5 +34,5 @@ public class Detail_FD {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "Status")
-    private InvoiceStatus status;
+    private DetailFD_Status status;
 }

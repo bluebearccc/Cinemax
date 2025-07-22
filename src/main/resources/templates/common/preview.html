@@ -9,15 +9,54 @@
     <link rel="stylesheet" th:href="@{/css/booking.css}">
 </head>
 <body>
+<div class="mb-3 text-danger text-end">
+    <strong>Thời gian còn lại để thanh toán:</strong>
+    <span id="countdown" class="fw-bold fs-5">15:00</span>
+</div>
+
 <div class="container my-5">
     <div class="card shadow-lg border-0 rounded-4">
         <div class="card-header bg-primary text-white rounded-top-4">
             <h2 class="mb-0"><i class="bi bi-ticket-perforated"></i> Xác nhận đặt vé</h2>
         </div>
+
         <div class="card-body">
+            <div th:if="${promotionError != null}" class="alert alert-danger">
+                [[${promotionError}]]
+            </div>
+            <!-- Nếu chưa có mã giảm giá thì hiển thị ô nhập -->
+            <div class="mb-3">
+                <form method="post" th:action="@{/booking/step2}">
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                    <input type="hidden" name="roomId" th:value="${room.roomID}">
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
+                    <input type="hidden" th:each="combo : ${comboList}"
+                           th:if="${comboQuantities[combo.theaterStockId] != null}"
+                           th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                           th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                    <label for="promotionCode" class="form-label"><strong>Nhập mã giảm giá:</strong></label>
+                    <div class="input-group">
+                        <input type="text" id="promotionCode" class="form-control" name="promotionCode"
+                               placeholder="Mã giảm giá" th:value="${param.promotionCode}">
+                        <button class="btn btn-outline-primary" type="submit">Áp dụng</button>
+                    </div>
+
+                    <!-- Hiện lỗi nếu có -->
+                    <div th:if="${promotionError != null}" class="form-text text-danger mt-1">
+                        [[${promotionError}]]
+                    </div>
+
+                    <!-- Hiện mã nếu áp dụng thành công -->
+                    <div th:if="${promotion != null}" class="form-text text-success mt-1">
+                        Mã [[${promotion.promotionCode}]] đã được áp dụng ([[${promotion.discount}]]%).
+                    </div>
+                </form>
+            </div>
+
             <div class="mb-3">
                 <strong>Lịch chiếu:</strong>
-                <span class="text-muted">[[${schedule.movie.movieName}]] - [[${#temporals.format(schedule.startTime, 'dd/MM/yyyy HH:mm')}]]</span>
+                <span class="text-muted">[[${schedule.movieName}]] - [[${#temporals.format(schedule.startTime, 'dd/MM/yyyy HH:mm')}]]</span>
             </div>
 
             <div class="mb-3">
@@ -25,31 +64,29 @@
                 <span class="text-muted">[[${room.name}]]</span>
             </div>
 
+            <!-- Ghế đã chọn -->
             <div class="mb-3">
                 <strong>Ghế đã chọn:</strong>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        th:each="seat : ${selectedSeats}">
-                        <span><i class="bi bi-chair"></i> [[${seat.position}]]</span>
-                        <span class="badge bg-success">[[${#numbers.formatDecimal(seat.unitPrice, 0, 0)}]]đ</span>
-                    </li>
-                </ul>
+                <span th:each="seat, iterStat : ${selectedSeats}">
+        <span class="badge bg-success">
+            [[${seat.position}]] ([[${#numbers.formatDecimal(seat.unitPrice, 0, 0)}]]đ)
+        </span>
+        <span th:if="${!iterStat.last}">, </span>
+    </span>
             </div>
 
-            <div class="mb-3">
-                <strong>Combo:</strong>
-                <ul class="list-group list-group-flush">
-                    <li class="list-group-item d-flex justify-content-between align-items-center"
-                        th:each="combo : ${comboList}">
-                        <div>
-                            <i class="bi bi-cup-straw"></i> [[${combo.foodName}]] - Số lượng: [[${comboQuantities[combo.theaterStockID]}]]
-                        </div>
-                        <span class="badge bg-warning text-dark">
-                            [[${#numbers.formatDecimal(combo.unitPrice, 0, 0)}]]đ
-                        </span>
-                    </li>
-                </ul>
+            <!-- Combo đã chọn -->
+            <div class="mb-3" th:if="${comboList != null and !comboList.isEmpty()}">
+                <strong>Combo đã chọn:</strong>
+                <span th:each="combo, iterStat : ${comboList}"
+                      th:if="${comboQuantities[combo.theaterStockId] != null and comboQuantities[combo.theaterStockId] > 0}">
+        <span class="badge bg-warning text-dark">
+            [[${combo.foodName}]] - SL: [[${comboQuantities[combo.theaterStockId]}]] ([[${#numbers.formatDecimal(combo.unitPrice, 0, 0)}]]đ)
+        </span>
+        <span th:if="${!iterStat.last}">, </span>
+    </span>
             </div>
+
 
             <div class="mb-3">
                 <strong>Tổng tiền:</strong>
@@ -74,18 +111,17 @@
                     [[${#numbers.formatDecimal(finalPrice, 0, 0)}]]đ
                 </span>
             </div>
-            <div class="text-center mt-4">
-                <h5><i class="bi bi-qr-code-scan"></i> Quét mã VietQR để chuyển khoản</h5>
+            <div class="text-center mt-4" th:if="${qrUrl != null}">
+                <h5><i class="bi bi-qr-code-scan"></i> Quét mã QR SePay để thanh toán</h5>
 
-                <img th:src="'https://img.vietqr.io/image/MB-0969823151-compact2.png?amount=' + ${#numbers.formatDecimal(finalPrice, 0, 0)} + '&addInfo=CINEMAX-HD' + ${schedule.scheduleID}"
-                     alt="VietQR" class="img-fluid border rounded-4 p-2 shadow"
-                     style="max-width: 300px;">
+                <img th:src="${qrUrl}" alt="QR Code SePay"
+                     class="img-fluid border rounded-4 p-2 shadow"
+                     style="max-width: 300px;" />
 
                 <div class="mt-2 text-muted small">
-                    <p>Sau khi chuyển khoản, bạn vẫn cần nhấn "Xác nhận và thanh toán" để hoàn tất đặt vé.</p>
+                    <p>Sau khi quét mã QR và thanh toán, hệ thống sẽ tự động xác nhận đặt vé khi SePay gọi về webhook.</p>
                 </div>
             </div>
-
             <div class="text-start mt-4">
                 <form th:action="@{/booking/step1}" method="post">
                     <!-- Hidden fields -->
@@ -99,12 +135,39 @@
                     </button>
                 </form>
             </div>
+
             <form method="post" th:action="@{/booking/confirm}">
                 <!-- Hidden fields -->
+                <input type="hidden" name="invoiceId" th:value="${invoiceId}" />
+                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}" />
+                <input type="hidden" name="roomId" th:value="${room.roomID}" />
+
+                <!-- Mã giảm giá -->
+                <input type="hidden" name="promotionCode"
+                       th:value="${promotion != null} ? ${promotion.promotionCode} : ''" />
+
+                <!-- Danh sách ghế -->
+                <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats"
+                       th:value="${seat.seatID}" />
+
+                <!-- Danh sách combo -->
+                <input type="hidden" th:each="combo : ${comboList}"
+                       th:if="${comboQuantities[combo.theaterStockId] != null}"
+                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                       th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                <!-- Nút submit -->
+                <div class="text-end mt-4">
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="bi bi-check-circle"></i> thanh toán với VNPay
+                    </button>
+                </div>
+            </form>
+
+            <form method="post" th:action="@{/webhook/sepay}">
                 <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
                 <input type="hidden" name="roomId" th:value="${room.roomID}">
 
-                <!-- Chỉ hiển thị promotionCode nếu promotion != null -->
                 <div th:if="${promotion != null}">
                     <input type="hidden" name="promotionCode" th:value="${promotion.promotionCode}">
                 </div>
@@ -114,21 +177,60 @@
 
                 <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
                 <input type="hidden" th:each="combo : ${comboList}"
-                       th:if="${comboQuantities[combo.theaterStockID] != null}"
-                       th:name="'comboQuantities[' + ${combo.theaterStockID} + ']'"
-                       th:value="${comboQuantities[combo.theaterStockID]}" />
-
-                <div class="text-end mt-4">
+                       th:if="${comboQuantities[combo.theaterStockId] != null}"
+                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                       th:value="${comboQuantities[combo.theaterStockId]}" />
 
 
-                    <button type="submit" class="btn btn-success btn-lg">
-                        <i class="bi bi-check-circle"></i> Xác nhận và thanh toán
-                    </button>
-                </div>
             </form>
 
         </div>
+        <form th:action="@{/booking/cancel}" method="post" class="mt-3">
+            <input type="hidden" name="invoiceId" th:value="${invoiceId}" />
+            <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}" />
+            <input type="hidden" name="roomId" th:value="${room.roomID}" />
+            <button type="submit" class="btn btn-danger btn-lg">
+                <i class="bi bi-x-circle"></i> Huỷ đặt vé
+            </button>
+        </form>
     </div>
+
+
 </div>
+<script th:inline="javascript">
+    let timeLeft = 15 * 60; // 15 phút = 900 giây
+
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function updateCountdown() {
+        const countdownEl = document.getElementById('countdown');
+        if (timeLeft <= 0) {
+            countdownEl.innerText = "00:00";
+            alert("Hết thời gian giữ vé! Hệ thống sẽ tự động hủy vé của bạn.");
+            // Optional: redirect hoặc gửi yêu cầu huỷ
+            window.location.href = "/booking/timeout?invoiceId=" + [[${invoiceId}]];
+            return;
+        }
+        countdownEl.innerText = formatTime(timeLeft);
+        timeLeft--;
+    }
+
+    setInterval(updateCountdown, 1000);
+    const invoiceId = [[${invoiceId}]];
+    setInterval(() => {
+        fetch('/booking/check-status?invoiceId=' + invoiceId)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'BOOKED') {
+                    window.location.href = '/booking/confirm-success?invoiceId=' + invoiceId;
+                }
+            });
+    }, 5000);
+</script>
+
 </body>
 </html>

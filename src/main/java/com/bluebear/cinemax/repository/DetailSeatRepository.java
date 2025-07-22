@@ -1,6 +1,7 @@
 package com.bluebear.cinemax.repository;
 
 import com.bluebear.cinemax.entity.DetailSeat;
+import com.bluebear.cinemax.enumtype.DetailSeat_Status;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.bluebear.cinemax.entity.Invoice;
@@ -14,6 +15,20 @@ import java.util.List;
 
 @Repository
 public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer> {
+    List<DetailSeat> findByInvoiceInvoiceID(Integer invoiceId);
+    List<DetailSeat> findByInvoiceInvoiceIDAndStatus(Integer invoice_invoiceID, DetailSeat_Status status);
+    List<DetailSeat> findBySeatSeatIDAndScheduleScheduleIDAndStatusIn(Integer seatId, Integer scheduleId, List<DetailSeat_Status> statuses);
+    @Query("SELECT COUNT(ds) FROM DetailSeat ds " +
+            "WHERE ds.invoice.status = 'Booked' AND ds.invoice.bookingDate BETWEEN :startOfDay AND :endOfDay")
+    Long countTicketsToday(@Param("startOfDay") LocalDateTime startOfDay,
+                           @Param("endOfDay") LocalDateTime endOfDay);
+
+
+    // Tổng số vé đã bán trong khoảng thời gian
+    @Query("SELECT COUNT(ds) FROM DetailSeat ds " +
+            "WHERE ds.invoice.status = 'Booked' AND ds.invoice.bookingDate BETWEEN :start AND :end")
+    Integer countTicketsBetween(@Param("start") LocalDateTime start,
+                                @Param("end") LocalDateTime end);
     @Query("SELECT ds.seat.seatID FROM DetailSeat ds WHERE ds.schedule.scheduleID = :scheduleId")
     List<Integer> findBookedSeatIdsByScheduleId(Integer scheduleId);
     Page<DetailSeat> findBySchedule_ScheduleID(Integer scheduleID , Pageable pageable);
@@ -39,4 +54,8 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
     ORDER BY s.StartTime ASC
     """, nativeQuery = true)
     List<DetailSeat> findFutureBookingsBySeatID(@Param("SeatID") Integer seatId, @Param("currentTime") LocalDateTime currentTime);
+    @Query("SELECT ds.seat.seatID FROM DetailSeat ds " +
+            "WHERE ds.schedule.scheduleID = :scheduleId AND ds.status = :status")
+    List<Integer> findSeatIdsByScheduleIdAndStatus(@Param("scheduleId") Integer scheduleId,
+                                                   @Param("status") DetailSeat_Status status);
 }

@@ -45,4 +45,8 @@ public class Promotion {
 
     @OneToMany(mappedBy = "promotion")
     private List<Invoice> InvoiceList;
+
+    public boolean isValid() {
+        return quantity > 0 && endTime.isAfter(LocalDateTime.now());
+    }
 }

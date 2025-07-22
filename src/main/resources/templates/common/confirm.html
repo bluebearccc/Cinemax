@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Xác nhận đặt vé</title>
+    <meta charset="UTF-8">
+    <link rel="stylesheet" href="/css/style.css"> <!-- thêm style nếu cần -->
+</head>
+<body>
+<div class="container">
+    <h2>🎉 Đặt vé thành công!</h2>
+
+    <div class="section">
+        <h3>🧾 Thông tin hóa đơn</h3>
+        <ul>
+            <li><strong>Lịch chiếu:</strong> <span th:text="${#temporals.format(schedule.startTime, 'dd/MM/yyyy HH:mm')}"></span></li>
+            <li><strong>Phòng:</strong> <span th:text="${room.name}"></span></li>
+            <li><strong>Rạp:</strong> <span th:text="${room.theaterID}"></span></li> <!-- sửa nếu cần -->
+            <li><strong>Tổng tiền ghế + combo:</strong> <span th:text="${#numbers.formatDecimal(totalPrice, 0, 'COMMA', '.', '')}"></span> VND</li>
+            <li><strong>Giảm giá:</strong>
+                <span th:if="${promotion != null}">
+                    <span th:text="${promotion.discount}"></span>% từ mã "<span th:text="${promotion.promotionCode}"></span>"
+                </span>
+                <span th:if="${promotion == null}">Không áp dụng</span>
+            </li>
+            <li><strong>Số tiền thanh toán:</strong> <b style="color:green" th:text="${#numbers.formatDecimal(finalPrice, 0, 'COMMA', '.', '') + ' VND'}"></b></li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>🎟️ Ghế đã đặt</h3>
+        <ul>
+            <li th:each="seat : ${selectedSeats}">
+                <span th:text="${seat.position}"></span> -
+                <span th:text="${seat.seatType}"></span> -
+                <span th:text="${#numbers.formatDecimal(seat.unitPrice, 0, 'COMMA', '.', '')}"></span> VND
+            </li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h3>🍿 Combo đã đặt</h3>
+        <ul>
+            <li th:each="combo : ${comboList}">
+                <span th:text="${combo.foodName}"></span> ×
+                <span th:text="${comboQuantities[combo.theaterStockId]}"></span> =
+                <span th:text="${#numbers.formatDecimal(combo.unitPrice * comboQuantities[combo.theaterStockId], 0, 'COMMA', '.', '')}"></span> VND
+            </li>
+        </ul>
+    </div>
+
+    <div class="section" style="margin-top: 20px;">
+        <a href="/" class="btn">🔙 Quay về trang chủ</a>
+    </div>
+</div>
+
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f5f6f8;
+        padding: 20px;
+    }
+    .container {
+        max-width: 700px;
+        margin: auto;
+        background: #fff;
+        padding: 25px 30px;
+        border-radius: 8px;
+        box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+    }
+    h2 {
+        color: #27ae60;
+    }
+    .section {
+        margin-bottom: 25px;
+    }
+    ul {
+        padding-left: 20px;
+    }
+    li {
+        margin-bottom: 8px;
+    }
+    .btn {
+        background-color: #27ae60;
+        color: white;
+        padding: 10px 18px;
+        text-decoration: none;
+        border-radius: 5px;
+    }
+    .btn:hover {
+        background-color: #219653;
+    }
+</style>
+</body>
+</html>

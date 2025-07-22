@@ -5,7 +5,6 @@ import com.bluebear.cinemax.dto.ItemRevenue;
 import com.bluebear.cinemax.dto.RevenueDataDTO;
 import com.bluebear.cinemax.entity.Detail_FD;
 import com.bluebear.cinemax.repository.DetailFDRepository;
-import com.bluebear.cinemax.repository.Detail_FDRepository;
 import com.bluebear.cinemax.repository.InvoiceRepository; // Inject InvoiceRepository
 import com.bluebear.cinemax.repository.TheaterStockRepository; // Inject TheaterStockRepository
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.dto;
 
+import com.bluebear.cinemax.enumtype.DetailSeat_Status;
 import lombok.*;
 
 @Data
@@ -11,4 +12,6 @@ public class DetailSeatDTO {
     private Integer invoiceID;
     private Integer seatID;
     private Integer scheduleID;
+    private  DetailSeat_Status status;
+
 }

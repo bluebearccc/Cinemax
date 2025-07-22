@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 public interface SeatService {
+    List<Integer> getUnpaidSeatIdsForSchedule(Integer scheduleId);
     SeatDTO createSeat(SeatDTO dto);
 
     SeatDTO updateSeat(Integer seatID, SeatDTO dto);
@@ -37,4 +38,8 @@ public interface SeatService {
 
     public void resetSeatNamesInRoom(Integer roomId);
     public void updateSeatsInRoom(SeatUpdateRequest request);
+    //
+
+    List<SeatDTO> toSeatDTOList(List<Seat> seats);
+    List<SeatDTO> getSeatsWithStatus(Integer roomId, Integer scheduleId);
 }

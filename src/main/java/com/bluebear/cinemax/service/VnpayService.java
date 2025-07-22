@@ -3,10 +3,13 @@ import com.bluebear.cinemax.config.VnpayConfig;
 import com.bluebear.cinemax.dto.InvoiceDTO;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.dto.*;
-import com.bluebear.cinemax.repository.InvoiceRepository;
-import com.bluebear.cinemax.repository.ScheduleRepository;
-import com.bluebear.cinemax.repository.SeatRepository;
+import com.bluebear.cinemax.enumtype.DetailSeat_Status;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
+import com.bluebear.cinemax.repository.*;
+
+import com.bluebear.cinemax.service.bookingSF.BookingServiceSF;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,15 +21,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import com.bluebear.cinemax.repository.TheaterStockRepository;
 @Service
 @RequiredArgsConstructor
 public class VnpayService {
+    private final DetailSeatRepository detailSeatRepo;
     private final ScheduleRepository scheduleRepo;
     private final SeatRepository seatRepo;
     private final InvoiceRepository invoiceRepo;
     private final VnpayConfig vnpayConfig;
-    private final BookingServiceSF bookingServiceSF;
+    private final BookingServiceSF bookingServiceImp;
     private final TheaterStockRepository theaterStockRepo;
     public String createPaymentUrl(InvoiceDTO invoice, HttpServletRequest request) {
         if (invoice.getTotalPrice() == null) {
@@ -132,7 +135,7 @@ public class VnpayService {
         dto.setEmployeeID(invoice.getEmployee() != null ? invoice.getEmployee().getId() : null);
         dto.setPromotionID(invoice.getPromotion() != null ? invoice.getPromotion().getPromotionID() : null);
         dto.setBookingDate(invoice.getBookingDate());
-        dto.setDiscount(invoice.getPromotion().getDiscount() != null ? invoice.getPromotion().getDiscount().doubleValue() : null);
+        dto.setDiscount(invoice.getDiscount());
         dto.setTotalPrice(invoice.getTotalPrice() != null ? invoice.getTotalPrice().doubleValue() : null);
 
         // Map danh sách ghế
@@ -149,12 +152,14 @@ public class VnpayService {
         return dto;
     }
     public ScheduleDTO getScheduleDTO(Integer scheduleId) {
-        Schedule schedule = scheduleRepo.findById(scheduleId)
+        Schedule schedule = scheduleRepo.findByIdWithMovieAndRoom(scheduleId)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy lịch chiếu"));
 
         ScheduleDTO dto = new ScheduleDTO();
         dto.setScheduleID(schedule.getScheduleID());
         dto.setStartTime(schedule.getStartTime());
+        dto.setMovieName(schedule.getMovie().getMovieName());
+        dto.setRoomName(schedule.getRoom().getName());
 
         // Movie
         Movie movie = schedule.getMovie();
@@ -176,6 +181,35 @@ public class VnpayService {
         return seatRepo.findById(seatId)
                 .map(Seat::getPosition)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy ghế"));
+    }
+    @Transactional
+    public void confirmInvoiceAfterPayment(int invoiceId) {
+        Invoice invoice = invoiceRepo.findById(invoiceId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+
+        // Chỉ cập nhật nếu trạng thái hiện tại là UNPAID hoặc PENDING
+        if (invoice.getStatus() != InvoiceStatus.Booked) {
+            invoice.setStatus(InvoiceStatus.Booked);
+            invoiceRepo.save(invoice);
+        }
+
+        // Cập nhật tất cả các DetailSeat thuộc hóa đơn này
+        List<DetailSeat> detailSeats = detailSeatRepo.findByInvoiceInvoiceID(invoiceId);
+        for (DetailSeat seat : detailSeats) {
+            seat.setStatus(DetailSeat_Status.Booked); // Enum bạn đã tạo
+        }
+        detailSeatRepo.saveAll(detailSeats);
+    }
+    public String createSepayQrUrl(InvoiceDTO invoice) {
+        String accountNumber = "0916897138"; // Số tài khoản nhận (MB Bank của bạn)
+        String bankCode = "MB";              // Mã ngân hàng (ví dụ: MB, VCB,...)
+        double amount = invoice.getTotalPrice(); // Đơn vị: VND
+        String description = "DH" + invoice.getInvoiceID(); // Nội dung chuyển khoản phải chứa DHxxx
+
+        return String.format(
+                "https://qr.sepay.vn/img?acc=%s&bank=%s&amount=%.0f&des=%s",
+                accountNumber, bankCode, amount, description
+        );
     }
 
 

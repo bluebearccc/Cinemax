@@ -2,6 +2,7 @@ package com.bluebear.cinemax.service.booking;
 
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
+import com.bluebear.cinemax.enumtype.DetailFD_Status;
 import com.bluebear.cinemax.enumtype.DetailSeat_Status;
 import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import com.bluebear.cinemax.enumtype.PaymentMethod;
@@ -138,7 +139,7 @@ public class BookingService {
                                 .theaterStock(stockItem)
                                 .quantity(quantity)
                                 .totalPrice(itemTotalPrice)
-                                .status(InvoiceStatus.Booked)
+                                .status(DetailFD_Status.Booked)
                                 .build();
                         detailFDRepository.save(detailFd);
                         totalFoodPrice += itemTotalPrice;
@@ -293,7 +294,7 @@ public class BookingService {
                             .theaterStock(stockItem)
                             .quantity(quantity)
                             .totalPrice(itemTotalPrice)
-                            .status(InvoiceStatus.Booked)
+                            .status(DetailFD_Status.Booked)
                             .build();
                     detailFDRepository.save(detailFd);
                     totalFoodPrice += itemTotalPrice;

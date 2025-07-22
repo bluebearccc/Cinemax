@@ -1,182 +1,619 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Hồ sơ người dùng - Cinema</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-  <link rel="stylesheet" th:href="@{/css/profile.css}">
+    <meta charset="UTF-8">
+    <title>User Profile - Cinema</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/profile.css}">
 </head>
 <body>
 
-<div class="profile-container">
-  <!-- Header -->
-  <div class="profile-header">
-    <h1><i class="fas fa-user-circle me-3"></i>Hồ sơ thành viên</h1>
-    <p class="subtitle">Quản lý thông tin cá nhân và lịch sử xem phim</p>
-  </div>
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="spinner"></div>
+</div>
 
-  <!-- Main Content Grid -->
-  <div class="grid-layout">
-    <!-- Account Information -->
-    <div class="profile-card">
-      <div class="card-header-custom">
-        <i class="fas fa-id-card"></i>
-        Thông tin tài khoản
-      </div>
-      <div class="card-body-custom">
-        <div class="info-row">
-          <div class="info-label">
-            <i class="fas fa-envelope"></i>
-            Email
-          </div>
-          <div class="info-value" th:text="${account.email}">example@gmail.com</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">
-            <i class="fas fa-check-circle"></i>
-            Trạng thái
-          </div>
-          <div class="info-value">
-            <span class="status-badge status-active" th:text="${account.status}">Hoạt động</span>
-          </div>
-        </div>
-      </div>
+<header class="header">
+    <div class="container">
+        <a href="#" class="logo">
+            <i class="fas fa-film"></i>
+            Cinema
+        </a>
+        <nav>
+            <ul class="nav-links">
+                <li><a href="#"><i class="fas fa-home me-1"></i>Home</a></li>
+                <li><a href="#"><i class="fas fa-film me-1"></i>Movies</a></li>
+                <li><a href="#"><i class="fas fa-calendar me-1"></i>Showtimes</a></li>
+                <li><a href="#"><i class="fas fa-user me-1"></i>Profile</a></li>
+                <li><a href="#"><i class="fas fa-sign-out-alt me-1"></i>Logout</a></li>
+            </ul>
+        </nav>
     </div>
+</header>
 
-    <!-- Personal Information -->
-    <div class="profile-card">
-      <div class="card-header-custom">
-        <i class="fas fa-user"></i>
-        Thông tin cá nhân
-      </div>
-      <div class="card-body-custom">
-        <div class="info-row">
-          <div class="info-label">
-            <i class="fas fa-signature"></i>
-            Họ tên
-          </div>
-          <div class="info-value" th:text="${customer.fullName}">Nguyễn Văn A</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">
-            <i class="fas fa-phone"></i>
-            Số điện thoại
-          </div>
-          <div class="info-value" th:text="${customer.phone}">0901234567</div>
-        </div>
-        <div class="info-row">
-          <div class="info-label">
-            <i class="fas fa-star"></i>
-            Điểm tích lũy
-          </div>
-          <div class="info-value">
-            <span class="points-display" th:text="${customer.point} + ' điểm'">150 điểm</span>
-          </div>
-        </div>
-        <div class="mt-4">
-          <a th:href="@{/user/profile/edit(customerId=${customer.id})}" class="btn btn-primary btn-edit">
-            <i class="fas fa-edit me-2"></i>Chỉnh sửa thông tin
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
+<main class="main-content">
+    <div class="container">
+        <div class="profile-header">
+            <h1><i class="fas fa-user-circle me-3"></i>Member Profile</h1>
+            <p>Manage your personal information and viewing history</p>
 
-  <!-- Movie History -->
+            <div class="row mt-4">
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-envelope"></i>
+                            Email:
+                        </div>
+                        <div class="info-value" th:text="${account.email}">example@gmail.com</div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-check-circle"></i>
+                            Status
+                        </div>
+                        <div class="info-value">
+                            <span class="status-badge status-active" th:text="${account.status}">Active</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-  <!-- Movie History Section - Thay thế phần cũ -->
-  <div class="profile-card">
-    <div class="card-header-custom">
-      <i class="fas fa-film"></i>
-      Lịch sử xem phim
-    </div>
-    <div class="card-body-custom">
-      <div th:if="${watchedMovies.isEmpty()}" class="empty-state">
-        <i class="fas fa-ticket-alt"></i>
-        <h5>Chưa có lịch sử xem phim</h5>
-        <p>Bạn chưa xem bộ phim nào tại rạp của chúng tôi.</p>
-      </div>
+        <div class="profile-layout">
+            <div class="profile-card">
+                <div class="card-header-custom">
+                    <i class="fas fa-film"></i>
+                    History & Rewards
+                </div>
+                <div class="card-body-custom p-0">
+                    <ul class="nav nav-tabs" id="profileTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="tab-history" data-bs-toggle="tab" data-bs-target="#history" type="button" role="tab">
+                                <i class="fas fa-ticket-alt me-2"></i>Booking History
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="tab-points" data-bs-toggle="tab" data-bs-target="#points" type="button" role="tab">
+                                <i class="fas fa-gift me-2"></i>Points & Rewards
+                            </button>
+                        </li>
+                    </ul>
 
-      <div th:if="${!watchedMovies.isEmpty()}" class="movie-history-grid">
-        <div class="movie-item" th:each="items : ${watchedMovies}">
-          <div class="movie-card-layout">
-            <!-- Movie Poster -->
-            <div class="movie-poster">
-              <img th:src="${items.movie.image}" alt="Poster phim" th:alt="${items.movie.movieName}">
+                    <div class="tab-content" id="profileTabContent">
+                        <div class="tab-pane fade show active" id="history" role="tabpanel">
+                            <form th:action="@{/user/profile}" method="get" class="d-flex mb-3">
+                                <input type="hidden" name="size" th:value="${pageSize}" />
+                                <input type="hidden" name="customerId" th:value="${customer.id}" />
+                                <input type="text" name="keyword" class="form-control me-2" placeholder="Search movie name..."
+                                       th:value="${keyword}" />
+                                <button type="submit" class="btn btn-outline-primary">
+                                    <i class="fas fa-search me-1"></i>Search
+                                </button>
+                            </form>
+
+                            <div class="p-4">
+                                <div th:if="${watchedMovies.isEmpty()}" class="empty-state">
+                                    <i class="fas fa-ticket-alt"></i>
+                                    <h5>No movie history yet</h5>
+                                    <p>You haven't watched any movies at our cinema.</p>
+                                </div>
+
+                                <div th:if="${!watchedMovies.isEmpty()}" class="movie-history-grid">
+                                    <div class="movie-item" th:each="items, iterStat : ${watchedMovies}">
+                                        <button class="btn btn-outline-info mb-3"
+                                                th:attr="data-invoice-id=${items.invoiceId}"
+                                                onclick="showInvoiceDetail(this)">
+                                            <i class="fas fa-receipt me-1"></i>Invoice Details
+                                        </button>
+
+                                        <div class="movie-card-layout">
+                                            <div class="movie-poster">
+                                                <img th:src="${items.movie.image}" alt="Movie Poster" th:alt="${items.movie.movieName}">
+                                            </div>
+
+                                            <div class="movie-content">
+                                                <h3 class="movie-title" th:text="${items.movie.movieName}">Dune: Part Two</h3>
+
+                                                <div class="movie-meta">
+                                                    <div class="movie-detail">
+                                                        <i class="fas fa-clock"></i>
+                                                        <span th:text="${items.movie.duration} + ' minutes'">120 minutes</span>
+                                                    </div>
+                                                    <div class="movie-detail">
+                                                        <i class="fas fa-building"></i>
+                                                        <span th:text="${items.movie.studio}">Studio</span>
+                                                    </div>
+                                                    <div class="movie-detail">
+                                                        <i class="fas fa-map-marker-alt"></i>
+                                                        <span th:text="${items.theater.theaterName}">District 1</span>
+                                                    </div>
+                                                </div>
+
+                                                <div class="theater-badge" th:text="'Theater ' + ${items.theater.theaterName}">
+                                                    Theater District 1
+                                                </div>
+
+                                                <div class="movie-datetime">
+                                                    25/08/2025 | 19:30 - 22:15
+                                                </div>
+
+                                                <div class="movie-rating">
+                                                    <div class="rating-display">
+                                                        <span class="rating-stars">★★★★★</span>
+                                                        <span class="rating-value" th:text="${#numbers.formatDecimal(items.movie.movieRate, 1, 1)} + '/5'">4.5/5</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="movie-feedback">
+                                            <form th:action="@{/feedback/submit}" method="post" class="feedback-form">
+                                                <input type="hidden" name="customerId" th:value="${customer.id}" />
+                                                <input type="hidden" name="theaterId" th:value="${items.theater.theaterID}" />
+
+                                                <textarea name="content" rows="2" class="form-control" placeholder="Feedback about cinema service..."></textarea>
+
+                                                <div class="input-group">
+                                                    <label class="input-group-text">
+                                                        <i class="fas fa-star text-warning"></i> Rating
+                                                    </label>
+                                                    <select class="form-select" name="serviceRate">
+                                                        <option value="5">Excellent</option>
+                                                        <option value="4">Good</option>
+                                                        <option value="3">Normal</option>
+                                                        <option value="2">Bad</option>
+                                                        <option value="1">Very Bad</option>
+                                                    </select>
+                                                </div>
+
+                                                <button class="btn btn-outline-primary" type="submit">
+                                                    <i class="fas fa-paper-plane me-1"></i>Send Feedback
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                                <nav th:if="${totalPages > 1}" class="mt-4">
+                                    <ul class="pagination justify-content-center">
+                                        <li class="page-item" th:classappend="${currentPage == 1} ? 'disabled'">
+                                            <a class="page-link"
+                                               th:href="@{/user/profile(customerId=${customer.id}, keyword=${keyword}, page=${currentPage - 1})}">
+                                                &laquo;
+                                            </a>
+                                        </li>
+
+                                        <li class="page-item" th:each="i : ${#numbers.sequence(1, totalPages)}"
+                                            th:classappend="${i == currentPage} ? 'active'">
+                                            <a class="page-link"
+                                               th:href="@{/user/profile(customerId=${customer.id}, keyword=${keyword}, page=${i})}"
+                                               th:text="${i}">1</a>
+                                        </li>
+
+                                        <li class="page-item" th:classappend="${currentPage == totalPages} ? 'disabled'">
+                                            <a class="page-link"
+                                               th:href="@{/user/profile(customerId=${customer.id}, keyword=${keyword}, page=${currentPage + 1})}">
+                                                &raquo;
+                                            </a>
+                                        </li>
+                                    </ul>
+                                </nav>
+
+                            </div>
+                        </div>
+
+                        <div class="tab-pane fade" id="points" role="tabpanel">
+                            <div class="p-4">
+                                <div class="mb-4">
+                                    <p class="mb-3">You currently have <strong class="points-display" th:text="${customer.point}">150</strong> reward points.</p>
+                                    <p class="text-muted">Keep accumulating points to receive many attractive gifts!</p>
+                                </div>
+
+                                <hr class="my-4">
+
+                                <h5 class="mt-4 mb-3"><i class="fas fa-exchange-alt me-2"></i>Redeem Rewards</h5>
+                                <div class="table-responsive">
+                                    <table class="table table-hover align-middle">
+                                        <thead>
+                                        <tr>
+                                            <th scope="col">Point Threshold</th>
+                                            <th scope="col">Reward</th>
+                                            <th scope="col">Status</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr>
+                                            <td><strong>100 points</strong></td>
+                                            <td>1 free movie ticket</td>
+                                            <td>
+                                                <span class="badge bg-success" th:if="${customer.point >= 100}">Eligible</span>
+                                                <span class="badge bg-secondary" th:unless="${customer.point >= 100}">Not enough</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>200 points</strong></td>
+                                            <td>1 popcorn + drink combo</td>
+                                            <td>
+                                                <span class="badge bg-success" th:if="${customer.point >= 200}">Eligible</span>
+                                                <span class="badge bg-secondary" th:unless="${customer.point >= 200}">Not enough</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>300 points</strong></td>
+                                            <td>50% off voucher for next ticket</td>
+                                            <td>
+                                                <span class="badge bg-success" th:if="${customer.point >= 300}">Eligible</span>
+                                                <span class="badge bg-secondary" th:unless="${customer.point >= 300}">Not enough</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>500 points</strong></td>
+                                            <td>2 VIP tickets + Special Combo</td>
+                                            <td>
+                                                <span class="badge bg-success" th:if="${customer.point >= 500}">Eligible</span>
+                                                <span class="badge bg-secondary" th:unless="${customer.point >= 500}">Not enough</span>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+
+                                <div class="mt-4 p-3 bg-light rounded">
+                                    <p class="mb-0 text-muted">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Reward points can be redeemed at the ticket counter or in the "Rewards" section of the app.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
-            <!-- Movie Content -->
-            <div class="movie-content">
-              <h3 class="movie-title" th:text="${items.movie.movieName}">Dune: Hành Trình Cát - Phần 2</h3>
-
-              <div class="movie-meta">
-                <div class="movie-detail">
-                  <i class="fas fa-clock"></i>
-                  <span th:text="${items.movie.duration} + ' phút'">120 phút</span>
+            <div class="profile-card">
+                <div class="card-header-custom">
+                    <i class="fas fa-user"></i>
+                    Personal Information
                 </div>
-                <div class="movie-detail">
-                  <i class="fas fa-building"></i>
-                  <span th:text="${items.movie.studio}">Studio</span>
-                </div>
-                <div class="movie-detail">
-                  <i class="fas fa-map-marker-alt"></i>
-                  <span th:text="${items.theater.theaterName}">Quận 1</span>
-                </div>
-              </div>
+                <div class="card-body-custom">
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-signature"></i>
+                            Full Name:
+                        </div>
+                        <div class="info-value" th:text="${customer.fullName}">John Doe</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-phone"></i>
+                            Phone Number:
+                        </div>
+                        <div class="info-value" th:text="${customer.phone}">0901234567</div>
+                    </div>
+                    <div class="info-row">
+                        <div class="info-label">
+                            <i class="fas fa-star"></i>
+                            Reward Points
+                        </div>
+                        <div class="info-value">
+                            <span class="points-display" th:text="${customer.point} + ' points'">150 points</span>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <button class="btn btn-edit" onclick="toggleEditForm()">
+                            <i class="fas fa-edit me-2"></i>Edit Information
+                        </button>
 
-              <!-- Theater Badge -->
-              <div class="theater-badge" th:text="'Rạp ' + ${items.theater.theaterName}">
-                Rạp Quận 1
-              </div>
+                        <div th:if="${errorMessage}" class="alert alert-danger mt-3" th:text="${errorMessage}"></div>
+                        <form th:action="@{/user/profile/update}" method="post" class="mt-4" id="editForm" style="display: none;">
+                            <input type="hidden" name="customerId" th:value="${customer.id}"/>
+                            <input type="hidden" name="accountId" th:value="${account.id}"/>
+                            <input type="hidden" id="originalEmail" th:value="${account.email}" />
+                            <div class="mb-3">
+                                <label for="fullName" class="form-label">Full Name</label>
+                                <input type="text" class="form-control" id="fullName" name="fullName"
+                                       th:value="${inputFullName != null ? inputFullName : customer.fullName}" required>
+                            </div>
 
-              <!-- Date and Time -->
-              <div class="movie-datetime">
-                25/08/2025 | 19:30 - 22:15
-              </div>
+                            <div class="mb-3">
+                                <label for="phone" class="form-label">Phone Number</label>
+                                <input type="tel" class="form-control" id="phone" name="phone"
+                                       th:value="${inputPhone != null ? inputPhone : customer.phone}"
+                                       pattern="[0-9]{10,11}" maxlength="11" required
+                                       title="Please enter a valid phone number (10-11 digits)">
 
-              <!-- Rating -->
-              <div class="movie-rating">
-                <div class="rating-display">
-                  <span class="rating-stars">★★★★★</span>
-                  <span class="rating-value" th:text="${#numbers.formatDecimal(items.movie.movieRate, 1, 1)} + '/5'">4.5/5</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email" name="email"
+                                       th:value="${inputEmail != null ? inputEmail : account.email}" required>
+
+
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="newPassword" class="form-label">New Password</label>
+                                <input type="password" class="form-control" id="newPassword" name="newPassword">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="confirmPassword" class="form-label">Confirm New Password</label>
+                                <input type="password" class="form-control" id="confirmPassword" name="confirmPassword">
+                            </div>
+
+                            <div class="mb-3">
+                                <label for="otp" class="form-label">OTP Code</label>
+                                <div class="d-flex gap-2">
+                                    <input type="text" class="form-control" id="otp" name="otp" placeholder="Enter OTP" required>
+                                    <button type="button" class="btn btn-warning" onclick="sendOtp()">Send OTP</button>
+                                </div>
+                                <small id="otpStatus" class="text-muted"></small>
+                            </div>
+
+                            <div class="d-flex gap-2">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-save me-2"></i>Save Changes
+                                </button>
+                                <button type="button" class="btn btn-secondary" onclick="toggleEditForm()">
+                                    <i class="fas fa-times me-2"></i>Cancel
+                                </button>
+                            </div>
+                        </form>
+                    </div>
                 </div>
-              </div>
             </div>
-          </div>
-
-          <!-- Feedback Form -->
-          <div class="movie-feedback">
-            <form th:action="@{/feedback/submit}" method="post" class="feedback-form">
-              <input type="hidden" name="customerId" th:value="${customer.id}" />
-              <input type="hidden" name="theaterId" th:value="${items.theater.theaterId}" />
-
-              <textarea name="content" rows="2" class="form-control" placeholder="Góp ý về dịch vụ rạp..."></textarea>
-
-              <div class="input-group">
-                <label class="input-group-text">
-                  <i class="fas fa-star text-warning"></i> Đánh giá
-                </label>
-                <select class="form-select" name="serviceRate">
-                  <option value="5">Rất tốt</option>
-                  <option value="4">Tốt</option>
-                  <option value="3">Bình thường</option>
-                  <option value="2">Tệ</option>
-                  <option value="1">Rất tệ</option>
-                </select>
-              </div>
-
-              <button class="btn btn-outline-primary btn-sm" type="submit">
-                <i class="fas fa-paper-plane me-1"></i>Gửi đánh giá
-              </button>
-            </form>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
+</main>
+
+<footer class="footer">
+    <div class="container text-center text-md-left">
+        <div class="row text-center text-md-left">
+            <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mt-3">
+                <h5 class="text-uppercase mb-4 font-weight-bold text-warning">Cinema</h5>
+                <p>Experience great cinema with us!</p>
+            </div>
+            <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mt-3">
+                <h6 class="text-uppercase mb-4 font-weight-bold">Links</h6>
+                <p><a href="#" class="text-light" style="text-decoration: none;">Home</a></p>
+                <p><a href="#" class="text-light" style="text-decoration: none;">Movies</a></p>
+                <p><a href="#" class="text-light" style="text-decoration: none;">Showtimes</a></p>
+                <p><a href="#" class="text-light" style="text-decoration: none;">Contact</a></p>
+            </div>
+            <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mt-3">
+                <h6 class="text-uppercase mb-4 font-weight-bold">Support</h6>
+                <p><a href="#" class="text-light" style="text-decoration: none;">FAQ</a></p>
+                <p><a href="#" class="text-light" style="text-decoration: none;">Terms</a></p>
+                <p><a href="#" class="text-light" style="text-decoration: none;">Privacy Policy</a></p>
+            </div>
+            <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mt-3">
+                <h6 class="text-uppercase mb-4 font-weight-bold">Contact</h6>
+                <p><i class="fas fa-home mr-3"></i> HOA LAC, HANOI CITY</p>
+                <p><i class="fas fa-envelope mr-3"></i> support@cinema.com</p>
+                <p><i class="fas fa-phone mr-3"></i> +84 123 456 789</p>
+            </div>
+        </div>
+        <hr class="mb-4">
+        <div class="row align-items-center">
+            <div class="col-md-7 col-lg-8">
+                <p>© 2025 Cinema. All Rights Reserved.</p>
+            </div>
+            <div class="col-md-5 col-lg-4">
+                <div class="text-center text-md-right">
+                    <ul class="list-unstyled list-inline">
+                        <li class="list-inline-item">
+                            <a href="#" class="btn-floating btn-sm text-light" style="font-size:23px;"><i class="fab fa-facebook"></i></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#" class="btn-floating btn-sm text-light" style="font-size:23px;"><i class="fab fa-twitter"></i></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#" class="btn-floating btn-sm text-light" style="font-size:23px;"><i class="fab fa-instagram"></i></a>
+                        </li>
+                        <li class="list-inline-item">
+                            <a href="#" class="btn-floating btn-sm text-light" style="font-size:23px;"><i class="fab fa-linkedin"></i></a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<div class="modal fade" id="invoiceDetailModal" tabindex="-1" aria-labelledby="invoiceDetailLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="invoiceDetailLabel">Invoice Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Theater:</strong> <span id="modalTheater"></span></p>
+                        <p><strong>Room:</strong> <span id="modalRoom"></span></p>
+                        <p><strong>Booking Date:</strong> <span id="modalDate"></span></p>
+                        <p><strong>Seats:</strong> <span id="modalSeats"></span></p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Food & Drinks:</strong> <span id="modalFoods"></span></p>
+                        <p><strong>Discount:</strong> <span id="modalDiscount"></span></p>
+                        <p><strong>Total Price:</strong> <span id="modalTotal"></span></p>
+                        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    function sendOtp() {
+        const email = document.getElementById("email").value;
+        const otpStatus = document.getElementById("otpStatus");
+
+        if (!email) {
+            otpStatus.innerText = "Please enter your email first.";
+            otpStatus.className = "text-danger";
+            return;
+        }
+
+        otpStatus.innerText = "Sending OTP...";
+        otpStatus.className = "text-info";
+
+        fetch('/user/send-otp', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            body: `email=${encodeURIComponent(email)}`
+        })
+            .then(response => response.text())
+            .then(data => {
+                otpStatus.innerText = data;
+                otpStatus.className = data.includes("successful") ? "text-success" : "text-danger";
+            })
+            .catch(error => {
+                otpStatus.innerText = "Failed to send OTP.";
+                otpStatus.className = "text-danger";
+            });
+    }
+
+    // Initialize Bootstrap tabs
+    const triggerTabList = document.querySelectorAll('#profileTabs button');
+    triggerTabList.forEach(triggerEl => {
+        const tabTrigger = new bootstrap.Tab(triggerEl);
+        triggerEl.addEventListener('click', event => {
+            event.preventDefault();
+            tabTrigger.show();
+        });
+    });
+
+    // Add smooth scrolling and fade-in animations
+    document.addEventListener('DOMContentLoaded', function() {
+        const cards = document.querySelectorAll('.profile-card');
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+
+        cards.forEach(card => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'all 0.6s ease';
+            observer.observe(card);
+        });
+    });
+
+    function toggleEditForm() {
+        const form = document.getElementById("editForm");
+        form.style.display = form.style.display === "none" ? "block" : "none";
+    }
+
+    // Form validation
+    document.addEventListener("DOMContentLoaded", function() {
+        const phoneInput = document.getElementById('phone');
+
+        // Prevent non-numeric characters and special characters
+        phoneInput.addEventListener('input', function () {
+            this.value = this.value.replace(/[^0-9]/g, '');
+        });
+        const editForm = document.getElementById('editForm');
+        if (editForm) {
+            editForm.addEventListener('submit', function(e) {
+                const fullName = document.getElementById('fullName').value.trim();
+                const pass = document.getElementById('newPassword').value;
+                const confirm = document.getElementById('confirmPassword').value;
+                const email = document.getElementById('email').value.trim();
+                const originalEmail = document.getElementById('originalEmail').value.trim();
+                const phoneInput = document.getElementById('phone');
+                // Confirm if email is changed
+                if (email !== originalEmail) {
+                    const confirmed = confirm("Are you sure you want to change your login email?");
+                    if (!confirmed) {
+                        e.preventDefault();
+                        return;
+                    }
+                }
+
+                // Validate full name
+                const nameRegex = /^[^\d!@#$%^&*()_+={}[\]:;"'<>,.?/\\|`~]*$/;
+                if (!fullName || !nameRegex.test(fullName) || /^\s|\s$/.test(fullName)) {
+                    alert("Full name cannot contain numbers, special characters, or leading/trailing spaces.");
+                    e.preventDefault();
+                    return;
+                }
+
+                if (pass && pass !== confirm) {
+                    alert("Confirm password does not match!");
+                    e.preventDefault();
+                    return;
+                }
+
+                document.getElementById('loadingOverlay').style.display = 'flex';
+            });
+        }
+    });
+
+
+    function showInvoiceDetail(button) {
+        const invoiceId = button.getAttribute("data-invoice-id");
+
+        // Show loading
+        document.getElementById('loadingOverlay').style.display = 'flex';
+
+        fetch(`/invoice/${invoiceId}/detail`)
+            .then(res => {
+
+                if (!res.ok) {
+                    throw new Error(`Server returned error: ${res.status}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                document.getElementById("modalTheater").textContent = data.theaterName;
+                document.getElementById("modalRoom").textContent = data.roomName;
+                document.getElementById("modalDate").textContent = new Date(data.bookingDate).toLocaleString('en-US');
+                document.getElementById("modalSeats").textContent = data.seats.join(', ');
+                document.getElementById("modalFoods").textContent = data.foodName.length > 0 ? data.foodName.join(', ') : "None";
+                document.getElementById("modalDiscount").textContent = new Intl.NumberFormat('en-US').format(data.discount) + " VND";
+                document.getElementById("modalTotal").textContent = new Intl.NumberFormat('en-US').format(data.totalPrice) + " VND";
+                document.getElementById("modalStatus").textContent = data.status;
+
+                const modal = new bootstrap.Modal(document.getElementById("invoiceDetailModal"));
+                modal.show();
+            })
+            .catch(err => {
+                alert("Error loading invoice details.");
+                console.error("Error details:", err);
+            })
+            .finally(() => {
+                // Hide loading
+                document.getElementById('loadingOverlay').style.display = 'none';
+            });
+    }
+
+    // Smooth scroll for navigation
+    document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+        anchor.addEventListener('click', function (e) {
+            e.preventDefault();
+            const target = document.querySelector(this.getAttribute('href'));
+            if (target) {
+                target.scrollIntoView({
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }
+        });
+    });
+</script>
+
 </body>
 </html>
