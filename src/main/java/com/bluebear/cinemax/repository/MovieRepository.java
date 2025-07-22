@@ -39,8 +39,8 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     // Tìm phim theo genre sử dụng @ManyToMany relationship
     @Query("SELECT DISTINCT m FROM Movie m " +
             "JOIN m.genres g " +
-            "WHERE g.genreID = :genreId")
-    List<Movie> findMoviesByGenreIdJoin(@Param("genreId") Integer genreId);
+            "WHERE g.genreID = :genreID")
+    List<Movie> findMoviesByGenreIDJoin(@Param("genreID") Integer genreID);
 
     // ==================== MOVIE-ACTOR QUERIES (SIMPLIFIED) ====================
 

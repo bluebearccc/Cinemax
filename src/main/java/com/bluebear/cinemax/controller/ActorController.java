@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.Arrays;
@@ -89,8 +88,8 @@ public class ActorController {
     public String addActorForm(Model model) {
         ActorDTO actor = new ActorDTO(); // Tạo object rỗng cho form
 
-        // FIXED: Lấy tất cả phim từ database
-        List<MovieDTO> allMovies = movieService.getAllMovies(); // Hoặc getAllActiveMovies() nếu có
+        // Lấy tất cả phim từ database
+        List<MovieDTO> allMovies = movieService.getAllMovies();
 
         // DEBUG: Kiểm tra dữ liệu phim
         System.out.println("DEBUG - Loading " + (allMovies != null ? allMovies.size() : 0) + " movies for actor form");
@@ -99,17 +98,16 @@ public class ActorController {
         }
 
         model.addAttribute("actor", actor);
-        model.addAttribute("allMovies", allMovies); // Thêm danh sách phim
+        model.addAttribute("allMovies", allMovies);
         model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Thêm diễn viên mới");
 
         return "admin/form-actor";
     }
 
-    // FIXED: Xử lý thêm actor mới với movies
+    // Xử lý thêm actor mới
     @PostMapping("/add")
     public String addActor(@ModelAttribute ActorDTO actorDTO,
-                           @RequestParam("imageFile") MultipartFile imageFile,
                            @RequestParam(value = "selectedMovies", required = false) String selectedMovies,
                            Model model,
                            RedirectAttributes redirectAttributes) {
@@ -119,23 +117,13 @@ public class ActorController {
                 throw new IllegalArgumentException("Tên diễn viên không được để trống");
             }
 
-            // Xử lý upload file ảnh (nếu có)
-            if (imageFile != null && !imageFile.isEmpty()) {
-                // TODO: Implement file upload service
-                // String imagePath = fileUploadService.uploadActorImage(imageFile);
-                // actorDTO.setImage(imagePath);
-
-                // Tạm thời set default image
-                actorDTO.setImage("/images/default-actor.png");
-            } else {
-                // Set default image nếu không upload
-                actorDTO.setImage("/images/default-actor.png");
-            }
+            // Set default image
+            actorDTO.setImage("/images/default-actor.png");
 
             // Lưu actor trước
             ActorDTO savedActor = actorService.saveActor(actorDTO);
 
-            // FIXED: Xử lý danh sách phim đã chọn
+            // Xử lý danh sách phim đã chọn
             if (selectedMovies != null && !selectedMovies.trim().isEmpty()) {
                 List<Integer> movieIds = Arrays.stream(selectedMovies.split(","))
                         .map(String::trim)
@@ -172,7 +160,7 @@ public class ActorController {
             return "redirect:/admin/actors";
         }
 
-        // FIXED: Lấy tất cả phim và phim hiện tại của actor
+        // Lấy tất cả phim và phim hiện tại của actor
         List<MovieDTO> allMovies = movieService.getAllMovies();
         List<MovieDTO> actorMovies = movieService.getMoviesByActor(id);
 
@@ -194,11 +182,10 @@ public class ActorController {
         return "admin/form-actor";
     }
 
-    // FIXED: Xử lý cập nhật actor với movies
+    // Xử lý cập nhật actor
     @PostMapping("/edit/{id}")
     public String updateActor(@PathVariable Integer id,
                               @ModelAttribute ActorDTO actorDTO,
-                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                               @RequestParam(value = "selectedMovies", required = false) String selectedMovies,
                               Model model,
                               RedirectAttributes redirectAttributes) {
@@ -211,18 +198,10 @@ public class ActorController {
                 throw new IllegalArgumentException("Tên diễn viên không được để trống");
             }
 
-            // Xử lý upload file ảnh mới (nếu có)
-            if (imageFile != null && !imageFile.isEmpty()) {
-                // TODO: Implement file upload service
-                // String imagePath = fileUploadService.uploadActorImage(imageFile);
-                // actorDTO.setImage(imagePath);
-            }
-            // Nếu không có file mới, giữ nguyên ảnh cũ (đã có trong actorDTO từ form)
-
             // Cập nhật thông tin actor
             ActorDTO updatedActor = actorService.updateActor(actorDTO);
 
-            // FIXED: Xử lý cập nhật danh sách phim
+            // Xử lý cập nhật danh sách phim
             List<Integer> movieIds = null;
             if (selectedMovies != null && !selectedMovies.trim().isEmpty()) {
                 movieIds = Arrays.stream(selectedMovies.split(","))
@@ -275,7 +254,7 @@ public class ActorController {
                 return "redirect:/admin/actors/" + id;
             }
 
-             actorService.deleteActor(id);
+            actorService.deleteActor(id);
 
             redirectAttributes.addFlashAttribute("success", "Xóa diễn viên thành công!");
             return "redirect:/admin/actors";
@@ -285,4 +264,3 @@ public class ActorController {
         }
     }
 }
-

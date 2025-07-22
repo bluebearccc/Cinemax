@@ -1,6 +1,7 @@
 package com.bluebear.cinemax.controller;
 
 import com.bluebear.cinemax.dto.ActorDTO;
+import com.bluebear.cinemax.dto.GenreDTO;
 import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
@@ -45,14 +46,22 @@ public class MovieController {
      */
     @GetMapping("")
     public String getAllMovies(Model model) {
-        List<MovieDTO> movies = movieService.getAllMovies();
-        List<Genre> genres = genreService.getAllGenres();
+        try {
+            List<MovieDTO> movies = movieService.getAllMovies();
+            List<GenreDTO> genres = genreService.getAllGenres(); // ✅ FIXED: Sử dụng GenreDTO
 
-        model.addAttribute("movies", movies);
-        model.addAttribute("genres", genres);
-        model.addAttribute("pageTitle", "Tất cả phim");
+            model.addAttribute("movies", movies);
+            model.addAttribute("genres", genres);
+            model.addAttribute("pageTitle", "Tất cả phim");
 
-        return "admin/movies"; // -> templates/admin/movies.html
+            return "admin/movies"; // -> templates/admin/movies.html
+        } catch (Exception e) {
+            System.err.println("Lỗi khi tải tất cả phim: " + e.getMessage());
+            model.addAttribute("error", "Có lỗi xảy ra khi tải danh sách phim");
+            model.addAttribute("movies", new ArrayList<>());
+            model.addAttribute("genres", new ArrayList<>());
+            return "admin/movies";
+        }
     }
 
     /**
@@ -63,7 +72,7 @@ public class MovieController {
     public String getActiveMovies(Model model) {
         try {
             List<MovieDTO> movies = movieService.getAllActiveMovies();
-            List<Genre> genres = genreService.getAllGenres();
+            List<GenreDTO> genres = genreService.getAllGenres(); // ✅ FIXED
 
             model.addAttribute("movies", movies);
             model.addAttribute("genres", genres);
@@ -73,6 +82,8 @@ public class MovieController {
         } catch (Exception e) {
             System.err.println("Lỗi khi tải phim Active: " + e.getMessage());
             model.addAttribute("error", "Có lỗi xảy ra khi tải phim Active");
+            model.addAttribute("movies", new ArrayList<>());
+            model.addAttribute("genres", new ArrayList<>());
             return "admin/movies";
         }
     }
@@ -83,14 +94,22 @@ public class MovieController {
      */
     @GetMapping("/now-showing")
     public String getNowShowingMovies(Model model) {
-        List<MovieDTO> movies = movieService.getNowShowingMovies();
-        List<Genre> genres = genreService.getAllGenres();
+        try {
+            List<MovieDTO> movies = movieService.getNowShowingMovies();
+            List<GenreDTO> genres = genreService.getAllGenres(); // ✅ FIXED
 
-        model.addAttribute("movies", movies);
-        model.addAttribute("genres", genres);
-        model.addAttribute("pageTitle", "Phim đang chiếu");
+            model.addAttribute("movies", movies);
+            model.addAttribute("genres", genres);
+            model.addAttribute("pageTitle", "Phim đang chiếu");
 
-        return "admin/movies";
+            return "admin/movies";
+        } catch (Exception e) {
+            System.err.println("Lỗi khi tải phim đang chiếu: " + e.getMessage());
+            model.addAttribute("error", "Có lỗi xảy ra khi tải phim đang chiếu");
+            model.addAttribute("movies", new ArrayList<>());
+            model.addAttribute("genres", new ArrayList<>());
+            return "admin/movies";
+        }
     }
 
     /**
@@ -99,14 +118,22 @@ public class MovieController {
      */
     @GetMapping("/upcoming")
     public String getUpcomingMovies(Model model) {
-        List<MovieDTO> movies = movieService.getUpcomingMovies();
-        List<Genre> genres = genreService.getAllGenres();
+        try {
+            List<MovieDTO> movies = movieService.getUpcomingMovies();
+            List<GenreDTO> genres = genreService.getAllGenres(); // ✅ FIXED
 
-        model.addAttribute("movies", movies);
-        model.addAttribute("genres", genres);
-        model.addAttribute("pageTitle", "Phim sắp chiếu");
+            model.addAttribute("movies", movies);
+            model.addAttribute("genres", genres);
+            model.addAttribute("pageTitle", "Phim sắp chiếu");
 
-        return "admin/movies";
+            return "admin/movies";
+        } catch (Exception e) {
+            System.err.println("Lỗi khi tải phim sắp chiếu: " + e.getMessage());
+            model.addAttribute("error", "Có lỗi xảy ra khi tải phim sắp chiếu");
+            model.addAttribute("movies", new ArrayList<>());
+            model.addAttribute("genres", new ArrayList<>());
+            return "admin/movies";
+        }
     }
 
     /**
@@ -124,7 +151,7 @@ public class MovieController {
             }
 
             List<ActorDTO> actors = actorService.getActorsByMovie(id);
-            List<Genre> genres = genreService.getGenresByMovie(id);
+            List<GenreDTO> genres = genreService.getGenresByMovie(id); // ✅ FIXED: Sử dụng GenreDTO
             List<MovieDTO> relatedMovies = movieService.getRelatedMovies(id.longValue());
 
             model.addAttribute("movie", movie);
@@ -215,17 +242,17 @@ public class MovieController {
                 System.out.println("Movies found after keyword filter: " + movies.size());
             }
 
-            // Bước 3: Lọc theo thể loại
+            // Bước 3: Lọc theo thể loại - ✅ FIXED
             if (genreId != null && genreId > 0) {
                 movies = movies.stream()
                         .filter(movie -> movie.getGenres() != null &&
                                 movie.getGenres().stream().anyMatch(genreName -> {
-                                    Genre g = genreService.getGenreById(genreId);
+                                    GenreDTO g = genreService.getGenreById(genreId); // ✅ FIXED: Sử dụng GenreDTO
                                     return g != null && genreName.equals(g.getGenreName());
                                 }))
                         .collect(Collectors.toList());
 
-                Genre genre = genreService.getGenreById(genreId);
+                GenreDTO genre = genreService.getGenreById(genreId); // ✅ FIXED
                 if (genre != null) {
                     if (titleBuilder.length() > 0) titleBuilder.append(" | ");
                     titleBuilder.append("Thể loại: ").append(genre.getGenreName());
@@ -239,7 +266,7 @@ public class MovieController {
                 pageTitle = titleBuilder.toString();
             }
 
-            List<Genre> allGenres = genreService.getAllGenres();
+            List<GenreDTO> allGenres = genreService.getAllGenres(); // ✅ FIXED
 
             model.addAttribute("movies", movies);
             model.addAttribute("genres", allGenres);
@@ -264,36 +291,20 @@ public class MovieController {
             return "admin/movies";
         }
     }
-
-    /**
-     * Top phim theo rating
-     */
-    @GetMapping("/top-rated")
-    public String getTopRatedMovies(Model model) {
-        List<MovieDTO> movies = movieService.getTopRatedMovies();
-        List<Genre> genres = genreService.getAllGenres();
-
-        model.addAttribute("movies", movies);
-        model.addAttribute("genres", genres);
-        model.addAttribute("pageTitle", "Phim được đánh giá cao");
-
-        return "admin/movies";
-    }
-
     /**
      * Theo thể loại
      */
     @GetMapping("/genre/{genreId}")
     public String getMoviesByGenre(@PathVariable Integer genreId, Model model) {
         try {
-            Genre genre = genreService.getGenreById(genreId);
+            GenreDTO genre = genreService.getGenreById(genreId); // ✅ FIXED
             if (genre == null) {
                 model.addAttribute("error", "Không tìm thấy thể loại");
                 return "error/404";
             }
 
             List<MovieDTO> movies = movieService.getMoviesByGenre(genreId);
-            List<Genre> allGenres = genreService.getAllGenres();
+            List<GenreDTO> allGenres = genreService.getAllGenres(); // ✅ FIXED
 
             model.addAttribute("movies", movies);
             model.addAttribute("genres", allGenres);
@@ -305,9 +316,12 @@ public class MovieController {
         } catch (Exception e) {
             System.err.println("Lỗi khi tải phim theo thể loại: " + e.getMessage());
             model.addAttribute("error", "Có lỗi xảy ra khi tải phim theo thể loại");
+            model.addAttribute("movies", new ArrayList<>());
+            model.addAttribute("genres", new ArrayList<>());
             return "admin/movies";
         }
     }
+
 
     // ==================== CHỨC NĂNG CHỈNH SỬA PHIM ====================
 
@@ -327,16 +341,16 @@ public class MovieController {
             if (movie == null) {
                 System.out.println("Không tìm thấy phim với ID: " + id);
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim");
-                return "redirect:/admin/movies"; // ✅ FIXED: Đã sửa từ /movies thành /admin/movies
+                return "redirect:/admin/movies";
             }
 
-            // Lấy tất cả thể loại
-            List<Genre> allGenres = genreService.getAllGenres();
+            // Lấy tất cả thể loại - ✅ FIXED
+            List<GenreDTO> allGenres = genreService.getAllGenres();
             System.out.println("Tổng số thể loại có sẵn: " + allGenres.size());
 
-            // Lấy các ID thể loại hiện tại của phim
+            // Lấy các ID thể loại hiện tại của phim - ✅ FIXED
             List<Integer> movieGenreIds = genreService.getGenresByMovie(id).stream()
-                    .map(Genre::getGenreID)
+                    .map(GenreDTO::getGenreId) // ✅ FIXED: Sử dụng GenreDTO
                     .collect(Collectors.toList());
             System.out.println("Thể loại hiện tại của phim: " + movieGenreIds);
 
@@ -352,7 +366,7 @@ public class MovieController {
             System.err.println("Lỗi khi tải form chỉnh sửa: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi tải form chỉnh sửa");
-            return "redirect:/admin/movies"; // ✅ FIXED
+            return "redirect:/admin/movies";
         }
     }
 
@@ -376,12 +390,10 @@ public class MovieController {
             if (existingMovie == null) {
                 System.out.println("LỖI: Không tìm thấy phim với ID: " + id);
                 redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim để cập nhật");
-                return "redirect:/admin/movies"; // ✅ FIXED
+                return "redirect:/admin/movies";
             }
 
             System.out.println("Đã tìm thấy phim hiện tại: " + existingMovie.getMovieName());
-
-            // ... (giữ nguyên phần validation code) ...
 
             // Lấy và validate dữ liệu từ form
             String movieName = allParams.get("movieName");
@@ -397,7 +409,7 @@ public class MovieController {
             // Validate tên phim
             if (movieName == null || movieName.trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Tên phim không được để trống");
-                return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+                return "redirect:/admin/movies/" + id + "/edit";
             }
 
             // Validate và parse thời lượng
@@ -410,11 +422,11 @@ public class MovieController {
                 duration = Integer.parseInt(durationStr.trim());
                 if (duration <= 0 || duration > 500) {
                     redirectAttributes.addFlashAttribute("error", "Thời lượng phim phải từ 1-500 phút");
-                    return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+                    return "redirect:/admin/movies/" + id + "/edit";
                 }
             } catch (NumberFormatException e) {
                 redirectAttributes.addFlashAttribute("error", "Thời lượng phim không hợp lệ");
-                return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+                return "redirect:/admin/movies/" + id + "/edit";
             }
 
             // Validate và parse đánh giá phim
@@ -425,11 +437,11 @@ public class MovieController {
                     movieRate = Double.parseDouble(movieRateStr.trim());
                     if (movieRate < 0.0 || movieRate > 5.0) {
                         redirectAttributes.addFlashAttribute("error", "Đánh giá phim phải từ 0-5");
-                        return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+                        return "redirect:/admin/movies/" + id + "/edit";
                     }
                 } catch (NumberFormatException e) {
                     redirectAttributes.addFlashAttribute("error", "Đánh giá phim không hợp lệ");
-                    return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+                    return "redirect:/admin/movies/" + id + "/edit";
                 }
             }
 
@@ -448,11 +460,11 @@ public class MovieController {
 
                 if (startDate.isAfter(endDate) || startDate.isEqual(endDate)) {
                     redirectAttributes.addFlashAttribute("error", "Ngày bắt đầu phải trước ngày kết thúc");
-                    return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+                    return "redirect:/admin/movies/" + id + "/edit";
                 }
             } catch (DateTimeParseException e) {
                 redirectAttributes.addFlashAttribute("error", "Định dạng ngày không hợp lệ (yyyy-MM-dd)");
-                return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+                return "redirect:/admin/movies/" + id + "/edit";
             }
 
             // Tạo đối tượng Movie để cập nhật
@@ -482,23 +494,22 @@ public class MovieController {
             if (updateSuccess) {
                 redirectAttributes.addFlashAttribute("success",
                         "Cập nhật phim '" + movieName + "' thành công!");
-                return "redirect:/admin/movies/" + id; // ✅ FIXED
+                return "redirect:/admin/movies/" + id;
             } else {
                 redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi cập nhật phim");
-                return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+                return "redirect:/admin/movies/" + id + "/edit";
             }
 
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
-            return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+            return "redirect:/admin/movies/" + id + "/edit";
         } catch (Exception e) {
             System.err.println("LỖI NGHIÊM TRỌNG trong updateMovie: " + e.getMessage());
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Có lỗi hệ thống xảy ra: " + e.getMessage());
-            return "redirect:/admin/movies/" + id + "/edit"; // ✅ FIXED
+            return "redirect:/admin/movies/" + id + "/edit";
         }
     }
-
     // ==================== CHỨC NĂNG CHỈNH SỬA NGÀY KẾT THÚC ====================
 
     /**
@@ -575,7 +586,7 @@ public class MovieController {
     @GetMapping("/add")
     public String showAddForm(Model model) {
         try {
-            List<Genre> allGenres = genreService.getAllGenres();
+            List<GenreDTO> allGenres = genreService.getAllGenres(); // ✅ FIXED
             List<ActorDTO> allActors = actorService.getAllActors();
 
             model.addAttribute("allGenres", allGenres);
@@ -586,7 +597,7 @@ public class MovieController {
         } catch (Exception e) {
             System.err.println("Lỗi khi tải form thêm phim: " + e.getMessage());
             model.addAttribute("error", "Có lỗi xảy ra khi tải form thêm phim");
-            return "redirect:/admin/movies"; // ✅ FIXED
+            return "redirect:/admin/movies";
         }
     }
 
@@ -610,16 +621,14 @@ public class MovieController {
             // Validate tên phim - CHỈ CÓ TÊN PHIM LÀ BẮT BUỘC
             if (movieName == null || movieName.trim().isEmpty()) {
                 redirectAttributes.addFlashAttribute("error", "Tên phim không được để trống");
-                return "redirect:/admin/movies/add"; // ✅ FIXED
+                return "redirect:/admin/movies/add";
             }
 
             // Kiểm tra tên phim trùng lặp
             if (movieService.isMovieNameExists(movieName.trim(), null)) {
                 redirectAttributes.addFlashAttribute("error", "Tên phim đã tồn tại");
-                return "redirect:/admin/movies/add"; // ✅ FIXED
+                return "redirect:/admin/movies/add";
             }
-
-            // ... (giữ nguyên phần validation code khác) ...
 
             String description = getParameterOrNull(allParams, "description");
             String image = getParameterOrNull(allParams, "image");

@@ -1,10 +1,888 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Genre Details</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .breadcrumb-text {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-warning {
+            background: var(--warning-orange);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-warning:hover {
+            background: #e8a317;
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-secondary {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: white;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-danger:hover {
+            background: #d33b2c;
+            transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 24px;
+        }
+
+        .detail-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            transition: all 0.3s ease;
+        }
+
+        .detail-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-title i {
+            color: var(--primary-blue);
+        }
+
+        .detail-item {
+            margin-bottom: 16px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .detail-item:last-child {
+            margin-bottom: 0;
+            padding-bottom: 0;
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            margin-bottom: 8px;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .detail-value {
+            font-size: 1rem;
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .genre-id-display {
+            font-family: 'Courier New', monospace;
+            font-weight: 700;
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 1.4rem;
+            text-align: center;
+            border: 2px dashed var(--primary-blue);
+            letter-spacing: 2px;
+        }
+
+        .genre-name-display {
+            font-size: 2rem;
+            font-weight: 700;
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            border-radius: 12px;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+            color: white;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            border: 3px solid var(--primary-blue);
+        }
+
+        .movie-count-display {
+            font-size: 3rem;
+            font-weight: 900;
+            text-align: center;
+            color: var(--success-green);
+            background: rgba(52, 168, 83, 0.1);
+            padding: 20px;
+            border-radius: 12px;
+            border: 2px solid var(--success-green);
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        .genre-stats {
+            background: var(--darker-bg);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .stat-item:last-child {
+            margin-bottom: 0;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .stat-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .info-box {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 20px;
+        }
+
+        .info-box-title {
+            color: var(--primary-blue);
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .info-box-content {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        .genre-preview {
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+            border-radius: 12px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .genre-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.1) 10px,
+                    rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .genre-preview-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .genre-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .genre-id-preview {
+            font-family: 'Courier New', monospace;
+            font-size: 1.8rem;
+            font-weight: 900;
+            letter-spacing: 3px;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .genre-name-preview {
+            font-size: 2.5rem;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .genre-id-display {
+                font-size: 1.2rem;
+                letter-spacing: 1px;
+            }
+
+            .genre-name-display {
+                font-size: 1.5rem;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .badge {
+            padding: 6px 12px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .bg-success {
+            background-color: var(--success-green) !important;
+        }
+
+        .bg-secondary {
+            background-color: var(--text-secondary) !important;
+        }
+
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.875rem;
+            border-radius: 6px;
+        }
+
+        .movies-section {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 24px;
+        }
+
+        .movies-table {
+            background: var(--darker-bg);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .movies-table .table {
+            margin-bottom: 0;
+        }
+
+        .movies-table .table thead th {
+            background: var(--border-color);
+            border-bottom: 2px solid var(--border-color);
+            font-size: 0.9rem;
+            padding: 12px;
+        }
+
+        .movies-table .table tbody td {
+            padding: 12px;
+            border-color: var(--border-color);
+        }
+
+        .movie-poster {
+            width: 40px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: 4px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .movie-info-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .movie-title {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .movie-studio {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+
+        .rating-star {
+            color: #ffc107;
+            font-size: 0.8rem;
+        }
+
+    </style>
 </head>
 <body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
 
+    <nav class="sidebar-nav">
+        <a class="nav-link" href="/admin">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link" href="/admin/movies">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        <a class="nav-link active" href="/admin/genres">
+            <i class="fas fa-tags"></i>Genres
+        </a>
+        <a class="nav-link" href="/admin/vouchers">
+            <i class="fas fa-ticket-alt"></i>Vouchers
+        </a>
+        <a class="nav-link" href="/admin/accounts">
+            <i class="fas fa-user-circle"></i>Accounts
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="header-section fade-in">
+        <div class="header-content">
+            <h2>Genre Details</h2>
+            <p class="breadcrumb-text">Dashboard > Genres > <span th:text="${genre.genreId}">1</span></p>
+        </div>
+        <div class="action-buttons">
+            <a href="/admin/genres" class="btn-secondary">
+                <i class="fas fa-arrow-left"></i>Back to Genres
+            </a>
+            <a th:href="@{/admin/genres/{id}/edit(id=${genre.genreId})}" class="btn-warning">
+                <i class="fas fa-edit"></i>Edit Genre
+            </a>
+        </div>
+    </div>
+
+    <!-- Genre Details -->
+    <div class="detail-grid fade-in">
+        <!-- Main Information -->
+        <div class="detail-card">
+            <h3 class="card-title">
+                <i class="fas fa-tags"></i>
+                Genre Information
+            </h3>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-id-card"></i>
+                    Genre ID
+                </div>
+                <div class="genre-id-display" th:text="${genre.genreId}">1</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-tag"></i>
+                    Genre Name
+                </div>
+                <div class="genre-name-display" th:text="${genre.genreName}">Action</div>
+            </div>
+
+            <div class="detail-item">
+                <div class="detail-label">
+                    <i class="fas fa-film"></i>
+                    Movie Count
+                </div>
+                <div class="movie-count-display" th:text="${movieCount ?: 0}">0</div>
+            </div>
+
+        </div>
+
+        <!-- Actions & Preview -->
+        <div class="detail-card">
+            <h3 class="card-title">
+                <i class="fas fa-cogs"></i>
+                Genre Actions & Preview
+            </h3>
+
+            <!-- Genre Preview -->
+            <div class="genre-preview">
+                <div class="genre-preview-content">
+                    <div class="genre-title">BlueBear Cinema Genre</div>
+                    <div class="genre-id-preview" th:text="${genre.genreId}">1</div>
+                    <div class="genre-name-preview" th:text="${genre.genreName}">Action</div>
+                    <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">
+                        Movie Category System
+                    </div>
+                </div>
+            </div>
+
+            <!-- Info Box -->
+            <div class="info-box">
+                <div class="info-box-title">
+                    <i class="fas fa-info-circle"></i>
+                    Genre Guidelines
+                </div>
+                <div class="info-box-content">
+                    • Genres help categorize movies<br>
+                    • Each movie can have multiple genres<br>
+                    • Genre names should be descriptive<br>
+                    • Keep genre names concise and clear
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div style="margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+                <h5 style="color: var(--text-primary); margin-bottom: 16px;">
+                    <i class="fas fa-bolt"></i>
+                    Quick Actions
+                </h5>
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn-primary w-100"
+                            th:data-genre-name="${genre.genreName}"
+                            onclick="copyToClipboard(this.getAttribute('data-genre-name'))">
+                        <i class="fas fa-copy"></i>Copy Genre Name
+                    </button>
+
+                    <a th:href="@{/admin/movies/genre/{id}(id=${genre.genreId})}"
+                       class="btn-primary w-100">
+                        <i class="fas fa-film"></i>View Movies in Genre
+                    </a>
+
+                    <button type="button" class="btn-danger w-100"
+                            th:data-genre-id="${genre.genreId}"
+                            th:data-genre-name="${genre.genreName}"
+                            onclick="confirmDelete(this.getAttribute('data-genre-id'), this.getAttribute('data-genre-name'))">
+                        <i class="fas fa-trash"></i>Delete Genre
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content" style="background: var(--card-bg); border: 1px solid var(--border-color);">
+            <div class="modal-header" style="border-bottom: 1px solid var(--border-color);">
+                <h5 class="modal-title" style="color: var(--text-primary);">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Confirm Genre Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" style="color: var(--text-primary);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <i class="fas fa-tags" style="font-size: 3rem; color: var(--danger-red); margin-bottom: 16px;"></i>
+                    <h5>Are you sure you want to delete this genre?</h5>
+                </div>
+                <div style="background: var(--darker-bg); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
+                    <strong>Genre ID: <span id="deleteGenreId" style="color: var(--primary-blue);"></span></strong><br>
+                    <strong>Genre Name: <span id="deleteGenreName" style="color: var(--success-green);"></span></strong>
+                </div>
+                <p class="text-danger">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <strong>Warning:</strong> This action cannot be undone!
+                </p>
+                <ul style="color: var(--text-secondary); font-size: 0.9rem;">
+                    <li>Genre will be permanently deleted from the system</li>
+                    <li>Movies associated with this genre may be affected</li>
+                    <li>This action is irreversible</li>
+                </ul>
+            </div>
+            <div class="modal-footer" style="border-top: 1px solid var(--border-color);">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i>Cancel
+                </button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i>Confirm Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Success Toast -->
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="copyToast" class="toast" role="alert">
+        <div class="toast-header" style="background: var(--card-bg); border-bottom: 1px solid var(--border-color);">
+            <i class="fas fa-check-circle text-success me-2"></i>
+            <strong class="me-auto" style="color: var(--text-primary);">Success</strong>
+            <button type="button" class="btn-close" data-bs-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" style="background: var(--card-bg); color: var(--text-primary);">
+            Genre name copied to clipboard!
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    });
+
+    // Copy to clipboard function
+    function copyToClipboard(text) {
+        navigator.clipboard.writeText(text).then(function() {
+            const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+            toast.show();
+        }).catch(function(err) {
+            console.error('Could not copy text: ', err);
+            // Fallback method
+            const textArea = document.createElement('textarea');
+            textArea.value = text;
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            try {
+                document.execCommand('copy');
+                const toast = new bootstrap.Toast(document.getElementById('copyToast'));
+                toast.show();
+            } catch (err) {
+                console.error('Fallback: Could not copy text: ', err);
+            }
+            document.body.removeChild(textArea);
+        });
+    }
+
+    // Delete confirmation
+    function confirmDelete(genreId, genreName) {
+        document.getElementById('deleteGenreId').textContent = genreId;
+        document.getElementById('deleteGenreName').textContent = genreName;
+        document.getElementById('deleteForm').action = '/admin/genres/' + genreId + '/delete';
+        new bootstrap.Modal(document.getElementById('deleteModal')).show();
+    }
+</script>
 </body>
 </html>

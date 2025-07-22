@@ -1,10 +1,623 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Edit Genre</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-bg: #343a40;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background-color: var(--dark-bg) !important;
+            margin-bottom: 20px;
+        }
+
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+        }
+
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
+        }
+
+        .card-header {
+            background-color: var(--primary-color);
+            color: white;
+            font-weight: bold;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .form-control, .form-select {
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            border-radius: 8px;
+        }
+
+        .btn-secondary {
+            border-radius: 8px;
+        }
+
+        .required {
+            color: var(--danger-color);
+        }
+
+        .form-text {
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+
+        .movies-selection {
+            background: #f8f9fa;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .movie-checkbox {
+            margin-bottom: 12px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .movie-checkbox:hover {
+            background: #e9ecef;
+        }
+
+        .movie-checkbox input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .movie-checkbox label {
+            color: #333;
+            cursor: pointer;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .movie-info {
+            margin-left: 8px;
+        }
+
+        .movie-name {
+            font-weight: 500;
+        }
+
+        .movie-details {
+            font-size: 0.8rem;
+            color: #666;
+            margin-top: 2px;
+        }
+
+        .selected-movies-summary {
+            background: rgba(0, 123, 255, 0.1);
+            border: 1px solid rgba(0, 123, 255, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .genre-preview-card {
+            background: linear-gradient(135deg, #007bff, #6610f2);
+            color: white;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .genre-preview-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.1) 10px,
+                    rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .genre-preview-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .genre-name-display {
+            font-size: 2rem;
+            font-weight: 900;
+            margin: 15px 0;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 768px) {
+            .btn-group-mobile {
+                flex-direction: column;
+                gap: 10px;
+            }
+        }
+
+        .loading-overlay {
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .movies-container {
+            position: relative;
+        }
+    </style>
 </head>
 <body>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/admin">
+            <i class="fas fa-film"></i> BlueBear Cinema
+        </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/admin">Dashboard</a>
+            <a class="nav-link" href="/admin/movies">Movies</a>
+            <a class="nav-link" href="/admin/actors">Actors</a>
+            <a class="nav-link active" href="/admin/genres">Genres</a>
+            <a class="nav-link" href="/admin/vouchers">Vouchers</a>
+            <a class="nav-link" href="/admin/accounts">Accounts</a>
+        </div>
+    </div>
+</nav>
 
+<div class="container">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>
+                <i class="fas fa-edit"></i>
+                <span th:text="${isEdit ? 'Edit Genre' : 'Add New Genre'}">Edit Genre</span>
+            </h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/genres">Genres</a></li>
+                    <li class="breadcrumb-item active" th:text="${isEdit ? 'Edit' : 'Add New'}">Edit</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="d-flex btn-group-mobile">
+            <a href="/admin/genres" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Genres
+            </a>
+        </div>
+    </div>
+
+    <!-- Form -->
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tags"></i> Genre Information
+                </div>
+                <div class="card-body">
+                    <form th:action="${isEdit ? '/admin/genres/' + genre.genreId + '/edit' : '/admin/genres/add'}"
+                          method="post" th:object="${genre}">
+
+                        <!-- Genre Name -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label for="genreName" class="form-label">
+                                    Genre Name <span class="required">*</span>
+                                </label>
+                                <input type="text"
+                                       class="form-control"
+                                       id="genreName"
+                                       th:field="*{genreName}"
+                                       placeholder="Enter genre name (e.g., Action, Comedy, Drama)"
+                                       maxlength="50"
+                                       required>
+                                <div class="form-text">Enter a clear and descriptive genre name, maximum 50 characters</div>
+                            </div>
+                        </div>
+
+                        <!-- Movies Selection -->
+                        <div class="row mb-3">
+                            <div class="col-md-12">
+                                <label class="form-label" for="moviesSelection">Movies in this Genre (Optional)</label>
+                                <div class="movies-container">
+                                    <div class="loading-overlay" id="loadingOverlay">
+                                        <div class="text-center">
+                                            <i class="fas fa-spinner fa-spin fa-2x text-primary"></i>
+                                            <div class="mt-2">Loading movies...</div>
+                                        </div>
+                                    </div>
+                                    <div class="movies-selection" id="moviesSelection">
+                                        <div class="text-center" style="padding: 20px;">
+                                            <i class="fas fa-spinner fa-spin"></i>
+                                            <div class="form-text mt-2">Loading movies...</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-text">
+                                    Select movies that belong to this genre. You can select multiple movies.
+                                </div>
+                                <div class="selected-movies-summary" id="selectedSummary" style="display: none;">
+                                    <div class="selected-count">Selected: <span id="selectedCount">0</span> movies</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden field for selected movies -->
+                        <input type="hidden" name="selectedMovies" id="selectedMoviesInput">
+
+                        <!-- Submit Buttons -->
+                        <div class="d-flex justify-content-between">
+                            <a href="/admin/genres" class="btn btn-secondary">
+                                <i class="fas fa-times"></i> Cancel
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save"></i>
+                                <span th:text="${isEdit ? 'Update Genre' : 'Create Genre'}">Update Genre</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Help Card -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-info-circle"></i> Guidelines
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6><i class="fas fa-tags text-primary"></i> Genre Name</h6>
+                        <p class="small text-muted">Enter a clear, descriptive name for the genre. Name will be automatically formatted with proper capitalization.</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="fas fa-film text-info"></i> Movie Association</h6>
+                        <p class="small text-muted">
+                            Select movies that belong to this genre. Movies can have multiple genres.
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="fas fa-lightbulb text-warning"></i> Best Practices</h6>
+                        <p class="small text-muted">
+                            • Use standard genre names (Action, Comedy, Drama)<br>
+                            • Keep names concise and clear<br>
+                            • Avoid special characters<br>
+                            • Consider audience familiarity
+                        </p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6><i class="fas fa-magic text-success"></i> Features</h6>
+                        <p class="small text-muted">
+                            • Auto-format genre names<br>
+                            • Multi-movie selection<br>
+                            • Search through movies<br>
+                            • Instant preview
+                        </p>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <small>
+                            Note: Changes to genre associations will be reflected across all related movies in the system.
+                        </small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Genre Preview Card -->
+            <div class="card mt-3">
+                <div class="card-header">
+                    <i class="fas fa-eye"></i> Live Preview
+                </div>
+                <div class="card-body p-0">
+                    <div class="genre-preview-card">
+                        <div class="genre-preview-content">
+                            <div style="font-size: 1rem; font-weight: 600; margin-bottom: 10px;">
+                                BlueBear Cinema Genre
+                            </div>
+                            <div class="genre-name-display" id="genreNamePreview">
+                                <span th:text="${genre.genreName ?: 'Action'}">Action</span>
+                            </div>
+                            <div style="font-size: 0.9rem; opacity: 0.8;">
+                                Movie Category System
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hidden data for JavaScript -->
+<script th:inline="javascript">
+    // Pass data from server to JavaScript
+    window.movieData = {
+        allMovies: /*[[${allMovies}]]*/ [],
+        currentMovieIds: /*[[${currentMovieIds}]]*/ [],
+        genreName: /*[[${genre.genreName}]]*/ 'Action',
+        isEdit: /*[[${isEdit}]]*/ false
+    };
+
+    console.log('Movie data loaded:', window.movieData);
+</script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('DOM loaded, initializing...');
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                try {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                } catch (e) {
+                    console.log('Alert already closed or not found');
+                }
+            });
+        }, 5000);
+
+        // Initialize form elements
+        initializeGenreForm();
+        loadMoviesSelection();
+    });
+
+    function initializeGenreForm() {
+        const genreNameInput = document.getElementById('genreName');
+        const genreNamePreview = document.getElementById('genreNamePreview');
+
+        if (!genreNameInput || !genreNamePreview) {
+            console.error('Genre form elements not found');
+            return;
+        }
+
+        // Format genre name and update preview
+        genreNameInput.addEventListener('input', function() {
+            let value = this.value.trim();
+
+            // Update preview in real-time
+            if (value) {
+                genreNamePreview.textContent = value;
+            } else {
+                genreNamePreview.textContent = window.movieData.genreName || 'Action';
+            }
+        });
+
+        genreNameInput.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value) {
+                // Auto-format: capitalize first letter of each word
+                const formatted = value.split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+                this.value = formatted;
+                genreNamePreview.textContent = formatted;
+            }
+        });
+
+        // Initialize preview with current genre name
+        if (window.movieData.genreName && genreNamePreview) {
+            genreNamePreview.textContent = window.movieData.genreName;
+        }
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const genreName = genreNameInput.value.trim();
+
+            if (!genreName) {
+                e.preventDefault();
+                alert('Please enter a genre name!');
+                genreNameInput.focus();
+                return;
+            }
+
+            if (genreName.length < 2) {
+                e.preventDefault();
+                alert('Genre name must be at least 2 characters!');
+                genreNameInput.focus();
+                return;
+            }
+
+            if (genreName.length > 50) {
+                e.preventDefault();
+                alert('Genre name cannot exceed 50 characters!');
+                genreNameInput.focus();
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            if (submitBtn) {
+                const originalText = submitBtn.innerHTML;
+                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+                submitBtn.disabled = true;
+            }
+        });
+    }
+
+    function loadMoviesSelection() {
+        console.log('Loading movies selection...');
+
+        const moviesContainer = document.getElementById('moviesSelection');
+        const selectedSummary = document.getElementById('selectedSummary');
+        const selectedCount = document.getElementById('selectedCount');
+        const selectedMoviesInput = document.getElementById('selectedMoviesInput');
+        const loadingOverlay = document.getElementById('loadingOverlay');
+
+        if (!moviesContainer) {
+            console.error('Movies container not found');
+            return;
+        }
+
+        // Show loading
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'flex';
+        }
+
+        // Check if we have movie data
+        if (!window.movieData || !window.movieData.allMovies) {
+            console.error('No movie data available');
+            moviesContainer.innerHTML = '<div class="text-center text-muted p-3">No movie data available</div>';
+            if (loadingOverlay) {
+                loadingOverlay.style.display = 'none';
+            }
+            return;
+        }
+
+        console.log('Found', window.movieData.allMovies.length, 'movies');
+        console.log('Current movie IDs:', window.movieData.currentMovieIds);
+
+        // Build movies HTML
+        let moviesHTML = '';
+
+        if (window.movieData.allMovies.length === 0) {
+            moviesHTML = '<div class="text-center text-muted p-3">No movies available</div>';
+        } else {
+            window.movieData.allMovies.forEach(movie => {
+                const movieId = movie.movieId || movie.id;
+                const movieName = movie.movieName || movie.title || 'Untitled Movie';
+
+
+
+                // Check if this movie is currently selected
+                const isChecked = window.movieData.currentMovieIds &&
+                    window.movieData.currentMovieIds.includes(movieId);
+
+                moviesHTML += `
+                    <div class="movie-checkbox">
+                        <label>
+                            <input type="checkbox"
+                                   value="${movieId}"
+                                   ${isChecked ? 'checked' : ''}
+                                   onchange="updateSelectedMovies()">
+                            <div class="movie-info">
+                                <div class="movie-name">${movieName}</div>
+
+                            </div>
+                        </label>
+                    </div>
+                `;
+            });
+        }
+
+        moviesContainer.innerHTML = moviesHTML;
+
+        // Hide loading
+        if (loadingOverlay) {
+            loadingOverlay.style.display = 'none';
+        }
+
+        // Update initial state
+        updateSelectedMovies();
+
+        console.log('Movies selection loaded successfully');
+    }
+
+    function updateSelectedMovies() {
+        const selectedSummary = document.getElementById('selectedSummary');
+        const selectedCount = document.getElementById('selectedCount');
+        const selectedMoviesInput = document.getElementById('selectedMoviesInput');
+        const checkboxes = document.querySelectorAll('#moviesSelection input[type="checkbox"]');
+
+        if (!selectedSummary || !selectedCount || !selectedMoviesInput) {
+            console.error('Selected movies elements not found');
+            return;
+        }
+
+        const selectedMovies = Array.from(checkboxes)
+            .filter(cb => cb.checked)
+            .map(cb => cb.value);
+
+        console.log('Selected movies:', selectedMovies);
+
+        selectedCount.textContent = selectedMovies.length;
+        selectedMoviesInput.value = selectedMovies.join(',');
+
+        if (selectedMovies.length > 0) {
+            selectedSummary.style.display = 'block';
+        } else {
+            selectedSummary.style.display = 'none';
+        }
+    }
+</script>
 </body>
 </html>

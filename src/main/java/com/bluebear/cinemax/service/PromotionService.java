@@ -4,11 +4,8 @@ import com.bluebear.cinemax.dto.PromotionDTO;
 import com.bluebear.cinemax.entity.Promotion;
 import com.bluebear.cinemax.enumtype.Promotion_Status;
 import com.bluebear.cinemax.repository.PromotionRepository;
-import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,186 +17,154 @@ public class PromotionService {
 
     // ==================== VALIDATION METHODS ====================
 
-    // Validation for create mode (all fields required)
-    public boolean isValidForCreate(PromotionDTO voucherDTO) {
-        return voucherDTO.getPromotionCode() != null && !voucherDTO.getPromotionCode().trim().isEmpty() &&
-                voucherDTO.getDiscount() != null && voucherDTO.getDiscount() >= 0 && voucherDTO.getDiscount() <= 100 &&
-                voucherDTO.getStartTime() != null && voucherDTO.getEndTime() != null && voucherDTO.getStartTime().isBefore(voucherDTO.getEndTime()) &&
-                voucherDTO.getQuantity() != null && voucherDTO.getQuantity() >= 0 &&
-                voucherDTO.getStatus() != null && !voucherDTO.getStatus().trim().isEmpty() &&
-                isValidStatus(voucherDTO.getStatus());
+    public boolean isValidForCreate(PromotionDTO dto) {
+        return isValidCode(dto.getPromotionCode()) && isValidDiscount(dto.getDiscount()) &&
+                isValidDateRange(dto.getStartTime(), dto.getEndTime()) && isValidQuantity(dto.getQuantity()) &&
+                isValidStatus(dto.getStatus());
     }
 
-    // Validation for edit mode (some fields can be null)
-    public boolean isValidForUpdate(PromotionDTO voucherDTO) {
-        // If promotion code is provided, it must be valid
-        if (voucherDTO.getPromotionCode() != null && voucherDTO.getPromotionCode().trim().isEmpty()) {
-            return false;
-        }
-
-        // If discount is provided, it must be between 0-100
-        if (voucherDTO.getDiscount() != null && (voucherDTO.getDiscount() < 0 || voucherDTO.getDiscount() > 100)) {
-            return false;
-        }
-
-        // If both start and end time are provided, start must be before end
-        if (voucherDTO.getStartTime() != null && voucherDTO.getEndTime() != null && !voucherDTO.getStartTime().isBefore(voucherDTO.getEndTime())) {
-            return false;
-        }
-
-        // If quantity is provided, it must be >= 0
-        if (voucherDTO.getQuantity() != null && voucherDTO.getQuantity() < 0) {
-            return false;
-        }
-
-        // If status is provided, it must be valid
-        if (voucherDTO.getStatus() != null && !voucherDTO.getStatus().trim().isEmpty() && !isValidStatus(voucherDTO.getStatus())) {
-            return false;
-        }
-
-        return true;
+    public boolean isValidForUpdate(PromotionDTO dto) {
+        return (dto.getPromotionCode() == null || isValidCode(dto.getPromotionCode())) &&
+                (dto.getDiscount() == null || isValidDiscount(dto.getDiscount())) &&
+                (dto.getStartTime() == null || dto.getEndTime() == null || dto.getStartTime().isBefore(dto.getEndTime())) &&
+                (dto.getQuantity() == null || isValidQuantity(dto.getQuantity())) &&
+                (dto.getStatus() == null || isValidStatus(dto.getStatus()));
     }
 
-    // Helper method to validate status
+    private boolean isValidCode(String code) {
+        return code != null && !code.trim().isEmpty();
+    }
+
+    private boolean isValidDiscount(Integer discount) {
+        return discount != null && discount >= 0 && discount <= 100;
+    }
+
+    private boolean isValidDateRange(java.time.LocalDateTime start, java.time.LocalDateTime end) {
+        return start != null && end != null && start.isBefore(end);
+    }
+
+    private boolean isValidQuantity(Integer quantity) {
+        return quantity != null && quantity >= 0;
+    }
+
     private boolean isValidStatus(String status) {
-        return "Available".equals(status) || "Expired".equals(status);
+        return status != null && !status.trim().isEmpty() &&
+                ("Available".equals(status) || "Expired".equals(status));
     }
 
     // ==================== BUSINESS METHODS ====================
 
-    // Get all vouchers
     public List<Promotion> getAllVouchers() {
         return voucherRepository.findAll();
     }
 
-    // Get voucher by ID
     public Optional<Promotion> getVoucherById(Integer id) {
         return voucherRepository.findById(id);
     }
 
-    // Create new voucher
-    public Promotion createVoucher(PromotionDTO voucherDTO) {
-        if (!isValidForCreate(voucherDTO)) {
-            throw new IllegalArgumentException("Invalid voucher data");
-        }
+    public Promotion createVoucher(PromotionDTO dto) {
+        validateForCreate(dto);
+        validateUniqueCode(dto.getPromotionCode());
 
-        // Check if promotion code already exists
-        if (voucherRepository.existsByPromotionCode(voucherDTO.getPromotionCode())) {
-            throw new IllegalArgumentException("Promotion code already exists");
-        }
-
-        // Validate date range
-        if (voucherDTO.getStartTime() != null && voucherDTO.getEndTime() != null) {
-            if (voucherDTO.getStartTime().isAfter(voucherDTO.getEndTime())) {
-                throw new IllegalArgumentException("Start time must be before end time");
-            }
-        }
-
-        // Create voucher entity
         Promotion voucher = Promotion.builder()
-                .promotionCode(voucherDTO.getPromotionCode())
-                .discount(voucherDTO.getDiscount())
-                .startTime(voucherDTO.getStartTime())
-                .endTime(voucherDTO.getEndTime())
-                .quantity(voucherDTO.getQuantity())
-                .status(Promotion_Status.valueOf(voucherDTO.getStatus()))
+                .promotionCode(dto.getPromotionCode())
+                .discount(dto.getDiscount())
+                .startTime(dto.getStartTime())
+                .endTime(dto.getEndTime())
+                .quantity(dto.getQuantity())
+                .status(Promotion_Status.valueOf(dto.getStatus()))
                 .build();
 
         return voucherRepository.save(voucher);
     }
 
-    // Update voucher
-    public Promotion updateVoucher(Integer id, PromotionDTO voucherDTO) {
-        if (!isValidForUpdate(voucherDTO)) {
-            throw new IllegalArgumentException("Invalid voucher data for update");
+    public Promotion updateVoucher(Integer id, PromotionDTO dto) {
+        validateForUpdate(dto);
+        Promotion voucher = findVoucherById(id);
+
+        if (dto.getPromotionCode() != null && !dto.getPromotionCode().equals(voucher.getPromotionCode())) {
+            validateUniqueCode(dto.getPromotionCode());
         }
 
-        Optional<Promotion> voucherOpt = voucherRepository.findById(id);
-        if (!voucherOpt.isPresent()) {
-            throw new IllegalArgumentException("Voucher not found");
-        }
-
-        Promotion voucher = voucherOpt.get();
-
-        // Check if promotion code is being changed and if it already exists
-        if (voucherDTO.getPromotionCode() != null &&
-                !voucherDTO.getPromotionCode().equals(voucher.getPromotionCode()) &&
-                voucherRepository.existsByPromotionCode(voucherDTO.getPromotionCode())) {
-            throw new IllegalArgumentException("Promotion code already exists");
-        }
-
-        // Update fields if provided
-        if (voucherDTO.getPromotionCode() != null) {
-            voucher.setPromotionCode(voucherDTO.getPromotionCode());
-        }
-        if (voucherDTO.getDiscount() != null) {
-            voucher.setDiscount(voucherDTO.getDiscount());
-        }
-        if (voucherDTO.getStartTime() != null) {
-            voucher.setStartTime(voucherDTO.getStartTime());
-        }
-        if (voucherDTO.getEndTime() != null) {
-            voucher.setEndTime(voucherDTO.getEndTime());
-        }
-        if (voucherDTO.getQuantity() != null) {
-            voucher.setQuantity(voucherDTO.getQuantity());
-        }
-        if (voucherDTO.getStatus() != null) {
-            voucher.setStatus(Promotion_Status.valueOf(voucherDTO.getStatus()));
-        }
-
-        // Validate date range after update
-        if (voucher.getStartTime() != null && voucher.getEndTime() != null) {
-            if (voucher.getStartTime().isAfter(voucher.getEndTime())) {
-                throw new IllegalArgumentException("Start time must be before end time");
-            }
-        }
-
+        updateVoucherFields(voucher, dto);
+        validateDateRangeAfterUpdate(voucher);
         return voucherRepository.save(voucher);
     }
 
-    // Delete voucher
     public void deleteVoucher(Integer id) {
-        Optional<Promotion> voucherOpt = voucherRepository.findById(id);
-        if (!voucherOpt.isPresent()) {
-            throw new IllegalArgumentException("Voucher not found");
-        }
+        findVoucherById(id);
         voucherRepository.deleteById(id);
     }
 
-
-    // Search vouchers
     public List<Promotion> searchVouchers(String keyword, String status) {
-        Promotion_Status enumStatus = null;
-        if (status != null && !status.isEmpty()) {
-            try {
-                enumStatus = Promotion_Status.valueOf(status);
-            } catch (IllegalArgumentException e) {
-                // Invalid status, will search without status filter
-            }
-        }
+        Promotion_Status enumStatus = parseStatus(status);
         return voucherRepository.searchVouchers(keyword, enumStatus);
     }
 
-
-    // Get total vouchers count
     public long getTotalVouchersCount() {
         return voucherRepository.count();
     }
 
-    // Get active vouchers count
     public long getActiveVouchersCount() {
         return voucherRepository.countByStatus(Promotion_Status.Available);
     }
 
-    // Get expired vouchers count
     public long getExpiredVouchersCount() {
         return voucherRepository.countByStatus(Promotion_Status.Expired);
     }
 
-    // Get average discount for active vouchers
     public double getAverageDiscountForActiveVouchers() {
-        Double averageDiscount = voucherRepository.getAverageDiscount(Promotion_Status.Available);
-        return averageDiscount != null ? averageDiscount : 0.0;
+        Double avg = voucherRepository.getAverageDiscount(Promotion_Status.Available);
+        return avg != null ? avg : 0.0;
+    }
+
+    // ==================== HELPER METHODS ====================
+
+    private void validateForCreate(PromotionDTO dto) {
+        if (!isValidForCreate(dto)) {
+            throw new IllegalArgumentException("Invalid voucher data");
+        }
+    }
+
+    private void validateForUpdate(PromotionDTO dto) {
+        if (!isValidForUpdate(dto)) {
+            throw new IllegalArgumentException("Invalid voucher data for update");
+        }
+    }
+
+    private void validateUniqueCode(String code) {
+        if (voucherRepository.existsByPromotionCode(code)) {
+            throw new IllegalArgumentException("Promotion code already exists");
+        }
+    }
+
+    private Promotion findVoucherById(Integer id) {
+        return voucherRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Voucher not found"));
+    }
+
+    private void updateVoucherFields(Promotion voucher, PromotionDTO dto) {
+        Optional.ofNullable(dto.getPromotionCode()).ifPresent(voucher::setPromotionCode);
+        Optional.ofNullable(dto.getDiscount()).ifPresent(voucher::setDiscount);
+        Optional.ofNullable(dto.getStartTime()).ifPresent(voucher::setStartTime);
+        Optional.ofNullable(dto.getEndTime()).ifPresent(voucher::setEndTime);
+        Optional.ofNullable(dto.getQuantity()).ifPresent(voucher::setQuantity);
+        Optional.ofNullable(dto.getStatus()).ifPresent(s -> voucher.setStatus(Promotion_Status.valueOf(s)));
+    }
+
+    private void validateDateRangeAfterUpdate(Promotion voucher) {
+        if (voucher.getStartTime() != null && voucher.getEndTime() != null &&
+                voucher.getStartTime().isAfter(voucher.getEndTime())) {
+            throw new IllegalArgumentException("Start time must be before end time");
+        }
+    }
+
+    private Promotion_Status parseStatus(String status) {
+        if (status == null || status.isEmpty()) return null;
+        try {
+            return Promotion_Status.valueOf(status);
+        } catch (IllegalArgumentException e) {
+            return null;
+        }
     }
 }

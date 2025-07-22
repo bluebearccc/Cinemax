@@ -25,7 +25,6 @@
             --text-muted: #808080;
             --sidebar-bg: #1e1e1e;
             --sidebar-hover: #333333;
-            /* FIXED: Thêm màu đen cho text */
             --text-black: #000000;
             --text-dark: #333333;
         }
@@ -344,7 +343,7 @@
             background: var(--card-hover);
         }
 
-        /* Fixed actor image styles */
+        /* Actor image styles - Static from database */
         .actor-image-container {
             width: 60px;
             height: 60px;
@@ -356,6 +355,12 @@
             justify-content: center;
             overflow: hidden;
             position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .actor-image-container:hover {
+            transform: scale(1.05);
+            border-color: var(--primary-blue);
         }
 
         .actor-image {
@@ -363,27 +368,47 @@
             height: 100%;
             object-fit: cover;
             display: block;
+            transition: opacity 0.3s ease;
         }
 
         .actor-image-placeholder {
             color: var(--text-muted);
             font-size: 1.5rem;
+            transition: color 0.3s ease;
         }
 
-        .actor-image.loading {
-            opacity: 0.5;
+        .actor-image-container:hover .actor-image-placeholder {
+            color: var(--primary-blue);
         }
 
-        .actor-image.error {
-            display: none;
+        /* Image not found indicator */
+        .image-not-found {
+            position: relative;
         }
 
-        /* FIXED: Actor name với màu đen dễ nhìn */
+        .image-not-found::after {
+            content: '!';
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            background: var(--warning-orange);
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Actor name */
         .actor-name {
             font-weight: 600;
-            color: #000000 !important; /* Màu đen cho chắc chắn */
+            color: #000000 !important;
             margin-bottom: 4px;
-            background-color: #ffffff; /* Nền trắng để contrast */
+            background-color: #ffffff;
             padding: 4px 8px;
             border-radius: 4px;
             display: inline-block;
@@ -484,6 +509,29 @@
             background: rgba(220, 53, 69, 0.1);
             border: 1px solid rgba(220, 53, 69, 0.3);
             color: var(--danger-red);
+        }
+
+        /* Image path info tooltip */
+        .image-info {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 10px;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .actor-image-container:hover .image-info {
+            opacity: 1;
         }
 
         @media (max-width: 768px) {
@@ -590,7 +638,7 @@
     <div class="header-section fade-in">
         <div class="header-content">
             <h2 th:text="${pageTitle}">Actor Management</h2>
-            <p class="breadcrumb-text">Dashboard > Actors</p>
+            <p class="breadcrumb-text">Dashboard > Actors > Static Images from Database</p>
         </div>
     </div>
 
@@ -645,7 +693,6 @@
                 <div>
                     <i class="fas fa-filter me-2"></i>
                     <span>Searching for:</span>
-
                     <span class="filter-badge">
                         <i class="fas fa-search"></i>
                         Name: "<span th:text="${keyword}"></span>"
@@ -661,7 +708,7 @@
         </div>
 
         <div class="showing-info">
-            <small>Showing <span th:text="${#lists.size(actors)}">0</span> actors</small>
+            <small>Showing <span th:text="${#lists.size(actors)}">0</span> actors (Images loaded from static/images/actors/)</small>
         </div>
     </div>
 
@@ -688,14 +735,30 @@
                         <div class="actor-name" th:text="${actor.actorName}">John Doe</div>
                     </td>
                     <td>
-                        <div class="actor-image-container">
+                        <div class="actor-image-container"
+                             th:classappend="${actor.image == null or #strings.isEmpty(actor.image)} ? 'image-not-found' : ''">
+
+                            <!-- Show image if image exists in database -->
                             <img th:if="${actor.image != null and !#strings.isEmpty(actor.image)}"
                                  th:src="${actor.image}"
                                  th:alt="${actor.actorName}"
                                  class="actor-image"
-                                 th:data-actor-id="${actor.actorId}">
+                                 th:onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+
+                            <!-- Fallback placeholder -->
                             <i th:if="${actor.image == null or #strings.isEmpty(actor.image)}"
                                class="fas fa-user actor-image-placeholder"></i>
+
+                            <!-- Hidden placeholder for error fallback -->
+                            <i th:if="${actor.image != null and !#strings.isEmpty(actor.image)}"
+                               class="fas fa-user actor-image-placeholder"
+                               style="display: none;"></i>
+
+                            <!-- Image info tooltip -->
+                            <div th:if="${actor.image != null and !#strings.isEmpty(actor.image)}"
+                                 class="image-info"
+                                 th:text="${actor.image}">
+                            </div>
                         </div>
                     </td>
                     <td>
@@ -769,40 +832,39 @@
             });
         }
 
-        // Improved image error handling
-        function handleImageError(img) {
-            // Only handle error once per image
-            if (img.classList.contains('error-handled')) {
-                return;
-            }
-
-            img.classList.add('error-handled');
-            img.classList.add('error');
-
-            // Create placeholder icon
-            const container = img.parentElement;
-            const placeholder = document.createElement('i');
-            placeholder.className = 'fas fa-user actor-image-placeholder';
-            container.appendChild(placeholder);
-
-            // Remove error event listener to prevent further calls
-            img.removeEventListener('error', handleImageError);
-        }
-
-        // Add error handling to existing images
+        // Handle image loading errors
         document.querySelectorAll('.actor-image').forEach(img => {
             img.addEventListener('error', function() {
-                handleImageError(this);
+                console.log('Image failed to load:', this.src);
+                this.style.display = 'none';
+                const placeholder = this.nextElementSibling;
+                if (placeholder && placeholder.classList.contains('actor-image-placeholder')) {
+                    placeholder.style.display = 'flex';
+                }
+
+                // Add not-found indicator to container
+                const container = this.closest('.actor-image-container');
+                if (container) {
+                    container.classList.add('image-not-found');
+                }
             });
 
-            // Add loading state
             img.addEventListener('load', function() {
-                this.classList.remove('loading');
+                console.log('Image loaded successfully:', this.src);
+                // Remove not-found indicator if image loads
+                const container = this.closest('.actor-image-container');
+                if (container) {
+                    container.classList.remove('image-not-found');
+                }
             });
+        });
 
-            // Check if image is already loaded
-            if (img.complete && img.naturalWidth === 0) {
-                handleImageError(img);
+        // Log image paths for debugging
+        const imageContainers = document.querySelectorAll('.actor-image-container');
+        imageContainers.forEach(container => {
+            const img = container.querySelector('.actor-image');
+            if (img) {
+                console.log('Expected image path:', img.src);
             }
         });
     });

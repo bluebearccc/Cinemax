@@ -340,12 +340,50 @@
             background: var(--card-hover);
         }
 
-        .movie-image {
+        /* Movie Image Styles */
+        .movie-image-container {
+            position: relative;
             width: 60px;
             height: 90px;
+        }
+
+        .movie-image {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             border-radius: 8px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .movie-image:hover {
+            transform: scale(1.05);
+            box-shadow: 0 8px 20px rgba(66, 133, 244, 0.3);
+        }
+
+        .image-status {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+            font-weight: bold;
+            border: 2px solid var(--card-bg);
+        }
+
+        .image-found {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .image-not-found {
+            background: var(--danger-red);
+            color: white;
         }
 
         .movie-title {
@@ -378,7 +416,6 @@
             font-weight: 500;
         }
 
-
         .status-badge {
             padding: 6px 12px;
             border-radius: 20px;
@@ -408,6 +445,10 @@
             border: none;
             transition: all 0.2s ease;
             color: white;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         .btn-view {
@@ -417,6 +458,8 @@
         .btn-view:hover {
             background: var(--primary-dark);
             transform: translateY(-1px);
+            color: white;
+            text-decoration: none;
         }
 
         .no-results {
@@ -435,6 +478,30 @@
             color: var(--text-secondary);
             font-size: 0.9rem;
             margin-top: 16px;
+        }
+
+        /* Image Path Info */
+        .image-path-info {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+
+        .path-instruction {
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .path-example {
+            font-family: 'Courier New', monospace;
+            background: var(--darker-bg);
+            padding: 8px 12px;
+            border-radius: 4px;
+            color: var(--primary-blue);
+            font-size: 0.85rem;
         }
 
         @media (max-width: 768px) {
@@ -528,7 +595,6 @@
             <div class="stat-number">5</div>
             <div class="stat-label">Upcoming</div>
         </div>
-
     </div>
 
     <!-- Search & Filter Section -->
@@ -551,9 +617,9 @@
                     <select class="form-select" name="genreId">
                         <option value="">All Categories</option>
                         <option th:each="genre : ${genres}"
-                                th:value="${genre.genreID}"
+                                th:value="${genre.genreId}"
                                 th:text="${genre.genreName}"
-                                th:selected="${genre.genreID == selectedGenreId}">
+                                th:selected="${genre.genreId == selectedGenreId}">
                         </option>
                     </select>
                 </div>
@@ -592,7 +658,7 @@
                     <span th:if="${selectedGenreId != null}" class="filter-badge">
                             <i class="fas fa-tags"></i>
                             Thể loại:
-                            <span th:each="genre : ${genres}" th:if="${genre.genreID == selectedGenreId}" th:text="${genre.genreName}"></span>
+                            <span th:each="genre : ${genres}" th:if="${genre.genreId == selectedGenreId}" th:text="${genre.genreName}"></span>
                         </span>
 
                     <span th:if="${selectedStatus != null and !#strings.isEmpty(selectedStatus)}" class="filter-badge">
@@ -632,9 +698,16 @@
                 <tbody>
                 <tr th:each="movie : ${movies}">
                     <td>
-                        <img th:src="${movie.image}" th:alt="${movie.movieName}"
-                             src="https://via.placeholder.com/60x90/4285f4/ffffff?text=Movie"
-                             class="movie-image">
+                        <div class="movie-image-container">
+                            <img th:id="'movieImg_' + ${movie.movieId}"
+                                 th:alt="${movie.movieName}"
+                                 class="movie-image"
+                                 th:data-movie-id="${movie.movieId}"
+                                 src="/images/movies/default.jpg">
+                            <div th:id="'imgStatus_' + ${movie.movieId}" class="image-status image-not-found">
+                                <i class="fas fa-times"></i>
+                            </div>
+                        </div>
                     </td>
                     <td>
                         <div class="movie-title" th:text="${movie.movieName}">Avengers: Endgame</div>
@@ -669,7 +742,7 @@
                 </tr>
                 <!-- No results message -->
                 <tr th:if="${#lists.isEmpty(movies)}">
-                    <td colspan="8" class="no-results">
+                    <td colspan="7" class="no-results">
                         <i class="fas fa-search"></i>
                         <p>No movies found matching your criteria</p>
                         <small>Try adjusting your search filters</small>
@@ -722,6 +795,81 @@
             el.style.transform = 'translateY(20px)';
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(el);
+        });
+
+        // Load movie images automatically
+        loadMovieImages();
+    });
+
+    // Load movie images from static folder
+    function loadMovieImages() {
+        const movieImages = document.querySelectorAll('.movie-image');
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        movieImages.forEach(img => {
+            const movieId = img.getAttribute('data-movie-id');
+            if (movieId) {
+                tryLoadMovieImage(img, movieId, imageExtensions, 0);
+            }
+        });
+    }
+
+    // Try to load image with different extensions
+    function tryLoadMovieImage(img, movieId, extensions, extensionIndex) {
+        if (extensionIndex >= extensions.length) {
+            // No image found, use default
+            img.src = '/images/movies/default.jpg';
+            updateImageStatus(movieId, false);
+            return;
+        }
+
+        const extension = extensions[extensionIndex];
+        const imagePath = `/images/movies/movie_${movieId}.${extension}`;
+
+        // Create a test image to check if file exists
+        const testImg = new Image();
+
+        testImg.onload = function() {
+            // Image found, use it
+            img.src = imagePath;
+            updateImageStatus(movieId, true);
+        };
+
+        testImg.onerror = function() {
+            // Try next extension
+            tryLoadMovieImage(img, movieId, extensions, extensionIndex + 1);
+        };
+
+        testImg.src = imagePath;
+    }
+
+    // Update image status indicator
+    function updateImageStatus(movieId, found) {
+        const statusElement = document.getElementById(`imgStatus_${movieId}`);
+        if (statusElement) {
+            if (found) {
+                statusElement.className = 'image-status image-found';
+                statusElement.innerHTML = '<i class="fas fa-check"></i>';
+                statusElement.title = 'Image found';
+            } else {
+                statusElement.className = 'image-status image-not-found';
+                statusElement.innerHTML = '<i class="fas fa-times"></i>';
+                statusElement.title = 'Image not found - using default';
+            }
+        }
+    }
+
+    // Handle image load errors for fallback
+    document.addEventListener('DOMContentLoaded', function() {
+        const movieImages = document.querySelectorAll('.movie-image');
+        movieImages.forEach(img => {
+            img.addEventListener('error', function() {
+                if (this.src !== '/images/movies/default.jpg') {
+                    this.src = '/images/movies/default.jpg';
+                    const movieId = this.getAttribute('data-movie-id');
+                    updateImageStatus(movieId, false);
+                }
+            });
         });
     });
 </script>

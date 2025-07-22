@@ -221,16 +221,6 @@
                             </div>
                         </div>
 
-                        <!-- Image Notice -->
-                        <div class="row mb-3">
-                            <div class="col-md-12">
-                                <div class="alert alert-info">
-                                    <i class="fas fa-info-circle"></i>
-                                    Ảnh diễn viên sẽ sử dụng ảnh mặc định của hệ thống.
-                                </div>
-                            </div>
-                        </div>
-
                         <!-- Movies Selection -->
                         <div class="row mb-3">
                             <div class="col-md-12">
@@ -251,7 +241,6 @@
                         </div>
 
                         <!-- Hidden fields -->
-                        <input type="hidden" th:field="*{image}" id="hiddenImagePath">
                         <input type="hidden" name="selectedMovies" id="selectedMoviesInput">
 
                         <!-- Hidden data for JavaScript -->
@@ -288,13 +277,6 @@
                     </div>
 
                     <div class="mb-3">
-                        <h6><i class="fas fa-camera text-info"></i> Ảnh Diễn Viên</h6>
-                        <p class="small text-muted">
-                            Hệ thống sẽ tự động sử dụng ảnh mặc định cho tất cả diễn viên.
-                        </p>
-                    </div>
-
-                    <div class="mb-3">
                         <h6><i class="fas fa-film text-warning"></i> Phim Tham Gia</h6>
                         <p class="small text-muted">Chọn các phim mà diễn viên đã tham gia. Có thể tìm kiếm và chọn nhiều phim cùng lúc.</p>
                     </div>
@@ -307,13 +289,6 @@
                             • Tìm kiếm phim nhanh<br>
                             • Validation thông minh
                         </p>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="fas fa-lightbulb"></i>
-                        <small>
-                            Lưu ý: Sau khi lưu, diễn viên sẽ xuất hiện trong danh sách với ảnh mặc định của hệ thống.
-                        </small>
                     </div>
                 </div>
             </div>

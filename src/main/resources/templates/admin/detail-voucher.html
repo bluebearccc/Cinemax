@@ -123,24 +123,6 @@
             border-left: 4px solid var(--primary-color);
         }
 
-        .stats-card {
-            background-color: #f8f9fa;
-            padding: 15px;
-            border-radius: 8px;
-            text-align: center;
-        }
-
-        .stats-number {
-            font-size: 1.5rem;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        .stats-label {
-            color: #666;
-            font-size: 0.9rem;
-        }
-
         @media (max-width: 768px) {
             .btn-group-custom {
                 flex-direction: column;
@@ -281,41 +263,6 @@
                                     </div>
                                     -->
                                 </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Usage Statistics -->
-            <div class="card">
-                <div class="card-header">
-                    <i class="fas fa-chart-bar"></i> Thống Kê Sử Dụng
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-3">
-                            <div class="stats-card">
-                                <div class="stats-number" th:text="${originalQuantity}">100</div>
-                                <div class="stats-label">Tổng Ban Đầu</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stats-card">
-                                <div class="stats-number" th:text="${usedQuantity}">0</div>
-                                <div class="stats-label">Đã Sử Dụng</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stats-card">
-                                <div class="stats-number" th:text="${voucher.quantity}">100</div>
-                                <div class="stats-label">Còn Lại</div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="stats-card">
-                                <div class="stats-number" th:text="${usagePercentage + '%'}">0%</div>
-                                <div class="stats-label">Tỷ Lệ Sử Dụng</div>
                             </div>
                         </div>
                     </div>

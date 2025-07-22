@@ -144,7 +144,7 @@
 
         .movie-banner {
             width: 100%;
-            height: 300px;
+            height: 400px;
             object-fit: cover;
             position: relative;
         }
@@ -155,41 +155,52 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(180deg, transparent 0%, rgba(26, 26, 26, 0.8) 100%);
+            background: linear-gradient(180deg, transparent 0%, rgba(26, 26, 26, 0.9) 100%);
         }
 
         .movie-content {
             position: relative;
-            padding: 32px;
-            margin-top: -80px;
-            z-index: 2;
+            padding: 40px;
+            margin-top: -150px;
+            z-index: 10;
         }
 
         .movie-main-info {
             display: flex;
-            gap: 24px;
+            gap: 32px;
             align-items: flex-start;
         }
 
+        .movie-poster-container {
+            position: relative;
+            width: 250px;
+            height: 375px;
+            flex-shrink: 0;
+        }
+
         .movie-poster {
-            width: 200px;
-            height: 300px;
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
-            flex-shrink: 0;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            border: 3px solid rgba(255, 255, 255, 0.1);
         }
 
         .movie-details {
             flex: 1;
+            min-height: 375px;
+            padding-top: 20px;
         }
 
         .movie-title {
-            font-size: 2.5rem;
+            font-size: 3rem;
             font-weight: 700;
             color: var(--text-primary);
-            margin-bottom: 12px;
-            line-height: 1.2;
+            margin-bottom: 16px;
+            line-height: 1.1;
+            word-wrap: break-word;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
         }
 
         .movie-meta {
@@ -521,19 +532,25 @@
                 padding: 16px;
             }
 
+            .movie-content {
+                padding: 24px;
+                margin-top: -100px;
+            }
+
             .movie-main-info {
                 flex-direction: column;
                 text-align: center;
+                gap: 20px;
             }
 
-            .movie-poster {
-                width: 160px;
-                height: 240px;
+            .movie-poster-container {
+                width: 200px;
+                height: 300px;
                 margin: 0 auto;
             }
 
             .movie-title {
-                font-size: 2rem;
+                font-size: 2.2rem;
             }
 
             .actor-grid {
@@ -608,18 +625,20 @@
 
     <!-- Movie Hero Section -->
     <div class="movie-hero fade-in">
-        <img th:src="${movie.banner ?: movie.image}"
+        <img th:id="'movieBanner_' + ${movie.movieId}"
              th:alt="${movie.movieName}"
-             src="https://via.placeholder.com/1200x300/4285f4/ffffff?text=Movie+Banner"
-             class="movie-banner">
+             class="movie-banner"
+             th:data-movie-id="${movie.movieId}">
         <div class="banner-overlay"></div>
 
         <div class="movie-content">
             <div class="movie-main-info">
-                <img th:src="${movie.image}"
-                     th:alt="${movie.movieName}"
-                     src="https://via.placeholder.com/200x300/4285f4/ffffff?text=Movie"
-                     class="movie-poster">
+                <div class="movie-poster-container">
+                    <img th:id="'moviePoster_' + ${movie.movieId}"
+                         th:alt="${movie.movieName}"
+                         class="movie-poster"
+                         th:data-movie-id="${movie.movieId}">
+                </div>
 
                 <div class="movie-details">
                     <h1 class="movie-title" th:text="${movie.movieName}">Avengers: Endgame</h1>
@@ -627,7 +646,7 @@
                     <div class="movie-meta">
                         <div class="meta-item">
                             <i class="fas fa-clock"></i>
-                              <span class="info-value" th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa xác định'}">181 phút</span>
+                            <span class="info-value" th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa xác định'}">181 phút</span>
                         </div>
                         <div class="meta-item">
                             <i class="fas fa-calendar-alt"></i>
@@ -673,8 +692,8 @@
 
                         <form th:if="${movie.status == 'Removed'}"
                               th:action="@{/admin/movies/{id}/hard-delete(id=${movie.movieId})}"
-                              method="post">
-                            <button type="submit" class="btn-action btn-danger">
+                              method="post" style="display: inline;">
+                            <button type="submit" class="btn-action btn-danger" onclick="return confirmHardDelete()">
                                 <i class="fas fa-trash-alt"></i>
                                 Xóa vĩnh viễn
                             </button>
@@ -701,7 +720,7 @@
             <ul class="info-list">
                 <li>
                     <span class="info-label">Duration</span>
-                      <span class="info-value" th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa xác định'}">181 phút</span>
+                    <span class="info-value" th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa xác định'}">181 phút</span>
                 </li>
                 <li>
                     <span class="info-label">Release Date</span>
@@ -717,8 +736,7 @@
                 </li>
                 <li>
                     <span class="info-label">Rating</span>
-                   <span class="rating-score" th:text="${movie.movieRate != null ? movie.movieRate + '/5.0' : 'Chưa đánh giá'}">4.8/5.0</span>
-
+                    <span class="rating-score" th:text="${movie.movieRate != null ? movie.movieRate + '/5.0' : 'Chưa đánh giá'}">4.8/5.0</span>
                 </li>
                 <li>
                     <span class="info-label">Status</span>
@@ -737,7 +755,6 @@
                 <div th:each="actor : ${actors}" class="actor-item">
                     <img th:src="${actor.image}"
                          th:alt="${actor.actorName}"
-                         src="https://via.placeholder.com/80x80/4285f4/ffffff?text=Actor"
                          class="actor-image">
                     <div class="actor-name" th:text="${actor.actorName}">Robert Downey Jr.</div>
                 </div>
@@ -758,15 +775,15 @@
         <div class="movies-grid">
             <div th:each="relatedMovie : ${relatedMovies}" class="movie-card"
                  th:onclick="'window.location.href=\'/admin/movies/' + ${relatedMovie.movieId} + '\''">
-                <img th:src="${relatedMovie.image}"
+                <img th:id="'relatedImg_' + ${relatedMovie.movieId}"
                      th:alt="${relatedMovie.movieName}"
-                     src="https://via.placeholder.com/200x280/4285f4/ffffff?text=Movie"
-                     class="movie-card-image">
+                     class="movie-card-image"
+                     th:data-movie-id="${relatedMovie.movieId}">
                 <div class="movie-card-content">
                     <h4 class="movie-card-title" th:text="${relatedMovie.movieName}">Related Movie</h4>
-                    <div class="movie-card-rating">
+                    <div class="movie-card-rating" th:if="${relatedMovie.movieRate != null}">
                         <i class="fas fa-star"></i>
-                        <span th:text="${relatedMovie.movieRate}"></span>>4.5/5</span>
+                        <span th:text="${relatedMovie.movieRate}">4.8</span>
                     </div>
                 </div>
             </div>
@@ -776,8 +793,84 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Load movie images automatically
+    function loadMovieImages() {
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        // Load poster image
+        const posterImg = document.querySelector('.movie-poster');
+        if (posterImg) {
+            const movieId = posterImg.getAttribute('data-movie-id');
+            if (movieId) {
+                tryLoadMovieImage(posterImg, movieId, imageExtensions, 0);
+            }
+        }
+
+        // Load banner image (try banner first, then poster)
+        const bannerImg = document.querySelector('.movie-banner');
+        if (bannerImg) {
+            const movieId = bannerImg.getAttribute('data-movie-id');
+            if (movieId) {
+                tryLoadBannerImage(bannerImg, movieId, imageExtensions, 0);
+            }
+        }
+
+        // Load related movie images
+        const relatedImages = document.querySelectorAll('.movie-card-image');
+        relatedImages.forEach(img => {
+            const movieId = img.getAttribute('data-movie-id');
+            if (movieId) {
+                tryLoadMovieImage(img, movieId, imageExtensions, 0);
+            }
+        });
+    }
+
+    // Try to load movie poster/card image
+    function tryLoadMovieImage(img, movieId, extensions, extensionIndex) {
+        if (extensionIndex >= extensions.length) {
+            img.src = '/images/movies/default.jpg';
+            return;
+        }
+
+        const extension = extensions[extensionIndex];
+        const imagePath = `/images/movies/movie_${movieId}.${extension}`;
+
+        const testImg = new Image();
+        testImg.onload = function() {
+            img.src = imagePath;
+        };
+        testImg.onerror = function() {
+            tryLoadMovieImage(img, movieId, extensions, extensionIndex + 1);
+        };
+        testImg.src = imagePath;
+    }
+
+    // Try to load banner image (try banner first, then fallback to poster)
+    function tryLoadBannerImage(img, movieId, extensions, extensionIndex) {
+        if (extensionIndex >= extensions.length) {
+            // No banner found, try poster instead
+            tryLoadMovieImage(img, movieId, extensions, 0);
+            return;
+        }
+
+        const extension = extensions[extensionIndex];
+        const bannerPath = `/images/movies/banner_${movieId}.${extension}`;
+
+        const testImg = new Image();
+        testImg.onload = function() {
+            img.src = bannerPath;
+        };
+        testImg.onerror = function() {
+            tryLoadBannerImage(img, movieId, extensions, extensionIndex + 1);
+        };
+        testImg.src = bannerPath;
+    }
+
     // Add fade-in animation on scroll
     document.addEventListener('DOMContentLoaded', function() {
+        // Load images first
+        loadMovieImages();
+
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -808,6 +901,24 @@
 
             card.addEventListener('mouseleave', function() {
                 this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Handle image load errors for fallback
+        const allImages = document.querySelectorAll('.movie-poster, .movie-banner, .movie-card-image');
+        allImages.forEach(img => {
+            img.addEventListener('error', function() {
+                if (!this.src.includes('default')) {
+                    this.src = '/images/movies/default.jpg';
+                }
+            });
+        });
+
+        // Handle actor images
+        const actorImages = document.querySelectorAll('.actor-image');
+        actorImages.forEach(img => {
+            img.addEventListener('error', function() {
+                this.src = '/images/actors/default.jpg';
             });
         });
     });

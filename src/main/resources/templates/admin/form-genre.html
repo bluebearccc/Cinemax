@@ -1,10 +1,895 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Add/Edit Genre</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .breadcrumb-text {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .btn-secondary {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-title i {
+            color: var(--primary-blue);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--danger-red);
+        }
+
+        .form-control {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-control:focus {
+            background: var(--darker-bg);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-red);
+            box-shadow: 0 0 0 0.2rem rgba(234, 67, 53, 0.25);
+        }
+
+        .invalid-feedback {
+            color: var(--danger-red);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .form-help {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            color: white;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 28px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 16px;
+        }
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        .genre-preview {
+            margin-top: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .genre-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.1) 10px,
+                    rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
+        .genre-preview-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .genre-name-preview {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .delete-section {
+            margin-top: 32px;
+            padding: 24px;
+            border: 2px solid var(--danger-red);
+            border-radius: 12px;
+            background: rgba(234, 67, 53, 0.1);
+        }
+
+        .delete-title {
+            color: var(--danger-red);
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .delete-warning {
+            color: var(--text-secondary);
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            color: white;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-danger:hover {
+            background: #d93025;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .form-container {
+                padding: 24px;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .movies-selection {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+
+        .movie-checkbox {
+            margin-bottom: 12px;
+            padding: 8px 12px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+        }
+
+        .movie-checkbox:hover {
+            background: var(--card-hover);
+            border-color: var(--border-color);
+        }
+
+        .movie-checkbox input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.2);
+        }
+
+        .movie-checkbox label {
+            color: var(--text-primary);
+            cursor: pointer;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+            width: 100%;
+        }
+
+        .movie-info {
+            flex: 1;
+        }
+
+        .movie-name {
+            font-weight: 500;
+            color: var(--text-primary);
+            margin-bottom: 2px;
+        }
+
+        .movie-details {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+        }
+
+        .selected-movies-summary {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin-top: 12px;
+            color: var(--primary-blue);
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .movie-checkbox:has(input:checked) {
+            background: rgba(66, 133, 244, 0.1);
+            border-color: var(--primary-blue);
+        }
+
+        .movie-checkbox:has(input:checked) .movie-name {
+            color: var(--primary-blue);
+            font-weight: 600;
+        }
+    </style>
 </head>
 <body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
 
+    <nav class="sidebar-nav">
+        <a class="nav-link" href="/admin/">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link" href="/admin/movies">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        <a class="nav-link active" href="/admin/genres">
+            <i class="fas fa-tags"></i>Genres
+        </a>
+        <a class="nav-link" href="/admin/vouchers">
+            <i class="fas fa-ticket-alt"></i>Vouchers
+        </a>
+        <a class="nav-link" href="/admin/accounts">
+            <i class="fas fa-user-circle"></i>Accounts
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="header-section fade-in">
+        <div class="header-content">
+            <h2 th:text="${isEdit} ? 'Edit Genre' : 'Add New Genre'">Add New Genre</h2>
+            <p class="breadcrumb-text">Dashboard > Genres > <span th:text="${isEdit} ? 'Edit' : 'Add New'">Add New</span></p>
+        </div>
+        <a href="/admin/genres" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i>Back to Genres
+        </a>
+    </div>
+
+    <!-- Form -->
+    <div class="form-container fade-in">
+        <h3 class="form-title">
+            <i th:class="${isEdit} ? 'fas fa-edit' : 'fas fa-plus'"></i>
+            <span th:text="${isEdit} ? 'Edit Genre Information' : 'Create New Genre'">Create New Genre</span>
+        </h3>
+
+        <form th:action="${isEdit} ? @{/admin/genres/{id}/edit(id=${genre.genreId})} : @{/admin/genres/add}"
+              method="post" th:object="${genre}" id="genreForm" novalidate>
+
+            <div class="form-group">
+                <label class="form-label required" for="genreName">Genre Name</label>
+                <input type="text"
+                       class="form-control"
+                       id="genreName"
+                       th:field="*{genreName}"
+                       placeholder="e.g., Action, Comedy, Drama, Horror"
+                       maxlength="50"
+                       required>
+                <div class="form-help">
+                    Enter a clear and descriptive genre name. Maximum 50 characters.
+                </div>
+                <div class="invalid-feedback" id="genreNameError"></div>
+            </div>
+
+            <!-- Movies Management Section (for Edit mode) -->
+            <div class="form-group" th:if="${isEdit}">
+                <label class="form-label" for="moviesSelection">
+                    <i class="fas fa-film"></i>
+                    Movies in this Genre
+                </label>
+                <div class="movies-selection" id="moviesSelection">
+                    <div class="text-center" style="padding: 20px;">
+                        <i class="fas fa-spinner fa-spin"></i>
+                        <div class="form-help mt-2">Loading movies...</div>
+                    </div>
+                </div>
+                <div class="form-help">
+                    Select movies that belong to this genre. You can select multiple movies.
+                </div>
+                <div class="selected-movies-summary" id="selectedSummary" style="display: none;">
+                    <div class="selected-count">
+                        <i class="fas fa-check-circle"></i>
+                        Selected: <span id="selectedCount">0</span> movies
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden field for selected movies -->
+            <input type="hidden" name="selectedMovies" id="selectedMoviesInput" th:if="${isEdit}">
+
+            <!-- Genre Name Preview -->
+            <div class="form-group">
+                <label class="form-label">Genre Preview</label>
+                <div class="genre-preview">
+                    <div class="genre-preview-content">
+                        <div style="font-size: 1rem; font-weight: 600; margin-bottom: 10px;">
+                            BlueBear Cinema Genre
+                        </div>
+                        <div class="genre-name-preview" id="previewName" th:text="${genre.genreName ?: 'New Genre'}">New Genre</div>
+                        <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">
+                            Movie Category System
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="btn-group">
+                <button type="submit" class="btn-primary">
+                    <i th:class="${isEdit} ? 'fas fa-save' : 'fas fa-plus'"></i>
+                    <span th:text="${isEdit} ? 'Update Genre' : 'Create Genre'">Create Genre</span>
+                </button>
+                <a href="/admin/genres" class="btn-outline">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+            </div>
+        </form>
+
+        <!-- Delete Section (only for edit mode) -->
+        <div th:if="${isEdit}" class="delete-section">
+            <div class="delete-title">
+                <i class="fas fa-exclamation-triangle"></i>
+                Danger Zone
+            </div>
+            <div class="delete-warning">
+                Once you delete this genre, it will be removed from all associated movies.
+                This action cannot be undone.
+            </div>
+            <form th:action="@{/admin/genres/{id}/delete(id=${genre.genreId})}"
+                  method="post"
+                  id="deleteForm"
+                  style="display: inline;">
+                <button type="submit" class="btn-danger" id="deleteButton">
+                    <i class="fas fa-trash"></i>
+                    Delete Genre Permanently
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('genreForm');
+        const previewSection = document.getElementById('genrePreview');
+        const deleteForm = document.getElementById('deleteForm');
+
+        // Form elements
+        const genreNameInput = document.getElementById('genreName');
+
+        // Preview elements
+        const previewName = document.getElementById('previewName');
+
+        // Update preview
+        function updatePreview() {
+            const genreName = genreNameInput.value.trim() || 'New Genre';
+            previewName.textContent = genreName;
+        }
+
+        // Load movies selection (for edit mode)
+        function loadMoviesSelection() {
+            const moviesContainer = document.getElementById('moviesSelection');
+            const selectedSummary = document.getElementById('selectedSummary');
+            const selectedCount = document.getElementById('selectedCount');
+            const selectedMoviesInput = document.getElementById('selectedMoviesInput');
+
+            if (!moviesContainer) return;
+
+            const genreId = window.location.pathname.match(/\/genres\/(\d+)\/edit/)?.[1];
+
+            if (!genreId) {
+                moviesContainer.innerHTML = '<div class="text-center" style="color: var(--text-secondary);">Genre ID not found</div>';
+                return;
+            }
+
+            // Show loading
+            moviesContainer.innerHTML = `
+                <div class="text-center" style="padding: 20px; color: var(--text-secondary);">
+                    <i class="fas fa-spinner fa-spin"></i>
+                    <div style="margin-top: 8px;">Loading movies...</div>
+                </div>
+            `;
+
+            // Fetch all movies and current genre's movies
+            Promise.all([
+                fetch('/admin/movies/api/all').then(r => r.json()).catch(() => []),
+                fetch(`/admin/genres/${genreId}/movies`).then(r => r.json()).catch(() => [])
+            ]).then(([allMovies, currentMovies]) => {
+                console.log('All movies:', allMovies.length);
+                console.log('Current movies:', currentMovies.length);
+
+                const currentMovieIds = currentMovies.map(m => m.movieId);
+
+                if (allMovies.length === 0) {
+                    moviesContainer.innerHTML = '<div class="text-center" style="color: var(--text-secondary); padding: 20px;">No movies available</div>';
+                    return;
+                }
+
+                let moviesHTML = '';
+                allMovies.forEach(movie => {
+                    const isChecked = currentMovieIds.includes(movie.movieId);
+                    moviesHTML += `
+                        <div class="movie-checkbox">
+                            <label>
+                                <input type="checkbox" value="${movie.movieId}" ${isChecked ? 'checked' : ''}>
+                                <div class="movie-info">
+                                    <div class="movie-name">${movie.movieName || 'Untitled Movie'}</div>
+                                    <div class="movie-details">${movie.studio || 'Unknown Studio'} • ${movie.duration || 'N/A'} minutes</div>
+                                </div>
+                            </label>
+                        </div>
+                    `;
+                });
+
+                moviesContainer.innerHTML = moviesHTML;
+
+                // Add event listeners
+                const checkboxes = moviesContainer.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(checkbox => {
+                    checkbox.addEventListener('change', updateSelectedMovies);
+                });
+
+                // Update initial state
+                updateSelectedMovies();
+
+                function updateSelectedMovies() {
+                    const selectedMovies = Array.from(checkboxes)
+                        .filter(cb => cb.checked)
+                        .map(cb => cb.value);
+
+                    selectedCount.textContent = selectedMovies.length;
+                    selectedMoviesInput.value = selectedMovies.join(',');
+
+                    if (selectedMovies.length > 0) {
+                        selectedSummary.style.display = 'block';
+                    } else {
+                        selectedSummary.style.display = 'none';
+                    }
+                }
+            }).catch(error => {
+                console.error('Error loading movies:', error);
+                moviesContainer.innerHTML = `
+                    <div class="text-center" style="color: var(--danger-red); padding: 20px;">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <div style="margin-top: 8px;">Error loading movies</div>
+                    </div>
+                `;
+            });
+        }
+
+        // Validation functions
+        function validateForm() {
+            let isValid = true;
+
+            // Clear previous errors
+            document.querySelectorAll('.form-control').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.textContent = '';
+            });
+
+            // Validate genre name
+            const genreName = genreNameInput.value.trim();
+            if (!genreName) {
+                showError('genreName', 'Genre name is required');
+                isValid = false;
+            } else if (genreName.length < 2) {
+                showError('genreName', 'Genre name must be at least 2 characters');
+                isValid = false;
+            } else if (genreName.length > 50) {
+                showError('genreName', 'Genre name cannot exceed 50 characters');
+                isValid = false;
+            } else if (!/^[a-zA-Z0-9\s\-&()]+$/.test(genreName)) {
+                showError('genreName', 'Genre name can only contain letters, numbers, spaces, and basic punctuation');
+                isValid = false;
+            }
+
+            return isValid;
+        }
+
+        function showError(fieldName, message) {
+            const field = document.getElementById(fieldName);
+            const errorDiv = document.getElementById(fieldName + 'Error');
+            field.classList.add('is-invalid');
+            errorDiv.textContent = message;
+        }
+
+        // Add event listeners for preview
+        genreNameInput.addEventListener('input', function() {
+            updatePreview();
+            // Auto-format genre name
+            this.value = this.value.replace(/\b\w/g, function(char) {
+                return char.toUpperCase();
+            });
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+
+                // Scroll to first error
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+            }
+        });
+
+        // Delete confirmation
+        if (deleteForm) {
+            deleteForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                const genreName = genreNameInput.value || 'Unknown Genre';
+
+                const confirmed = confirm(
+                    `⚠️ WARNING: You are about to permanently delete this genre!\n\n` +
+                    `Genre: ${genreName}\n\n` +
+                    `This will remove the genre from all associated movies.\n` +
+                    `This action cannot be undone. Are you absolutely sure?`
+                );
+
+                if (confirmed) {
+                    const secondConfirm = confirm(
+                        `🚨 FINAL CONFIRMATION\n\n` +
+                        `Are you really sure you want to delete "${genreName}" permanently?`
+                    );
+
+                    if (secondConfirm) {
+                        this.submit();
+                    }
+                }
+            });
+        }
+
+        // Initialize form and preview
+        updatePreview();
+
+        // Load movies if in edit mode
+        if (document.getElementById('moviesSelection')) {
+            loadMoviesSelection();
+        }
+
+        // Add fade-in animation on scroll
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+    });
+</script>
 </body>
 </html>
