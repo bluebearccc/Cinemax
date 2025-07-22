@@ -145,9 +145,6 @@ public class ActorService {
         actorRepository.deleteById(actorId);
     }
 
-    public long countAllActors() {
-        return actorRepository.count();
-    }
 
     private ActorDTO convertToDTO(Actor actor) {
         if (actor == null) return null;
