@@ -33,7 +33,7 @@ public class BookingConfirmController {
     @Autowired
     private InvoiceRepository invoiceRepository;
     @Autowired
-    private TheaterStockService theaterStockService; // Thêm service này
+    private TheaterStockService theaterStockService;
 
     @Value("${payment.sepay.bank}")
     private String sepayBank;

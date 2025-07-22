@@ -24,7 +24,6 @@ public class AccountController {
     @Autowired
     private AccountService accountService;
 
-    // ... (getAllAccount và các phương thức khác không cần thay đổi)
     @GetMapping()
     public String getAllAccount(@RequestParam(defaultValue = "") String keyWord,
                                 @RequestParam(defaultValue = "All") String role,
@@ -54,14 +53,12 @@ public class AccountController {
         return "admin/account";
     }
 
-    // === PHƯƠNG THỨC NÀY ĐÃ ĐƯỢC SỬA ===
     @GetMapping("/add")
     public String add(Model model) {
         if (!model.containsAttribute("accountDTO")) {
             model.addAttribute("accountDTO", new AccountDTO());
         }
 
-        // Lọc danh sách vai trò, loại bỏ vai trò Customer
         List<Role> filteredRoles = Arrays.stream(Role.values())
                 .filter(r -> r != Role.Customer)
                 .collect(Collectors.toList());
@@ -87,7 +84,6 @@ public class AccountController {
         }
 
         if (bindingResult.hasErrors()) {
-            // Lọc lại danh sách vai trò ở đây để khi có lỗi trả về, dropdown vẫn đúng
             List<Role> filteredRoles = Arrays.stream(Role.values())
                     .filter(r -> r != Role.Customer)
                     .collect(Collectors.toList());

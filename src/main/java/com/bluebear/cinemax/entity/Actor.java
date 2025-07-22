@@ -26,6 +26,6 @@ public class Actor {
     private String image;
 
     @JsonIgnore
-    @ManyToMany(mappedBy = "actors")
+    @ManyToMany(mappedBy = "actors", fetch = FetchType.LAZY)
     private List<Movie> movies;
 }

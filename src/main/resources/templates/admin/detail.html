@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Movie Detail</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .back-nav {
+            margin-bottom: 24px;
+        }
+
+        .back-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--card-hover);
+            color: var(--text-primary);
+            text-decoration: none;
+        }
+
+        .movie-hero {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            overflow: hidden;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .movie-banner {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
+            position: relative;
+        }
+
+        .banner-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg, transparent 0%, rgba(26, 26, 26, 0.9) 100%);
+        }
+
+        .movie-content {
+            position: relative;
+            padding: 40px;
+            margin-top: -150px;
+            z-index: 10;
+        }
+
+        .movie-main-info {
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+        }
+
+        .movie-poster-container {
+            position: relative;
+            width: 250px;
+            height: 375px;
+            flex-shrink: 0;
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 12px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.6);
+            border: 3px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .movie-details {
+            flex: 1;
+            min-height: 375px;
+            padding-top: 20px;
+        }
+
+        .movie-title {
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 16px;
+            line-height: 1.1;
+            word-wrap: break-word;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+        }
+
+        .movie-meta {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .meta-item i {
+            color: var(--primary-blue);
+        }
+
+        .rating-display {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .rating-stars {
+            color: #ffd700;
+            font-size: 1.2rem;
+        }
+
+        .rating-score {
+            background: var(--primary-blue);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .genre-list {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .genre-tag {
+            background: rgba(66, 133, 244, 0.2);
+            color: var(--primary-blue);
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            border: 1px solid rgba(66, 133, 244, 0.3);
+        }
+
+        .status-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .status-active {
+            background: rgba(52, 168, 83, 0.2);
+            color: var(--success-green);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+        }
+
+        .status-inactive {
+            background: rgba(234, 67, 53, 0.2);
+            color: var(--danger-red);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+        }
+
+        .movie-description {
+            color: var(--text-secondary);
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-outline:hover {
+            background: var(--card-hover);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .info-sections {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-top: 32px;
+        }
+
+        .info-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+        }
+
+        .info-card h3 {
+            color: var(--text-primary);
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .info-card h3 i {
+            color: var(--primary-blue);
+        }
+
+        .actor-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 16px;
+        }
+
+        .actor-item {
+            text-align: center;
+            padding: 16px;
+            background: var(--darker-bg);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            border: 1px solid var(--border-color);
+        }
+
+        .actor-item:hover {
+            background: var(--card-hover);
+            transform: translateY(-2px);
+        }
+
+        .actor-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin: 0 auto 12px;
+            border: 3px solid var(--border-color);
+        }
+
+        .actor-name {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            text-align: center;
+        }
+
+        .info-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .info-list li {
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-list li:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: var(--text-primary);
+            font-weight: 600;
+        }
+
+        .related-movies {
+            margin-top: 32px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-blue);
+        }
+
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .movie-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .movie-card-image {
+            width: 100%;
+            height: 280px;
+            object-fit: cover;
+        }
+
+        .movie-card-content {
+            padding: 16px;
+        }
+
+        .movie-card-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .movie-card-rating {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+        }
+
+        .movie-card-rating .fa-star {
+            color: #ffd700;
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-muted);
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 1024px) {
+            .info-sections {
+                grid-template-columns: 1fr;
+            }
+
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .movie-content {
+                padding: 24px;
+                margin-top: -100px;
+            }
+
+            .movie-main-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .movie-poster-container {
+                width: 200px;
+                height: 300px;
+                margin: 0 auto;
+            }
+
+            .movie-title {
+                font-size: 2.2rem;
+            }
+
+            .actor-grid {
+                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .trailer-btn {
+            background: #ff0000;
+            color: white;
+        }
+
+        .trailer-btn:hover {
+            background: #cc0000;
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a class="nav-link" th:href="@{/admin/}">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link active" th:href="@{/admin/movies}">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        <a class="nav-link" href="/admin/genres">
+            <i class="fas fa-tags"></i>Genres
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Back Navigation -->
+    <div class="back-nav fade-in">
+        <a th:href="@{/admin/movies}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Movies
+        </a>
+    </div>
+
+    <!-- Movie Hero Section -->
+    <div class="movie-hero fade-in">
+        <img th:id="'movieBanner_' + ${movie.movieId}"
+             th:alt="${movie.movieName}"
+             class="movie-banner"
+             th:data-movie-id="${movie.movieId}">
+        <div class="banner-overlay"></div>
+
+        <div class="movie-content">
+            <div class="movie-main-info">
+                <div class="movie-poster-container">
+                    <img th:id="'moviePoster_' + ${movie.movieId}"
+                         th:alt="${movie.movieName}"
+                         class="movie-poster"
+                         th:data-movie-id="${movie.movieId}">
+                </div>
+
+                <div class="movie-details">
+                    <h1 class="movie-title" th:text="${movie.movieName}">Avengers: Endgame</h1>
+
+                    <div class="movie-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-clock"></i>
+                            <span class="info-value" th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa xác định'}">181 phút</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span th:text="${#temporals.format(movie.startDate, 'MMM dd, yyyy')}">Jan 15, 2024</span>
+                        </div>
+                        <div class="meta-item" th:if="${movie.studio}">
+                            <i class="fas fa-building"></i>
+                            <span th:text="${movie.studio}">Marvel Studios</span>
+                        </div>
+                    </div>
+
+                    <div class="rating-display">
+                        <div class="rating-stars">
+                            <span th:each="i : ${#numbers.sequence(1, 5)}"
+                                  th:class="${i <= (movie.movieRate ?: 0)} ? 'fas fa-star' : 'far fa-star'">
+                            </span>
+                        </div>
+                        <span class="rating-score" th:text="${movie.movieRate != null ? movie.movieRate + '/5.0' : 'Chưa đánh giá'}">4.8/5.0</span>
+                    </div>
+
+                    <div class="genre-list" th:if="${movie.genres != null and !#lists.isEmpty(movie.genres)}">
+                        <span th:each="genre : ${movie.genres}" class="genre-tag" th:text="${genre}">Action</span>
+                    </div>
+
+                    <div th:class="${movie.status == 'Active'} ? 'status-indicator status-active' : 'status-indicator status-inactive'">
+                        <i th:class="${movie.status == 'Active'} ? 'fas fa-play-circle' : 'fas fa-pause-circle'"></i>
+                        <span th:text="${movie.status}">Active</span>
+                    </div>
+
+                    <p class="movie-description" th:text="${movie.description}">
+                        After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos' actions and restore balance to the universe.
+                    </p>
+
+                    <div class="action-buttons">
+                        <a th:href="${movie.trailer}" target="_blank" class="btn-action btn-primary trailer-btn" th:if="${movie.trailer}">
+                            <i class="fab fa-youtube"></i>
+                            Watch Trailer
+                        </a>
+                        <a th:href="@{/admin/movies/{id}/edit(id=${movie.movieId})}" class="btn-action btn-outline">
+                            <i class="fas fa-edit"></i>
+                            Edit Movie
+                        </a>
+
+                        <form th:if="${movie.status == 'Removed'}"
+                              th:action="@{/admin/movies/{id}/hard-delete(id=${movie.movieId})}"
+                              method="post" style="display: inline;">
+                            <button type="submit" class="btn-action btn-danger" onclick="return confirmHardDelete()">
+                                <i class="fas fa-trash-alt"></i>
+                                Xóa vĩnh viễn
+                            </button>
+                        </form>
+
+                        <a th:href="@{/admin/movies}" class="btn-action btn-outline">
+                            <i class="fas fa-list"></i>
+                            All Movies
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Information Sections -->
+    <div class="info-sections fade-in">
+        <!-- Movie Details -->
+        <div class="info-card">
+            <h3>
+                <i class="fas fa-info-circle"></i>
+                Movie Information
+            </h3>
+            <ul class="info-list">
+                <li>
+                    <span class="info-label">Duration</span>
+                    <span class="info-value" th:text="${movie.duration != null ? movie.duration + ' phút' : 'Chưa xác định'}">181 phút</span>
+                </li>
+                <li>
+                    <span class="info-label">Release Date</span>
+                    <span class="info-value" th:text="${#temporals.format(movie.startDate, 'MMMM dd, yyyy')}">January 15, 2024</span>
+                </li>
+                <li>
+                    <span class="info-label">End Date</span>
+                    <span class="info-value" th:text="${#temporals.format(movie.endDate, 'MMMM dd, yyyy')}">April 15, 2024</span>
+                </li>
+                <li th:if="${movie.studio}">
+                    <span class="info-label">Studio</span>
+                    <span class="info-value" th:text="${movie.studio}">Marvel Studios</span>
+                </li>
+                <li>
+                    <span class="info-label">Rating</span>
+                    <span class="rating-score" th:text="${movie.movieRate != null ? movie.movieRate + '/5.0' : 'Chưa đánh giá'}">4.8/5.0</span>
+                </li>
+                <li>
+                    <span class="info-label">Status</span>
+                    <span class="info-value" th:text="${movie.status}">Active</span>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Cast & Crew -->
+        <div class="info-card">
+            <h3>
+                <i class="fas fa-users"></i>
+                Cast & Crew
+            </h3>
+            <div th:if="${actors != null and !#lists.isEmpty(actors)}" class="actor-grid">
+                <div th:each="actor : ${actors}" class="actor-item">
+                    <img th:src="${actor.image}"
+                         th:alt="${actor.actorName}"
+                         class="actor-image">
+                    <div class="actor-name" th:text="${actor.actorName}">Robert Downey Jr.</div>
+                </div>
+            </div>
+            <div th:if="${actors == null or #lists.isEmpty(actors)}" class="no-data">
+                <i class="fas fa-user-slash"></i>
+                <p>No cast information available</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Related Movies -->
+    <div class="related-movies fade-in" th:if="${relatedMovies != null and !#lists.isEmpty(relatedMovies)}">
+        <h2 class="section-title">
+            <i class="fas fa-film"></i>
+            Related Movies
+        </h2>
+        <div class="movies-grid">
+            <div th:each="relatedMovie : ${relatedMovies}" class="movie-card"
+                 th:onclick="'window.location.href=\'/admin/movies/' + ${relatedMovie.movieId} + '\''">
+                <img th:id="'relatedImg_' + ${relatedMovie.movieId}"
+                     th:alt="${relatedMovie.movieName}"
+                     class="movie-card-image"
+                     th:data-movie-id="${relatedMovie.movieId}">
+                <div class="movie-card-content">
+                    <h4 class="movie-card-title" th:text="${relatedMovie.movieName}">Related Movie</h4>
+                    <div class="movie-card-rating" th:if="${relatedMovie.movieRate != null}">
+                        <i class="fas fa-star"></i>
+                        <span th:text="${relatedMovie.movieRate}">4.8</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Load movie images automatically
+    function loadMovieImages() {
+        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+
+        // Load poster image
+        const posterImg = document.querySelector('.movie-poster');
+        if (posterImg) {
+            const movieId = posterImg.getAttribute('data-movie-id');
+            if (movieId) {
+                tryLoadMovieImage(posterImg, movieId, imageExtensions, 0);
+            }
+        }
+
+        // Load banner image (try banner first, then poster)
+        const bannerImg = document.querySelector('.movie-banner');
+        if (bannerImg) {
+            const movieId = bannerImg.getAttribute('data-movie-id');
+            if (movieId) {
+                tryLoadBannerImage(bannerImg, movieId, imageExtensions, 0);
+            }
+        }
+
+        // Load related movie images
+        const relatedImages = document.querySelectorAll('.movie-card-image');
+        relatedImages.forEach(img => {
+            const movieId = img.getAttribute('data-movie-id');
+            if (movieId) {
+                tryLoadMovieImage(img, movieId, imageExtensions, 0);
+            }
+        });
+    }
+
+    // Try to load movie poster/card image
+    function tryLoadMovieImage(img, movieId, extensions, extensionIndex) {
+        if (extensionIndex >= extensions.length) {
+            img.src = '/images/movies/default.jpg';
+            return;
+        }
+
+        const extension = extensions[extensionIndex];
+        const imagePath = `/images/movies/movie_${movieId}.${extension}`;
+
+        const testImg = new Image();
+        testImg.onload = function() {
+            img.src = imagePath;
+        };
+        testImg.onerror = function() {
+            tryLoadMovieImage(img, movieId, extensions, extensionIndex + 1);
+        };
+        testImg.src = imagePath;
+    }
+
+    // Try to load banner image (try banner first, then fallback to poster)
+    function tryLoadBannerImage(img, movieId, extensions, extensionIndex) {
+        if (extensionIndex >= extensions.length) {
+            // No banner found, try poster instead
+            tryLoadMovieImage(img, movieId, extensions, 0);
+            return;
+        }
+
+        const extension = extensions[extensionIndex];
+        const bannerPath = `/images/movies/banner_${movieId}.${extension}`;
+
+        const testImg = new Image();
+        testImg.onload = function() {
+            img.src = bannerPath;
+        };
+        testImg.onerror = function() {
+            tryLoadBannerImage(img, movieId, extensions, extensionIndex + 1);
+        };
+        testImg.src = bannerPath;
+    }
+
+    // Add fade-in animation on scroll
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load images first
+        loadMovieImages();
+
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, observerOptions);
+
+        // Observe fade-in elements
+        document.querySelectorAll('.fade-in').forEach(el => {
+            el.style.opacity = '0';
+            el.style.transform = 'translateY(20px)';
+            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+            observer.observe(el);
+        });
+
+        // Movie card click handlers
+        document.querySelectorAll('.movie-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Handle image load errors for fallback
+        const allImages = document.querySelectorAll('.movie-poster, .movie-banner, .movie-card-image');
+        allImages.forEach(img => {
+            img.addEventListener('error', function() {
+                if (!this.src.includes('default')) {
+                    this.src = '/images/movies/default.jpg';
+                }
+            });
+        });
+
+        // Handle actor images
+        const actorImages = document.querySelectorAll('.actor-image');
+        actorImages.forEach(img => {
+            img.addEventListener('error', function() {
+                this.src = '/images/actors/default.jpg';
+            });
+        });
+    });
+
+    // Hard Delete Confirmation
+    function confirmHardDelete() {
+        const movieName = document.querySelector('.movie-title').textContent;
+        return confirm(
+            `⚠️ CẢNH BÁO: Bạn sắp xóa vĩnh viễn phim "${movieName}"!\n\n` +
+            `Hành động này sẽ:\n` +
+            `• Xóa hoàn toàn phim khỏi database\n` +
+            `• Xóa tất cả dữ liệu liên quan\n` +
+            `• KHÔNG THỂ HOÀN TÁC\n\n` +
+            `Bạn có chắc chắn muốn tiếp tục?`
+        );
+    }
+</script>
+</body>
+</html>

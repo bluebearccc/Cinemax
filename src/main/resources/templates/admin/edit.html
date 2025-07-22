@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Edit Movie</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+        }
+
+        .page-header {
+            margin-bottom: 32px;
+        }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .edit-form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 800px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-blue);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: var(--danger-red);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .genre-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .genre-checkbox:hover {
+            background: var(--card-hover);
+        }
+
+        .genre-checkbox input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .genre-checkbox.selected {
+            background: rgba(66, 133, 244, 0.1);
+            border-color: var(--primary-blue);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--card-hover);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
+        .alert {
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .genre-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a class="nav-link" th:href="@{/admin/}">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link active" th:href="@{/admin/movies}">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        <a class="nav-link" href="/admin/genres">
+            <i class="fas fa-tags"></i>Genres
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title" th:text="${pageTitle}">Edit Movie</h1>
+        <div class="breadcrumb">
+            <a th:href="@{/admin/movies}">Movies</a>
+            <i class="fas fa-chevron-right"></i>
+            <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" th:text="${movie.movieName}">Movie Detail</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Edit</span>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${success}">Success message</span>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${error}">Error message</span>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="edit-form-container">
+        <!-- Updated form with proper action and method -->
+        <form th:action="@{/admin/movies/{id}/edit(id=${movie.movieId})}" method="POST">
+
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Basic Information
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Movie Name <span class="required">*</span>
+                    </label>
+                    <input type="text"
+                           name="movieName"
+                           class="form-control"
+                           th:value="${movie.movieName}"
+                           placeholder="Enter movie name"
+                           required
+                           maxlength="100">
+                    <div class="help-text">Maximum 100 characters</div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description"
+                              class="form-control"
+                              th:text="${movie.description}"
+                              placeholder="Enter movie description"
+                              maxlength="1000"></textarea>
+                    <div class="help-text">Maximum 1000 characters</div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Duration (minutes) <span class="required">*</span></label>
+                        <input type="number"
+                               name="duration"
+                               class="form-control"
+                               th:value="${movie.duration}"
+                               placeholder="180"
+                               required
+                               min="1"
+                               max="500">
+                        <div class="help-text">Between 1-500 minutes</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">Rating</label>
+                        <input type="number"
+                               name="movieRate"
+                               class="form-control"
+                               th:value="${movie.movieRate}"
+                               placeholder="4.5"
+                               step="0.1"
+                               min="0"
+                               max="5">
+                        <div class="help-text">0.0 to 5.0</div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Studio</label>
+                    <input type="text"
+                           name="studio"
+                           class="form-control"
+                           th:value="${movie.studio}"
+                           placeholder="Marvel Studios"
+                           maxlength="50">
+                    <div class="help-text">Maximum 50 characters</div>
+                </div>
+            </div>
+
+            <!-- Media Information -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-photo-video"></i>
+                    Media Information
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">Image URL</label>
+                    <input type="text"
+                           name="image"
+                           class="form-control"
+                           th:value="${movie.image}"
+                           placeholder="https://example.com/movie-poster.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Banner URL</label>
+                    <input type="text"
+                           name="banner"
+                           class="form-control"
+                           th:value="${movie.banner}"
+                           placeholder="https://example.com/movie-banner.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Trailer URL</label>
+                    <input type="text"
+                           name="trailer"
+                           class="form-control"
+                           th:value="${movie.trailer}"
+                           placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+            </div>
+
+            <!-- Schedule Information -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Schedule Information
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Start Date <span class="required">*</span></label>
+                        <input type="date"
+                               name="startDate"
+                               class="form-control"
+                               th:value="${movie.startDate}"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">End Date <span class="required">*</span></label>
+                        <input type="date"
+                               name="endDate"
+                               class="form-control"
+                               th:value="${movie.endDate}"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Status <span class="required">*</span></label>
+                    <select name="status" class="form-control" required>
+                        <option value="Active" th:selected="${movie.status == 'Active'}">Active</option>
+                        <option value="Removed" th:selected="${movie.status == 'Removed'}">Removed</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Genres -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-tags"></i>
+                    Genres
+                </h3>
+
+                <div class="genre-grid">
+                    <div th:each="genre : ${allGenres}" class="genre-checkbox">
+                        <input type="checkbox"
+                               name="genreIds"
+                               th:value="${genre.genreId}"
+                               th:checked="${#lists.contains(movieGenreIds, genre.genreId)}"
+                               th:id="'genre_' + ${genre.genreId}">
+                        <label th:for="'genre_' + ${genre.genreId}" th:text="${genre.genreName}">Action</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary" id="saveButton">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Genre checkbox styling
+        document.querySelectorAll('.genre-checkbox input[type="checkbox"]').forEach(checkbox => {
+            const container = checkbox.closest('.genre-checkbox');
+
+            function updateStyle() {
+                if (checkbox.checked) {
+                    container.classList.add('selected');
+                } else {
+                    container.classList.remove('selected');
+                }
+            }
+
+            checkbox.addEventListener('change', updateStyle);
+            updateStyle(); // Initial state
+        });
+
+        // Form validation - NON-BLOCKING
+        const form = document.getElementById('editMovieForm');
+        const saveButton = document.getElementById('saveButton');
+
+        form.addEventListener('submit', function(e) {
+            console.log('=== FORM SUBMISSION DEBUG ===');
+            console.log('Form action:', this.action);
+            console.log('Form method:', this.method);
+
+            // Basic validation only - don't prevent submission for minor issues
+            const movieName = document.querySelector('input[name="movieName"]').value;
+            if (!movieName || movieName.trim() === '') {
+                e.preventDefault();
+                alert('Tên phim không được để trống');
+                return false;
+            }
+
+            const duration = document.querySelector('input[name="duration"]').value;
+            if (!duration || parseInt(duration) <= 0) {
+                e.preventDefault();
+                alert('Thời lượng phim phải lớn hơn 0');
+                return false;
+            }
+
+            // Show loading state
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+            saveButton.disabled = true;
+
+            console.log('Form submitted successfully');
+            return true;
+        });
+
+        // Debug form submission
+        console.log('Form action:', form.action);
+        console.log('Form method:', form.method);
+    });
+</script>
+</body>
+</html>

@@ -5,9 +5,8 @@ import com.bluebear.cinemax.dto.RevenueDataDTO;
 
 import java.util.List;
 
-    public interface DetaillFD_Service {
-        public List<Detail_FDDTO> findByTheaterStockID(Integer id);
-        public List<Detail_FDDTO> getAllFoodSalesForTheater(Integer theaterId, int year, int month);
-        public RevenueDataDTO getRevenueByItemForMonth(Integer theaterId, int year, int month);
-    }
-
+public interface DetaillFD_Service {
+    public List<Detail_FDDTO> findByTheaterStockID(Integer id);
+    public List<Detail_FDDTO> getAllFoodSalesForTheater(Integer theaterId, int year, int month);
+    public RevenueDataDTO getRevenueByItemForMonth(Integer theaterId, int year, int month);
+}

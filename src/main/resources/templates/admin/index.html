@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle}">Dashboard - BlueBear Cinema</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    :root {
+      --primary-blue: #4285f4;
+      --primary-dark: #3367d6;
+      --success-green: #34a853;
+      --warning-orange: #fbbc04;
+      --danger-red: #ea4335;
+      --dark-bg: #1a1a1a;
+      --darker-bg: #0f0f0f;
+      --card-bg: #2d2d2d;
+      --card-hover: #3a3a3a;
+      --border-color: #404040;
+      --text-primary: #ffffff;
+      --text-secondary: #b0b0b0;
+      --text-muted: #808080;
+      --sidebar-bg: #1e1e1e;
+      --sidebar-hover: #333333;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: var(--dark-bg);
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .sidebar {
+      background: var(--sidebar-bg);
+      min-height: 100vh;
+      width: 260px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      border-right: 1px solid var(--border-color);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .sidebar-header h5 {
+      color: var(--text-primary);
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin: 0;
+    }
+
+    .sidebar-header .fa-film {
+      color: var(--primary-blue);
+      margin-right: 10px;
+    }
+
+    .sidebar-nav {
+      padding: 20px 0;
+    }
+
+    .nav-link {
+      color: var(--text-secondary);
+      padding: 12px 20px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      border: none;
+      background: none;
+      margin: 2px 0;
+    }
+
+    .nav-link:hover {
+      color: var(--text-primary);
+      background: var(--sidebar-hover);
+    }
+
+    .nav-link.active {
+      color: var(--primary-blue);
+      background: rgba(66, 133, 244, 0.1);
+      border-right: 3px solid var(--primary-blue);
+    }
+
+    .nav-link i {
+      width: 20px;
+      margin-right: 12px;
+      font-size: 1rem;
+    }
+
+    .main-content {
+      margin-left: 260px;
+      padding: 24px;
+      min-height: 100vh;
+      background: var(--dark-bg);
+    }
+
+    .header-section {
+      background: var(--card-bg);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 24px;
+      border: 1px solid var(--border-color);
+    }
+
+    .header-section h2 {
+      font-size: 1.75rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+      color: var(--text-primary);
+    }
+
+    .header-section p {
+      color: var(--text-secondary);
+      margin: 0;
+      font-size: 0.95rem;
+    }
+
+    .welcome-card {
+      background: var(--card-bg);
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      padding: 40px;
+      text-align: center;
+      margin-bottom: 24px;
+    }
+
+    .welcome-icon {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, var(--primary-blue), var(--primary-dark));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+    }
+
+    .welcome-icon i {
+      font-size: 2.5rem;
+      color: white;
+    }
+
+    .welcome-card h3 {
+      color: var(--text-primary);
+      font-weight: 600;
+      margin-bottom: 12px;
+    }
+
+    .welcome-card p {
+      color: var(--text-secondary);
+      font-size: 1rem;
+      line-height: 1.6;
+      max-width: 600px;
+      margin: 0 auto;
+    }
+
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 24px;
+    }
+
+    .action-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      transition: all 0.3s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .action-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      border-color: var(--primary-blue);
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .action-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--primary-blue);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 16px;
+    }
+
+    .action-icon i {
+      font-size: 1.25rem;
+      color: white;
+    }
+
+    .action-card h6 {
+      color: var(--text-primary);
+      font-weight: 600;
+      margin-bottom: 8px;
+      font-size: 1rem;
+    }
+
+    .action-card p {
+      color: var(--text-secondary);
+      font-size: 0.875rem;
+      line-height: 1.5;
+      margin: 0;
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 16px;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+      }
+
+      .welcome-card {
+        padding: 24px;
+      }
+    }
+
+    .fade-in {
+      animation: fadeIn 0.6s ease-in-out;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <h5>
+      <i class="fas fa-film"></i>
+      BlueBear Cinema
+    </h5>
+  </div>
+
+  <nav class="sidebar-nav">
+    <a class="nav-link active" href="/admin/">
+      <i class="fas fa-home"></i>Dashboard
+    </a>
+    <a class="nav-link" href="/admin/movies">
+      <i class="fas fa-film"></i>Movies
+    </a>
+    <a class="nav-link" href="/admin/actors">
+      <i class="fas fa-users"></i>Actors
+    </a>
+    <a class="nav-link" href="/admin/vouchers">
+      <i class="fas fa-ticket-alt"></i>Vouchers
+    </a>
+    <a class="nav-link" href="/admin/genres">
+      <i class="fas fa-user-circle"></i>Genres
+    </a>
+  </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+  <!-- Header -->
+  <div class="header-section fade-in">
+    <h2>Dashboard</h2>
+    <p>Welcome to BlueBear Cinema Management System</p>
+  </div>
+
+  <!-- Welcome Section -->
+  <div class="welcome-card fade-in">
+    <div class="welcome-icon">
+      <i class="fas fa-film"></i>
+    </div>
+    <h3>Welcome to BlueBear Cinema Admin</h3>
+    <p>
+      Manage your cinema system efficiently with our comprehensive admin panel.
+      Use the navigation menu to access different management modules.
+    </p>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="quick-actions fade-in">
+    <a href="/admin/movies" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-film"></i>
+      </div>
+      <h6>Movies</h6>
+      <p>Manage movie database and information</p>
+    </a>
+
+    <a href="/admin/actors" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-users"></i>
+      </div>
+      <h6>Actors</h6>
+      <p>Manage actor profiles and relationships</p>
+    </a>
+
+    <a href="/admin/vouchers" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-ticket-alt"></i>
+      </div>
+      <h6>Vouchers</h6>
+      <p>Create and manage promotional codes</p>
+    </a>
+
+    <a href="/admin/genres" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-user-circle"></i>
+      </div>
+      <h6genres</h6>
+      <p>Genre administration</p>
+    </a>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Simple fade-in animation
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.style.opacity = '1';
+          entry.target.style.transform = 'translateY(0)';
+        }
+      });
+    }, observerOptions);
+
+    document.querySelectorAll('.action-card').forEach(card => {
+      card.style.opacity = '0';
+      card.style.transform = 'translateY(20px)';
+      card.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+      observer.observe(card);
+    });
+  });
+</script>
+</body>
+</html>

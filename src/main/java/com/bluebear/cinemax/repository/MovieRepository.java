@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
@@ -40,9 +41,6 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     @Query(value="select * from Movie m where LOWER(m.MovieName) LIKE LOWER(CONCAT('%', :name, '%')) AND m.StartDate <= GETDATE() And m.EndDate >= GETDATE()", nativeQuery = true)
     List<Movie> findAllByMovieName(@Param("name") String name);
     Page<Movie> findMoviesByStartDateAfter(LocalDateTime currentDate, Pageable pageable);
-
-    // ==================== [PHẦN ĐƯỢC SỬA] - Bắt đầu ====================
-    // Sửa các truy vấn để dùng "IN :ageLimits" thay vì "= :ageLimit"
 
     @Query("""
     SELECT DISTINCT m FROM Movie m
@@ -144,7 +142,6 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("ageLimits") List<Age_Limit> ageLimits,
             Pageable pageable
     );
-    // ==================== [PHẦN ĐƯỢC SỬA] - Kết thúc ====================
 
     @Query("SELECT DISTINCT m FROM Movie m JOIN m.scheduleList s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND LOWER(m.movieName) LIKE LOWER(CONCAT('%', :movieName, '%')) AND s.startTime > :now AND m.status = :status")
     Page<Movie> findMoviesByTheaterIdAndMovieNameAndStatus(int theaterId, String movieName, Movie_Status status, LocalDateTime now, Pageable pageable);
@@ -160,9 +157,22 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     Page<Movie> findAllByStatus(Movie_Status status, Pageable pageable);
 
+    List<Movie> findByStatus(Movie_Status status);
+
     List<Movie> findByMovieNameContaining(String keyword);
 
+    @Query("SELECT m FROM Movie m " +
+            "WHERE m.startDate <= :currentDate " +
+            "AND m.endDate >= :currentDate " +
+            "ORDER BY m.startDate ASC")
+    List<Movie> findActiveMovies(@Param("currentDate") LocalDateTime currentDate);
+
     MovieDTO getMovieByMovieID(Integer movieID);
+
+    @Query("SELECT m FROM Movie m " +
+            "WHERE m.startDate > :currentDate " +
+            "ORDER BY m.startDate ASC")
+    List<Movie> findUpcomingMovies(@Param("currentDate") LocalDateTime currentDate);
 
     @Query("""
         SELECT DISTINCT m FROM Movie m LEFT JOIN m.genres g
@@ -180,6 +190,8 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("endDate") LocalDateTime endDate,
             Pageable pageable
     );
+
+    List<Movie> findByMovieNameContainingIgnoreCase(String movieName);
 
     @Query("""
         SELECT DISTINCT CAST(s.startTime as LocalDate) FROM Movie m
@@ -219,6 +231,11 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("ageLimits") List<Age_Limit> ageLimits,
             Pageable pageable
     );
+
+    @Query("SELECT DISTINCT m FROM Movie m " +
+            "JOIN m.genres g " +
+            "WHERE g.genreID = :genreID")
+    List<Movie> findMoviesByGenreIDJoin(@Param("genreID") Integer genreID);
 
     @Query("""
         SELECT DISTINCT m FROM Movie m
@@ -295,4 +312,19 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
             @Param("ageLimits") List<Age_Limit> ageLimits,
             Pageable pageable
     );
+
+    @Query("SELECT DISTINCT m FROM Movie m " +
+            "JOIN m.actors a " +
+            "WHERE a.actorID = :actorId")
+    List<Movie> findMoviesByActorIdJoin(@Param("actorId") Integer actorId);
+
+    @Query("SELECT m FROM Movie m")
+    List<Movie> getAllMovies();
+
+    @Query("SELECT m FROM Movie m JOIN m.actors a WHERE a.actorID = :actorId")
+    List<Movie> getMoviesByActor(@Param("actorId") Integer actorId);
+
+    // Đúng
+    @Query("SELECT m FROM Movie m JOIN m.actors a WHERE a.actorID = :actorId")
+    Collection<Movie> findMoviesByActorId(@Param("actorId") Integer actorId);
 }

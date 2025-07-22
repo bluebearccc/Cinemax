@@ -1,0 +1,1171 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Add Actor</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .sidebar {
+            background: var(--sidebar-bg);
+            min-height: 100vh;
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+            border: none;
+            background: none;
+            margin: 2px 0;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 1rem;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
+            min-height: 100vh;
+            background: var(--dark-bg);
+        }
+
+        .header-section {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header-content h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .breadcrumb-text {
+            color: var(--text-secondary);
+            margin: 0;
+            font-size: 0.95rem;
+        }
+
+        .btn-secondary {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 20px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 32px;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .form-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .form-title i {
+            color: var(--success-green);
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text-primary);
+            font-size: 0.95rem;
+        }
+
+        .form-label.required::after {
+            content: " *";
+            color: var(--danger-red);
+        }
+
+        .form-control {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+            width: 100%;
+            font-size: 1rem;
+        }
+
+        .form-control::placeholder {
+            color: var(--text-muted);
+        }
+
+        .form-control:focus {
+            background: var(--darker-bg);
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            color: var(--text-primary);
+            outline: none;
+        }
+
+        .form-control.is-invalid {
+            border-color: var(--danger-red);
+            box-shadow: 0 0 0 0.2rem rgba(234, 67, 53, 0.25);
+        }
+
+        .invalid-feedback {
+            color: var(--danger-red);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        .form-help {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            margin-top: 4px;
+        }
+
+        /* Image preview styles */
+        .image-preview-container {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .image-preview-container.has-image {
+            border-color: var(--success-green);
+            background: rgba(52, 168, 83, 0.05);
+        }
+
+        .image-preview-container.has-error {
+            border-color: var(--danger-red);
+            background: rgba(234, 67, 53, 0.05);
+        }
+
+        .actor-image-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+            margin: 0 auto 12px;
+        }
+
+        .actor-image-container.has-image {
+            border-color: var(--success-green);
+        }
+
+        .actor-image-container.has-error {
+            border-color: var(--danger-red);
+        }
+
+        .actor-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        .actor-image-placeholder {
+            color: var(--text-muted);
+            font-size: 2rem;
+        }
+
+        .image-status {
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .image-status.success {
+            color: var(--success-green);
+        }
+
+        .image-status.error {
+            color: var(--danger-red);
+        }
+
+        .image-status.default {
+            color: var(--text-secondary);
+        }
+
+        .image-examples {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .image-examples .example-title {
+            color: var(--primary-blue);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .image-examples .example-item {
+            color: var(--text-secondary);
+            margin: 2px 0;
+            font-family: 'Courier New', monospace;
+        }
+
+        .movies-selection {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+
+        .movie-checkbox {
+            margin-bottom: 12px;
+            padding: 8px;
+            border-radius: 6px;
+            transition: background 0.2s ease;
+        }
+
+        .movie-checkbox:hover {
+            background: var(--card-hover);
+        }
+
+        .movie-checkbox input[type="checkbox"] {
+            margin-right: 10px;
+            transform: scale(1.2);
+        }
+
+        .movie-checkbox label {
+            color: var(--text-primary);
+            cursor: pointer;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            font-size: 0.9rem;
+        }
+
+        .movie-info {
+            margin-left: 8px;
+        }
+
+        .movie-name {
+            font-weight: 500;
+        }
+
+        .movie-details {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            margin-top: 2px;
+        }
+
+        .selected-movies-summary {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 12px;
+        }
+
+        .selected-count {
+            color: var(--primary-blue);
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn-primary {
+            background: var(--success-green);
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            color: white;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-primary:hover {
+            background: #2e7b38;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 28px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            font-size: 1rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .btn-outline:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: 0 -12px;
+        }
+
+        .col-md-6 {
+            flex: 0 0 50%;
+            max-width: 50%;
+            padding: 0 12px;
+        }
+
+        .col-md-12 {
+            flex: 0 0 100%;
+            max-width: 100%;
+            padding: 0 12px;
+        }
+
+        .alert {
+            border-radius: 8px;
+            margin-bottom: 20px;
+            padding: 16px;
+        }
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
+        }
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        .actor-preview {
+            margin-top: 24px;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--success-green), #4caf50);
+            border-radius: 12px;
+            color: white;
+            text-align: center;
+        }
+
+        .actor-preview-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 16px;
+        }
+
+        .actor-preview-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+        }
+
+        .actor-preview-info h4 {
+            margin: 0 0 6px 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .actor-preview-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .header-section {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .form-container {
+                padding: 24px;
+            }
+
+            .col-md-6 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+
+            .btn-group {
+                flex-direction: column;
+            }
+
+            .actor-preview-content {
+                flex-direction: column;
+                gap: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a class="nav-link" href="/admin">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link" href="/admin/movies">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link active" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        <a class="nav-link" href="/admin/vouchers">
+            <i class="fas fa-ticket-alt"></i>Vouchers
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Header -->
+    <div class="header-section">
+        <div class="header-content">
+            <h2>Thêm Diễn Viên Mới</h2>
+            <p class="breadcrumb-text">Dashboard > Actors > Thêm Mới</p>
+        </div>
+        <a href="/admin/actors" class="btn-secondary">
+            <i class="fas fa-arrow-left"></i>Quay Lại
+        </a>
+    </div>
+
+    <!-- Form -->
+    <div class="form-container">
+        <h3 class="form-title">
+            <i class="fas fa-user-plus"></i>
+            <span>Tạo Diễn Viên Mới</span>
+        </h3>
+
+        <form th:action="@{/admin/actors/add}" method="post" th:object="${actor}" id="actorForm" novalidate>
+
+            <div class="row">
+                <!-- Actor Name - Required -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label required" for="actorName">Tên Diễn Viên</label>
+                        <input type="text"
+                               class="form-control"
+                               id="actorName"
+                               th:field="*{actorName}"
+                               placeholder="Ví dụ: Tom Hanks, Scarlett Johansson"
+                               maxlength="255"
+                               required>
+                        <div class="form-help">
+                            Tên đầy đủ của diễn viên (bắt buộc)
+                        </div>
+                        <div class="invalid-feedback" id="actorNameError"></div>
+                    </div>
+                </div>
+
+                <!-- Image Link Input -->
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label" for="imageLink">Đường Dẫn Ảnh (Tùy chọn)</label>
+                        <input type="text"
+                               class="form-control"
+                               id="imageLink"
+                               th:field="*{image}"
+                               placeholder="/images/actors/actor-name.jpg"
+                               maxlength="500">
+                        <div class="form-help">
+                            Nhập đường dẫn ảnh từ thư mục static (không bắt buộc)
+                        </div>
+                        <div class="invalid-feedback" id="imageLinkError"></div>
+
+                        <!-- Image Examples -->
+                        <div class="image-examples">
+                            <div class="example-title">Ví dụ đường dẫn:</div>
+                            <div class="example-item">/images/actors/tom-hanks.jpg</div>
+                            <div class="example-item">/images/actors/scarlett-johansson.png</div>
+                            <div class="example-item">/images/default-actor.png</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Preview -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="form-label">Xem Trước Ảnh</label>
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <div>
+                                <div class="actor-image-container" id="actorImageContainer">
+                                    <img class="actor-image"
+                                         id="previewImage"
+                                         src="/images/default-actor.png"
+                                         alt="Actor Preview"
+                                         style="display: none;">
+                                    <i class="fas fa-user actor-image-placeholder" id="imagePlaceholder"></i>
+                                </div>
+                                <div class="image-status default" id="imageStatus">
+                                    <i class="fas fa-info-circle"></i> Nhập đường dẫn ảnh để xem trước
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Movies Selection -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="form-label" for="moviesSelection">Phim Đã Tham Gia (Tùy chọn)</label>
+                        <div class="movies-selection" id="moviesSelection">
+                            <div class="text-center" style="padding: 20px;">
+                                <i class="fas fa-spinner fa-spin"></i>
+                                <div class="form-help mt-2">Đang tải danh sách phim...</div>
+                            </div>
+                        </div>
+                        <div class="form-help">
+                            Chọn các phim mà diễn viên đã tham gia (có thể bỏ qua)
+                        </div>
+                        <div class="selected-movies-summary" id="selectedSummary" style="display: none;">
+                            <div class="selected-count">Đã chọn: <span id="selectedCount">0</span> phim</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hidden fields -->
+            <input type="hidden" name="selectedMovies" id="selectedMoviesInput">
+
+            <!-- Hidden data for JavaScript -->
+            <script th:inline="javascript">
+                window.moviesData = /*[[${allMovies}]]*/ [];
+                window.currentMovieIds = /*[[${currentMovieIds}]]*/ [];
+            </script>
+
+            <!-- Actor Preview -->
+            <div id="actorPreview" style="display: none;">
+                <div class="actor-preview">
+                    <div class="actor-preview-content">
+                        <img class="actor-preview-image" id="previewActorImage" alt="Actor Preview" src="/images/default-actor.png">
+                        <div class="actor-preview-info">
+                            <h4 id="previewActorName">Tên Diễn Viên</h4>
+                            <p><i class="fas fa-user"></i> BlueBear Cinema Actor</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="btn-group">
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-user-plus"></i>
+                    <span>Tạo Diễn Viên</span>
+                </button>
+                <a href="/admin/actors" class="btn-outline">
+                    <i class="fas fa-times"></i>
+                    Hủy Bỏ
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('actorForm');
+        const actorNameInput = document.getElementById('actorName');
+        const imageLinkInput = document.getElementById('imageLink');
+        const previewImage = document.getElementById('previewImage');
+        const imagePlaceholder = document.getElementById('imagePlaceholder');
+        const actorImageContainer = document.getElementById('actorImageContainer');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imageStatus = document.getElementById('imageStatus');
+        const actorPreviewSection = document.getElementById('actorPreview');
+        const previewActorName = document.getElementById('previewActorName');
+        const previewActorImage = document.getElementById('previewActorImage');
+        const moviesSelection = document.getElementById('moviesSelection');
+        const selectedSummary = document.getElementById('selectedSummary');
+        const selectedCount = document.getElementById('selectedCount');
+        const selectedMoviesInput = document.getElementById('selectedMoviesInput');
+
+        // Load movies from server data
+        function loadMovies() {
+            try {
+                let allMoviesData = window.moviesData || [];
+                let currentMovieIds = window.currentMovieIds || [];
+
+                console.log('Movies data loaded:', allMoviesData);
+
+                if (!allMoviesData || allMoviesData.length === 0) {
+                    renderEmptyState();
+                    return;
+                }
+
+                renderMovies(allMoviesData, currentMovieIds);
+            } catch (error) {
+                console.error('Error loading movies data:', error);
+                renderEmptyState();
+            }
+        }
+
+        function renderEmptyState() {
+            moviesSelection.innerHTML = `
+                <div class="text-center" style="padding: 20px;">
+                    <i class="fas fa-film" style="font-size: 2rem; opacity: 0.5; margin-bottom: 8px;"></i>
+                    <div class="form-help">Không có phim nào trong hệ thống</div>
+                    <div class="form-help">Vui lòng thêm phim trước khi gán cho diễn viên</div>
+                </div>
+            `;
+        }
+
+        function renderMovies(movies, selectedIds = []) {
+            moviesSelection.innerHTML = '';
+
+            // Add search input
+            const searchInput = document.createElement('input');
+            searchInput.type = 'text';
+            searchInput.className = 'form-control';
+            searchInput.placeholder = 'Tìm kiếm phim...';
+            searchInput.style.marginBottom = '12px';
+            searchInput.addEventListener('input', handleMovieSearch);
+            moviesSelection.appendChild(searchInput);
+
+            // Add select all button
+            const buttonContainer = document.createElement('div');
+            buttonContainer.style.marginBottom = '12px';
+
+            const selectAllBtn = document.createElement('button');
+            selectAllBtn.type = 'button';
+            selectAllBtn.className = 'btn btn-sm btn-outline-primary';
+            selectAllBtn.textContent = 'Chọn tất cả';
+            selectAllBtn.addEventListener('click', handleSelectAll);
+
+            buttonContainer.appendChild(selectAllBtn);
+            moviesSelection.appendChild(buttonContainer);
+
+            // Add movie checkboxes
+            movies.forEach(movie => {
+                const movieDiv = document.createElement('div');
+                movieDiv.className = 'movie-checkbox';
+
+                const isSelected = selectedIds.includes(movie.movieId || movie.id);
+                const movieStatus = movie.status || 'Unknown';
+                const movieYear = movie.startDate ? new Date(movie.startDate).getFullYear() : 'Unknown';
+
+                movieDiv.innerHTML = `
+                    <label>
+                        <input type="checkbox"
+                               value="${movie.movieId || movie.id}"
+                               ${isSelected ? 'checked' : ''}
+                               onchange="updateSelectedMovies()">
+                        <div class="movie-info">
+                            <div class="movie-name">${movie.movieName || movie.name}</div>
+                            <div class="movie-details">${movieYear} • ${movieStatus}</div>
+                        </div>
+                    </label>
+                `;
+                moviesSelection.appendChild(movieDiv);
+            });
+
+            updateSelectedMovies();
+        }
+
+        function handleMovieSearch() {
+            const searchTerm = this.value.toLowerCase();
+            const movieCheckboxes = moviesSelection.querySelectorAll('.movie-checkbox');
+
+            movieCheckboxes.forEach(movieDiv => {
+                const movieName = movieDiv.querySelector('.movie-name').textContent.toLowerCase();
+                movieDiv.style.display = movieName.includes(searchTerm) ? 'block' : 'none';
+            });
+        }
+
+        function handleSelectAll() {
+            const visibleCheckboxes = moviesSelection.querySelectorAll('.movie-checkbox:not([style*="display: none"]) input[type="checkbox"]');
+            const allChecked = Array.from(visibleCheckboxes).every(cb => cb.checked);
+
+            visibleCheckboxes.forEach(cb => {
+                cb.checked = !allChecked;
+            });
+
+            updateSelectedMovies();
+            this.textContent = allChecked ? 'Chọn tất cả' : 'Bỏ chọn tất cả';
+        }
+
+        // Update selected movies
+        window.updateSelectedMovies = function() {
+            const selectedMovies = [];
+            const checkboxes = moviesSelection.querySelectorAll('input[type="checkbox"]:checked');
+
+            checkboxes.forEach(checkbox => {
+                selectedMovies.push(parseInt(checkbox.value));
+            });
+
+            selectedMoviesInput.value = selectedMovies.join(',');
+
+            if (selectedMovies.length > 0) {
+                selectedCount.textContent = selectedMovies.length;
+                selectedSummary.style.display = 'block';
+            } else {
+                selectedSummary.style.display = 'none';
+            }
+        };
+
+        // Image preview handling
+        function updateImagePreview() {
+            const imagePath = imageLinkInput.value.trim();
+
+            if (!imagePath) {
+                // No image path - show placeholder
+                showImagePlaceholder();
+                imageStatus.className = 'image-status default';
+                imageStatus.innerHTML = '<i class="fas fa-info-circle"></i> Nhập đường dẫn ảnh để xem trước';
+                imagePreviewContainer.className = 'image-preview-container';
+                actorImageContainer.className = 'actor-image-container';
+                return;
+            }
+
+            // Show loading state
+            imageStatus.className = 'image-status default';
+            imageStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải ảnh...';
+
+            // Test if image exists
+            const testImage = new Image();
+            testImage.onload = function() {
+                // Image loaded successfully
+                previewImage.src = imagePath;
+                previewActorImage.src = imagePath;
+                showImage();
+                imageStatus.className = 'image-status success';
+                imageStatus.innerHTML = '<i class="fas fa-check-circle"></i> Ảnh tải thành công';
+                imagePreviewContainer.className = 'image-preview-container has-image';
+                actorImageContainer.className = 'actor-image-container has-image';
+                clearError('imageLink');
+            };
+
+            testImage.onerror = function() {
+                // Image failed to load
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Không thể tải ảnh từ đường dẫn này';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                previewActorImage.src = '/images/default-actor.png';
+                showError('imageLink', 'Đường dẫn ảnh không hợp lệ hoặc ảnh không tồn tại');
+            };
+
+            testImage.src = imagePath;
+        }
+
+        function showImage() {
+            previewImage.style.display = 'block';
+            imagePlaceholder.style.display = 'none';
+        }
+
+        function showImagePlaceholder() {
+            previewImage.style.display = 'none';
+            imagePlaceholder.style.display = 'flex';
+        }
+
+        // Image link input event
+        imageLinkInput.addEventListener('input', function() {
+            clearError('imageLink');
+            updateImagePreview();
+            updatePreview();
+        });
+
+        // Auto-format image path
+        imageLinkInput.addEventListener('blur', function() {
+            let value = this.value.trim();
+            if (value && !value.startsWith('/')) {
+                value = '/' + value;
+                this.value = value;
+                updateImagePreview();
+            }
+        });
+
+        // Update main preview
+        function updatePreview() {
+            const actorName = actorNameInput.value.trim() || 'Tên Diễn Viên';
+            previewActorName.textContent = actorName;
+
+            if (actorName !== 'Tên Diễn Viên') {
+                actorPreviewSection.style.display = 'block';
+            } else {
+                actorPreviewSection.style.display = 'none';
+            }
+        }
+
+        // Actor name input event
+        actorNameInput.addEventListener('input', function() {
+            clearError('actorName');
+            updatePreview();
+        });
+
+        // Form validation
+        function validateForm() {
+            let isValid = true;
+
+            // Clear previous errors
+            document.querySelectorAll('.form-control').forEach(el => {
+                el.classList.remove('is-invalid');
+            });
+            document.querySelectorAll('.invalid-feedback').forEach(el => {
+                el.textContent = '';
+            });
+
+            // Validate actor name
+            const actorName = actorNameInput.value.trim();
+            if (!actorName) {
+                showError('actorName', 'Tên diễn viên là bắt buộc');
+                isValid = false;
+            } else if (actorName.length < 2) {
+                showError('actorName', 'Tên diễn viên phải có ít nhất 2 ký tự');
+                isValid = false;
+            } else if (actorName.length > 255) {
+                showError('actorName', 'Tên diễn viên không được vượt quá 255 ký tự');
+                isValid = false;
+            }
+
+            // Validate image link if provided
+            const imageLink = imageLinkInput.value.trim();
+            if (imageLink) {
+                if (imageLink.length > 500) {
+                    showError('imageLink', 'Đường dẫn ảnh không được vượt quá 500 ký tự');
+                    isValid = false;
+                }
+
+                // Check if it looks like a valid image path
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+                const hasValidExtension = imageExtensions.some(ext =>
+                    imageLink.toLowerCase().includes(ext)
+                );
+
+                if (!hasValidExtension) {
+                    showError('imageLink', 'Đường dẫn ảnh nên có phần mở rộng hợp lệ (.jpg, .png, .gif, .webp)');
+                    isValid = false;
+                }
+            }
+
+            return isValid;
+        }
+
+        function showError(fieldName, message) {
+            const field = document.getElementById(fieldName);
+            const errorDiv = document.getElementById(fieldName + 'Error');
+
+            if (field) field.classList.add('is-invalid');
+            if (errorDiv) errorDiv.textContent = message;
+        }
+
+        function clearError(fieldName) {
+            const field = document.getElementById(fieldName);
+            const errorDiv = document.getElementById(fieldName + 'Error');
+
+            if (field) field.classList.remove('is-invalid');
+            if (errorDiv) errorDiv.textContent = '';
+        }
+
+        // Format actor name
+        actorNameInput.addEventListener('blur', function() {
+            const value = this.value.trim();
+            if (value) {
+                const formatted = value.split(' ')
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join(' ');
+                this.value = formatted;
+                updatePreview();
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', function(e) {
+            if (!validateForm()) {
+                e.preventDefault();
+
+                const firstError = document.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    firstError.focus();
+                }
+                return;
+            }
+
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo diễn viên...';
+            submitBtn.disabled = true;
+
+            // Log form data for debugging
+            console.log('Form submission:');
+            console.log('Actor name:', actorNameInput.value);
+            console.log('Image link:', imageLinkInput.value);
+            console.log('Selected movies:', selectedMoviesInput.value);
+
+            // Re-enable button after timeout (in case of error)
+            setTimeout(() => {
+                if (submitBtn.disabled) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }, 10000);
+        });
+
+        // Initialize everything
+        function initialize() {
+            loadMovies();
+            updateImagePreview();
+            updatePreview();
+
+            // Auto-hide alerts
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    if (bootstrap && bootstrap.Alert) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                });
+            }, 5000);
+
+            // Focus on name input
+            if (actorNameInput) {
+                actorNameInput.focus();
+            }
+        }
+
+        // Character counter for actor name
+        actorNameInput.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            const maxLength = 255;
+
+            let counter = this.parentNode.querySelector('.char-counter');
+            if (!counter) {
+                counter = document.createElement('div');
+                counter.className = 'char-counter form-help';
+                this.parentNode.appendChild(counter);
+            }
+
+            counter.textContent = `${currentLength}/${maxLength} ký tự`;
+
+            if (currentLength > maxLength * 0.9) {
+                counter.style.color = 'var(--warning-orange)';
+            } else if (currentLength === maxLength) {
+                counter.style.color = 'var(--danger-red)';
+            } else {
+                counter.style.color = 'var(--text-secondary)';
+            }
+        });
+
+        // Character counter for image link
+        imageLinkInput.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            const maxLength = 500;
+
+            let counter = this.parentNode.querySelector('.char-counter');
+            if (!counter) {
+                counter = document.createElement('div');
+                counter.className = 'char-counter form-help';
+                this.parentNode.appendChild(counter);
+            }
+
+            counter.textContent = `${currentLength}/${maxLength} ký tự`;
+
+            if (currentLength > maxLength * 0.9) {
+                counter.style.color = 'var(--warning-orange)';
+            } else if (currentLength === maxLength) {
+                counter.style.color = 'var(--danger-red)';
+            } else {
+                counter.style.color = 'var(--text-secondary)';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + S to save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit', { bubbles: true }));
+            }
+
+            // Escape to cancel
+            if (e.key === 'Escape') {
+                const cancelBtn = document.querySelector('.btn-outline');
+                if (cancelBtn) {
+                    window.location.href = cancelBtn.href;
+                }
+            }
+        });
+
+        // Initialize
+        initialize();
+    });
+</script>
+</body>
+</html>
