@@ -57,7 +57,13 @@ public class ActorService {
 
         Actor actor = new Actor();
         actor.setActorName(actorDTO.getActorName());
-        actor.setImage("/images/default-actor.png");
+
+        // Handle image path - use provided path or default
+        String imagePath = actorDTO.getImage();
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            imagePath = "/images/default-actor.png";
+        }
+        actor.setImage(imagePath);
 
         return convertToDTO(actorRepository.save(actor));
     }
@@ -68,7 +74,19 @@ public class ActorService {
         return actorRepository.findById(actorDTO.getActorId())
                 .map(actor -> {
                     actor.setActorName(actorDTO.getActorName());
-                    actor.setImage("/images/default-actor.png");
+
+                    // Handle image path - use provided path or keep existing or use default
+                    String imagePath = actorDTO.getImage();
+                    if (imagePath == null || imagePath.trim().isEmpty()) {
+                        // If no new image path provided, keep existing or use default
+                        if (actor.getImage() == null || actor.getImage().trim().isEmpty()) {
+                            imagePath = "/images/default-actor.png";
+                        } else {
+                            imagePath = actor.getImage(); // Keep existing
+                        }
+                    }
+                    actor.setImage(imagePath);
+
                     return convertToDTO(actorRepository.save(actor));
                 })
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy diễn viên với ID: " + actorDTO.getActorId()));
@@ -137,7 +155,13 @@ public class ActorService {
         ActorDTO dto = new ActorDTO();
         dto.setActorId(convertToInteger(actor.getActorId()));
         dto.setActorName(actor.getActorName());
-        dto.setImage(actor.getImage());
+
+        // Handle image path - ensure it's not null
+        String imagePath = actor.getImage();
+        if (imagePath == null || imagePath.trim().isEmpty()) {
+            imagePath = "/images/default-actor.png";
+        }
+        dto.setImage(imagePath);
 
         // Lấy danh sách phim active
         List<String> movieNames = Optional.ofNullable(actor.getMovies())

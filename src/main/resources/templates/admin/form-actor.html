@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Add/Edit Actor</title>
+    <title th:text="${pageTitle}">Add Actor</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
@@ -174,7 +174,7 @@
         }
 
         .form-title i {
-            color: var(--primary-blue);
+            color: var(--success-green);
         }
 
         .form-group {
@@ -234,63 +234,101 @@
             margin-top: 4px;
         }
 
-        .file-upload-area {
-            border: 2px dashed var(--border-color);
+        /* Image preview styles */
+        .image-preview-container {
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            padding: 30px 20px;
+            padding: 16px;
             text-align: center;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             transition: all 0.3s ease;
-            cursor: pointer;
-            position: relative;
+        }
+
+        .image-preview-container.has-image {
+            border-color: var(--success-green);
+            background: rgba(52, 168, 83, 0.05);
+        }
+
+        .image-preview-container.has-error {
+            border-color: var(--danger-red);
+            background: rgba(234, 67, 53, 0.05);
+        }
+
+        .actor-image-container {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+            margin: 0 auto 12px;
         }
 
-        .file-upload-area:hover {
-            border-color: var(--primary-blue);
-            background: rgba(66, 133, 244, 0.05);
+        .actor-image-container.has-image {
+            border-color: var(--success-green);
         }
 
-        .file-upload-content {
-            pointer-events: none;
+        .actor-image-container.has-error {
+            border-color: var(--danger-red);
         }
 
-        .file-upload-icon {
-            font-size: 2rem;
-            color: var(--primary-blue);
-            margin-bottom: 12px;
-        }
-
-        .file-upload-text {
-            color: var(--text-primary);
-            font-size: 0.9rem;
-            margin-bottom: 4px;
-        }
-
-        .file-upload-hint {
-            color: var(--text-secondary);
-            font-size: 0.8rem;
-        }
-
-        .file-input {
-            position: absolute;
-            top: 0;
-            left: 0;
+        .actor-image {
             width: 100%;
             height: 100%;
-            opacity: 0;
-            cursor: pointer;
+            object-fit: cover;
+            display: block;
         }
 
-        .image-preview {
-            margin-top: 15px;
-            text-align: center;
+        .actor-image-placeholder {
+            color: var(--text-muted);
+            font-size: 2rem;
         }
 
-        .preview-image {
-            max-width: 150px;
-            max-height: 200px;
+        .image-status {
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .image-status.success {
+            color: var(--success-green);
+        }
+
+        .image-status.error {
+            color: var(--danger-red);
+        }
+
+        .image-status.default {
+            color: var(--text-secondary);
+        }
+
+        .image-examples {
+            background: rgba(66, 133, 244, 0.1);
+            border: 1px solid rgba(66, 133, 244, 0.3);
             border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .image-examples .example-title {
+            color: var(--primary-blue);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .image-examples .example-item {
+            color: var(--text-secondary);
+            margin: 2px 0;
+            font-family: 'Courier New', monospace;
         }
 
         .movies-selection {
@@ -365,7 +403,7 @@
         }
 
         .btn-primary {
-            background: var(--primary-blue);
+            background: var(--success-green);
             border: none;
             border-radius: 8px;
             padding: 14px 28px;
@@ -377,7 +415,7 @@
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            background: #2e7b38;
             transform: translateY(-1px);
         }
 
@@ -439,7 +477,7 @@
         .actor-preview {
             margin-top: 24px;
             padding: 20px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+            background: linear-gradient(135deg, var(--success-green), #4caf50);
             border-radius: 12px;
             color: white;
             text-align: center;
@@ -552,8 +590,8 @@
     <!-- Header -->
     <div class="header-section">
         <div class="header-content">
-            <h2 th:text="${isEdit} ? 'Chỉnh Sửa Diễn Viên' : 'Thêm Diễn Viên Mới'">Thêm Diễn Viên Mới</h2>
-            <p class="breadcrumb-text">Dashboard > Actors > <span th:text="${isEdit} ? 'Chỉnh Sửa' : 'Thêm Mới'">Thêm Mới</span></p>
+            <h2>Thêm Diễn Viên Mới</h2>
+            <p class="breadcrumb-text">Dashboard > Actors > Thêm Mới</p>
         </div>
         <a href="/admin/actors" class="btn-secondary">
             <i class="fas fa-arrow-left"></i>Quay Lại
@@ -563,12 +601,11 @@
     <!-- Form -->
     <div class="form-container">
         <h3 class="form-title">
-            <i th:class="${isEdit} ? 'fas fa-edit' : 'fas fa-user-plus'"></i>
-            <span th:text="${isEdit} ? 'Chỉnh Sửa Thông Tin Diễn Viên' : 'Tạo Diễn Viên Mới'">Tạo Diễn Viên Mới</span>
+            <i class="fas fa-user-plus"></i>
+            <span>Tạo Diễn Viên Mới</span>
         </h3>
 
-        <form th:action="${isEdit} ? @{/admin/actors/edit/{id}(id=${actor.actorId})} : @{/admin/actors/add}"
-              method="post" th:object="${actor}" id="actorForm" novalidate enctype="multipart/form-data">
+        <form th:action="@{/admin/actors/add}" method="post" th:object="${actor}" id="actorForm" novalidate>
 
             <div class="row">
                 <!-- Actor Name - Required -->
@@ -589,39 +626,51 @@
                     </div>
                 </div>
 
-                <!-- Image Upload - Optional -->
+                <!-- Image Link Input -->
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label" for="imageFile">Ảnh Diễn Viên (Tùy chọn)</label>
-                        <div class="file-upload-area" id="fileUploadArea">
-                            <input type="file"
-                                   class="file-input"
-                                   id="imageFile"
-                                   name="imageFile"
-                                   accept="image/*">
-                            <div class="file-upload-content">
-                                <div class="file-upload-icon">
-                                    <i class="fas fa-camera"></i>
+                        <label class="form-label" for="imageLink">Đường Dẫn Ảnh (Tùy chọn)</label>
+                        <input type="text"
+                               class="form-control"
+                               id="imageLink"
+                               th:field="*{image}"
+                               placeholder="/images/actors/actor-name.jpg"
+                               maxlength="500">
+                        <div class="form-help">
+                            Nhập đường dẫn ảnh từ thư mục static (không bắt buộc)
+                        </div>
+                        <div class="invalid-feedback" id="imageLinkError"></div>
+
+                        <!-- Image Examples -->
+                        <div class="image-examples">
+                            <div class="example-title">Ví dụ đường dẫn:</div>
+                            <div class="example-item">/images/actors/tom-hanks.jpg</div>
+                            <div class="example-item">/images/actors/scarlett-johansson.png</div>
+                            <div class="example-item">/images/default-actor.png</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Image Preview -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="form-group">
+                        <label class="form-label">Xem Trước Ảnh</label>
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <div>
+                                <div class="actor-image-container" id="actorImageContainer">
+                                    <img class="actor-image"
+                                         id="previewImage"
+                                         src="/images/default-actor.png"
+                                         alt="Actor Preview"
+                                         style="display: none;">
+                                    <i class="fas fa-user actor-image-placeholder" id="imagePlaceholder"></i>
                                 </div>
-                                <div class="file-upload-text">
-                                    Click để chọn ảnh
-                                </div>
-                                <div class="file-upload-hint">
-                                    JPG, PNG (tối đa 5MB) - Không bắt buộc
+                                <div class="image-status default" id="imageStatus">
+                                    <i class="fas fa-info-circle"></i> Nhập đường dẫn ảnh để xem trước
                                 </div>
                             </div>
-                        </div>
-                        <div class="invalid-feedback" id="imageFileError"></div>
-
-                        <!-- Show current image if editing -->
-                        <div th:if="${isEdit and !#strings.isEmpty(actor.image)}"class="image-preview">
-                            <div class="form-help">Ảnh hiện tại:</div>
-                            <img th:src="${actor.image}" th:alt="${actor.actorName}" class="preview-image">
-                        </div>
-
-                        <!-- Image Preview for new upload -->
-                        <div class="image-preview" id="imagePreview" style="display: none;">
-                            <img class="preview-image" id="previewImg" alt="Preview">
                         </div>
                     </div>
                 </div>
@@ -649,7 +698,6 @@
             </div>
 
             <!-- Hidden fields -->
-            <input type="hidden" th:field="*{image}" id="hiddenImagePath">
             <input type="hidden" name="selectedMovies" id="selectedMoviesInput">
 
             <!-- Hidden data for JavaScript -->
@@ -674,8 +722,8 @@
             <!-- Form Actions -->
             <div class="btn-group">
                 <button type="submit" class="btn-primary">
-                    <i th:class="${isEdit} ? 'fas fa-save' : 'fas fa-user-plus'"></i>
-                    <span th:text="${isEdit} ? 'Cập Nhật Diễn Viên' : 'Tạo Diễn Viên'">Tạo Diễn Viên</span>
+                    <i class="fas fa-user-plus"></i>
+                    <span>Tạo Diễn Viên</span>
                 </button>
                 <a href="/admin/actors" class="btn-outline">
                     <i class="fas fa-times"></i>
@@ -691,10 +739,12 @@
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('actorForm');
         const actorNameInput = document.getElementById('actorName');
-        const imageFileInput = document.getElementById('imageFile');
-        const fileUploadArea = document.getElementById('fileUploadArea');
-        const imagePreview = document.getElementById('imagePreview');
-        const previewImg = document.getElementById('previewImg');
+        const imageLinkInput = document.getElementById('imageLink');
+        const previewImage = document.getElementById('previewImage');
+        const imagePlaceholder = document.getElementById('imagePlaceholder');
+        const actorImageContainer = document.getElementById('actorImageContainer');
+        const imagePreviewContainer = document.getElementById('imagePreviewContainer');
+        const imageStatus = document.getElementById('imageStatus');
         const actorPreviewSection = document.getElementById('actorPreview');
         const previewActorName = document.getElementById('previewActorName');
         const previewActorImage = document.getElementById('previewActorImage');
@@ -710,16 +760,10 @@
                 let currentMovieIds = window.currentMovieIds || [];
 
                 console.log('Movies data loaded:', allMoviesData);
-                console.log('Current movie IDs:', currentMovieIds);
 
-                // FALLBACK: If no server data, use sample data for testing
                 if (!allMoviesData || allMoviesData.length === 0) {
-                    console.log('No server data found, using fallback...');
-                    allMoviesData = [
-                        { movieId: 1, movieName: "Test Movie 1", startDate: "2023-01-01", status: "Active" },
-                        { movieId: 2, movieName: "Test Movie 2", startDate: "2023-02-01", status: "Active" },
-                        { movieId: 3, movieName: "Test Movie 3", startDate: "2023-03-01", status: "Active" }
-                    ];
+                    renderEmptyState();
+                    return;
                 }
 
                 renderMovies(allMoviesData, currentMovieIds);
@@ -832,61 +876,80 @@
             }
         };
 
-        // File upload handling
-        function handleFileUpload(file) {
-            if (!file) return;
+        // Image preview handling
+        function updateImagePreview() {
+            const imagePath = imageLinkInput.value.trim();
 
-            if (!file.type.startsWith('image/')) {
-                showError('imageFile', 'Vui lòng chọn file ảnh hợp lệ');
+            if (!imagePath) {
+                // No image path - show placeholder
+                showImagePlaceholder();
+                imageStatus.className = 'image-status default';
+                imageStatus.innerHTML = '<i class="fas fa-info-circle"></i> Nhập đường dẫn ảnh để xem trước';
+                imagePreviewContainer.className = 'image-preview-container';
+                actorImageContainer.className = 'actor-image-container';
                 return;
             }
 
-            const maxSize = 5 * 1024 * 1024;
-            if (file.size > maxSize) {
-                showError('imageFile', 'Kích thước file không được vượt quá 5MB');
-                return;
-            }
+            // Show loading state
+            imageStatus.className = 'image-status default';
+            imageStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải ảnh...';
 
-            clearError('imageFile');
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                previewImg.src = e.target.result;
-                previewActorImage.src = e.target.result;
-                imagePreview.style.display = 'block';
-                updatePreview();
+            // Test if image exists
+            const testImage = new Image();
+            testImage.onload = function() {
+                // Image loaded successfully
+                previewImage.src = imagePath;
+                previewActorImage.src = imagePath;
+                showImage();
+                imageStatus.className = 'image-status success';
+                imageStatus.innerHTML = '<i class="fas fa-check-circle"></i> Ảnh tải thành công';
+                imagePreviewContainer.className = 'image-preview-container has-image';
+                actorImageContainer.className = 'actor-image-container has-image';
+                clearError('imageLink');
             };
-            reader.readAsDataURL(file);
+
+            testImage.onerror = function() {
+                // Image failed to load
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Không thể tải ảnh từ đường dẫn này';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                previewActorImage.src = '/images/default-actor.png';
+                showError('imageLink', 'Đường dẫn ảnh không hợp lệ hoặc ảnh không tồn tại');
+            };
+
+            testImage.src = imagePath;
         }
 
-        // File input change event
-        imageFileInput.addEventListener('change', function(e) {
-            const file = e.target.files[0];
-            handleFileUpload(file);
+        function showImage() {
+            previewImage.style.display = 'block';
+            imagePlaceholder.style.display = 'none';
+        }
+
+        function showImagePlaceholder() {
+            previewImage.style.display = 'none';
+            imagePlaceholder.style.display = 'flex';
+        }
+
+        // Image link input event
+        imageLinkInput.addEventListener('input', function() {
+            clearError('imageLink');
+            updateImagePreview();
+            updatePreview();
         });
 
-        // Drag and drop functionality
-        fileUploadArea.addEventListener('dragover', function(e) {
-            e.preventDefault();
-            this.classList.add('dragover');
-        });
-
-        fileUploadArea.addEventListener('dragleave', function(e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
-        });
-
-        fileUploadArea.addEventListener('drop', function(e) {
-            e.preventDefault();
-            this.classList.remove('dragover');
-            const files = e.dataTransfer.files;
-            if (files.length > 0) {
-                imageFileInput.files = files;
-                handleFileUpload(files[0]);
+        // Auto-format image path
+        imageLinkInput.addEventListener('blur', function() {
+            let value = this.value.trim();
+            if (value && !value.startsWith('/')) {
+                value = '/' + value;
+                this.value = value;
+                updateImagePreview();
             }
         });
 
-        // Update preview
+        // Update main preview
         function updatePreview() {
             const actorName = actorNameInput.value.trim() || 'Tên Diễn Viên';
             previewActorName.textContent = actorName;
@@ -908,13 +971,15 @@
         function validateForm() {
             let isValid = true;
 
-            document.querySelectorAll('.form-control, .file-input').forEach(el => {
+            // Clear previous errors
+            document.querySelectorAll('.form-control').forEach(el => {
                 el.classList.remove('is-invalid');
             });
             document.querySelectorAll('.invalid-feedback').forEach(el => {
                 el.textContent = '';
             });
 
+            // Validate actor name
             const actorName = actorNameInput.value.trim();
             if (!actorName) {
                 showError('actorName', 'Tên diễn viên là bắt buộc');
@@ -927,18 +992,22 @@
                 isValid = false;
             }
 
-            const hasFile = imageFileInput.files.length > 0;
-            if (hasFile) {
-                const file = imageFileInput.files[0];
-
-                if (!file.type.startsWith('image/')) {
-                    showError('imageFile', 'Vui lòng chọn file ảnh hợp lệ');
+            // Validate image link if provided
+            const imageLink = imageLinkInput.value.trim();
+            if (imageLink) {
+                if (imageLink.length > 500) {
+                    showError('imageLink', 'Đường dẫn ảnh không được vượt quá 500 ký tự');
                     isValid = false;
                 }
 
-                const maxSize = 5 * 1024 * 1024;
-                if (file.size > maxSize) {
-                    showError('imageFile', 'Kích thước file không được vượt quá 5MB');
+                // Check if it looks like a valid image path
+                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+                const hasValidExtension = imageExtensions.some(ext =>
+                    imageLink.toLowerCase().includes(ext)
+                );
+
+                if (!hasValidExtension) {
+                    showError('imageLink', 'Đường dẫn ảnh nên có phần mở rộng hợp lệ (.jpg, .png, .gif, .webp)');
                     isValid = false;
                 }
             }
@@ -950,16 +1019,16 @@
             const field = document.getElementById(fieldName);
             const errorDiv = document.getElementById(fieldName + 'Error');
 
-            field.classList.add('is-invalid');
-            errorDiv.textContent = message;
+            if (field) field.classList.add('is-invalid');
+            if (errorDiv) errorDiv.textContent = message;
         }
 
         function clearError(fieldName) {
             const field = document.getElementById(fieldName);
             const errorDiv = document.getElementById(fieldName + 'Error');
 
-            field.classList.remove('is-invalid');
-            errorDiv.textContent = '';
+            if (field) field.classList.remove('is-invalid');
+            if (errorDiv) errorDiv.textContent = '';
         }
 
         // Format actor name
@@ -984,39 +1053,54 @@
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     firstError.focus();
                 }
-            } else {
-                const submitBtn = this.querySelector('button[type="submit"]');
-                const originalText = submitBtn.innerHTML;
-                submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xử lý...';
-                submitBtn.disabled = true;
+                return;
+            }
 
-                setTimeout(() => {
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo diễn viên...';
+            submitBtn.disabled = true;
+
+            // Log form data for debugging
+            console.log('Form submission:');
+            console.log('Actor name:', actorNameInput.value);
+            console.log('Image link:', imageLinkInput.value);
+            console.log('Selected movies:', selectedMoviesInput.value);
+
+            // Re-enable button after timeout (in case of error)
+            setTimeout(() => {
+                if (submitBtn.disabled) {
                     submitBtn.innerHTML = originalText;
                     submitBtn.disabled = false;
-                }, 5000);
-            }
+                }
+            }, 10000);
         });
 
-        // Initialize
-        loadMovies();
-        updatePreview();
+        // Initialize everything
+        function initialize() {
+            loadMovies();
+            updateImagePreview();
+            updatePreview();
 
-        // Initialize existing image preview
-        const existingImagePath = document.getElementById('hiddenImagePath').value;
-        if (existingImagePath) {
-            previewActorImage.src = existingImagePath;
+            // Auto-hide alerts
+            setTimeout(function() {
+                const alerts = document.querySelectorAll('.alert');
+                alerts.forEach(function(alert) {
+                    if (bootstrap && bootstrap.Alert) {
+                        const bsAlert = new bootstrap.Alert(alert);
+                        bsAlert.close();
+                    }
+                });
+            }, 5000);
+
+            // Focus on name input
+            if (actorNameInput) {
+                actorNameInput.focus();
+            }
         }
 
-        // Auto-hide alerts
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
-
-        // Character counter
+        // Character counter for actor name
         actorNameInput.addEventListener('input', function() {
             const currentLength = this.value.length;
             const maxLength = 255;
@@ -1039,13 +1123,38 @@
             }
         });
 
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
-                e.preventDefault();
-                form.dispatchEvent(new Event('submit'));
+        // Character counter for image link
+        imageLinkInput.addEventListener('input', function() {
+            const currentLength = this.value.length;
+            const maxLength = 500;
+
+            let counter = this.parentNode.querySelector('.char-counter');
+            if (!counter) {
+                counter = document.createElement('div');
+                counter.className = 'char-counter form-help';
+                this.parentNode.appendChild(counter);
             }
 
+            counter.textContent = `${currentLength}/${maxLength} ký tự`;
+
+            if (currentLength > maxLength * 0.9) {
+                counter.style.color = 'var(--warning-orange)';
+            } else if (currentLength === maxLength) {
+                counter.style.color = 'var(--danger-red)';
+            } else {
+                counter.style.color = 'var(--text-secondary)';
+            }
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(e) {
+            // Ctrl/Cmd + S to save
+            if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+                e.preventDefault();
+                form.dispatchEvent(new Event('submit', { bubbles: true }));
+            }
+
+            // Escape to cancel
             if (e.key === 'Escape') {
                 const cancelBtn = document.querySelector('.btn-outline');
                 if (cancelBtn) {
@@ -1054,8 +1163,8 @@
             }
         });
 
-        // Focus on name input
-        actorNameInput.focus();
+        // Initialize
+        initialize();
     });
 </script>
 </body>

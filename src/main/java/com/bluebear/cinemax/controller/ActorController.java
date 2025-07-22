@@ -83,7 +83,7 @@ public class ActorController {
         return "admin/list-actor";
     }
 
-    // Hiển thị form thêm actor mới
+    // Hiển thị form thêm actor mới - CHUYỂN VỀ FORM-ACTOR
     @GetMapping("/add")
     public String addActorForm(Model model) {
         ActorDTO actor = new ActorDTO(); // Tạo object rỗng cho form
@@ -102,7 +102,7 @@ public class ActorController {
         model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Thêm diễn viên mới");
 
-        return "admin/form-actor";
+        return "admin/form-actor"; // Chuyển về form-actor cho ADD
     }
 
     // Xử lý thêm actor mới
@@ -117,8 +117,23 @@ public class ActorController {
                 throw new IllegalArgumentException("Tên diễn viên không được để trống");
             }
 
-            // Set default image
-            actorDTO.setImage("/images/default-actor.png");
+            // Validate và xử lý đường dẫn ảnh
+            String imagePath = actorDTO.getImage();
+            if (imagePath != null && !imagePath.trim().isEmpty()) {
+                // Clean up image path
+                imagePath = imagePath.trim();
+                if (!imagePath.startsWith("/")) {
+                    imagePath = "/" + imagePath;
+                }
+                actorDTO.setImage(imagePath);
+
+                // Log for debugging
+                System.out.println("DEBUG - Actor image path set to: " + imagePath);
+            } else {
+                // Use default image if no path provided
+                actorDTO.setImage("/images/default-actor.png");
+                System.out.println("DEBUG - Using default actor image");
+            }
 
             // Lưu actor trước
             ActorDTO savedActor = actorService.saveActor(actorDTO);
@@ -133,6 +148,8 @@ public class ActorController {
 
                 // Cập nhật quan hệ Actor-Movie
                 actorService.updateActorMovies(savedActor.getActorId(), movieIds);
+
+                System.out.println("DEBUG - Actor assigned to " + movieIds.size() + " movies");
             }
 
             redirectAttributes.addFlashAttribute("success", "Thêm diễn viên thành công!");
@@ -148,11 +165,14 @@ public class ActorController {
             model.addAttribute("pageTitle", "Thêm diễn viên mới");
             model.addAttribute("error", "Có lỗi xảy ra khi thêm diễn viên: " + e.getMessage());
 
-            return "admin/form-actor";
+            System.err.println("ERROR - Adding actor: " + e.getMessage());
+            e.printStackTrace();
+
+            return "admin/form-actor"; // Quay lại form-actor khi có lỗi
         }
     }
 
-    // Hiển thị form chỉnh sửa actor
+    // Hiển thị form chỉnh sửa actor - CHUYỂN VỀ EDIT-ACTOR
     @GetMapping("/edit/{id}")
     public String editActorForm(@PathVariable Integer id, Model model) {
         ActorDTO actor = actorService.getActorById(id);
@@ -167,6 +187,7 @@ public class ActorController {
         // DEBUG: Kiểm tra dữ liệu
         System.out.println("DEBUG - Edit form: " + (allMovies != null ? allMovies.size() : 0) + " total movies");
         System.out.println("DEBUG - Actor movies: " + (actorMovies != null ? actorMovies.size() : 0) + " movies");
+        System.out.println("DEBUG - Actor current image: " + actor.getImage());
 
         // Tạo danh sách ID phim hiện tại
         List<Integer> currentMovieIds = actorMovies.stream()
@@ -179,7 +200,7 @@ public class ActorController {
         model.addAttribute("isEdit", true);
         model.addAttribute("pageTitle", "Chỉnh sửa diễn viên - " + actor.getActorName());
 
-        return "admin/form-actor";
+        return "admin/edit-actor"; // Chuyển về edit-actor cho EDIT
     }
 
     // Xử lý cập nhật actor
@@ -198,6 +219,21 @@ public class ActorController {
                 throw new IllegalArgumentException("Tên diễn viên không được để trống");
             }
 
+            // Validate và xử lý đường dẫn ảnh
+            String imagePath = actorDTO.getImage();
+            if (imagePath != null && !imagePath.trim().isEmpty()) {
+                // Clean up image path
+                imagePath = imagePath.trim();
+                if (!imagePath.startsWith("/")) {
+                    imagePath = "/" + imagePath;
+                }
+                actorDTO.setImage(imagePath);
+
+                // Log for debugging
+                System.out.println("DEBUG - Actor image path updated to: " + imagePath);
+            }
+            // If imagePath is null or empty, the service will handle keeping existing or using default
+
             // Cập nhật thông tin actor
             ActorDTO updatedActor = actorService.updateActor(actorDTO);
 
@@ -209,6 +245,10 @@ public class ActorController {
                         .filter(s -> !s.isEmpty())
                         .map(Integer::parseInt)
                         .collect(Collectors.toList());
+
+                System.out.println("DEBUG - Updating actor with " + movieIds.size() + " movies");
+            } else {
+                System.out.println("DEBUG - Removing actor from all movies");
             }
 
             // Cập nhật quan hệ Actor-Movie (có thể là danh sách rỗng để xóa tất cả)
@@ -232,7 +272,10 @@ public class ActorController {
             model.addAttribute("pageTitle", "Chỉnh sửa diễn viên - " + actorDTO.getActorName());
             model.addAttribute("error", "Có lỗi xảy ra khi cập nhật diễn viên: " + e.getMessage());
 
-            return "admin/edit-actor";
+            System.err.println("ERROR - Updating actor: " + e.getMessage());
+            e.printStackTrace();
+
+            return "admin/edit-actor"; // Quay lại edit-actor khi có lỗi
         }
     }
 
@@ -256,9 +299,13 @@ public class ActorController {
 
             actorService.deleteActor(id);
 
+            System.out.println("DEBUG - Actor deleted successfully: " + actor.getActorName());
             redirectAttributes.addFlashAttribute("success", "Xóa diễn viên thành công!");
             return "redirect:/admin/actors";
         } catch (Exception e) {
+            System.err.println("ERROR - Deleting actor: " + e.getMessage());
+            e.printStackTrace();
+
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi xóa diễn viên: " + e.getMessage());
             return "redirect:/admin/actors/" + id;
         }
