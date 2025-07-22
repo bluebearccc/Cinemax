@@ -222,17 +222,30 @@ public class BookingProcessController {
                 return "redirect:/cashier/" + selectedMovie.getMovieID() + "/select-schedule";
             }
 
-            // Lấy thông tin phòng chiếu để biết số hàng và cột
             RoomDTO room = roomService.getRoomById(selectedSchedule.getRoomID());
             List<SeatDTO> allSeatsInRoom = seatService.getSeatsByRoomId(selectedSchedule.getRoomID()).getContent();
             List<Integer> bookedSeatIds = detailSeatService.findBookedSeatIdsByScheduleId(scheduleId);
+
+            // ==================== ĐOẠN CODE SỬA ĐỔI ====================
+            // Nhóm các ghế theo hàng (dựa trên ký tự đầu tiên của 'position')
+            Map<Character, List<SeatDTO>> seatsByRow = allSeatsInRoom.stream()
+                    .collect(Collectors.groupingBy(
+                            seat -> seat.getPosition().charAt(0),
+                            TreeMap::new, // Sử dụng TreeMap để các hàng được sắp xếp theo thứ tự (A, B, C...)
+                            Collectors.toList()
+                    ));
+            // ==========================================================
 
             session.setAttribute("selectedSchedule", selectedSchedule);
             model.addAttribute("currentStep", 3);
             model.addAttribute("selectedMovie", selectedMovie);
             model.addAttribute("selectedSchedule", selectedSchedule);
-            model.addAttribute("room", room); // Truyền đối tượng room
-            model.addAttribute("allSeatsInRoom", allSeatsInRoom); // Truyền danh sách ghế phẳng
+            model.addAttribute("room", room);
+
+            // Xóa cái cũ đi hoặc để lại cũng không sao, nhưng cái mới này là quan trọng nhất
+            // model.addAttribute("allSeatsInRoom", allSeatsInRoom);
+            model.addAttribute("seatsByRow", seatsByRow); // <-- Thêm biến này vào model
+
             model.addAttribute("bookedSeatIds", bookedSeatIds);
         } catch (Exception e) {
             e.printStackTrace();
