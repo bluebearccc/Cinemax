@@ -8,23 +8,19 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #4285f4;
-            --primary-light: #5a9bf8;
-            --primary-dark: #3367d6;
-            --accent-blue: #1976d2;
-            --success-green: #34a853;
-            --warning-orange: #fbbc04;
-            --danger-red: #ea4335;
-            --dark-bg: #1a1a1a;
-            --darker-bg: #0f0f0f;
-            --card-bg: #2d2d2d;
-            --card-hover: #3a3a3a;
-            --border-color: #404040;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-muted: #808080;
-            --sidebar-bg: #1e1e1e;
-            --sidebar-hover: #333333;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-gradient-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            --primary-color: #667eea;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --border-color: #dee2e6;
+            --card-bg: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #6c757d;
         }
 
         * {
@@ -34,15 +30,14 @@
         }
 
         body {
-            background: var(--dark-bg);
+            background-color: var(--light-bg);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .sidebar {
-            background: var(--sidebar-bg);
+            background: var(--white);
             min-height: 100vh;
             width: 260px;
             position: fixed;
@@ -51,22 +46,24 @@
             border-right: 1px solid var(--border-color);
             z-index: 1000;
             transition: all 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
 
         .sidebar-header {
             padding: 24px 20px;
             border-bottom: 1px solid var(--border-color);
+            background: var(--primary-gradient);
         }
 
         .sidebar-header h5 {
-            color: var(--text-primary);
+            color: white;
             font-weight: 600;
             font-size: 1.2rem;
             margin: 0;
         }
 
         .sidebar-header .fa-film {
-            color: var(--primary-blue);
+            color: white;
             margin-right: 10px;
         }
 
@@ -87,14 +84,15 @@
         }
 
         .nav-link:hover {
-            color: var(--text-primary);
-            background: var(--sidebar-hover);
+            color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .nav-link.active {
-            color: var(--primary-blue);
-            background: rgba(66, 133, 244, 0.1);
-            border-right: 3px solid var(--primary-blue);
+            color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.1);
+            border-right: 3px solid var(--primary-color);
+            font-weight: 600;
         }
 
         .nav-link i {
@@ -107,11 +105,11 @@
             margin-left: 260px;
             padding: 24px;
             min-height: 100vh;
-            background: var(--dark-bg);
+            background: var(--light-bg);
         }
 
         .header-section {
-            background: var(--card-bg);
+            background: var(--white);
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 24px;
@@ -119,6 +117,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
         .header-content h2 {
@@ -135,7 +134,7 @@
         }
 
         .btn-secondary {
-            background: none;
+            background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px 20px;
@@ -149,18 +148,19 @@
         }
 
         .btn-secondary:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
             text-decoration: none;
         }
 
         .form-container {
-            background: var(--card-bg);
+            background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 32px;
             max-width: 900px;
             margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
         .form-title {
@@ -174,7 +174,7 @@
         }
 
         .form-title i {
-            color: var(--primary-blue);
+            color: var(--primary-color);
         }
 
         .form-group {
@@ -191,11 +191,11 @@
 
         .form-label.required::after {
             content: " *";
-            color: var(--danger-red);
+            color: var(--danger-color);
         }
 
         .form-control {
-            background: var(--darker-bg);
+            background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--text-primary);
@@ -210,16 +210,16 @@
         }
 
         .form-control:focus {
-            background: var(--darker-bg);
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            background: var(--white);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
             color: var(--text-primary);
             outline: none;
         }
 
         .form-control.is-invalid {
-            border-color: var(--danger-red);
-            box-shadow: 0 0 0 0.2rem rgba(234, 67, 53, 0.25);
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
         }
 
         .date-time-group {
@@ -240,7 +240,7 @@
         }
 
         .form-select {
-            background: var(--darker-bg);
+            background: var(--white);
             border: 1px solid var(--border-color);
             color: var(--text-primary);
             border-radius: 8px;
@@ -250,18 +250,18 @@
         }
 
         .form-select option {
-            background: var(--card-bg);
+            background: var(--white);
             color: var(--text-primary);
         }
 
         .form-select:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
             outline: none;
         }
 
         .invalid-feedback {
-            color: var(--danger-red);
+            color: var(--danger-color);
             font-size: 0.875rem;
             margin-top: 4px;
         }
@@ -278,7 +278,7 @@
         }
 
         .input-group-text {
-            background: var(--border-color);
+            background: var(--light-bg);
             border: 1px solid var(--border-color);
             border-right: none;
             color: var(--text-primary);
@@ -301,7 +301,7 @@
         }
 
         .btn-primary {
-            background: var(--primary-blue);
+            background: var(--primary-gradient);
             border: none;
             border-radius: 8px;
             padding: 14px 28px;
@@ -313,12 +313,12 @@
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
+            background: var(--primary-gradient-hover);
             transform: translateY(-1px);
         }
 
         .btn-outline {
-            background: none;
+            background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 14px 28px;
@@ -331,8 +331,8 @@
         }
 
         .btn-outline:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
             text-decoration: none;
         }
 
@@ -349,27 +349,27 @@
         }
 
         .alert {
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 20px;
             padding: 16px;
         }
 
         .alert-success {
-            background: rgba(52, 168, 83, 0.1);
-            border: 1px solid rgba(52, 168, 83, 0.3);
-            color: var(--success-green);
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: var(--success-color);
         }
 
         .alert-danger {
-            background: rgba(234, 67, 53, 0.1);
-            border: 1px solid rgba(234, 67, 53, 0.3);
-            color: var(--danger-red);
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: var(--danger-color);
         }
 
         .voucher-preview {
             margin-top: 24px;
             padding: 24px;
-            background: linear-gradient(135deg, var(--primary-blue), var(--primary-light));
+            background: var(--primary-gradient);
             border-radius: 12px;
             color: white;
             text-align: center;
@@ -501,7 +501,7 @@
     </div>
 
     <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin">
+        <a class="nav-link" href="/admin/">
             <i class="fas fa-home"></i>Dashboard
         </a>
         <a class="nav-link" href="/admin/movies">
@@ -766,13 +766,10 @@
 
         // Initialize form with existing data (for edit mode)
         function initializeForm() {
-            // Chỉ hiển thị giá trị hiện tại, user có thể để trống để không thay đổi
             const startTimeValue = hiddenStartTime.value;
             const endTimeValue = hiddenEndTime.value;
 
-            // Không tự động fill, để user quyết định có muốn thay đổi hay không
             if (startTimeValue && document.querySelector('[th\\:field="*{promotionID}"]')) {
-                // Chỉ hiển thị placeholder với giá trị hiện tại
                 const startDateTime = formatDateForInput(startTimeValue);
                 startDateInput.placeholder = `Hiện tại: ${startDateTime.date}`;
                 startTimeInput.placeholder = `Hiện tại: ${startDateTime.time}`;
@@ -787,20 +784,16 @@
 
         // Update hidden fields
         function updateHiddenFields() {
-            // Chỉ cập nhật nếu user có nhập giá trị mới
             const startDateTime = parseDateTime(startDateInput.value, startTimeInput.value);
             const endDateTime = parseDateTime(endDateInput.value, endTimeInput.value);
 
-            // Nếu có giá trị mới thì cập nhật, nếu không thì giữ nguyên giá trị cũ
             if (startDateTime) {
                 hiddenStartTime.value = startDateTime.toISOString().slice(0, 19);
             }
-            // Không xóa giá trị cũ nếu user để trống
 
             if (endDateTime) {
                 hiddenEndTime.value = endDateTime.toISOString().slice(0, 19);
             }
-            // Không xóa giá trị cũ nếu user để trống
         }
 
         // Update preview
@@ -822,7 +815,6 @@
 
             previewQuantity.textContent = `Còn lại: ${quantity} lượt`;
 
-            // Show preview if any field has value
             if (code !== 'VOUCHER' || discount !== '0' || startDate || endDate || quantity !== '0') {
                 previewSection.style.display = 'block';
             } else {
@@ -959,12 +951,11 @@
                 isValid = false;
             }
 
-            // Validate start date and time (chỉ validate nếu user có nhập)
+            // Validate start date and time
             const startDate = startDateInput.value;
             const startTime = startTimeInput.value;
-            const isEditMode = hiddenStartTime.value !== ''; // Có giá trị cũ là edit mode
+            const isEditMode = hiddenStartTime.value !== '';
 
-            // Nếu là create mode hoặc user có nhập giá trị mới
             if (!isEditMode || startDate || startTime) {
                 if (!startDate) {
                     showError('startDateTime', 'Ngày bắt đầu là bắt buộc');
@@ -983,11 +974,10 @@
                 }
             }
 
-            // Validate end date and time (chỉ validate nếu user có nhập)
+            // Validate end date and time
             const endDate = endDateInput.value;
             const endTime = endTimeInput.value;
 
-            // Nếu là create mode hoặc user có nhập giá trị mới
             if (!isEditMode || endDate || endTime) {
                 if (!endDate) {
                     showError('endDateTime', 'Ngày kết thúc là bắt buộc');
@@ -1006,7 +996,7 @@
                 }
             }
 
-            // Validate date range (chỉ khi cả 2 đều có giá trị mới)
+            // Validate date range
             if (isValid && startDate && startTime && endDate && endTime) {
                 const startDateTime = parseDateTime(startDate, startTime);
                 const endDateTime = parseDateTime(endDate, endTime);
@@ -1073,7 +1063,6 @@
             if (!validateForm()) {
                 e.preventDefault();
 
-                // Scroll to first error
                 const firstError = document.querySelector('.is-invalid');
                 if (firstError) {
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });

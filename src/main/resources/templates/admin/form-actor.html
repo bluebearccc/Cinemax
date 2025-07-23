@@ -8,23 +8,19 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #4285f4;
-            --primary-light: #5a9bf8;
-            --primary-dark: #3367d6;
-            --accent-blue: #1976d2;
-            --success-green: #34a853;
-            --warning-orange: #fbbc04;
-            --danger-red: #ea4335;
-            --dark-bg: #1a1a1a;
-            --darker-bg: #0f0f0f;
-            --card-bg: #2d2d2d;
-            --card-hover: #3a3a3a;
-            --border-color: #404040;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-muted: #808080;
-            --sidebar-bg: #1e1e1e;
-            --sidebar-hover: #333333;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-gradient-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            --primary-color: #667eea;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --light-bg: #f8f9fa;
+            --white: #ffffff;
+            --border-color: #dee2e6;
+            --card-bg: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --text-muted: #6c757d;
         }
 
         * {
@@ -34,15 +30,14 @@
         }
 
         body {
-            background: var(--dark-bg);
+            background-color: var(--light-bg);
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             color: var(--text-primary);
             min-height: 100vh;
-            overflow-x: hidden;
         }
 
         .sidebar {
-            background: var(--sidebar-bg);
+            background: var(--white);
             min-height: 100vh;
             width: 260px;
             position: fixed;
@@ -51,22 +46,24 @@
             border-right: 1px solid var(--border-color);
             z-index: 1000;
             transition: all 0.3s ease;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
         }
 
         .sidebar-header {
             padding: 24px 20px;
             border-bottom: 1px solid var(--border-color);
+            background: var(--primary-gradient);
         }
 
         .sidebar-header h5 {
-            color: var(--text-primary);
+            color: white;
             font-weight: 600;
             font-size: 1.2rem;
             margin: 0;
         }
 
         .sidebar-header .fa-film {
-            color: var(--primary-blue);
+            color: white;
             margin-right: 10px;
         }
 
@@ -87,14 +84,15 @@
         }
 
         .nav-link:hover {
-            color: var(--text-primary);
-            background: var(--sidebar-hover);
+            color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.1);
         }
 
         .nav-link.active {
-            color: var(--primary-blue);
-            background: rgba(66, 133, 244, 0.1);
-            border-right: 3px solid var(--primary-blue);
+            color: var(--primary-color);
+            background: rgba(102, 126, 234, 0.1);
+            border-right: 3px solid var(--primary-color);
+            font-weight: 600;
         }
 
         .nav-link i {
@@ -107,11 +105,11 @@
             margin-left: 260px;
             padding: 24px;
             min-height: 100vh;
-            background: var(--dark-bg);
+            background: var(--light-bg);
         }
 
         .header-section {
-            background: var(--card-bg);
+            background: var(--white);
             border-radius: 12px;
             padding: 24px;
             margin-bottom: 24px;
@@ -119,6 +117,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
         .header-content h2 {
@@ -135,7 +134,7 @@
         }
 
         .btn-secondary {
-            background: none;
+            background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 12px 20px;
@@ -149,18 +148,19 @@
         }
 
         .btn-secondary:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
             text-decoration: none;
         }
 
         .form-container {
-            background: var(--card-bg);
+            background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 12px;
             padding: 32px;
             max-width: 900px;
             margin: 0 auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
         }
 
         .form-title {
@@ -174,7 +174,7 @@
         }
 
         .form-title i {
-            color: var(--success-green);
+            color: var(--success-color);
         }
 
         .form-group {
@@ -191,11 +191,11 @@
 
         .form-label.required::after {
             content: " *";
-            color: var(--danger-red);
+            color: var(--danger-color);
         }
 
         .form-control {
-            background: var(--darker-bg);
+            background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             color: var(--text-primary);
@@ -210,20 +210,20 @@
         }
 
         .form-control:focus {
-            background: var(--darker-bg);
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            background: var(--white);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
             color: var(--text-primary);
             outline: none;
         }
 
         .form-control.is-invalid {
-            border-color: var(--danger-red);
-            box-shadow: 0 0 0 0.2rem rgba(234, 67, 53, 0.25);
+            border-color: var(--danger-color);
+            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
         }
 
         .invalid-feedback {
-            color: var(--danger-red);
+            color: var(--danger-color);
             font-size: 0.875rem;
             margin-top: 4px;
         }
@@ -236,7 +236,7 @@
 
         /* Image preview styles */
         .image-preview-container {
-            background: var(--darker-bg);
+            background: var(--light-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 16px;
@@ -249,20 +249,20 @@
         }
 
         .image-preview-container.has-image {
-            border-color: var(--success-green);
-            background: rgba(52, 168, 83, 0.05);
+            border-color: var(--success-color);
+            background: rgba(40, 167, 69, 0.05);
         }
 
         .image-preview-container.has-error {
-            border-color: var(--danger-red);
-            background: rgba(234, 67, 53, 0.05);
+            border-color: var(--danger-color);
+            background: rgba(220, 53, 69, 0.05);
         }
 
         .actor-image-container {
             width: 80px;
             height: 80px;
             border-radius: 50%;
-            background: var(--card-bg);
+            background: var(--white);
             border: 2px solid var(--border-color);
             display: flex;
             align-items: center;
@@ -274,11 +274,11 @@
         }
 
         .actor-image-container.has-image {
-            border-color: var(--success-green);
+            border-color: var(--success-color);
         }
 
         .actor-image-container.has-error {
-            border-color: var(--danger-red);
+            border-color: var(--danger-color);
         }
 
         .actor-image {
@@ -299,11 +299,11 @@
         }
 
         .image-status.success {
-            color: var(--success-green);
+            color: var(--success-color);
         }
 
         .image-status.error {
-            color: var(--danger-red);
+            color: var(--danger-color);
         }
 
         .image-status.default {
@@ -311,8 +311,8 @@
         }
 
         .image-examples {
-            background: rgba(66, 133, 244, 0.1);
-            border: 1px solid rgba(66, 133, 244, 0.3);
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
             border-radius: 8px;
             padding: 12px;
             margin-top: 8px;
@@ -320,7 +320,7 @@
         }
 
         .image-examples .example-title {
-            color: var(--primary-blue);
+            color: var(--primary-color);
             font-weight: 500;
             margin-bottom: 6px;
         }
@@ -332,7 +332,7 @@
         }
 
         .movies-selection {
-            background: var(--darker-bg);
+            background: var(--light-bg);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 16px;
@@ -348,7 +348,7 @@
         }
 
         .movie-checkbox:hover {
-            background: var(--card-hover);
+            background: var(--white);
         }
 
         .movie-checkbox input[type="checkbox"] {
@@ -380,15 +380,15 @@
         }
 
         .selected-movies-summary {
-            background: rgba(66, 133, 244, 0.1);
-            border: 1px solid rgba(66, 133, 244, 0.3);
+            background: rgba(102, 126, 234, 0.1);
+            border: 1px solid rgba(102, 126, 234, 0.3);
             border-radius: 8px;
             padding: 12px;
             margin-top: 12px;
         }
 
         .selected-count {
-            color: var(--primary-blue);
+            color: var(--primary-color);
             font-weight: 600;
             font-size: 0.9rem;
         }
@@ -403,7 +403,7 @@
         }
 
         .btn-primary {
-            background: var(--success-green);
+            background: var(--success-color);
             border: none;
             border-radius: 8px;
             padding: 14px 28px;
@@ -415,12 +415,12 @@
         }
 
         .btn-primary:hover {
-            background: #2e7b38;
+            background: #218838;
             transform: translateY(-1px);
         }
 
         .btn-outline {
-            background: none;
+            background: var(--white);
             border: 1px solid var(--border-color);
             border-radius: 8px;
             padding: 14px 28px;
@@ -433,8 +433,8 @@
         }
 
         .btn-outline:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
+            border-color: var(--primary-color);
+            color: var(--primary-color);
             text-decoration: none;
         }
 
@@ -457,27 +457,27 @@
         }
 
         .alert {
-            border-radius: 8px;
+            border-radius: 10px;
             margin-bottom: 20px;
             padding: 16px;
         }
 
         .alert-success {
-            background: rgba(52, 168, 83, 0.1);
-            border: 1px solid rgba(52, 168, 83, 0.3);
-            color: var(--success-green);
+            background: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.3);
+            color: var(--success-color);
         }
 
         .alert-danger {
-            background: rgba(234, 67, 53, 0.1);
-            border: 1px solid rgba(234, 67, 53, 0.3);
-            color: var(--danger-red);
+            background: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.3);
+            color: var(--danger-color);
         }
 
         .actor-preview {
             margin-top: 24px;
             padding: 20px;
-            background: linear-gradient(135deg, var(--success-green), #4caf50);
+            background: var(--primary-gradient);
             border-radius: 12px;
             color: white;
             text-align: center;
@@ -557,7 +557,7 @@
     </div>
 
     <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin">
+        <a class="nav-link" href="/admin/">
             <i class="fas fa-home"></i>Dashboard
         </a>
         <a class="nav-link" href="/admin/movies">
@@ -837,7 +837,7 @@
         function renderEmptyState() {
             moviesSelection.innerHTML = `
                 <div class="text-center" style="padding: 20px;">
-                    <i class="fas fa-film" style="font-size: 2rem; opacity: 0.5; margin-bottom: 8px;"></i>
+                    <i class="fas fa-film fa-3x mb-3"></i>
                     <div class="form-help">Không có phim nào trong hệ thống</div>
                     <div class="form-help">Vui lòng thêm phim trước khi gán cho diễn viên</div>
                 </div>
@@ -1110,9 +1110,9 @@
             counter.textContent = `${currentLength}/${maxLength} ký tự`;
 
             if (currentLength > maxLength * 0.9) {
-                counter.style.color = 'var(--warning-orange)';
+                counter.style.color = 'var(--warning-color)';
             } else if (currentLength === maxLength) {
-                counter.style.color = 'var(--danger-red)';
+                counter.style.color = 'var(--danger-color)';
             } else {
                 counter.style.color = 'var(--text-secondary)';
             }

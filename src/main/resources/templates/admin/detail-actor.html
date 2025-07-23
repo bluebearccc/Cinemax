@@ -8,12 +8,14 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-color: #007bff;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --primary-gradient-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            --primary-color: #667eea;
             --success-color: #28a745;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
-            --dark-bg: #343a40;
             --light-bg: #f8f9fa;
+            --white: #ffffff;
             --border-color: #dee2e6;
         }
 
@@ -23,8 +25,9 @@
         }
 
         .navbar {
-            background-color: var(--dark-bg) !important;
+            background: var(--primary-gradient) !important;
             margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .navbar-brand {
@@ -32,15 +35,31 @@
             font-weight: bold;
         }
 
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8) !important;
+            transition: color 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: white !important;
+        }
+
+        .nav-link.active {
+            color: white !important;
+            font-weight: 600;
+        }
+
         .card {
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border: 1px solid var(--border-color);
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+            border: none;
+            border-radius: 15px;
         }
 
         .card-header {
-            background-color: var(--primary-color);
+            background: var(--primary-gradient);
             color: white;
             font-weight: bold;
+            border-radius: 15px 15px 0 0 !important;
         }
 
         .actor-image {
@@ -48,8 +67,8 @@
             max-width: 300px;
             height: 400px;
             object-fit: cover;
-            border-radius: 10px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
         }
 
         .actor-name {
@@ -93,21 +112,60 @@
             gap: 10px;
         }
 
+        .btn-secondary {
+            border-radius: 8px;
+        }
+
+        .btn-warning {
+            background: var(--warning-color);
+            border: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-warning:hover {
+            background: #e8a317;
+            transform: translateY(-1px);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            border: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+            transform: translateY(-1px);
+        }
+
+        .breadcrumb-item a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: var(--primary-gradient-hover);
+        }
+
         .movie-card {
             transition: transform 0.2s;
-            border: 1px solid var(--border-color);
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 15px rgba(0,0,0,0.1);
         }
 
         .movie-card:hover {
             transform: translateY(-5px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.2);
         }
 
         .movie-poster {
             width: 100%;
             height: 200px;
             object-fit: cover;
-            border-radius: 8px;
+            border-radius: 15px 15px 0 0;
         }
 
         .movie-title {
@@ -123,20 +181,22 @@
         }
 
         .stats-card {
-            background-color: #f8f9fa;
+            background: var(--primary-gradient);
+            color: white;
             padding: 15px;
-            border-radius: 8px;
+            border-radius: 15px;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
 
         .stats-number {
             font-size: 2rem;
             font-weight: bold;
-            color: var(--primary-color);
+            color: white;
         }
 
         .stats-label {
-            color: #666;
+            color: rgba(255, 255, 255, 0.9);
             font-size: 0.9rem;
         }
 
@@ -145,6 +205,26 @@
             color: #666;
             font-style: italic;
             padding: 40px;
+        }
+
+        .alert {
+            border-radius: 10px;
+        }
+
+        .badge {
+            border-radius: 10px;
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-gradient-hover);
+            transform: translateY(-1px);
         }
 
         @media (max-width: 768px) {
@@ -171,10 +251,11 @@
             <i class="fas fa-film"></i> BlueBear Cinema
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/admin">Dashboard</a>
+            <a class="nav-link" href="/admin/">Dashboard</a>
             <a class="nav-link" href="/admin/movies">Movies</a>
             <a class="nav-link active" href="/admin/actors">Actors</a>
             <a class="nav-link" href="/admin/vouchers">Vouchers</a>
+            <a class="nav-link" href="/admin/genres">Genres</a>
         </div>
     </div>
 </nav>
@@ -199,7 +280,7 @@
             <h2>Chi Tiết Diễn Viên</h2>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/">Dashboard</a></li>
                     <li class="breadcrumb-item"><a href="/admin/actors">Actors</a></li>
                     <li class="breadcrumb-item active" th:text="${actor.actorName}">Actor Name</li>
                 </ol>
@@ -270,34 +351,6 @@
                 </div>
             </div>
 
-            <!-- Movies Statistics -->
-            <div class="card mb-4">
-                <div class="card-header">
-                    <i class="fas fa-chart-bar"></i> Thống Kê Phim
-                </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <div class="stats-number" th:text="${movies.size()}">0</div>
-                                <div class="stats-label">Tổng Số Phim</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <div class="stats-number" th:text="${#lists.size(movies) > 0 ? #temporals.year(movies[0].startDate) : 'N/A'}">N/A</div>
-                                <div class="stats-label">Phim Đầu Tiên</div>
-                            </div>
-                        </div>
-                        <div class="col-md-4">
-                            <div class="stats-card">
-                                <div class="stats-number" th:text="${#lists.size(movies) > 0 ? #temporals.year(movies[#lists.size(movies)-1].startDate) : 'N/A'}">N/A</div>
-                                <div class="stats-label">Phim Gần Nhất</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
             <!-- Movies List -->
             <div class="card">
