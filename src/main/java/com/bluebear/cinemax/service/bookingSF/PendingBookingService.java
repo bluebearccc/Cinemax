@@ -19,7 +19,7 @@ import java.util.List;
 @Service
 public class PendingBookingService {
     @Autowired
-    private FeedbackServiceRepository feedbackServiceRepository;
+    private ServiceFeedbackRepository feedbackServiceRepository;
     @Autowired
     private InvoiceRepository invoiceRepo;
     @Autowired
@@ -88,7 +88,7 @@ public class PendingBookingService {
             Integer theaterId = theater.getTheaterID();
 
             // Nếu đã có phản hồi thì bỏ qua
-            if (feedbackServiceRepository.existsByCustomer_IdAndTheaterId(customerId, theaterId)) {
+            if (feedbackServiceRepository.existsByCustomer_IdAndTheater_TheaterID(customerId, theaterId)) {
                 continue;
             }
 

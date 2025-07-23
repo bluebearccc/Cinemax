@@ -1,0 +1,40 @@
+<div class="blog-list-container" th:fragment="list-blog" id="list-blog-wrapper">
+    <div class="blog-grid" id="blogGrid">
+        <div class="empty-state" th:if="${#lists.isEmpty(blogs.content)}">
+            <div class="empty-icon">😔</div>
+            <h3>No suitable blog found.</h3>
+            <p>Please try again with different search criteria.</p>
+        </div>
+        <div class="blog-card" th:each="blog : ${blogs.content}"
+             th:onclick="|window.location.href='/customer/blog-detail?blogId=${blog.blogID}'|">
+            <div class="card-image">
+                <img th:src="@{${blog.image}}" class="blog-list-img">
+            </div>
+            <div class="card-content">
+                <span class="card-category" th:each="category : ${blog.categories}"
+                      th:text="${category.categoryName}"></span>
+                <h3 class="card-title" th:text="${blog.title}"></h3>
+                <p class="card-excerpt" th:text="${blog.content}"></p>
+                <div class="card-meta">
+                    <span th:text="${#temporals.format(blog.createdAt, 'dd/MM/yyyy')}"></span>
+                </div>
+                <div class="card-meta">
+                    <span th:text="${blog.authorName}"></span>
+                    <a href="#" class="read-more">Read more</a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pagination-area text-center">
+        <a href="" th:style="${blogs.number + 1 == 1} ? 'display:none'"
+           th:onclick="'filterBlog(' + ${blogs.number} + '); return false;'"><i
+                class="fas fa-angle-double-left"></i><span>Prev</span></a>
+        <a href="" th:each="i : ${#numbers.sequence(1, blogs.getTotalPages(), 1)}"
+           th:class="${i == blogs.number + 1} ? 'active' : ''"
+           th:text="${i}"
+           th:onclick="'filterBlog(' + ${i} + '); return false;'"></a>
+        <a href="" th:style="${blogs.number + 1 >= blogs.getTotalPages()} ? 'display:none'"
+           th:onclick="'filterBlog(' + ${blogs.number + 1 + 1} + '); return false;'"><span>Next</span><i
+                class="fas fa-angle-double-right"></i></a>
+    </div>
+</div>

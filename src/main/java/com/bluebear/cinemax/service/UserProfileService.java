@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 @Service
 public class UserProfileService {
     @Autowired
-    private FeedbackServiceRepository serviceFeedbackRepository;
+    private ServiceFeedbackRepository serviceFeedbackRepository;
     @Autowired
     private ServiceFeedbackService serviceFeedbackService;
     @Autowired
@@ -202,12 +202,12 @@ public class UserProfileService {
         Customer customer = customerRepository.findById(dto.getCustomerId())
                 .orElseThrow(() -> new RuntimeException("Customer not found"));
 
-        FeedbackService feedback = new FeedbackService();
+        ServiceFeedback feedback = new ServiceFeedback();
         feedback.setCustomer(customer);
         feedback.setContent(dto.getContent());
         feedback.setCreatedDate(LocalDateTime.now());
         feedback.setServiceRate(dto.getServiceRate());
-        feedback.setTheaterId(dto.getTheaterId());
+        feedback.setTheater(theaterRepository.findById(dto.getTheaterId()).orElse(null));
 
         // ✅ Logic được chuyển từ controller xuống đây:
         if (dto.getServiceRate() < 4) {

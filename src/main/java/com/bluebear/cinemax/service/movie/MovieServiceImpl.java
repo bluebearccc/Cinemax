@@ -3,12 +3,14 @@ package com.bluebear.cinemax.service.movie;
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
-import com.bluebear.cinemax.enumtype.Age_Limit;
+import com.bluebear.cinemax.entity.Theater;
+import com.bluebear.cinemax.enumtype.AgeLimit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.enumtype.Theater_Status;
 import com.bluebear.cinemax.repository.DetailSeatRepository;
 import com.bluebear.cinemax.repository.GenreRepository;
 import com.bluebear.cinemax.repository.MovieRepository;
+import com.bluebear.cinemax.repository.TheaterRepository;
 import com.bluebear.cinemax.service.actor.ActorServiceImpl;
 import com.bluebear.cinemax.service.genre.GenreService;
 import com.bluebear.cinemax.service.moviefeedback.MovieFeedbackService;
@@ -42,6 +44,8 @@ public class MovieServiceImpl implements MovieService {
     private ActorServiceImpl actorService;
     @Autowired
     private DetailSeatRepository detailSeatRepository;
+    @Autowired
+    private TheaterRepository theaterRepository;
 
     public Movie toEntity(MovieDTO dto) {
         List<Genre> genres = dto.getGenres() != null
@@ -231,12 +235,12 @@ public class MovieServiceImpl implements MovieService {
     }
 
     // ==================== [PHẦN ĐƯỢC SỬA] - Bắt đầu ====================
-    // Cập nhật các phương thức để chấp nhận List<Age_Limit>
+    // Cập nhật các phương thức để chấp nhận List<AgeLimit>
     @Override
     public Page<MovieDTO> findMoviesByTheaterAndDateRange(Integer theaterId, Movie_Status status,
                                                           Theater_Status theaterStatus,
                                                           LocalDateTime startDate, LocalDateTime endDate,
-                                                          List<Age_Limit> ageLimits, Pageable pageable) {
+                                                          List<AgeLimit> ageLimits, Pageable pageable) {
         Page<Movie> moviesPage = movieRepository.findByTheaterIdAndDateRange(
                 theaterId, status, theaterStatus, startDate, endDate, ageLimits, pageable);
 
@@ -275,7 +279,7 @@ public class MovieServiceImpl implements MovieService {
     public Page<MovieDTO> findMoviesByTheaterAndGenreAndDateRange(Integer theaterId, Integer genreId,
                                                                   Movie_Status status, Theater_Status theaterStatus,
                                                                   LocalDateTime startDate, LocalDateTime endDate,
-                                                                  List<Age_Limit> ageLimits, Pageable pageable) {
+                                                                  List<AgeLimit> ageLimits, Pageable pageable) {
         Page<Movie> moviesPage = movieRepository.findByTheaterIdAndGenreIdAndDateRange(
                 theaterId, genreId, status, theaterStatus, startDate, endDate, ageLimits, pageable);
 
@@ -290,7 +294,7 @@ public class MovieServiceImpl implements MovieService {
     public Page<MovieDTO> findMoviesByTheaterAndKeywordAndDateRange(Integer theaterId, String keyword,
                                                                     Movie_Status status, Theater_Status theaterStatus,
                                                                     LocalDateTime startDate, LocalDateTime endDate,
-                                                                    List<Age_Limit> ageLimits, Pageable pageable) {
+                                                                    List<AgeLimit> ageLimits, Pageable pageable) {
         Page<Movie> moviesPage = movieRepository.findByTheaterIdAndKeywordAndDateRange(
                 theaterId, keyword, status, theaterStatus, startDate, endDate, ageLimits, pageable);
 
@@ -306,7 +310,7 @@ public class MovieServiceImpl implements MovieService {
                                                                             String keyword, Movie_Status status,
                                                                             Theater_Status theaterStatus,
                                                                             LocalDateTime startDate, LocalDateTime endDate,
-                                                                            List<Age_Limit> ageLimits, Pageable pageable) {
+                                                                            List<AgeLimit> ageLimits, Pageable pageable) {
         Page<Movie> moviesPage = movieRepository.findByTheaterIdAndGenreIdAndKeywordAndDateRange(
                 theaterId, genreId, keyword, status, theaterStatus, startDate, endDate, ageLimits, pageable);
 
@@ -341,22 +345,65 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public Page<MovieDTO> findMoviesForCashierByAllFilters(Integer theaterId, Integer genreId, String keyword, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<Age_Limit> ageLimits, Pageable pageable) {
+    public Page<MovieDTO> findMoviesForCashierByAllFilters(Integer theaterId, Integer genreId, String keyword, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<AgeLimit> ageLimits, Pageable pageable) {
         return movieRepository.findForCashierByAllFilters(theaterId, genreId, keyword, status, theaterStatus, startDate, endDate, ageLimits, pageable).map(this::toDTO);
     }
 
     @Override
-    public Page<MovieDTO> findMoviesForCashierByKeyword(Integer theaterId, String keyword, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<Age_Limit> ageLimits, Pageable pageable) {
+    public Page<MovieDTO> findMoviesForCashierByKeyword(Integer theaterId, String keyword, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<AgeLimit> ageLimits, Pageable pageable) {
         return movieRepository.findForCashierByKeyword(theaterId, keyword, status, theaterStatus, startDate, endDate, ageLimits, pageable).map(this::toDTO);
     }
 
     @Override
-    public Page<MovieDTO> findMoviesForCashierByGenre(Integer theaterId, Integer genreId, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<Age_Limit> ageLimits, Pageable pageable) {
+    public Page<MovieDTO> findMoviesForCashierByGenre(Integer theaterId, Integer genreId, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<AgeLimit> ageLimits, Pageable pageable) {
         return movieRepository.findForCashierByGenre(theaterId, genreId, status, theaterStatus, startDate, endDate, ageLimits, pageable).map(this::toDTO);
     }
 
     @Override
-    public Page<MovieDTO> findMoviesForCashier(Integer theaterId, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<Age_Limit> ageLimits, Pageable pageable) {
+    public Page<MovieDTO> findMoviesForCashier(Integer theaterId, Movie_Status status, Theater_Status theaterStatus, LocalDateTime startDate, LocalDateTime endDate, List<AgeLimit> ageLimits, Pageable pageable) {
         return movieRepository.findForCashierByTheater(theaterId, status, theaterStatus, startDate, endDate, ageLimits, pageable).map(this::toDTO);
+    }
+
+    @Override
+    public Page<MovieDTO> findMoviesByScheduleAndTheaterAndRoomTypeAndGenre(LocalDateTime schedule, int theaterId, String roomType, String genreName) {
+        Page<MovieDTO> movieDTOS = movieRepository.findMoviesWithScheduleTodayWithTheaterAndRoomTypeAndGenre(theaterId, schedule, roomType, Pageable.unpaged(), Movie_Status.Active, genreName).map(this::toDTO);
+        Iterator<MovieDTO> iterator = movieDTOS.iterator();
+        while (iterator.hasNext()) {
+            MovieDTO movieDTO = iterator.next();
+            List<ScheduleDTO> scheduleDTOS = scheduleService.getScheduleByMovieIdAndDate(movieDTO.getMovieID(), schedule).getContent();
+            for (ScheduleDTO scheduleDTO : scheduleDTOS) {
+                scheduleService.calculateNumOfSeatLeft(scheduleDTO);
+            }
+            if (scheduleDTOS.isEmpty()) {
+                iterator.remove();
+            } else {
+                movieDTO.setSchedules(scheduleDTOS);
+            }
+        }
+        return movieDTOS;
+    }
+
+    public Page<MovieDTO> findMoviesByScheduleAndTheater(LocalDateTime schedule, String theaterName) {
+        Theater theater = theaterRepository.findByTheaterNameContainingIgnoreCase(theaterName).getFirst();
+        Page<MovieDTO> movieDTOS = movieRepository.findMoviesWithScheduleTodayWithTheater(theater.getTheaterID(), schedule, Pageable.unpaged(), Movie_Status.Active).map(this::toDTO);
+        Iterator<MovieDTO> iterator = movieDTOS.iterator();
+        while (iterator.hasNext()) {
+            MovieDTO movieDTO = iterator.next();
+            List<ScheduleDTO> scheduleDTOS = scheduleService.getScheduleByMovieIdAndDate(movieDTO.getMovieID(), schedule).getContent();
+            for (ScheduleDTO scheduleDTO : scheduleDTOS) {
+                scheduleService.calculateNumOfSeatLeft(scheduleDTO);
+            }
+            if (scheduleDTOS.isEmpty()) {
+                iterator.remove();
+            } else {
+                movieDTO.setSchedules(scheduleDTOS);
+            }
+        }
+        return movieDTOS;
+    }
+
+    @Override
+    public List<MovieDTO> getMoviesByActor(String actorName) {
+        return movieRepository.findMoviesByActors_ActorNameIgnoreCaseAndStatus(actorName, Movie_Status.Active).stream().map(this::toDTO).collect(Collectors.toList());
     }
 }

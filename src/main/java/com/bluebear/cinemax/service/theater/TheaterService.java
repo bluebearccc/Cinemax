@@ -41,5 +41,7 @@ public interface TheaterService {
     public Page<TheaterDTO> findByStatusPaginated(String status, Pageable pageable);
     public Page<TheaterDTO> findAllPaginated(Pageable pageable);
     public void updateTheater(TheaterDTO theaterDTO) throws IOException;
+    TheaterDTO getTheaterByName(String name);
+
 }
 

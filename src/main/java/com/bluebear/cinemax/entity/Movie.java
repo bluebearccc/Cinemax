@@ -1,14 +1,11 @@
 package com.bluebear.cinemax.entity;
 
-import com.bluebear.cinemax.enumtype.Age_Limit;
+import com.bluebear.cinemax.enumtype.AgeLimit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Date;
 import java.util.List;
 
 @Entity
@@ -29,7 +26,7 @@ public class Movie {
 
     @Column(name = "Age_limit", length = 10)
     @Enumerated(EnumType.STRING)
-    private Age_Limit ageLimit;
+    private AgeLimit ageLimit;
 
     @Column(name = "Description", length = 1000)
     private String description;

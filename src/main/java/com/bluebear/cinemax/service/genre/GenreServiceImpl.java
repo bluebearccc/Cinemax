@@ -36,6 +36,10 @@ public class GenreServiceImpl implements GenreService {
         return toDTO(saved);
     }
 
+    public GenreDTO findGenreByName(String name) {
+        return genreRepository.findByGenreName(name).map(this::toDTO).orElse(null);
+    }
+
     public List<GenreDTO> getAllGenres() {
         return genreRepository.findAll().stream()
                 .map(this::toDTO)

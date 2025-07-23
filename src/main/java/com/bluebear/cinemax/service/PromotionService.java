@@ -37,7 +37,7 @@ public class PromotionService {
         return code != null && !code.trim().isEmpty();
     }
 
-    private boolean isValidDiscount(Double discount) {
+    private boolean isValidDiscount(Integer discount) {
         return discount != null && discount >= 0 && discount <= 100;
     }
 

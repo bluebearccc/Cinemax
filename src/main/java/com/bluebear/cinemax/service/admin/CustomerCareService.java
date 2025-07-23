@@ -5,11 +5,11 @@ package com.bluebear.cinemax.service.admin;
 import com.bluebear.cinemax.dto.CustomerServiceFeedbackDTO;
 import com.bluebear.cinemax.entity.Account;
 import com.bluebear.cinemax.entity.Customer;
-import com.bluebear.cinemax.entity.FeedbackService;
+import com.bluebear.cinemax.entity.ServiceFeedback;
 import com.bluebear.cinemax.enumtype.FeedbackStatus;
 import com.bluebear.cinemax.repository.AccountRepository;
 import com.bluebear.cinemax.repository.CustomerRepository;
-import com.bluebear.cinemax.repository.FeedbackServiceRepository;
+import com.bluebear.cinemax.repository.ServiceFeedbackRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
 public class CustomerCareService {
 
     @Autowired
-    private FeedbackServiceRepository serviceFeedbackRepository;
+    private ServiceFeedbackRepository serviceFeedbackRepository;
 
     @Autowired
     private CustomerRepository customerRepository;
@@ -30,7 +30,7 @@ public class CustomerCareService {
 
 
     public List<CustomerServiceFeedbackDTO> getUnresolvedServiceFeedbacks() {
-        List<FeedbackService> feedbacks = serviceFeedbackRepository.findByStatus(FeedbackStatus.Not_Suported);
+        List<ServiceFeedback> feedbacks = serviceFeedbackRepository.findByStatus(FeedbackStatus.Not_Suported);
 
         return feedbacks.stream()
                 .map(fb -> {
@@ -48,7 +48,7 @@ public class CustomerCareService {
                             .content(fb.getContent())
                             .status(fb.getStatus().toString())
                             .serviceRate(fb.getServiceRate())
-                            .theaterId(fb.getTheaterId())
+                            .theaterId(fb.getId())
                             .build();
                 })
                 .filter(dto -> dto != null)
@@ -96,7 +96,7 @@ public class CustomerCareService {
 //        smsService.sendSms(phone, customMessage);
 //    }
     public void resolveFeedback(Integer feedbackId) {
-        FeedbackService fb = serviceFeedbackRepository.findById(feedbackId)
+        ServiceFeedback fb = serviceFeedbackRepository.findById(feedbackId)
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy feedback với id " + feedbackId));
         fb.setStatus(FeedbackStatus.Suported);
         serviceFeedbackRepository.save(fb);

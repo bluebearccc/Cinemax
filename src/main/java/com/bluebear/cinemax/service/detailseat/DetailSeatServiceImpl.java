@@ -5,6 +5,7 @@ import com.bluebear.cinemax.entity.DetailSeat;
 import com.bluebear.cinemax.entity.Invoice;
 import com.bluebear.cinemax.entity.Schedule;
 import com.bluebear.cinemax.entity.Seat;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import com.bluebear.cinemax.repository.DetailSeatRepository;
 import com.bluebear.cinemax.repository.InvoiceRepository;
 import com.bluebear.cinemax.repository.ScheduleRepository;
@@ -50,6 +51,9 @@ public class DetailSeatServiceImpl implements DetailSeatService {
                 .collect(Collectors.toList());
     }
 
+    public boolean hasCustomerWatched(int customerId, int movieId) {
+        return detailSeatRepository.hasCustomerWatchedMovie(customerId, movieId, InvoiceStatus.Booked);
+    }
     
     public DetailSeatDTO updateDetailSeat(Integer id, DetailSeatDTO dto) {
         Optional<DetailSeat> optional = detailSeatRepository.findById(id);

@@ -16,7 +16,7 @@ import java.util.List;
 public class PromotionDTO {
     private Integer promotionID;
     private String promotionCode;
-    private Double discount;
+    private Integer discount;
     private LocalDateTime startTime;
     private LocalDateTime endTime;
     private Integer quantity;
@@ -24,7 +24,7 @@ public class PromotionDTO {
 
     private List<InvoiceDTO> invoiceDTOList;
 
-    public PromotionDTO(Integer promotionID, String promotionCode, Double discount, LocalDateTime startTime, LocalDateTime endTime, Integer quantity, Promotion_Status status) {
+    public PromotionDTO(Integer promotionID, String promotionCode, Integer discount, LocalDateTime startTime, LocalDateTime endTime, Integer quantity, Promotion_Status status) {
         this.promotionID = promotionID;
         this.promotionCode = promotionCode;
         this.discount = discount;

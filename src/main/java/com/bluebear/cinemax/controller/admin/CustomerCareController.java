@@ -4,7 +4,7 @@ import com.bluebear.cinemax.dto.CustomerDTO;
 import com.bluebear.cinemax.dto.CustomerServiceFeedbackDTO;
 import com.bluebear.cinemax.dto.WatchedMovieDTO;
 import com.bluebear.cinemax.enumtype.FeedbackStatus;
-import com.bluebear.cinemax.repository.FeedbackServiceRepository;
+import com.bluebear.cinemax.repository.ServiceFeedbackRepository;
 import com.bluebear.cinemax.service.admin.CustomerCareService;
 import com.bluebear.cinemax.service.UserProfileService;
 import org.slf4j.Logger;
@@ -22,7 +22,7 @@ import java.util.List;
 public class CustomerCareController {
     private static final Logger log = LoggerFactory.getLogger(CustomerCareController.class);
     @Autowired
-    private FeedbackServiceRepository serviceFeedbackRepository;
+    private ServiceFeedbackRepository serviceFeedbackRepository;
     @Autowired
     private CustomerCareService customerCareService;
     @Autowired

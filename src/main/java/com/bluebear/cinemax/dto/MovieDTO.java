@@ -1,14 +1,11 @@
 package com.bluebear.cinemax.dto;
 
-import com.bluebear.cinemax.enumtype.Age_Limit;
+import com.bluebear.cinemax.enumtype.AgeLimit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import lombok.*;
 
-import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -18,7 +15,7 @@ import java.util.List;
 public class MovieDTO {
     private Integer movieID;
     private String movieName;
-    private Age_Limit ageLimit;
+    private AgeLimit ageLimit;
     private String description;
     private String image;
     private String banner;

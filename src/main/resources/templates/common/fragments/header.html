@@ -34,7 +34,7 @@
                     </ul>
                 </li>
                 <li>
-                    <a href="#0">Blog</a>
+                    <a th:href="@{/customer/blog}" th:class="${currentWebPage == 'blogs'} ? 'active' : ''">Blogs</a>
                 </li>
                 <li class="header-button pr-0" th:if="${session.account == null}">
                     <a th:href="@{/login}">Sign in</a>

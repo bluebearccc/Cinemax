@@ -1,7 +1,7 @@
 package com.bluebear.cinemax.controller.cashier;
 
 import com.bluebear.cinemax.dto.*;
-import com.bluebear.cinemax.enumtype.Age_Limit;
+import com.bluebear.cinemax.enumtype.AgeLimit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.enumtype.Theater_Status;
 import com.bluebear.cinemax.service.detailseat.DetailSeatService;
@@ -50,19 +50,21 @@ public class BookingProcessController {
     private RoomService roomService; // INJECT RoomService
 
     private final LocalDateTime currentDate = LocalDateTime.now();
-    private Integer theaterId = 1;
+    private Integer theaterId = null;
 
     // ... (Các phương thức khác không thay đổi)
     @GetMapping("/movie/")
     public String getMovie(@RequestParam(required = false) String keyword,
                            @RequestParam(required = false) Integer genreId,
                            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime date,
-                           @RequestParam(required = false) Age_Limit ageLimit,
+                           @RequestParam(required = false) AgeLimit ageLimit,
                            @RequestParam(defaultValue = "0") Integer page,
                            @RequestParam(defaultValue = "6") Integer pageSize,
                            HttpSession session,
                            Model model) {
         clearSessionData(session);
+        EmployeeDTO employee = (EmployeeDTO) session.getAttribute("employee");
+        theaterId = employee.getTheaterId();
         session.setAttribute("theaterId", theaterId);
         try {
             String normalizedKeyword = normalizeSearchParam(keyword);
@@ -78,17 +80,17 @@ public class BookingProcessController {
                 queryEndDate = null;
             }
 
-            List<Age_Limit> applicableAgeLimits = null;
+            List<AgeLimit> applicableAgeLimits = null;
             if (ageLimit != null) {
                 applicableAgeLimits = new ArrayList<>();
                 switch (ageLimit) {
                     case AGE_18_PLUS:
-                        applicableAgeLimits.add(Age_Limit.AGE_18_PLUS);
+                        applicableAgeLimits.add(AgeLimit.AGE_18_PLUS);
                     case AGE_16_PLUS:
-                        applicableAgeLimits.add(Age_Limit.AGE_16_PLUS);
+                        applicableAgeLimits.add(AgeLimit.AGE_16_PLUS);
                     case AGE_13_PLUS:
-                        applicableAgeLimits.add(Age_Limit.AGE_13_PLUS);
-                    case AGE_P: applicableAgeLimits.add(Age_Limit.AGE_P);
+                        applicableAgeLimits.add(AgeLimit.AGE_13_PLUS);
+                    case AGE_P: applicableAgeLimits.add(AgeLimit.AGE_P);
                         break;
                 }
             }
@@ -115,7 +117,7 @@ public class BookingProcessController {
             model.addAttribute("keyword", normalizedKeyword);
             model.addAttribute("availableGenres", availableGenres);
             model.addAttribute("availableDates", availableDates);
-            model.addAttribute("availableAgeLimits", Age_Limit.values());
+            model.addAttribute("availableAgeLimits", AgeLimit.values());
             model.addAttribute("selectedGenreId", genreId);
             model.addAttribute("selectedDate", date);
             model.addAttribute("selectedAgeLimit", ageLimit);
@@ -226,15 +228,12 @@ public class BookingProcessController {
             List<SeatDTO> allSeatsInRoom = seatService.getSeatsByRoomId(selectedSchedule.getRoomID()).getContent();
             List<Integer> bookedSeatIds = detailSeatService.findBookedSeatIdsByScheduleId(scheduleId);
 
-            // ==================== ĐOẠN CODE SỬA ĐỔI ====================
-            // Nhóm các ghế theo hàng (dựa trên ký tự đầu tiên của 'position')
             Map<Character, List<SeatDTO>> seatsByRow = allSeatsInRoom.stream()
                     .collect(Collectors.groupingBy(
                             seat -> seat.getPosition().charAt(0),
-                            TreeMap::new, // Sử dụng TreeMap để các hàng được sắp xếp theo thứ tự (A, B, C...)
+                            TreeMap::new,
                             Collectors.toList()
                     ));
-            // ==========================================================
 
             session.setAttribute("selectedSchedule", selectedSchedule);
             model.addAttribute("currentStep", 3);
@@ -242,9 +241,7 @@ public class BookingProcessController {
             model.addAttribute("selectedSchedule", selectedSchedule);
             model.addAttribute("room", room);
 
-            // Xóa cái cũ đi hoặc để lại cũng không sao, nhưng cái mới này là quan trọng nhất
-            // model.addAttribute("allSeatsInRoom", allSeatsInRoom);
-            model.addAttribute("seatsByRow", seatsByRow); // <-- Thêm biến này vào model
+            model.addAttribute("seatsByRow", seatsByRow);
 
             model.addAttribute("bookedSeatIds", bookedSeatIds);
         } catch (Exception e) {

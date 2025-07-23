@@ -1262,4 +1262,60 @@ textarea.comment-input-movie-detail:focus {
 }
 
 
+.custom-button-item-theater:active::after {
+    transform: translate(-50%, -50%) scale(1);
+    opacity: 1;
+    transition: 0s;
+}
+
+.custom-button-item-theater {
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 0.8rem;
+    margin-bottom: 0.5rem;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    border: 1px solid transparent;
+}
+
+.custom-button-item-theater:hover {
+    background: #154C6C;
+    border-color: #154C6C;
+}
+
+.custom-button-item-theater.active {
+    background: #154C6C;
+    border-color: #07A3CA;
+}
+
+.custom-alert {
+    width: 50%;
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background-color: #ff4d4f;
+    color: white;
+    padding: 16px 24px;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    z-index: 10000;
+    font-family: sans-serif;
+    max-width: 500px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.custom-alert .close-btn {
+    margin-left: 12px;
+    cursor: pointer;
+    font-weight: bold;
+    float: right;
+    font-size: 20px;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
 

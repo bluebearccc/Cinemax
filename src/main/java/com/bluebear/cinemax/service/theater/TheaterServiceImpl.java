@@ -268,4 +268,9 @@ public class TheaterServiceImpl implements TheaterService {
 
     }
 
+    @Override
+    public TheaterDTO getTheaterByName(String name) {
+        return toDTO(theaterRepository.findByTheaterNameContainingIgnoreCase(name).getFirst());
+    }
+
 }

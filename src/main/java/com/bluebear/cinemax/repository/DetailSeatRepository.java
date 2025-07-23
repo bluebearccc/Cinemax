@@ -2,6 +2,7 @@ package com.bluebear.cinemax.repository;
 
 import com.bluebear.cinemax.entity.DetailSeat;
 import com.bluebear.cinemax.enumtype.DetailSeat_Status;
+import com.bluebear.cinemax.enumtype.InvoiceStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import com.bluebear.cinemax.entity.Invoice;
@@ -16,8 +17,11 @@ import java.util.List;
 @Repository
 public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer> {
     List<DetailSeat> findByInvoiceInvoiceID(Integer invoiceId);
+
     List<DetailSeat> findByInvoiceInvoiceIDAndStatus(Integer invoice_invoiceID, DetailSeat_Status status);
+
     List<DetailSeat> findBySeatSeatIDAndScheduleScheduleIDAndStatusIn(Integer seatId, Integer scheduleId, List<DetailSeat_Status> statuses);
+
     @Query("SELECT COUNT(ds) FROM DetailSeat ds " +
             "WHERE ds.invoice.status = 'Booked' AND ds.invoice.bookingDate BETWEEN :startOfDay AND :endOfDay")
     Long countTicketsToday(@Param("startOfDay") LocalDateTime startOfDay,
@@ -29,9 +33,11 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
             "WHERE ds.invoice.status = 'Booked' AND ds.invoice.bookingDate BETWEEN :start AND :end")
     Integer countTicketsBetween(@Param("start") LocalDateTime start,
                                 @Param("end") LocalDateTime end);
+
     @Query("SELECT ds.seat.seatID FROM DetailSeat ds WHERE ds.schedule.scheduleID = :scheduleId")
     List<Integer> findBookedSeatIdsByScheduleId(Integer scheduleId);
-    Page<DetailSeat> findBySchedule_ScheduleID(Integer scheduleID , Pageable pageable);
+
+    Page<DetailSeat> findBySchedule_ScheduleID(Integer scheduleID, Pageable pageable);
 
     @Query("SELECT COUNT(d) FROM DetailSeat d JOIN d.schedule s JOIN s.movie m WHERE m.movieID = :movieId")
     long countTotalTicketsSold(int movieId);
@@ -42,20 +48,35 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
     List<DetailSeat> findByInvoice(Invoice invoice);
 
     boolean existsBySeatSeatIDAndScheduleScheduleID(Integer seatID, Integer scheduleId);
+
     long countBySeat_SeatID(Integer seatId);
+
     int countBySeat_SeatIDIn(List<Integer> seatIds);
+
     @Query(value = """
-    SELECT ds.* 
-    FROM Detail_Seat ds
-    INNER JOIN Schedule s ON ds.ScheduleID = s.ScheduleID
-    WHERE ds.SeatID = :SeatID 
-    AND s.StartTime > :currentTime
-    AND ds.Status != 'Booked'
-    ORDER BY s.StartTime ASC
-    """, nativeQuery = true)
+            SELECT ds.* 
+            FROM Detail_Seat ds
+            INNER JOIN Schedule s ON ds.ScheduleID = s.ScheduleID
+            WHERE ds.SeatID = :SeatID 
+            AND s.StartTime > :currentTime
+            AND ds.Status != 'Booked'
+            ORDER BY s.StartTime ASC
+            """, nativeQuery = true)
     List<DetailSeat> findFutureBookingsBySeatID(@Param("SeatID") Integer seatId, @Param("currentTime") LocalDateTime currentTime);
+
     @Query("SELECT ds.seat.seatID FROM DetailSeat ds " +
             "WHERE ds.schedule.scheduleID = :scheduleId AND ds.status = :status")
     List<Integer> findSeatIdsByScheduleIdAndStatus(@Param("scheduleId") Integer scheduleId,
                                                    @Param("status") DetailSeat_Status status);
+
+    @Query("""
+                SELECT CASE WHEN COUNT(ds) > 0 THEN true ELSE false END
+                FROM DetailSeat ds
+                JOIN ds.invoice i
+                JOIN ds.schedule s
+                WHERE i.customer.id = :customerId
+                  AND s.movie.movieID = :movieId
+                  AND i.status = :status
+            """)
+    boolean hasCustomerWatchedMovie(@Param("customerId") int customerId, @Param("movieId") int movieId, InvoiceStatus status);
 }

@@ -16,7 +16,6 @@ public interface ActorRepository extends JpaRepository<Actor, Integer> {
 
     @Query("SELECT a FROM Actor a JOIN a.movies m WHERE m.movieID = :movieId")
     Page<Actor> findActorsByMovieId(Integer movieId, Pageable pageable);
- //    Tìm diễn viên theo tên (tìm kiếm không phân biệt hoa thường)
 
     List<Actor> findByActorNameContainingIgnoreCase(String actorName);
 

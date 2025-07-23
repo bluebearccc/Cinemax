@@ -26,4 +26,5 @@ public interface PromotionService {
 
     Optional<PromotionDTO> validatePromotionCode(String code);
     Map<String, Object> checkPromotionCode(String code, double totalAmount);
+
 }

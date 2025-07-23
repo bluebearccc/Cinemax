@@ -3,9 +3,9 @@ package com.bluebear.cinemax.service.admin;
 import com.bluebear.cinemax.dto.Movie.DashboardDTO;
 import com.bluebear.cinemax.dto.Movie.MovieRevenueDTO;
 import com.bluebear.cinemax.dto.ServiceFeedbackDTO;
-import com.bluebear.cinemax.entity.FeedbackService;
+import com.bluebear.cinemax.entity.ServiceFeedback;
 import com.bluebear.cinemax.repository.DetailSeatRepository;
-import com.bluebear.cinemax.repository.FeedbackServiceRepository;
+import com.bluebear.cinemax.repository.ServiceFeedbackRepository;
 import com.bluebear.cinemax.repository.InvoiceRepository;
 import com.bluebear.cinemax.repository.MovieRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +34,7 @@ public class DashboardService {
     @Autowired
     private DetailSeatRepository detailSeatRepository;
     @Autowired
-    private FeedbackServiceRepository feedbackServiceRepository;
+    private ServiceFeedbackRepository feedbackServiceRepository;
     public Integer countCurrentlyShowingMovies() {
         LocalDateTime now = LocalDateTime.now();
         return movieRepository.countCurrentlyShowing(now);
@@ -152,7 +152,7 @@ public class DashboardService {
     }
     public Page<ServiceFeedbackDTO> getFeedbacksByServiceRate(int minRate, int maxRate, int page) {
         Pageable pageable = PageRequest.of(page, 5);
-        Page<FeedbackService> feedbacks = feedbackServiceRepository
+        Page<ServiceFeedback> feedbacks = feedbackServiceRepository
                 .findByServiceRateBetweenOrderByServiceRateDesc(minRate, maxRate, pageable);
 
         return feedbacks.map(this::toDTO);
@@ -178,13 +178,13 @@ public class DashboardService {
                 .build();
     }
 
-    public ServiceFeedbackDTO toDTO(FeedbackService feedback) {
+    public ServiceFeedbackDTO toDTO(ServiceFeedback feedback) {
         return ServiceFeedbackDTO.builder()
                 .id(feedback.getId())
                 .customerId(feedback.getCustomer().getId())
                 .createdDate(feedback.getCreatedDate())
                 .content(feedback.getContent())
-                .theaterId(feedback.getTheaterId())
+                .theaterId(feedback.getId())
                 .serviceRate(feedback.getServiceRate())
                 .status(feedback.getStatus())
                 .build();

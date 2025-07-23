@@ -28,4 +28,7 @@ public interface DetailSeatService {
     DetailSeat toEntity(DetailSeatDTO dto);
 
     List<Integer> findBookedSeatIdsByScheduleId(Integer scheduleId);
+
+    public boolean hasCustomerWatched(int customerId, int movieId);
+
 }

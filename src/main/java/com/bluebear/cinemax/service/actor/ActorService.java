@@ -22,4 +22,5 @@ public interface ActorService {
     ActorDTO toDTO(Actor actor);
 
     Actor toEntity(ActorDTO dto);
+
 }
