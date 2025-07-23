@@ -308,7 +308,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Status -->
+                                <!-- Status with validation warnings -->
                                 <div class="mb-3">
                                     <label for="status" class="form-label">
                                         <i class="fas fa-toggle-on me-2"></i>
@@ -317,10 +317,24 @@
                                     <select class="form-select" id="status" name="status" required>
                                         <option value="">-- Chọn trạng thái --</option>
                                         <option value="Active" th:selected="${movie.status == 'Active'}">Đang hoạt động</option>
-                                        <option value="Inactive" th:selected="${movie.status == 'Inactive'}">Tạm dừng</option>
-                                        <option value="Coming_Soon" th:selected="${movie.status == 'Coming_Soon'}">Sắp chiếu</option>
                                         <option value="Removed" th:selected="${movie.status == 'Removed'}">Đã xóa</option>
                                     </select>
+                                    <small class="form-text text-muted">
+                                        Chọn trạng thái hiển thị của phim
+                                    </small>
+
+                                    <!-- Warning about Removed status -->
+                                    <div class="alert alert-warning mt-2" id="removedStatusWarning" style="display: none;">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Cảnh báo:</strong> Không thể chuyển sang trạng thái "Đã xóa" nếu phim đang có lịch chiếu trong hệ thống.
+                                        Vui lòng xóa tất cả lịch chiếu trước khi thay đổi trạng thái.
+                                    </div>
+
+                                    <!-- Info about Active status -->
+                                    <div class="alert alert-info mt-2" id="activeStatusInfo" style="display: none;">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        <strong>Thông tin:</strong> Phim ở trạng thái "Đang hoạt động" sẽ hiển thị cho khách hàng và có thể đặt vé.
+                                    </div>
                                 </div>
 
                                 <!-- Genres -->
@@ -516,12 +530,8 @@
                         <div class="col-md-6">
                             <p><strong>Trạng thái:</strong>
                                 <span class="badge"
-                                      th:classappend="${movie.status == 'Active'} ? 'bg-success' :
-                                                     (${movie.status == 'Inactive'} ? 'bg-warning' :
-                                                     (${movie.status == 'Coming_Soon'} ? 'bg-info' : 'bg-danger'))"
-                                      th:text="${movie.status == 'Active'} ? 'Đang hoạt động' :
-                                               (${movie.status == 'Inactive'} ? 'Tạm dừng' :
-                                               (${movie.status == 'Coming_Soon'} ? 'Sắp chiếu' : 'Đã xóa'))">
+                                      th:classappend="${movie.status == 'Active'} ? 'bg-success' : 'bg-danger'"
+                                      th:text="${movie.status == 'Active'} ? 'Đang hoạt động' : 'Đã xóa'">
                                 </span>
                             </p>
                             <p><strong>Đánh giá:</strong>
@@ -603,6 +613,24 @@
         }
     }
 
+    // Status change handler - Show warnings/info based on selection
+    document.getElementById('status').addEventListener('change', function() {
+        const selectedStatus = this.value;
+        const removedWarning = document.getElementById('removedStatusWarning');
+        const activeInfo = document.getElementById('activeStatusInfo');
+
+        // Hide all alerts first
+        removedWarning.style.display = 'none';
+        activeInfo.style.display = 'none';
+
+        // Show appropriate alert based on selection
+        if (selectedStatus === 'Removed') {
+            removedWarning.style.display = 'block';
+        } else if (selectedStatus === 'Active') {
+            activeInfo.style.display = 'block';
+        }
+    });
+
     // Validate form before submit
     document.querySelector('form').addEventListener('submit', function(e) {
         // Validate required fields
@@ -676,8 +704,6 @@
             return false;
         }
 
-        // Không cần validate movie rate vì nó readonly
-
         // Validate status
         const status = document.getElementById('status').value;
         if (!status) {
@@ -718,13 +744,6 @@
                 alert('Chỉ được chọn tối đa 10 diễn viên!');
             }
         });
-    });
-
-    // Debug: Log loaded data to console
-    console.log('Movie data:', {
-        movieId: document.querySelector('input[name="startDate"]')?.getAttribute('th:value'),
-        genreIds: Array.from(document.querySelectorAll('input[name="genreIds"]:checked')).map(cb => cb.value),
-        actorIds: Array.from(document.querySelectorAll('input[name="actorIds"]:checked')).map(cb => cb.value)
     });
 </script>
 </body>

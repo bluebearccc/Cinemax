@@ -540,15 +540,15 @@
     <!-- Stats Cards -->
     <div class="stats-grid fade-in">
         <div class="stat-card">
-            <div class="stat-number" th:text="${#lists.size(movies)}">0</div>
+            <div class="stat-number" th:text="${totalMovies ?: 0}">0</div>
             <div class="stat-label">Total Movies</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">12</div>
+            <div class="stat-number" th:text="${nowShowingCount ?: 0}">0</div>
             <div class="stat-label">Now Showing</div>
         </div>
         <div class="stat-card">
-            <div class="stat-number">5</div>
+            <div class="stat-number" th:text="${upcomingCount ?: 0}">0</div>
             <div class="stat-label">Upcoming</div>
         </div>
     </div>

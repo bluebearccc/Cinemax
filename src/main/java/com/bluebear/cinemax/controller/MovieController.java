@@ -110,14 +110,16 @@ public class MovieController {
         String status = params.get("status");
         if (status == null || status.trim().isEmpty()) return "Trạng thái phim không được để trống";
 
-        if (!isEdit) {
+        // Chỉ validate movieRate khi edit, không validate khi add
+        if (isEdit) {
             String movieRateStr = params.get("movieRate");
-            if (movieRateStr == null || movieRateStr.trim().isEmpty()) return "Đánh giá phim không được để trống";
-            try {
-                double movieRate = Double.parseDouble(movieRateStr.trim());
-                if (movieRate < 0.0 || movieRate > 5.0) return "Đánh giá phim phải từ 0.0 đến 5.0";
-            } catch (NumberFormatException e) {
-                return "Đánh giá phim không hợp lệ";
+            if (movieRateStr != null && !movieRateStr.trim().isEmpty()) {
+                try {
+                    double movieRate = Double.parseDouble(movieRateStr.trim());
+                    if (movieRate < 0.0 || movieRate > 5.0) return "Đánh giá phim phải từ 0.0 đến 5.0";
+                } catch (NumberFormatException e) {
+                    return "Đánh giá phim không hợp lệ";
+                }
             }
         }
 
@@ -245,7 +247,7 @@ public class MovieController {
                 return "redirect:/admin/movies/add";
             }
 
-            // Create movie object với default images
+            // Create movie object với default images và rating
             Movie newMovie = new Movie();
             newMovie.setMovieName(allParams.get("movieName").trim());
             newMovie.setDescription(allParams.get("description").trim());
@@ -253,7 +255,10 @@ public class MovieController {
             newMovie.setDuration(Integer.parseInt(allParams.get("duration").trim()));
             newMovie.setTrailer(allParams.get("trailer") != null && !allParams.get("trailer").trim().isEmpty() ?
                     allParams.get("trailer").trim() : null);
-            newMovie.setMovieRate(Double.parseDouble(allParams.get("movieRate").trim()));
+
+            // Set default rating to 0.0 for new movies
+            newMovie.setMovieRate(0.0);
+
             newMovie.setStartDate(LocalDateTime.parse(allParams.get("startDate")));
             newMovie.setEndDate(LocalDateTime.parse(allParams.get("endDate")));
             newMovie.setStatus(Movie_Status.valueOf(allParams.get("status")));
@@ -407,6 +412,26 @@ public class MovieController {
                 return "redirect:/admin/movies/" + id + "/edit";
             }
 
+            // KIỂM TRA STATUS CHANGE - ĐẶC BIỆT CHO REMOVED
+            String newStatus = allParams.get("status");
+            if ("Removed".equals(newStatus) && !"Removed".equals(existingMovie.getStatus())) {
+                // Kiểm tra xem phim có trong schedule không
+                if (movieService.hasSchedule(id)) {
+                    redirectAttributes.addFlashAttribute("error",
+                            "Không thể chuyển phim sang trạng thái 'Đã xóa' vì phim này đang có lịch chiếu trong hệ thống. " +
+                                    "Vui lòng xóa tất cả lịch chiếu trước khi thay đổi trạng thái.");
+                    return "redirect:/admin/movies/" + id + "/edit";
+                }
+
+                // Kiểm tra xem có schedule đang hoạt động không
+                if (movieService.hasActiveSchedule(id)) {
+                    redirectAttributes.addFlashAttribute("error",
+                            "Không thể chuyển phim sang trạng thái 'Đã xóa' vì phim này có lịch chiếu đang hoạt động. " +
+                                    "Vui lòng dừng hoặc xóa tất cả lịch chiếu đang hoạt động trước.");
+                    return "redirect:/admin/movies/" + id + "/edit";
+                }
+            }
+
             // Giữ ảnh cũ làm mặc định
             String finalImagePath = existingMovie.getImage();
             String finalBannerPath = existingMovie.getBanner();
@@ -463,14 +488,20 @@ public class MovieController {
 
             movieToUpdate.setStatus(Movie_Status.valueOf(allParams.get("status")));
 
-            // Update database
-            boolean updateSuccess = updateMovieDirectly(id, movieToUpdate, genreIds, actorIds);
+            // Update database - sử dụng MovieService thay vì direct method
+            try {
+                boolean updateSuccess = movieService.updateMovieComplete(id, movieToUpdate, genreIds, actorIds);
 
-            if (updateSuccess) {
-                redirectAttributes.addFlashAttribute("success", "Cập nhật phim thành công!");
-                return "redirect:/admin/movies/" + id;
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi cập nhật phim");
+                if (updateSuccess) {
+                    redirectAttributes.addFlashAttribute("success", "Cập nhật phim thành công!");
+                    return "redirect:/admin/movies/" + id;
+                } else {
+                    redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi cập nhật phim");
+                    return "redirect:/admin/movies/" + id + "/edit";
+                }
+            } catch (IllegalArgumentException e) {
+                // Xử lý lỗi validation từ MovieService
+                redirectAttributes.addFlashAttribute("error", e.getMessage());
                 return "redirect:/admin/movies/" + id + "/edit";
             }
 

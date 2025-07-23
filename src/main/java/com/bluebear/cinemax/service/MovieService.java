@@ -29,6 +29,14 @@ public class MovieService {
         return convertToDTOList(movieRepository.findByStatus(Movie_Status.Active));
     }
 
+    public List<MovieDTO> getNowShowingMovies() {
+        return convertToDTOList(movieRepository.findActiveMovies(LocalDateTime.now()));
+    }
+
+    public List<MovieDTO> getUpcomingMovies() {
+        return convertToDTOList(movieRepository.findUpcomingMovies(LocalDateTime.now()));
+    }
+
     public MovieDTO getMovieById(Integer id) {
         return id == null ? null : movieRepository.findById(id).map(this::convertToDTO).orElse(null);
     }
@@ -183,6 +191,98 @@ public class MovieService {
 
     // ==================== UPDATE OPERATIONS ====================
 
+    @Transactional
+    public boolean updateMovieComplete(Integer movieId, Movie updatedMovie, List<Integer> genreIds, List<Integer> actorIds) {
+        try {
+            if (movieId == null || updatedMovie == null) {
+                return false;
+            }
+
+            // Kiểm tra phim có tồn tại không
+            Movie existingMovie = movieRepository.findById(movieId).orElse(null);
+            if (existingMovie == null) {
+                return false;
+            }
+
+            // Validate dữ liệu
+            String validationError = validateMovieData(updatedMovie, false);
+            if (validationError != null) {
+                throw new IllegalArgumentException(validationError);
+            }
+
+            // Kiểm tra tên phim trùng lặp (ngoại trừ chính nó)
+            if (isMovieNameExists(updatedMovie.getMovieName(), movieId)) {
+                throw new IllegalArgumentException("Tên phim đã tồn tại");
+            }
+
+            // Validate thể loại (bắt buộc)
+            String genreValidationError = validateIds(genreIds, "thể loại", 5, true);
+            if (genreValidationError != null) {
+                throw new IllegalArgumentException(genreValidationError);
+            }
+
+            // Validate diễn viên (bắt buộc)
+            String actorValidationError = validateIds(actorIds, "diễn viên", 10, true);
+            if (actorValidationError != null) {
+                throw new IllegalArgumentException(actorValidationError);
+            }
+
+            // Validate status change
+            String statusValidationError = validateStatusChange(existingMovie, updatedMovie.getStatus());
+            if (statusValidationError != null) {
+                throw new IllegalArgumentException(statusValidationError);
+            }
+
+            // Cập nhật thông tin phim
+            existingMovie.setMovieName(updatedMovie.getMovieName());
+            existingMovie.setDescription(updatedMovie.getDescription());
+            existingMovie.setImage(updatedMovie.getImage());
+            existingMovie.setBanner(updatedMovie.getBanner());
+            existingMovie.setStudio(updatedMovie.getStudio());
+            existingMovie.setDuration(updatedMovie.getDuration());
+            existingMovie.setTrailer(updatedMovie.getTrailer());
+            existingMovie.setMovieRate(updatedMovie.getMovieRate());
+            existingMovie.setStartDate(updatedMovie.getStartDate());
+            existingMovie.setEndDate(updatedMovie.getEndDate());
+            existingMovie.setStatus(updatedMovie.getStatus());
+
+            // Cập nhật thể loại
+            List<Genre> newGenres = new ArrayList<>();
+            for (Integer genreId : genreIds) {
+                Genre genre = genreRepository.findById(genreId).orElse(null);
+                if (genre != null) {
+                    newGenres.add(genre);
+                }
+            }
+            existingMovie.setGenres(newGenres);
+
+            // Cập nhật diễn viên
+            List<Actor> newActors = new ArrayList<>();
+            for (Integer actorId : actorIds) {
+                Actor actor = actorRepository.findById(actorId).orElse(null);
+                if (actor != null) {
+                    newActors.add(actor);
+                }
+            }
+            existingMovie.setActors(newActors);
+
+            // Lưu vào database
+            movieRepository.save(existingMovie);
+
+            // Log để debug
+            System.out.println("Movie updated successfully:");
+            System.out.println("- ID: " + existingMovie.getMovieID());
+            System.out.println("- Image: " + existingMovie.getImage());
+            System.out.println("- Banner: " + existingMovie.getBanner());
+
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Lỗi khi cập nhật phim hoàn chỉnh: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
+        }
+    }
 
     @Transactional
     public boolean updateMovieStatus(Integer movieId, Movie_Status newStatus) {
@@ -212,6 +312,32 @@ public class MovieService {
         }
     }
 
+    @Transactional
+    public boolean updateEndDate(Integer movieId, LocalDateTime newEndDate) {
+        try {
+            if (movieId == null || newEndDate == null) {
+                return false;
+            }
+
+            Movie movie = movieRepository.findById(movieId).orElse(null);
+            if (movie == null) {
+                return false;
+            }
+
+            // Kiểm tra ngày kết thúc không được trước ngày bắt đầu
+            if (movie.getStartDate() != null && newEndDate.isBefore(movie.getStartDate())) {
+                return false;
+            }
+
+            movie.setEndDate(newEndDate);
+            movieRepository.save(movie);
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Lỗi khi cập nhật ngày kết thúc: " + e.getMessage());
+            return false;
+        }
+    }
 
     // ==================== DELETE OPERATIONS ====================
 
@@ -258,6 +384,37 @@ public class MovieService {
         }
     }
 
+    // ==================== SCHEDULE CHECK METHODS ====================
+
+    /**
+     * Kiểm tra xem movie có schedule không
+     * @param movieId ID của movie
+     * @return true nếu có schedule, false nếu không
+     */
+    public boolean hasSchedule(Integer movieId) {
+        if (movieId == null) return false;
+        return movieRepository.existsInSchedule(movieId);
+    }
+
+    /**
+     * Kiểm tra xem movie có schedule đang hoạt động không
+     * @param movieId ID của movie
+     * @return true nếu có schedule active, false nếu không
+     */
+    public boolean hasActiveSchedule(Integer movieId) {
+        if (movieId == null) return false;
+        return movieRepository.hasActiveSchedule(movieId);
+    }
+
+    /**
+     * Lấy số lượng schedule của movie
+     * @param movieId ID của movie
+     * @return số lượng schedule
+     */
+    public long getScheduleCount(Integer movieId) {
+        if (movieId == null) return 0;
+        return movieRepository.countSchedulesByMovieId(movieId);
+    }
 
     // ==================== HELPER METHODS ====================
 
