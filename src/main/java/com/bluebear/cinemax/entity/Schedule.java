@@ -28,7 +28,7 @@ public class Schedule {
     private LocalDateTime endTime;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "MovieID", nullable = false)
+    @JoinColumn(name = "MovieID", referencedColumnName = "MovieID")
     private Movie movie;
 
     @ManyToOne(fetch = FetchType.LAZY)

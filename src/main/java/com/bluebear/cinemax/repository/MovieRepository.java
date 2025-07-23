@@ -34,6 +34,22 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     // Tìm phim theo tên (có thể search) - không phân biệt hoa thường
     List<Movie> findByMovieNameContainingIgnoreCase(String movieName);
 
+    // ==================== SCHEDULE VALIDATION QUERIES ====================
+
+    // Kiểm tra xem movie có tồn tại trong schedule không
+    @Query("SELECT COUNT(s) > 0 FROM Schedule s WHERE s.movie.movieID = :movieId")
+    boolean existsInSchedule(@Param("movieId") Integer movieId);
+
+    // Kiểm tra xem movie có schedule đang hoạt động không
+    @Query("SELECT COUNT(s) > 0 FROM Schedule s " +
+            "WHERE s.movie.movieID = :movieId " +
+            "AND s.status = com.bluebear.cinemax.enumtype.Schedule_Status.Active")
+    boolean hasActiveSchedule(@Param("movieId") Integer movieId);
+
+    // Lấy số lượng schedule của movie
+    @Query("SELECT COUNT(s) FROM Schedule s WHERE s.movie.movieID = :movieId")
+    long countSchedulesByMovieId(@Param("movieId") Integer movieId);
+
     // ==================== MOVIE-GENRE QUERIES (SIMPLIFIED) ====================
 
     // Tìm phim theo genre sử dụng @ManyToMany relationship

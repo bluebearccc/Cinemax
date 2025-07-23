@@ -9,9 +9,7 @@
     <style>
         :root {
             --primary-blue: #4285f4;
-            --primary-light: #5a9bf8;
             --primary-dark: #3367d6;
-            --accent-blue: #1976d2;
             --success-green: #34a853;
             --warning-orange: #fbbc04;
             --danger-red: #ea4335;
@@ -27,11 +25,7 @@
             --sidebar-hover: #333333;
         }
 
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             background: var(--dark-bg);
@@ -110,91 +104,64 @@
             background: var(--dark-bg);
         }
 
-        .header-section {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
+        .back-nav {
             margin-bottom: 24px;
+        }
+
+        .back-btn {
+            background: var(--card-bg);
             border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-content h2 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--text-primary);
-        }
-
-        .breadcrumb-text {
-            color: var(--text-secondary);
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .btn-back {
-            background: var(--border-color);
-            border: none;
             border-radius: 8px;
             padding: 12px 20px;
-            color: var(--text-primary);
-            font-weight: 500;
-            transition: all 0.2s ease;
+            color: var(--text-secondary);
             text-decoration: none;
             display: inline-flex;
             align-items: center;
             gap: 8px;
+            transition: all 0.2s ease;
         }
 
-        .btn-back:hover {
+        .back-btn:hover {
             background: var(--card-hover);
             color: var(--text-primary);
             text-decoration: none;
         }
 
-        .form-container {
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
             background: var(--card-bg);
             border: 1px solid var(--border-color);
-            border-radius: 12px;
+        }
+
+        .card-header {
+            background: var(--primary-blue);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 20px;
+            border-bottom: none;
+        }
+
+        .card-body {
             padding: 32px;
-            margin-bottom: 24px;
-        }
-
-        .form-section-title {
-            color: var(--text-primary);
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            padding-bottom: 10px;
-            border-bottom: 2px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .form-section-title i {
-            color: var(--primary-blue);
         }
 
         .form-label {
             color: var(--text-primary);
             font-weight: 500;
             margin-bottom: 8px;
-            display: block;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .form-label.required::after {
-            content: " *";
-            color: var(--danger-red);
+        .form-label i {
+            color: var(--primary-blue);
         }
 
-        .form-label.optional::after {
-            content: " (tùy chọn)";
-            color: var(--text-muted);
-            font-weight: 400;
-            font-size: 0.9em;
+        .form-label .text-danger {
+            color: var(--danger-red) !important;
         }
 
         .form-control {
@@ -204,7 +171,6 @@
             color: var(--text-primary);
             padding: 12px 16px;
             transition: all 0.2s ease;
-            margin-bottom: 20px;
         }
 
         .form-control::placeholder {
@@ -224,7 +190,6 @@
             color: var(--text-primary);
             border-radius: 8px;
             padding: 12px 16px;
-            margin-bottom: 20px;
         }
 
         .form-select option {
@@ -232,24 +197,69 @@
             color: var(--text-primary);
         }
 
-        .form-check {
+        .btn-primary {
+            background: var(--primary-blue);
+            border: none;
+            border-radius: 8px;
+            padding: 12px 24px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: none;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 12px 24px;
+            color: var(--text-secondary);
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .btn-outline-secondary {
+            background: none;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 8px;
+            padding: 12px 16px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 3px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .image-preview:hover {
+            border-color: var(--primary-blue);
+        }
+
+        .genre-checkbox, .actor-checkbox {
+            margin-right: 15px;
             margin-bottom: 10px;
         }
 
         .form-check-input {
-            background-color: var(--darker-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 4px;
-        }
-
-        .form-check-input:checked {
-            background-color: var(--primary-blue);
-            border-color: var(--primary-blue);
-        }
-
-        .form-check-input:focus {
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
+            accent-color: var(--primary-blue);
         }
 
         .form-check-label {
@@ -257,148 +267,109 @@
             margin-left: 8px;
         }
 
-        .genres-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .actors-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .btn-submit {
-            background: var(--primary-blue);
-            border: none;
-            border-radius: 8px;
-            padding: 16px 32px;
-            color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.2s ease;
-            width: 100%;
-            margin-top: 20px;
-        }
-
-        .btn-submit:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(66, 133, 244, 0.3);
-        }
-
-        .btn-reset {
-            background: none;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 16px 32px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: all 0.2s ease;
-            width: 100%;
-            margin-top: 12px;
-        }
-
-        .btn-reset:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-        }
-
-        .image-preview {
-            width: 100%;
-            max-width: 200px;
-            height: 280px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid var(--border-color);
-            margin-top: 10px;
-            display: none;
-        }
-
-        .banner-preview {
-            width: 100%;
-            max-width: 400px;
-            height: 200px;
-            object-fit: cover;
-            border-radius: 8px;
-            border: 2px solid var(--border-color);
-            margin-top: 10px;
-            display: none;
-        }
-
-        .help-text {
-            color: var(--text-muted);
-            font-size: 0.875rem;
-            margin-top: 4px;
-        }
-
-        .info-box {
+        .upload-info {
             background: rgba(66, 133, 244, 0.1);
             border: 1px solid rgba(66, 133, 244, 0.3);
-            color: var(--primary-blue);
-            padding: 16px;
             border-radius: 8px;
-            margin-bottom: 24px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 0.85rem;
         }
 
-        .info-box i {
-            font-size: 1.2rem;
+        .upload-info .info-title {
+            color: var(--primary-blue);
+            font-weight: 500;
+            margin-bottom: 6px;
         }
 
-        .error-message {
-            background: rgba(234, 67, 53, 0.1);
-            border: 1px solid rgba(234, 67, 53, 0.3);
-            color: var(--danger-red);
-            padding: 12px 16px;
+        .upload-info .info-item {
+            color: var(--text-secondary);
+            margin: 2px 0;
+        }
+
+        .alert {
             border-radius: 8px;
             margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
 
-        .success-message {
+        .alert-success {
             background: rgba(52, 168, 83, 0.1);
             border: 1px solid rgba(52, 168, 83, 0.3);
             color: var(--success-green);
-            padding: 12px 16px;
+        }
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        .alert-warning {
+            background: rgba(251, 188, 4, 0.1);
+            border: 1px solid rgba(251, 188, 4, 0.3);
+            color: var(--warning-orange);
+        }
+
+        .required-field {
+            background: rgba(234, 67, 53, 0.05) !important;
+            border: 1px solid rgba(234, 67, 53, 0.2) !important;
+        }
+
+        .required-field:focus {
+            border-color: var(--primary-blue) !important;
+            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25) !important;
+        }
+
+        .selection-grid {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid var(--border-color);
             border-radius: 8px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            padding: 16px;
+            background: var(--darker-bg);
+        }
+
+        .requirements-card {
+            background: rgba(234, 67, 53, 0.05);
+            border: 1px solid rgba(234, 67, 53, 0.2);
+        }
+
+        .requirements-header {
+            background: rgba(234, 67, 53, 0.1);
+            color: var(--danger-red);
+            padding: 12px;
+        }
+
+        .requirements-body {
+            padding: 12px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .auto-rating-info {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            border-radius: 8px;
+            padding: 12px;
+            margin-top: 8px;
+            font-size: 0.85rem;
+        }
+
+        .auto-rating-info .info-title {
+            color: var(--success-green);
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+
+        .auto-rating-info .info-item {
+            color: var(--text-secondary);
+            margin: 2px 0;
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 16px;
-            }
-
-            .header-section {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-
-            .genres-grid,
-            .actors-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .form-container {
-                padding: 20px;
-            }
+            .sidebar { transform: translateX(-100%); }
+            .main-content { margin-left: 0; padding: 16px; }
+            .card-body { padding: 20px; }
         }
 
         .fade-in {
@@ -406,14 +377,8 @@
         }
 
         @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
         }
     </style>
 </head>
@@ -445,353 +410,637 @@
 
 <!-- Main Content -->
 <div class="main-content">
-    <!-- Header -->
-    <div class="header-section fade-in">
-        <div class="header-content">
-            <h2>Add New Movie</h2>
-            <p class="breadcrumb-text">Dashboard > Movies > Add New</p>
-        </div>
-        <a th:href="@{/admin/movies}" class="btn-back">
-            <i class="fas fa-arrow-left"></i>Back to Movies
+    <!-- Back Navigation -->
+    <div class="back-nav fade-in">
+        <a th:href="@{/admin/movies}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Movies
         </a>
     </div>
 
-    <!-- Info Box -->
-    <div class="info-box fade-in">
-        <i class="fas fa-info-circle"></i>
-        <div>
-            <strong>Thông tin:</strong> Chỉ có tên phim là bắt buộc. Các thông tin khác có thể để trống và sẽ được thiết lập giá trị mặc định.
-            Bạn có thể chỉnh sửa lại sau khi tạo phim.
-        </div>
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- Flash Messages -->
-    <div th:if="${error}" class="error-message fade-in">
-        <i class="fas fa-exclamation-triangle"></i>
-        <span th:text="${error}">Error message</span>
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <div th:if="${success}" class="success-message fade-in">
-        <i class="fas fa-check-circle"></i>
-        <span th:text="${success}">Success message</span>
+    <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${warning}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
     <!-- Add Movie Form -->
-    <div class="form-container fade-in">
-        <form th:action="@{/admin/movies/add}" method="post">
+    <div class="card fade-in">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-plus me-2"></i>
+                Thêm phim mới
+            </h5>
+            <small class="text-light">Tất cả các trường có dấu (*) là bắt buộc</small>
+        </div>
 
-            <!-- Basic Information Section -->
-            <div class="form-section-title">
-                <i class="fas fa-info-circle"></i>
-                Basic Information
-            </div>
+        <div class="card-body">
+            <form th:action="@{/admin/movies/add}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="movieForm">
 
-            <div class="row">
-                <div class="col-md-8">
-                    <label for="movieName" class="form-label required">Movie Name</label>
-                    <input type="text" class="form-control" id="movieName" name="movieName"
-                           placeholder="Enter movie name" required maxlength="100">
-                    <div class="help-text">Maximum 100 characters - <strong>Bắt buộc</strong></div>
-                </div>
-                <div class="col-md-4">
-                    <label for="status" class="form-label optional">Status</label>
-                    <select class="form-select" id="status" name="status">
-                        <option value="">Auto (sẽ set Active)</option>
-                        <option value="Active" selected>Active</option>
-                        <option value="Removed">Removed</option>
-                    </select>
-                </div>
-            </div>
+                <!-- Hidden field for default rating -->
+                <input type="hidden" name="movieRate" value="0.0">
 
-            <div class="row">
-                <div class="col-md-12">
-                    <label for="description" class="form-label optional">Description</label>
-                    <textarea class="form-control" id="description" name="description" rows="4"
-                              placeholder="Enter movie description (tùy chọn)" maxlength="1000"></textarea>
-                    <div class="help-text">Maximum 1000 characters - Có thể để trống</div>
-                </div>
-            </div>
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-8">
+                        <!-- Movie Name -->
+                        <div class="mb-3">
+                            <label for="movieName" class="form-label">
+                                <i class="fas fa-film"></i>
+                                Tên phim <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control required-field"
+                                   id="movieName"
+                                   name="movieName"
+                                   required
+                                   maxlength="255"
+                                   placeholder="Nhập tên phim (bắt buộc)...">
+                            <small class="form-text text-muted">Tên phim không được để trống và tối đa 255 ký tự</small>
+                        </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <label for="studio" class="form-label optional">Studio</label>
-                    <input type="text" class="form-control" id="studio" name="studio"
-                           placeholder="Enter studio name (tùy chọn)" maxlength="50">
-                </div>
-                <div class="col-md-3">
-                    <label for="duration" class="form-label optional">Duration (minutes)</label>
-                    <input type="number" class="form-control" id="duration" name="duration"
-                           placeholder="120 (mặc định)" min="1" max="500">
-                    <div class="help-text">Mặc định: 120 phút nếu để trống</div>
-                </div>
-                <div class="col-md-3">
-                    <label for="movieRate" class="form-label optional">Rating (0-5)</label>
-                    <input type="number" class="form-control" id="movieRate" name="movieRate"
-                           placeholder="0.0 (mặc định)" step="0.1" min="0" max="5">
-                    <div class="help-text">Mặc định: 0.0 nếu để trống</div>
-                </div>
-            </div>
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left"></i>
+                                Mô tả phim <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control required-field"
+                                      id="description"
+                                      name="description"
+                                      required
+                                      rows="4"
+                                      maxlength="2000"
+                                      placeholder="Nhập mô tả chi tiết về phim (bắt buộc)..."></textarea>
+                            <small class="form-text text-muted">Mô tả chi tiết về phim, tối đa 2000 ký tự</small>
+                        </div>
 
-            <!-- Media Section -->
-            <div class="form-section-title">
-                <i class="fas fa-images"></i>
-                Media & Assets (Tùy chọn)
-            </div>
+                        <!-- Studio and Duration -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="studio" class="form-label">
+                                        <i class="fas fa-building"></i>
+                                        Hãng sản xuất <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control required-field"
+                                           id="studio"
+                                           name="studio"
+                                           required
+                                           maxlength="100"
+                                           placeholder="Nhập hãng sản xuất (bắt buộc)...">
+                                    <small class="form-text text-muted">Hãng sản xuất phim, tối đa 100 ký tự</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label">
+                                        <i class="fas fa-clock"></i>
+                                        Thời lượng (phút) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number"
+                                           class="form-control required-field"
+                                           id="duration"
+                                           name="duration"
+                                           required
+                                           min="1"
+                                           max="500"
+                                           placeholder="Nhập thời lượng phim...">
+                                    <small class="form-text text-muted">Thời lượng từ 1-500 phút</small>
+                                </div>
+                            </div>
+                        </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <label for="image" class="form-label optional">Poster Image URL</label>
-                    <input type="url" class="form-control" id="image" name="image"
-                           placeholder="https://example.com/poster.jpg (tùy chọn)" onchange="previewImage()">
-                    <div class="help-text">URL to movie poster image - Có thể để trống</div>
-                    <img id="imagePreview" class="image-preview" alt="Poster Preview">
+                        <!-- Trailer URL -->
+                        <div class="mb-3">
+                            <label for="trailer" class="form-label">
+                                <i class="fas fa-play"></i>
+                                URL Trailer
+                            </label>
+                            <input type="url"
+                                   class="form-control"
+                                   id="trailer"
+                                   name="trailer"
+                                   placeholder="https://youtube.com/watch?v=...">
+                            <small class="form-text text-muted">Đường dẫn video trailer (tùy chọn)</small>
+                        </div>
+
+                        <!-- Auto Rating Info -->
+                        <div class="auto-rating-info mb-3">
+                            <div class="info-title">
+                                <i class="fas fa-star me-2"></i>
+                                Đánh giá phim
+                            </div>
+                            <div class="info-item">• Đánh giá sẽ được tự động đặt về 0.0/5.0 khi thêm phim mới</div>
+                            <div class="info-item">• Khách hàng sẽ đánh giá phim sau khi xem</div>
+                            <div class="info-item">• Có thể chỉnh sửa đánh giá sau khi phim được thêm vào hệ thống</div>
+                        </div>
+
+                        <!-- Start and End Date -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="startDate" class="form-label">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        Ngày bắt đầu <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="datetime-local"
+                                           class="form-control required-field"
+                                           id="startDate"
+                                           name="startDate"
+                                           required>
+                                    <small class="form-text text-muted">Ngày bắt đầu chiếu (từ hôm nay trở đi)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="endDate" class="form-label">
+                                        <i class="fas fa-calendar-times"></i>
+                                        Ngày kết thúc <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="datetime-local"
+                                           class="form-control required-field"
+                                           id="endDate"
+                                           name="endDate"
+                                           required>
+                                    <small class="form-text text-muted">Ngày kết thúc chiếu (sau ngày bắt đầu)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label for="status" class="form-label">
+                                <i class="fas fa-toggle-on"></i>
+                                Trạng thái <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select required-field" id="status" name="status" required>
+                                <option value="">-- Chọn trạng thái --</option>
+                                <option value="Active" selected>Đang hoạt động</option>
+                                <option value="Inactive">Tạm dừng</option>
+                                <option value="Coming_Soon">Sắp chiếu</option>
+                                <option value="Removed">Đã xóa</option>
+                            </select>
+                            <small class="form-text text-muted">Trạng thái hiển thị của phim</small>
+                        </div>
+
+                        <!-- Genres -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-tags"></i>
+                                Thể loại phim <span class="text-danger">*</span>
+                            </label>
+                            <div class="selection-grid">
+                                <div th:each="genre : ${genres}" class="form-check genre-checkbox">
+                                    <input class="form-check-input genre-input"
+                                           type="checkbox"
+                                           th:id="'genre_' + ${genre.genreID}"
+                                           name="genreIds"
+                                           th:value="${genre.genreID}">
+                                    <label class="form-check-label" th:for="'genre_' + ${genre.genreID}">
+                                        <span th:text="${genre.genreName}"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Chọn ít nhất 1 thể loại (tối đa 5 thể loại)
+                            </small>
+                            <div id="genre-counter" class="mt-1 text-info small"></div>
+                        </div>
+
+                        <!-- Actors -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-users"></i>
+                                Diễn viên <span class="text-danger">*</span>
+                            </label>
+                            <div class="selection-grid">
+                                <div th:each="actor : ${actors}" class="form-check actor-checkbox">
+                                    <input class="form-check-input actor-input"
+                                           type="checkbox"
+                                           th:id="'actor_' + ${actor.actorId}"
+                                           name="actorIds"
+                                           th:value="${actor.actorId}">
+                                    <label class="form-check-label" th:for="'actor_' + ${actor.actorId}">
+                                        <span th:text="${actor.actorName}"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="form-text text-muted">
+                                Chọn ít nhất 1 diễn viên (tối đa 10 diễn viên)
+                            </small>
+                            <div id="actor-counter" class="mt-1 text-info small"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Images & Requirements -->
+                    <div class="col-md-4">
+                        <!-- Upload Poster -->
+                        <div class="mb-4">
+                            <label for="posterFile" class="form-label">
+                                <i class="fas fa-upload"></i>
+                                Upload Poster
+                            </label>
+                            <input type="file"
+                                   class="form-control"
+                                   id="posterFile"
+                                   name="posterFile"
+                                   accept="image/*">
+                            <small class="form-text text-muted">
+                                JPG, PNG, GIF, WEBP - Tối đa 5MB (tùy chọn)
+                            </small>
+                            <div class="upload-info">
+                                <div class="info-title">Ảnh sẽ được lưu với format:</div>
+                                <div class="info-item">movie_{id}_poster.extension</div>
+                                <div class="info-item">Ví dụ: movie_1_poster.jpg</div>
+                            </div>
+                            <div id="poster-preview-container" class="mt-2"></div>
+                        </div>
+
+                        <!-- Upload Banner -->
+                        <div class="mb-4">
+                            <label for="bannerFile" class="form-label">
+                                <i class="fas fa-upload"></i>
+                                Upload Banner
+                            </label>
+                            <input type="file"
+                                   class="form-control"
+                                   id="bannerFile"
+                                   name="bannerFile"
+                                   accept="image/*">
+                            <small class="form-text text-muted">
+                                JPG, PNG, GIF, WEBP - Tối đa 5MB (tùy chọn)
+                            </small>
+                            <div class="upload-info">
+                                <div class="info-title">Ảnh sẽ được lưu với format:</div>
+                                <div class="info-item">movie_{id}_banner.extension</div>
+                                <div class="info-item">Ví dụ: movie_1_banner.jpg</div>
+                            </div>
+                            <div id="banner-preview-container" class="mt-2"></div>
+                        </div>
+
+                        <!-- Validation Requirements -->
+                        <div class="card requirements-card">
+                            <div class="card-header requirements-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Điều kiện bắt buộc
+                                </h6>
+                            </div>
+                            <div class="card-body requirements-body">
+                                <ul class="mb-0">
+                                    <li>Tên phim (không trống, ≤255 ký tự)</li>
+                                    <li>Mô tả (không trống, ≤2000 ký tự)</li>
+                                    <li>Hãng sản xuất (không trống, ≤100 ký tự)</li>
+                                    <li>Thời lượng (1-500 phút)</li>
+                                    <li>Ngày bắt đầu (từ hôm nay)</li>
+                                    <li>Ngày kết thúc (sau ngày bắt đầu)</li>
+                                    <li>Trạng thái phim</li>
+                                    <li>Ít nhất 1 thể loại (tối đa 5)</li>
+                                    <li>Ít nhất 1 diễn viên (tối đa 10)</li>
+                                </ul>
+                                <hr>
+                                <small class="text-success">
+                                    <i class="fas fa-info-circle"></i>
+                                    Đánh giá phim sẽ tự động được đặt về 0.0
+                                </small>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <label for="banner" class="form-label optional">Banner Image URL</label>
-                    <input type="url" class="form-control" id="banner" name="banner"
-                           placeholder="https://example.com/banner.jpg (tùy chọn)" onchange="previewBanner()">
-                    <div class="help-text">URL to movie banner image - Có thể để trống</div>
-                    <img id="bannerPreview" class="banner-preview" alt="Banner Preview">
+
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a th:href="@{/admin/movies}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>
+                                    Hủy bỏ
+                                </a>
+                            </div>
+                            <div>
+                                <button type="reset" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-undo me-2"></i>
+                                    Đặt lại
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Thêm phim
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12">
-                    <label for="trailer" class="form-label optional">Trailer URL</label>
-                    <input type="url" class="form-control" id="trailer" name="trailer"
-                           placeholder="https://youtube.com/watch?v=... (tùy chọn)">
-                    <div class="help-text">YouTube or other video platform URL - Có thể để trống</div>
-                </div>
-            </div>
-
-            <!-- Schedule Section -->
-            <div class="form-section-title">
-                <i class="fas fa-calendar-alt"></i>
-                Schedule (Tùy chọn)
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <label for="startDate" class="form-label optional">Start Date</label>
-                    <input type="date" class="form-control" id="startDate" name="startDate">
-                    <div class="help-text">Mặc định: 7 ngày từ hôm nay nếu để trống</div>
-                </div>
-                <div class="col-md-6">
-                    <label for="endDate" class="form-label optional">End Date</label>
-                    <input type="date" class="form-control" id="endDate" name="endDate">
-                    <div class="help-text">Mặc định: 30 ngày sau start date nếu để trống</div>
-                </div>
-            </div>
-
-            <!-- Genres Section -->
-            <div class="form-section-title">
-                <i class="fas fa-tags"></i>
-                Genres (Tùy chọn)
-            </div>
-
-            <div class="help-text" style="margin-bottom: 15px;">Select up to 5 genres for this movie - Có thể để trống</div>
-            <div class="genres-grid">
-                <div th:each="genre : ${allGenres}" class="form-check">
-                    <input class="form-check-input genre-checkbox" type="checkbox"
-                           th:id="'genre_' + ${genre.genreId}" th:name="genreIDs" th:value="${genre.genreId}">
-                    <label class="form-check-label" th:for="'genre_' + ${genre.genreId}" th:text="${genre.genreName}">
-                        Action
-                    </label>
-                </div>
-            </div>
-
-            <!-- Actors Section -->
-            <div class="form-section-title">
-                <i class="fas fa-users"></i>
-                Actors (Tùy chọn)
-            </div>
-
-            <div class="help-text" style="margin-bottom: 15px;">Select actors for this movie - Có thể để trống</div>
-            <div class="actors-grid">
-                <div th:each="actor : ${allActors}" class="form-check">
-                    <input class="form-check-input actor-checkbox" type="checkbox"
-                           th:id="'actor_' + ${actor.actorId}" th:name="actorIds" th:value="${actor.actorId}">
-                    <label class="form-check-label" th:for="'actor_' + ${actor.actorId}" th:text="${actor.actorName}">
-                        Robert Downey Jr.
-                    </label>
-                </div>
-            </div>
-
-            <!-- Submit Buttons -->
-            <div class="row" style="margin-top: 32px;">
-                <div class="col-md-6">
-                    <button type="submit" class="btn-submit">
-                        <i class="fas fa-plus me-2"></i>Add Movie
-                    </button>
-                </div>
-                <div class="col-md-6">
-                    <button type="reset" class="btn-reset">
-                        <i class="fas fa-refresh me-2"></i>Reset Form
-                    </button>
-                </div>
-            </div>
-
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Form validation and interactions - RELAXED VERSION
+    // Set default dates
     document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('addMovieForm');
-        const startDateInput = document.getElementById('startDate');
-        const endDateInput = document.getElementById('endDate');
-        const genreCheckboxes = document.querySelectorAll('.genre-checkbox');
-        const actorCheckboxes = document.querySelectorAll('.actor-checkbox');
+        const now = new Date();
+        const startDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
+        const endDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 days
 
-        // Set minimum date to today (but not required)
-        const today = new Date().toISOString().split('T')[0];
-        startDateInput.min = today;
-        endDateInput.min = today;
+        document.getElementById('startDate').value = startDate.toISOString().slice(0, 16);
+        document.getElementById('endDate').value = endDate.toISOString().slice(0, 16);
 
-        // Validate date range only if both dates are provided
-        function validateDates() {
-            const startDate = new Date(startDateInput.value);
-            const endDate = new Date(endDateInput.value);
+        updateCounters();
+    });
 
-            if (startDateInput.value && endDateInput.value) {
-                if (startDate >= endDate) {
-                    endDateInput.setCustomValidity('End date must be after start date');
-                } else {
-                    endDateInput.setCustomValidity('');
-                }
-            } else {
-                endDateInput.setCustomValidity(''); // Clear validation if either is empty
+    // Preview uploaded images
+    document.getElementById('posterFile').addEventListener('change', function(e) {
+        previewImage(e, 'poster-preview-container');
+    });
+
+    document.getElementById('bannerFile').addEventListener('change', function(e) {
+        previewImage(e, 'banner-preview-container');
+    });
+
+    function previewImage(event, containerId) {
+        const file = event.target.files[0];
+        const container = document.getElementById(containerId);
+
+        // Clear previous preview
+        container.innerHTML = '';
+
+        if (file) {
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File không được vượt quá 5MB!');
+                event.target.value = '';
+                return;
             }
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                alert('Vui lòng chọn file hình ảnh!');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.className = 'image-preview';
+                preview.src = e.target.result;
+                preview.alt = 'Preview';
+
+                const label = document.createElement('p');
+                label.className = 'text-muted small text-center mt-1';
+                label.textContent = 'Ảnh sẽ được upload';
+
+                container.appendChild(preview);
+                container.appendChild(label);
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Update counters for genres and actors
+    function updateCounters() {
+        const genreInputs = document.querySelectorAll('.genre-input:checked');
+        const actorInputs = document.querySelectorAll('.actor-input:checked');
+
+        const genreCounter = document.getElementById('genre-counter');
+        const actorCounter = document.getElementById('actor-counter');
+
+        genreCounter.textContent = `Đã chọn: ${genreInputs.length}/5 thể loại`;
+        actorCounter.textContent = `Đã chọn: ${actorInputs.length}/10 diễn viên`;
+
+        // Change color based on selection
+        if (genreInputs.length === 0) {
+            genreCounter.className = 'mt-1 text-danger small';
+            genreCounter.textContent += ' (Bắt buộc chọn ít nhất 1)';
+        } else if (genreInputs.length <= 5) {
+            genreCounter.className = 'mt-1 text-success small';
         }
 
-        startDateInput.addEventListener('change', function() {
-            if (this.value) {
-                endDateInput.min = this.value;
-            }
-            validateDates();
-        });
-
-        endDateInput.addEventListener('change', validateDates);
-
-        // Limit genre selection to 5 (but not required)
-        function limitGenreSelection() {
-            const checkedGenres = document.querySelectorAll('.genre-checkbox:checked');
-            if (checkedGenres.length >= 5) {
-                genreCheckboxes.forEach(checkbox => {
-                    if (!checkbox.checked) {
-                        checkbox.disabled = true;
-                    }
-                });
-            } else {
-                genreCheckboxes.forEach(checkbox => {
-                    checkbox.disabled = false;
-                });
-            }
+        if (actorInputs.length === 0) {
+            actorCounter.className = 'mt-1 text-danger small';
+            actorCounter.textContent += ' (Bắt buộc chọn ít nhất 1)';
+        } else if (actorInputs.length <= 10) {
+            actorCounter.className = 'mt-1 text-success small';
         }
+    }
 
-        genreCheckboxes.forEach(checkbox => {
-            checkbox.addEventListener('change', limitGenreSelection);
-        });
-
-        // Form submission validation - RELAXED
-        form.addEventListener('submit', function(e) {
-            const movieName = document.getElementById('movieName').value.trim();
-
-            // Only check movie name is required
-            if (!movieName) {
-                e.preventDefault();
-                alert('Tên phim là bắt buộc!');
-                document.getElementById('movieName').focus();
-                return false;
+    // Genre and Actor checkbox validation
+    document.querySelectorAll('.genre-input').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('.genre-input:checked').length;
+            if (checkedCount > 5) {
+                this.checked = false;
+                alert('Chỉ được chọn tối đa 5 thể loại!');
             }
-
-            const checkedGenres = document.querySelectorAll('.genre-checkbox:checked');
-
-            // Only check genre limit, not requirement
-            if (checkedGenres.length > 5) {
-                e.preventDefault();
-                alert('Please select no more than 5 genres for the movie.');
-                return false;
-            }
-
-            // Only validate dates if both are provided
-            if (startDateInput.value && endDateInput.value) {
-                validateDates();
-            }
-
-            // Basic form validation
-            if (!form.checkValidity()) {
-                e.preventDefault();
-                e.stopPropagation();
-            }
-
-            form.classList.add('was-validated');
-        });
-
-        // Add fade-in animation
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
+            updateCounters();
         });
     });
 
-    // Image preview functions
-    function previewImage() {
-        const imageUrl = document.getElementById('image').value;
-        const preview = document.getElementById('imagePreview');
+    document.querySelectorAll('.actor-input').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('.actor-input:checked').length;
+            if (checkedCount > 10) {
+                this.checked = false;
+                alert('Chỉ được chọn tối đa 10 diễn viên!');
+            }
+            updateCounters();
+        });
+    });
 
-        if (imageUrl && isValidImageUrl(imageUrl)) {
-            preview.src = imageUrl;
-            preview.style.display = 'block';
-            preview.onerror = function() {
-                this.style.display = 'none';
-            };
-        } else {
-            preview.style.display = 'none';
+    // Enhanced form validation (removed movie rate validation)
+    document.querySelector('#movieForm').addEventListener('submit', function(e) {
+        let isValid = true;
+        let errorMessages = [];
+
+        // Validate movie name
+        const movieName = document.getElementById('movieName').value.trim();
+        if (!movieName) {
+            errorMessages.push('Tên phim không được để trống');
+            isValid = false;
+        } else if (movieName.length > 255) {
+            errorMessages.push('Tên phim không được vượt quá 255 ký tự');
+            isValid = false;
         }
-    }
 
-    function previewBanner() {
-        const bannerUrl = document.getElementById('banner').value;
-        const preview = document.getElementById('bannerPreview');
-
-        if (bannerUrl && isValidImageUrl(bannerUrl)) {
-            preview.src = bannerUrl;
-            preview.style.display = 'block';
-            preview.onerror = function() {
-                this.style.display = 'none';
-            };
-        } else {
-            preview.style.display = 'none';
+        // Validate description
+        const description = document.getElementById('description').value.trim();
+        if (!description) {
+            errorMessages.push('Mô tả phim không được để trống');
+            isValid = false;
+        } else if (description.length > 2000) {
+            errorMessages.push('Mô tả không được vượt quá 2000 ký tự');
+            isValid = false;
         }
-    }
 
-    function isValidImageUrl(url) {
-        try {
-            new URL(url);
-            return /\.(jpg|jpeg|png|gif|webp)(\?.*)?$/i.test(url);
-        } catch {
+        // Validate studio
+        const studio = document.getElementById('studio').value.trim();
+        if (!studio) {
+            errorMessages.push('Hãng sản xuất không được để trống');
+            isValid = false;
+        } else if (studio.length > 100) {
+            errorMessages.push('Hãng sản xuất không được vượt quá 100 ký tự');
+            isValid = false;
+        }
+
+        // Validate duration
+        const duration = parseInt(document.getElementById('duration').value);
+        if (!duration || duration <= 0 || duration > 500) {
+            errorMessages.push('Thời lượng phim phải từ 1 đến 500 phút');
+            isValid = false;
+        }
+
+        // Validate dates
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        if (!startDateInput.value) {
+            errorMessages.push('Ngày bắt đầu không được để trống');
+            isValid = false;
+        }
+
+        if (!endDateInput.value) {
+            errorMessages.push('Ngày kết thúc không được để trống');
+            isValid = false;
+        }
+
+        if (startDateInput.value && endDateInput.value) {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (startDate < today) {
+                errorMessages.push('Ngày bắt đầu phải từ hôm nay trở đi');
+                isValid = false;
+            }
+
+            if (startDate >= endDate) {
+                errorMessages.push('Ngày kết thúc phải sau ngày bắt đầu');
+                isValid = false;
+            }
+        }
+
+        // Validate status
+        const status = document.getElementById('status').value;
+        if (!status) {
+            errorMessages.push('Vui lòng chọn trạng thái phim');
+            isValid = false;
+        }
+
+        // Validate genres
+        const checkedGenres = document.querySelectorAll('.genre-input:checked');
+        if (checkedGenres.length === 0) {
+            errorMessages.push('Phải chọn ít nhất 1 thể loại');
+            isValid = false;
+        } else if (checkedGenres.length > 5) {
+            errorMessages.push('Chỉ được chọn tối đa 5 thể loại');
+            isValid = false;
+        }
+
+        // Validate actors
+        const checkedActors = document.querySelectorAll('.actor-input:checked');
+        if (checkedActors.length === 0) {
+            errorMessages.push('Phải chọn ít nhất 1 diễn viên');
+            isValid = false;
+        } else if (checkedActors.length > 10) {
+            errorMessages.push('Chỉ được chọn tối đa 10 diễn viên');
+            isValid = false;
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Vui lòng sửa các lỗi sau:\n\n' + errorMessages.join('\n'));
             return false;
         }
-    }
+
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang thêm phim...';
+        submitBtn.disabled = true;
+
+        // Re-enable button after timeout (in case of error)
+        setTimeout(() => {
+            if (submitBtn.disabled) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }, 10000);
+    });
+
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+
+    // Reset form handler
+    document.querySelector('button[type="reset"]').addEventListener('click', function() {
+        setTimeout(() => {
+            updateCounters();
+
+            // Reset date fields to default
+            const now = new Date();
+            const startDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            const endDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+            document.getElementById('startDate').value = startDate.toISOString().slice(0, 16);
+            document.getElementById('endDate').value = endDate.toISOString().slice(0, 16);
+
+            // Clear image previews
+            document.getElementById('poster-preview-container').innerHTML = '';
+            document.getElementById('banner-preview-container').innerHTML = '';
+        }, 50);
+    });
+
+    // Add fade-in animation on scroll
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+
+    // Observe fade-in elements
+    document.querySelectorAll('.fade-in').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(20px)';
+        el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
+        observer.observe(el);
+    });
+
+    console.log('Add movie form loaded - Auto rating set to 0.0');
 </script>
 </body>
 </html>

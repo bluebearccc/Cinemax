@@ -58,14 +58,24 @@ public class ActorService {
         Actor actor = new Actor();
         actor.setActorName(actorDTO.getActorName());
 
-        // Handle image path - use provided path or default
+        // Handle image path - CHỈ SỬ DỤNG UPLOADS
         String imagePath = actorDTO.getImage();
         if (imagePath == null || imagePath.trim().isEmpty()) {
-            imagePath = "/images/default-actor.png";
+            imagePath = "/uploads/default-actor.jpg";  // Thay đổi đường dẫn mặc định
+        }
+        // Đảm bảo đường dẫn luôn từ uploads
+        if (!imagePath.startsWith("/uploads/")) {
+            if (imagePath.startsWith("/")) {
+                imagePath = "/uploads" + imagePath;
+            } else {
+                imagePath = "/uploads/" + imagePath;
+            }
         }
         actor.setImage(imagePath);
 
-        return convertToDTO(actorRepository.save(actor));
+        Actor savedActor = actorRepository.save(actor);
+        System.out.println("Actor saved with image: " + savedActor.getImage());
+        return convertToDTO(savedActor);
     }
 
     public ActorDTO updateActor(ActorDTO actorDTO) {
@@ -75,19 +85,30 @@ public class ActorService {
                 .map(actor -> {
                     actor.setActorName(actorDTO.getActorName());
 
-                    // Handle image path - use provided path or keep existing or use default
+                    // Handle image path - CHỈ SỬ DỤNG UPLOADS
                     String imagePath = actorDTO.getImage();
                     if (imagePath == null || imagePath.trim().isEmpty()) {
                         // If no new image path provided, keep existing or use default
                         if (actor.getImage() == null || actor.getImage().trim().isEmpty()) {
-                            imagePath = "/images/default-actor.png";
+                            imagePath = "/uploads/default-actor.jpg";
                         } else {
                             imagePath = actor.getImage(); // Keep existing
+                        }
+                    } else {
+                        // Đảm bảo đường dẫn luôn từ uploads
+                        if (!imagePath.startsWith("/uploads/")) {
+                            if (imagePath.startsWith("/")) {
+                                imagePath = "/uploads" + imagePath;
+                            } else {
+                                imagePath = "/uploads/" + imagePath;
+                            }
                         }
                     }
                     actor.setImage(imagePath);
 
-                    return convertToDTO(actorRepository.save(actor));
+                    Actor updatedActor = actorRepository.save(actor);
+                    System.out.println("Actor updated with image: " + updatedActor.getImage());
+                    return convertToDTO(updatedActor);
                 })
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy diễn viên với ID: " + actorDTO.getActorId()));
     }
@@ -145,7 +166,6 @@ public class ActorService {
         actorRepository.deleteById(actorId);
     }
 
-
     private ActorDTO convertToDTO(Actor actor) {
         if (actor == null) return null;
 
@@ -153,10 +173,13 @@ public class ActorService {
         dto.setActorId(convertToInteger(actor.getActorId()));
         dto.setActorName(actor.getActorName());
 
-        // Handle image path - ensure it's not null
+        // Handle image path - ĐẢM BẢO CHỈ SỬ DỤNG ĐƯỜNG DẪN TỪ UPLOADS
         String imagePath = actor.getImage();
         if (imagePath == null || imagePath.trim().isEmpty()) {
-            imagePath = "/images/default-actor.png";
+            imagePath = "/uploads/default-actor.jpg";
+        } else if (!imagePath.startsWith("/uploads/")) {
+            // Nếu đường dẫn không phải từ uploads, thử tìm ảnh trong uploads
+            imagePath = "/uploads/actor_" + actor.getActorId() + ".jpg";
         }
         dto.setImage(imagePath);
 

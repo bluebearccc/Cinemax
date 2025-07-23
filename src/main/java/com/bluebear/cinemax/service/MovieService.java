@@ -78,26 +78,63 @@ public class MovieService {
 
     private String validateMovieData(Movie movie, boolean isAdd) {
         if (movie == null) return "Dữ liệu phim không hợp lệ";
+
+        // Tên phim bắt buộc
         if (movie.getMovieName() == null || movie.getMovieName().trim().isEmpty())
             return "Tên phim không được để trống";
-        if (movie.getMovieName().length() > 100)
-            return "Tên phim không được vượt quá 100 ký tự";
+        if (movie.getMovieName().length() > 255)
+            return "Tên phim không được vượt quá 255 ký tự";
+
+        // Mô tả bắt buộc
+        if (movie.getDescription() == null || movie.getDescription().trim().isEmpty())
+            return "Mô tả phim không được để trống";
+        if (movie.getDescription().length() > 2000)
+            return "Mô tả không được vượt quá 2000 ký tự";
+
+        // Hãng sản xuất bắt buộc
+        if (movie.getStudio() == null || movie.getStudio().trim().isEmpty())
+            return "Hãng sản xuất không được để trống";
+        if (movie.getStudio().length() > 100)
+            return "Tên hãng sản xuất không được vượt quá 100 ký tự";
+
+        // Thời lượng bắt buộc
+        if (movie.getDuration() == null)
+            return "Thời lượng phim không được để trống";
+        if (movie.getDuration() <= 0 || movie.getDuration() > 500)
+            return "Thời lượng phim phải từ 1-500 phút";
+
+        // Đánh giá bắt buộc
+        if (movie.getMovieRate() == null)
+            return "Đánh giá phim không được để trống";
+        if (movie.getMovieRate() < 0.0 || movie.getMovieRate() > 5.0)
+            return "Đánh giá phải từ 0.0 đến 5.0";
+
+        // Ngày bắt đầu bắt buộc
+        if (movie.getStartDate() == null)
+            return "Ngày bắt đầu chiếu không được để trống";
+        LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
+        if (movie.getStartDate().isBefore(today))
+            return "Ngày bắt đầu chiếu phải từ hôm nay trở đi";
+
+        // Ngày kết thúc bắt buộc
+        if (movie.getEndDate() == null)
+            return "Ngày kết thúc chiếu không được để trống";
+        if (movie.getEndDate().isBefore(movie.getStartDate()) || movie.getEndDate().isEqual(movie.getStartDate()))
+            return "Ngày kết thúc phải sau ngày bắt đầu";
+
+        // Trạng thái bắt buộc
+        if (movie.getStatus() == null)
+            return "Trạng thái phim không được để trống";
 
         if (isAdd && isMovieNameExists(movie.getMovieName(), null))
             return "Tên phim đã tồn tại";
 
-        if (movie.getDuration() != null && movie.getDuration() <= 0)
-            return "Thời lượng phim phải lớn hơn 0";
-        if (movie.getMovieRate() != null && (movie.getMovieRate() < 0.0 || movie.getMovieRate() > 5.0))
-            return "Đánh giá phải từ 0.0 đến 5.0";
-        if (movie.getStartDate() != null && movie.getEndDate() != null &&
-                movie.getStartDate().isAfter(movie.getEndDate()))
-            return "Ngày bắt đầu chiếu phải trước ngày kết thúc";
-
         return null;
     }
 
-    private String validateIds(List<Integer> ids, String type, int maxCount) {
+    private String validateIds(List<Integer> ids, String type, int maxCount, boolean required) {
+        if (required && (ids == null || ids.isEmpty()))
+            return String.format("Phải chọn ít nhất một %s", type);
         if (ids == null || ids.isEmpty()) return null;
         if (ids.size() > maxCount) return String.format("Một phim chỉ có thể có tối đa %d %s", maxCount, type);
 
@@ -109,58 +146,196 @@ public class MovieService {
         return null;
     }
 
+    // ==================== STATUS VALIDATION ====================
+
+    /**
+     * Kiểm tra xem movie có thể chuyển từ Active sang Removed hay không
+     * @param movieId ID của movie cần kiểm tra
+     * @return true nếu có thể chuyển, false nếu không
+     */
+    private boolean canChangeToRemovedStatus(Integer movieId) {
+        if (movieId == null) return false;
+
+        // Kiểm tra xem movie có tồn tại trong schedule không
+        return !movieRepository.existsInSchedule(movieId);
+    }
+
+    /**
+     * Validate việc thay đổi status của movie
+     * @param currentMovie Movie hiện tại
+     * @param newStatus Status mới
+     * @return null nếu hợp lệ, message lỗi nếu không hợp lệ
+     */
+    private String validateStatusChange(Movie currentMovie, Movie_Status newStatus) {
+        if (currentMovie == null || newStatus == null) {
+            return "Dữ liệu không hợp lệ";
+        }
+
+        Movie_Status currentStatus = currentMovie.getStatus();
+
+        // Nếu status không thay đổi thì OK
+        if (currentStatus == newStatus) {
+            return null;
+        }
+
+        // Kiểm tra chuyển từ Active sang Removed
+        if (currentStatus == Movie_Status.Active && newStatus == Movie_Status.Removed) {
+            if (!canChangeToRemovedStatus(currentMovie.getMovieID())) {
+                return "Không thể xóa phim này vì đang có lịch chiếu";
+            }
+        }
+
+        // Các trường hợp khác đều cho phép
+        return null;
+    }
+
     // ==================== UPDATE OPERATIONS ====================
 
     @Transactional
-    public boolean updateMovieComplete(Integer id, Movie movieDetails, List<Integer> genreIds) {
-        if (id == null || movieDetails == null) return false;
-
+    public boolean updateMovieComplete(Integer movieId, Movie updatedMovie, List<Integer> genreIds, List<Integer> actorIds) {
         try {
-            Movie existingMovie = movieRepository.findById(id).orElse(null);
-            if (existingMovie == null) return false;
+            if (movieId == null || updatedMovie == null) {
+                return false;
+            }
 
-            // Copy fields
-            existingMovie.setMovieName(movieDetails.getMovieName());
-            existingMovie.setDescription(movieDetails.getDescription());
-            existingMovie.setImage(movieDetails.getImage());
-            existingMovie.setBanner(movieDetails.getBanner());
-            existingMovie.setStudio(movieDetails.getStudio());
-            existingMovie.setDuration(movieDetails.getDuration());
-            existingMovie.setTrailer(movieDetails.getTrailer());
-            existingMovie.setMovieRate(movieDetails.getMovieRate());
-            existingMovie.setStartDate(movieDetails.getStartDate());
-            existingMovie.setEndDate(movieDetails.getEndDate());
-            existingMovie.setStatus(movieDetails.getStatus());
+            // Kiểm tra phim có tồn tại không
+            Movie existingMovie = movieRepository.findById(movieId).orElse(null);
+            if (existingMovie == null) {
+                return false;
+            }
 
-            Movie savedMovie = movieRepository.save(existingMovie);
-            updateRelationships(savedMovie, genreIds, null);
+            // Validate dữ liệu
+            String validationError = validateMovieData(updatedMovie, false);
+            if (validationError != null) {
+                throw new IllegalArgumentException(validationError);
+            }
+
+            // Kiểm tra tên phim trùng lặp (ngoại trừ chính nó)
+            if (isMovieNameExists(updatedMovie.getMovieName(), movieId)) {
+                throw new IllegalArgumentException("Tên phim đã tồn tại");
+            }
+
+            // Validate thể loại (bắt buộc)
+            String genreValidationError = validateIds(genreIds, "thể loại", 5, true);
+            if (genreValidationError != null) {
+                throw new IllegalArgumentException(genreValidationError);
+            }
+
+            // Validate diễn viên (bắt buộc)
+            String actorValidationError = validateIds(actorIds, "diễn viên", 10, true);
+            if (actorValidationError != null) {
+                throw new IllegalArgumentException(actorValidationError);
+            }
+
+            // Validate status change
+            String statusValidationError = validateStatusChange(existingMovie, updatedMovie.getStatus());
+            if (statusValidationError != null) {
+                throw new IllegalArgumentException(statusValidationError);
+            }
+
+            // Cập nhật thông tin phim
+            existingMovie.setMovieName(updatedMovie.getMovieName());
+            existingMovie.setDescription(updatedMovie.getDescription());
+            existingMovie.setImage(updatedMovie.getImage());
+            existingMovie.setBanner(updatedMovie.getBanner());
+            existingMovie.setStudio(updatedMovie.getStudio());
+            existingMovie.setDuration(updatedMovie.getDuration());
+            existingMovie.setTrailer(updatedMovie.getTrailer());
+            existingMovie.setMovieRate(updatedMovie.getMovieRate());
+            existingMovie.setStartDate(updatedMovie.getStartDate());
+            existingMovie.setEndDate(updatedMovie.getEndDate());
+            existingMovie.setStatus(updatedMovie.getStatus());
+
+            // Cập nhật thể loại
+            List<Genre> newGenres = new ArrayList<>();
+            for (Integer genreId : genreIds) {
+                Genre genre = genreRepository.findById(genreId).orElse(null);
+                if (genre != null) {
+                    newGenres.add(genre);
+                }
+            }
+            existingMovie.setGenres(newGenres);
+
+            // Cập nhật diễn viên
+            List<Actor> newActors = new ArrayList<>();
+            for (Integer actorId : actorIds) {
+                Actor actor = actorRepository.findById(actorId).orElse(null);
+                if (actor != null) {
+                    newActors.add(actor);
+                }
+            }
+            existingMovie.setActors(newActors);
+
+            // Lưu vào database
+            movieRepository.save(existingMovie);
+
+            // Log để debug
+            System.out.println("Movie updated successfully:");
+            System.out.println("- ID: " + existingMovie.getMovieID());
+            System.out.println("- Image: " + existingMovie.getImage());
+            System.out.println("- Banner: " + existingMovie.getBanner());
 
             return true;
+
         } catch (Exception e) {
-            throw new RuntimeException("Error updating movie: " + e.getMessage());
+            System.err.println("Lỗi khi cập nhật phim hoàn chỉnh: " + e.getMessage());
+            e.printStackTrace();
+            throw e;
         }
     }
 
     @Transactional
-    public boolean updateEndDate(Integer id, LocalDateTime endDate) {
-        if (id == null || endDate == null) return false;
-
+    public boolean updateMovieStatus(Integer movieId, Movie_Status newStatus) {
         try {
-            Movie movie = movieRepository.findById(id).orElse(null);
-            if (movie == null) return false;
+            if (movieId == null || newStatus == null) {
+                return false;
+            }
 
-            if (movie.getStartDate() != null && endDate.isBefore(movie.getStartDate()))
-                throw new IllegalArgumentException("Ngày kết thúc không thể trước ngày bắt đầu chiếu");
-            if (movie.getStatus() == Movie_Status.Active && endDate.isBefore(LocalDateTime.now()))
-                throw new IllegalArgumentException("Ngày kết thúc không thể ở quá khứ đối với phim đang chiếu");
+            Movie movie = movieRepository.findById(movieId).orElse(null);
+            if (movie == null) {
+                return false;
+            }
 
-            movie.setEndDate(endDate);
+            // Kiểm tra điều kiện chuyển đổi status
+            String validationError = validateStatusChange(movie, newStatus);
+            if (validationError != null) {
+                throw new IllegalArgumentException(validationError);
+            }
+
+            movie.setStatus(newStatus);
             movieRepository.save(movie);
             return true;
-        } catch (IllegalArgumentException e) {
-            throw e;
+
         } catch (Exception e) {
-            throw new RuntimeException("Có lỗi xảy ra khi cập nhật ngày hết hạn chiếu: " + e.getMessage());
+            System.err.println("Lỗi khi cập nhật trạng thái phim: " + e.getMessage());
+            throw e;
+        }
+    }
+
+    @Transactional
+    public boolean updateEndDate(Integer movieId, LocalDateTime newEndDate) {
+        try {
+            if (movieId == null || newEndDate == null) {
+                return false;
+            }
+
+            Movie movie = movieRepository.findById(movieId).orElse(null);
+            if (movie == null) {
+                return false;
+            }
+
+            // Kiểm tra ngày kết thúc không được trước ngày bắt đầu
+            if (movie.getStartDate() != null && newEndDate.isBefore(movie.getStartDate())) {
+                return false;
+            }
+
+            movie.setEndDate(newEndDate);
+            movieRepository.save(movie);
+            return true;
+
+        } catch (Exception e) {
+            System.err.println("Lỗi khi cập nhật ngày kết thúc: " + e.getMessage());
+            return false;
         }
     }
 
@@ -191,10 +366,12 @@ public class MovieService {
             String error = validateMovieData(movie, true);
             if (error != null) throw new IllegalArgumentException(error);
 
-            error = validateIds(genreIds, "thể loại", 5);
+            // Validate thể loại (bắt buộc)
+            error = validateIds(genreIds, "thể loại", 5, true);
             if (error != null) throw new IllegalArgumentException(error);
 
-            error = validateIds(actorIds, "diễn viên", 20);
+            // Validate diễn viên (bắt buộc)
+            error = validateIds(actorIds, "diễn viên", 10, true);
             if (error != null) throw new IllegalArgumentException(error);
 
             setDefaultValues(movie);
@@ -207,21 +384,54 @@ public class MovieService {
         }
     }
 
+    // ==================== SCHEDULE CHECK METHODS ====================
+
+    /**
+     * Kiểm tra xem movie có schedule không
+     * @param movieId ID của movie
+     * @return true nếu có schedule, false nếu không
+     */
+    public boolean hasSchedule(Integer movieId) {
+        if (movieId == null) return false;
+        return movieRepository.existsInSchedule(movieId);
+    }
+
+    /**
+     * Kiểm tra xem movie có schedule đang hoạt động không
+     * @param movieId ID của movie
+     * @return true nếu có schedule active, false nếu không
+     */
+    public boolean hasActiveSchedule(Integer movieId) {
+        if (movieId == null) return false;
+        return movieRepository.hasActiveSchedule(movieId);
+    }
+
+    /**
+     * Lấy số lượng schedule của movie
+     * @param movieId ID của movie
+     * @return số lượng schedule
+     */
+    public long getScheduleCount(Integer movieId) {
+        if (movieId == null) return 0;
+        return movieRepository.countSchedulesByMovieId(movieId);
+    }
+
     // ==================== HELPER METHODS ====================
 
     private void setDefaultValues(Movie movie) {
-        if (movie.getDuration() == null) movie.setDuration(120);
-        if (movie.getStartDate() == null) movie.setStartDate(LocalDateTime.now());
-        if (movie.getEndDate() == null) movie.setEndDate(movie.getStartDate().plusDays(30));
-        if (movie.getStatus() == null) movie.setStatus(Movie_Status.Active);
-        if (movie.getMovieRate() == null) movie.setMovieRate(0.0);
-
+        // Không set default cho các field bắt buộc, chỉ set cho field tùy chọn
         movie.setMovieName(movie.getMovieName() != null ? movie.getMovieName().trim() : "");
-        movie.setDescription(getOrDefault(movie.getDescription(), "Đang cập nhật thông tin phim..."));
-        movie.setStudio(getOrDefault(movie.getStudio(), "Chưa xác định"));
-        movie.setImage(getOrDefault(movie.getImage(), "/images/default-poster.jpg"));
-        movie.setBanner(getOrDefault(movie.getBanner(), "/images/default-banner.jpg"));
-        movie.setTrailer(getOrDefault(movie.getTrailer(), "https://www.youtube.com/watch?v=dQw4w9WgXcQ"));
+        movie.setDescription(movie.getDescription() != null ? movie.getDescription().trim() : "");
+        movie.setStudio(movie.getStudio() != null ? movie.getStudio().trim() : "");
+
+        // Chỉ set default nếu chưa có giá trị
+        if (movie.getImage() == null || movie.getImage().trim().isEmpty()) {
+            movie.setImage("/uploads/default-movie.jpg");
+        }
+        if (movie.getBanner() == null || movie.getBanner().trim().isEmpty()) {
+            movie.setBanner("/uploads/default-banner.jpg");
+        }
+        movie.setTrailer(getOrDefault(movie.getTrailer(), null));
     }
 
     private String getOrDefault(String value, String defaultValue) {
@@ -262,8 +472,11 @@ public class MovieService {
         dto.setMovieId((Integer) movie.getMovieID());
         dto.setMovieName(movie.getMovieName());
         dto.setDescription(movie.getDescription());
-        dto.setImage(movie.getImage());
-        dto.setBanner(movie.getBanner());
+
+        // SỬ DỤNG TRỰC TIẾP ĐƯỜNG DẪN TỪ DATABASE
+        dto.setImage(movie.getImage() != null ? movie.getImage() : "/uploads/default-movie.jpg");
+        dto.setBanner(movie.getBanner() != null ? movie.getBanner() : "/uploads/default-banner.jpg");
+
         dto.setStudio(movie.getStudio());
         dto.setDuration(movie.getDuration());
         dto.setTrailer(movie.getTrailer());
@@ -282,4 +495,5 @@ public class MovieService {
 
         return dto;
     }
+
 }

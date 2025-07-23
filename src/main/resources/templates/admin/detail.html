@@ -340,6 +340,119 @@
             transform: translateY(-1px);
         }
 
+        .trailer-btn {
+            background: #ff0000;
+            color: white;
+        }
+
+        .trailer-btn:hover {
+            background: #cc0000;
+            transform: translateY(-1px);
+        }
+
+        /* Trailer Modal Styles */
+        .trailer-modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        .trailer-modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            position: relative;
+            width: 70%;
+            max-width: 900px;
+            aspect-ratio: 16/9;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .modal-header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 20px;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            color: white;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin: 0;
+        }
+
+        .close-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .close-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .trailer-iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
+            background: #000;
+        }
+
+        .loading-spinner {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            font-size: 2rem;
+            animation: spin 1s linear infinite;
+        }
+
+        .error-message {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: white;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .error-message i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            color: var(--danger-red);
+        }
+
         .info-sections {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -512,6 +625,27 @@
             opacity: 0.5;
         }
 
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+
+        @keyframes spin {
+            0% { transform: translate(-50%, -50%) rotate(0deg); }
+            100% { transform: translate(-50%, -50%) rotate(360deg); }
+        }
+
         @media (max-width: 1024px) {
             .info-sections {
                 grid-template-columns: 1fr;
@@ -519,6 +653,11 @@
 
             .movies-grid {
                 grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+
+            .modal-content {
+                width: 85%;
+                max-width: 700px;
             }
         }
 
@@ -560,30 +699,24 @@
             .action-buttons {
                 flex-direction: column;
             }
+
+            .modal-content {
+                width: 92%;
+                max-width: 500px;
+                margin: 10px;
+            }
+
+            .modal-header {
+                padding: 15px;
+            }
+
+            .modal-title {
+                font-size: 1rem;
+            }
         }
 
         .fade-in {
             animation: fadeIn 0.6s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .trailer-btn {
-            background: #ff0000;
-            color: white;
-        }
-
-        .trailer-btn:hover {
-            background: #cc0000;
         }
     </style>
 </head>
@@ -625,19 +758,19 @@
 
     <!-- Movie Hero Section -->
     <div class="movie-hero fade-in">
-        <img th:id="'movieBanner_' + ${movie.movieId}"
+        <img th:src="${movie.banner != null ? movie.banner : '/uploads/default-banner.jpg'}"
              th:alt="${movie.movieName}"
              class="movie-banner"
-             th:data-movie-id="${movie.movieId}">
+             onerror="this.src='/uploads/default-banner.jpg'">
         <div class="banner-overlay"></div>
 
         <div class="movie-content">
             <div class="movie-main-info">
                 <div class="movie-poster-container">
-                    <img th:id="'moviePoster_' + ${movie.movieId}"
+                    <img th:src="${movie.image != null ? movie.image : '/uploads/default-movie.jpg'}"
                          th:alt="${movie.movieName}"
                          class="movie-poster"
-                         th:data-movie-id="${movie.movieId}">
+                         onerror="this.src='/uploads/default-movie.jpg'">
                 </div>
 
                 <div class="movie-details">
@@ -681,10 +814,14 @@
                     </p>
 
                     <div class="action-buttons">
-                        <a th:href="${movie.trailer}" target="_blank" class="btn-action btn-primary trailer-btn" th:if="${movie.trailer}">
+                        <button th:if="${movie.trailer}"
+                                class="btn-action trailer-btn"
+                                onclick="openTrailerModal()"
+                                th:data-trailer="${movie.trailer}"
+                                th:data-movie-name="${movie.movieName}">
                             <i class="fab fa-youtube"></i>
                             Watch Trailer
-                        </a>
+                        </button>
                         <a th:href="@{/admin/movies/{id}/edit(id=${movie.movieId})}" class="btn-action btn-outline">
                             <i class="fas fa-edit"></i>
                             Edit Movie
@@ -755,7 +892,8 @@
                 <div th:each="actor : ${actors}" class="actor-item">
                     <img th:src="${actor.image}"
                          th:alt="${actor.actorName}"
-                         class="actor-image">
+                         class="actor-image"
+                         onerror="this.src='/uploads/default-actor.jpg'">
                     <div class="actor-name" th:text="${actor.actorName}">Robert Downey Jr.</div>
                 </div>
             </div>
@@ -775,10 +913,10 @@
         <div class="movies-grid">
             <div th:each="relatedMovie : ${relatedMovies}" class="movie-card"
                  th:onclick="'window.location.href=\'/admin/movies/' + ${relatedMovie.movieId} + '\''">
-                <img th:id="'relatedImg_' + ${relatedMovie.movieId}"
+                <img th:src="${relatedMovie.image != null ? relatedMovie.image : '/uploads/default-movie.jpg'}"
                      th:alt="${relatedMovie.movieName}"
                      class="movie-card-image"
-                     th:data-movie-id="${relatedMovie.movieId}">
+                     onerror="this.src='/uploads/default-movie.jpg'">
                 <div class="movie-card-content">
                     <h4 class="movie-card-title" th:text="${relatedMovie.movieName}">Related Movie</h4>
                     <div class="movie-card-rating" th:if="${relatedMovie.movieRate != null}">
@@ -791,86 +929,173 @@
     </div>
 </div>
 
+<!-- Trailer Modal -->
+<div id="trailerModal" class="trailer-modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h3 class="modal-title" id="modalTitle">Movie Trailer</h3>
+            <button class="close-btn" onclick="closeTrailerModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="loading-spinner" id="loadingSpinner">
+            <i class="fas fa-spinner"></i>
+        </div>
+        <div class="error-message" id="errorMessage" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <h4>Unable to load trailer</h4>
+            <p>Please check your internet connection or try again later.</p>
+        </div>
+        <iframe id="trailerIframe" class="trailer-iframe" allowfullscreen></iframe>
+    </div>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
-    // Load movie images automatically
-    function loadMovieImages() {
-        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+    // Global variables for trailer modal
+    let trailerModal = null;
+    let trailerIframe = null;
+    let currentTrailerUrl = '';
+    let currentMovieName = '';
 
-        // Load poster image
-        const posterImg = document.querySelector('.movie-poster');
-        if (posterImg) {
-            const movieId = posterImg.getAttribute('data-movie-id');
-            if (movieId) {
-                tryLoadMovieImage(posterImg, movieId, imageExtensions, 0);
-            }
+    // Initialize trailer modal elements
+    document.addEventListener('DOMContentLoaded', function() {
+        trailerModal = document.getElementById('trailerModal');
+        trailerIframe = document.getElementById('trailerIframe');
+
+        // Initialize fade-in animations
+        initializeFadeInAnimations();
+
+        // Initialize movie cards
+        initializeMovieCards();
+
+        // Get trailer data from button
+        const trailerButton = document.querySelector('.trailer-btn');
+        if (trailerButton) {
+            currentTrailerUrl = trailerButton.getAttribute('data-trailer');
+            currentMovieName = trailerButton.getAttribute('data-movie-name');
+            document.getElementById('modalTitle').textContent = currentMovieName + ' - Trailer';
         }
 
-        // Load banner image (try banner first, then poster)
-        const bannerImg = document.querySelector('.movie-banner');
-        if (bannerImg) {
-            const movieId = bannerImg.getAttribute('data-movie-id');
-            if (movieId) {
-                tryLoadBannerImage(bannerImg, movieId, imageExtensions, 0);
-            }
-        }
-
-        // Load related movie images
-        const relatedImages = document.querySelectorAll('.movie-card-image');
-        relatedImages.forEach(img => {
-            const movieId = img.getAttribute('data-movie-id');
-            if (movieId) {
-                tryLoadMovieImage(img, movieId, imageExtensions, 0);
+        // Close modal when clicking outside
+        trailerModal.addEventListener('click', function(e) {
+            if (e.target === trailerModal) {
+                closeTrailerModal();
             }
         });
-    }
 
-    // Try to load movie poster/card image
-    function tryLoadMovieImage(img, movieId, extensions, extensionIndex) {
-        if (extensionIndex >= extensions.length) {
-            img.src = '/images/movies/default.jpg';
+        // Close modal on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && trailerModal.classList.contains('show')) {
+                closeTrailerModal();
+            }
+        });
+    });
+
+    // Open trailer modal
+    function openTrailerModal() {
+        if (!currentTrailerUrl) {
+            alert('Trailer không khả dụng');
             return;
         }
 
-        const extension = extensions[extensionIndex];
-        const imagePath = `/images/movies/movie_${movieId}.${extension}`;
+        // Show modal
+        trailerModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
 
-        const testImg = new Image();
-        testImg.onload = function() {
-            img.src = imagePath;
-        };
-        testImg.onerror = function() {
-            tryLoadMovieImage(img, movieId, extensions, extensionIndex + 1);
-        };
-        testImg.src = imagePath;
-    }
+        // Show loading spinner
+        document.getElementById('loadingSpinner').style.display = 'block';
+        document.getElementById('errorMessage').style.display = 'none';
 
-    // Try to load banner image (try banner first, then fallback to poster)
-    function tryLoadBannerImage(img, movieId, extensions, extensionIndex) {
-        if (extensionIndex >= extensions.length) {
-            // No banner found, try poster instead
-            tryLoadMovieImage(img, movieId, extensions, 0);
+        // Convert YouTube URL to embed format
+        const embedUrl = convertToEmbedUrl(currentTrailerUrl);
+
+        if (!embedUrl) {
+            showError('Invalid YouTube URL');
             return;
         }
 
-        const extension = extensions[extensionIndex];
-        const bannerPath = `/images/movies/banner_${movieId}.${extension}`;
+        // Load iframe
+        trailerIframe.onload = function() {
+            document.getElementById('loadingSpinner').style.display = 'none';
+        };
 
-        const testImg = new Image();
-        testImg.onload = function() {
-            img.src = bannerPath;
+        trailerIframe.onerror = function() {
+            showError('Failed to load trailer');
         };
-        testImg.onerror = function() {
-            tryLoadBannerImage(img, movieId, extensions, extensionIndex + 1);
-        };
-        testImg.src = bannerPath;
+
+        // Set iframe source
+        setTimeout(() => {
+            trailerIframe.src = embedUrl;
+        }, 300);
+
+        console.log('Opening trailer:', embedUrl);
     }
 
-    // Add fade-in animation on scroll
-    document.addEventListener('DOMContentLoaded', function() {
-        // Load images first
-        loadMovieImages();
+    // Close trailer modal
+    function closeTrailerModal() {
+        trailerModal.classList.remove('show');
+        document.body.style.overflow = 'auto';
 
+        // Stop video by clearing iframe src
+        trailerIframe.src = '';
+
+        // Reset states
+        document.getElementById('loadingSpinner').style.display = 'none';
+        document.getElementById('errorMessage').style.display = 'none';
+
+        console.log('Trailer modal closed');
+    }
+
+    // Convert YouTube URL to embed format
+    function convertToEmbedUrl(url) {
+        if (!url) return null;
+
+        try {
+            // Handle different YouTube URL formats
+            let videoId = '';
+
+            // Standard watch URL: https://www.youtube.com/watch?v=VIDEO_ID
+            if (url.includes('watch?v=')) {
+                const urlParams = new URLSearchParams(new URL(url).search);
+                videoId = urlParams.get('v');
+            }
+            // Short URL: https://youtu.be/VIDEO_ID
+            else if (url.includes('youtu.be/')) {
+                videoId = url.split('youtu.be/')[1].split('?')[0];
+            }
+            // Embed URL: https://www.youtube.com/embed/VIDEO_ID
+            else if (url.includes('/embed/')) {
+                videoId = url.split('/embed/')[1].split('?')[0];
+            }
+
+            if (!videoId) {
+                console.error('Could not extract video ID from URL:', url);
+                return null;
+            }
+
+            // Clean video ID (remove any extra parameters)
+            videoId = videoId.split('&')[0];
+
+            // Return embed URL with parameters
+            return `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&showinfo=0&modestbranding=1`;
+
+        } catch (error) {
+            console.error('Error converting YouTube URL:', error);
+            return null;
+        }
+    }
+
+    // Show error message
+    function showError(message) {
+        document.getElementById('loadingSpinner').style.display = 'none';
+        const errorDiv = document.getElementById('errorMessage');
+        errorDiv.style.display = 'block';
+        errorDiv.querySelector('p').textContent = message;
+    }
+
+    // Initialize fade-in animations
+    function initializeFadeInAnimations() {
         const observerOptions = {
             threshold: 0.1,
             rootMargin: '0px 0px -50px 0px'
@@ -892,8 +1117,11 @@
             el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
             observer.observe(el);
         });
+    }
 
-        // Movie card click handlers
+    // Initialize movie cards
+    function initializeMovieCards() {
+        // Movie card hover effects
         document.querySelectorAll('.movie-card').forEach(card => {
             card.addEventListener('mouseenter', function() {
                 this.style.transform = 'translateY(-4px) scale(1.02)';
@@ -904,24 +1132,14 @@
             });
         });
 
-        // Handle image load errors for fallback
-        const allImages = document.querySelectorAll('.movie-poster, .movie-banner, .movie-card-image');
-        allImages.forEach(img => {
-            img.addEventListener('error', function() {
-                if (!this.src.includes('default')) {
-                    this.src = '/images/movies/default.jpg';
-                }
-            });
-        });
-
         // Handle actor images
         const actorImages = document.querySelectorAll('.actor-image');
         actorImages.forEach(img => {
             img.addEventListener('error', function() {
-                this.src = '/images/actors/default.jpg';
+                this.src = '/uploads/default-actor.jpg';
             });
         });
-    });
+    }
 
     // Hard Delete Confirmation
     function confirmHardDelete() {
@@ -935,6 +1153,25 @@
             `Bạn có chắc chắn muốn tiếp tục?`
         );
     }
+
+    // Utility function to test if URL is valid YouTube link
+    function isValidYouTubeUrl(url) {
+        const youtubeRegex = /^(https?:\/\/)?(www\.)?(youtube\.com|youtu\.be)\/.+/;
+        return youtubeRegex.test(url);
+    }
+
+    // Debug function to test trailer modal
+    function testTrailerModal() {
+        currentTrailerUrl = 'https://www.youtube.com/watch?v=TcMBFSGVi1c';
+        currentMovieName = 'Test Movie';
+        document.getElementById('modalTitle').textContent = currentMovieName + ' - Trailer';
+        openTrailerModal();
+    }
+
+    // Console log for debugging
+    console.log('Detail page loaded');
+    console.log('Current trailer URL:', currentTrailerUrl);
+    console.log('Current movie name:', currentMovieName);
 </script>
 </body>
 </html>

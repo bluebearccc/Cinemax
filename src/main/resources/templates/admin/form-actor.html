@@ -605,7 +605,7 @@
             <span>Tạo Diễn Viên Mới</span>
         </h3>
 
-        <form th:action="@{/admin/actors/add}" method="post" th:object="${actor}" id="actorForm" novalidate>
+        <form th:action="@{/admin/actors/add}" method="post" th:object="${actor}" id="actorForm" enctype="multipart/form-data" novalidate>
 
             <div class="row">
                 <!-- Actor Name - Required -->
@@ -626,52 +626,44 @@
                     </div>
                 </div>
 
-                <!-- Image Link Input -->
+                <!-- Image Upload Section -->
                 <div class="col-md-6">
                     <div class="form-group">
-                        <label class="form-label" for="imageLink">Đường Dẫn Ảnh (Tùy chọn)</label>
-                        <input type="text"
-                               class="form-control"
-                               id="imageLink"
-                               th:field="*{image}"
-                               placeholder="/images/actors/actor-name.jpg"
-                               maxlength="500">
-                        <div class="form-help">
-                            Nhập đường dẫn ảnh từ thư mục static (không bắt buộc)
+                        <label class="form-label" for="imageFile">Ảnh Diễn Viên</label>
+
+                        <!-- Image Preview Container -->
+                        <div class="image-preview-container" id="imagePreviewContainer">
+                            <div class="actor-image-container" id="actorImageContainer">
+                                <img class="actor-image" id="previewImage" alt="Actor Image" style="display: none;">
+                                <div class="actor-image-placeholder" id="imagePlaceholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </div>
+                            <div class="image-status default" id="imageStatus">
+                                <i class="fas fa-info-circle"></i> Chọn file ảnh để xem trước
+                            </div>
                         </div>
-                        <div class="invalid-feedback" id="imageLinkError"></div>
+
+                        <!-- File Input -->
+                        <input type="file"
+                               class="form-control"
+                               id="imageFile"
+                               name="imageFile"
+                               accept="image/*"
+                               style="margin-top: 12px;">
+
+                        <div class="form-help">
+                            Chọn file ảnh (JPG, PNG, GIF, WEBP - tối đa 5MB)
+                        </div>
 
                         <!-- Image Examples -->
                         <div class="image-examples">
-                            <div class="example-title">Ví dụ đường dẫn:</div>
-                            <div class="example-item">/images/actors/tom-hanks.jpg</div>
-                            <div class="example-item">/images/actors/scarlett-johansson.png</div>
-                            <div class="example-item">/images/default-actor.png</div>
+                            <div class="example-title">Ảnh sẽ được lưu với format:</div>
+                            <div class="example-item">actor_[ID].extension</div>
+                            <div class="example-item">Ví dụ: actor_1.jpg</div>
                         </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Image Preview -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label class="form-label">Xem Trước Ảnh</label>
-                        <div class="image-preview-container" id="imagePreviewContainer">
-                            <div>
-                                <div class="actor-image-container" id="actorImageContainer">
-                                    <img class="actor-image"
-                                         id="previewImage"
-                                         src="/images/default-actor.png"
-                                         alt="Actor Preview"
-                                         style="display: none;">
-                                    <i class="fas fa-user actor-image-placeholder" id="imagePlaceholder"></i>
-                                </div>
-                                <div class="image-status default" id="imageStatus">
-                                    <i class="fas fa-info-circle"></i> Nhập đường dẫn ảnh để xem trước
-                                </div>
-                            </div>
-                        </div>
+                        <div class="invalid-feedback" id="imageFileError"></div>
                     </div>
                 </div>
             </div>
@@ -739,7 +731,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('actorForm');
         const actorNameInput = document.getElementById('actorName');
-        const imageLinkInput = document.getElementById('imageLink');
+        const imageFileInput = document.getElementById('imageFile');
         const previewImage = document.getElementById('previewImage');
         const imagePlaceholder = document.getElementById('imagePlaceholder');
         const actorImageContainer = document.getElementById('actorImageContainer');
@@ -752,6 +744,75 @@
         const selectedSummary = document.getElementById('selectedSummary');
         const selectedCount = document.getElementById('selectedCount');
         const selectedMoviesInput = document.getElementById('selectedMoviesInput');
+
+        // File input change handler
+        imageFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            clearError('imageFile');
+
+            if (!file) {
+                showImagePlaceholder();
+                imageStatus.className = 'image-status default';
+                imageStatus.innerHTML = '<i class="fas fa-info-circle"></i> Chọn file ảnh để xem trước';
+                imagePreviewContainer.className = 'image-preview-container';
+                actorImageContainer.className = 'actor-image-container';
+                previewActorImage.src = '/images/default-actor.png';
+                return;
+            }
+
+            // Validate file
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+            if (!allowedTypes.includes(file.type)) {
+                showError('imageFile', 'Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)');
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Định dạng file không hợp lệ';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                return;
+            }
+
+            if (file.size > maxSize) {
+                showError('imageFile', 'Kích thước file không được vượt quá 5MB');
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> File quá lớn (tối đa 5MB)';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                return;
+            }
+
+            // Show loading state
+            imageStatus.className = 'image-status default';
+            imageStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải ảnh...';
+
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewActorImage.src = e.target.result;
+                showImage();
+
+                const fileSizeKB = Math.round(file.size / 1024);
+                imageStatus.className = 'image-status success';
+                imageStatus.innerHTML = `<i class="fas fa-check-circle"></i> File hợp lệ (${fileSizeKB}KB)`;
+                imagePreviewContainer.className = 'image-preview-container has-image';
+                actorImageContainer.className = 'actor-image-container has-image';
+            };
+
+            reader.onerror = function() {
+                showError('imageFile', 'Không thể đọc file ảnh');
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Lỗi đọc file';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+            };
+
+            reader.readAsDataURL(file);
+        });
 
         // Load movies from server data
         function loadMovies() {
@@ -876,52 +937,6 @@
             }
         };
 
-        // Image preview handling
-        function updateImagePreview() {
-            const imagePath = imageLinkInput.value.trim();
-
-            if (!imagePath) {
-                // No image path - show placeholder
-                showImagePlaceholder();
-                imageStatus.className = 'image-status default';
-                imageStatus.innerHTML = '<i class="fas fa-info-circle"></i> Nhập đường dẫn ảnh để xem trước';
-                imagePreviewContainer.className = 'image-preview-container';
-                actorImageContainer.className = 'actor-image-container';
-                return;
-            }
-
-            // Show loading state
-            imageStatus.className = 'image-status default';
-            imageStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải ảnh...';
-
-            // Test if image exists
-            const testImage = new Image();
-            testImage.onload = function() {
-                // Image loaded successfully
-                previewImage.src = imagePath;
-                previewActorImage.src = imagePath;
-                showImage();
-                imageStatus.className = 'image-status success';
-                imageStatus.innerHTML = '<i class="fas fa-check-circle"></i> Ảnh tải thành công';
-                imagePreviewContainer.className = 'image-preview-container has-image';
-                actorImageContainer.className = 'actor-image-container has-image';
-                clearError('imageLink');
-            };
-
-            testImage.onerror = function() {
-                // Image failed to load
-                showImagePlaceholder();
-                imageStatus.className = 'image-status error';
-                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Không thể tải ảnh từ đường dẫn này';
-                imagePreviewContainer.className = 'image-preview-container has-error';
-                actorImageContainer.className = 'actor-image-container has-error';
-                previewActorImage.src = '/images/default-actor.png';
-                showError('imageLink', 'Đường dẫn ảnh không hợp lệ hoặc ảnh không tồn tại');
-            };
-
-            testImage.src = imagePath;
-        }
-
         function showImage() {
             previewImage.style.display = 'block';
             imagePlaceholder.style.display = 'none';
@@ -931,23 +946,6 @@
             previewImage.style.display = 'none';
             imagePlaceholder.style.display = 'flex';
         }
-
-        // Image link input event
-        imageLinkInput.addEventListener('input', function() {
-            clearError('imageLink');
-            updateImagePreview();
-            updatePreview();
-        });
-
-        // Auto-format image path
-        imageLinkInput.addEventListener('blur', function() {
-            let value = this.value.trim();
-            if (value && !value.startsWith('/')) {
-                value = '/' + value;
-                this.value = value;
-                updateImagePreview();
-            }
-        });
 
         // Update main preview
         function updatePreview() {
@@ -992,22 +990,19 @@
                 isValid = false;
             }
 
-            // Validate image link if provided
-            const imageLink = imageLinkInput.value.trim();
-            if (imageLink) {
-                if (imageLink.length > 500) {
-                    showError('imageLink', 'Đường dẫn ảnh không được vượt quá 500 ký tự');
+            // Validate image file if provided
+            const imageFile = imageFileInput.files[0];
+            if (imageFile) {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+                if (!allowedTypes.includes(imageFile.type)) {
+                    showError('imageFile', 'Chỉ chấp nhận file ảnh (JPG, PNG, GIF, WEBP)');
                     isValid = false;
                 }
 
-                // Check if it looks like a valid image path
-                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-                const hasValidExtension = imageExtensions.some(ext =>
-                    imageLink.toLowerCase().includes(ext)
-                );
-
-                if (!hasValidExtension) {
-                    showError('imageLink', 'Đường dẫn ảnh nên có phần mở rộng hợp lệ (.jpg, .png, .gif, .webp)');
+                if (imageFile.size > maxSize) {
+                    showError('imageFile', 'Kích thước file không được vượt quá 5MB');
                     isValid = false;
                 }
             }
@@ -1065,7 +1060,7 @@
             // Log form data for debugging
             console.log('Form submission:');
             console.log('Actor name:', actorNameInput.value);
-            console.log('Image link:', imageLinkInput.value);
+            console.log('Image file:', imageFileInput.files[0]);
             console.log('Selected movies:', selectedMoviesInput.value);
 
             // Re-enable button after timeout (in case of error)
@@ -1080,7 +1075,7 @@
         // Initialize everything
         function initialize() {
             loadMovies();
-            updateImagePreview();
+            showImagePlaceholder();
             updatePreview();
 
             // Auto-hide alerts
@@ -1104,29 +1099,6 @@
         actorNameInput.addEventListener('input', function() {
             const currentLength = this.value.length;
             const maxLength = 255;
-
-            let counter = this.parentNode.querySelector('.char-counter');
-            if (!counter) {
-                counter = document.createElement('div');
-                counter.className = 'char-counter form-help';
-                this.parentNode.appendChild(counter);
-            }
-
-            counter.textContent = `${currentLength}/${maxLength} ký tự`;
-
-            if (currentLength > maxLength * 0.9) {
-                counter.style.color = 'var(--warning-orange)';
-            } else if (currentLength === maxLength) {
-                counter.style.color = 'var(--danger-red)';
-            } else {
-                counter.style.color = 'var(--text-secondary)';
-            }
-        });
-
-        // Character counter for image link
-        imageLinkInput.addEventListener('input', function() {
-            const currentLength = this.value.length;
-            const maxLength = 500;
 
             let counter = this.parentNode.querySelector('.char-counter');
             if (!counter) {

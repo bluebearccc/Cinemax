@@ -340,7 +340,7 @@
             background: var(--card-hover);
         }
 
-        /* Movie Image Styles */
+        /* Movie Image Styles - Simplified */
         .movie-image-container {
             position: relative;
             width: 60px;
@@ -359,31 +359,6 @@
         .movie-image:hover {
             transform: scale(1.05);
             box-shadow: 0 8px 20px rgba(66, 133, 244, 0.3);
-        }
-
-        .image-status {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.7rem;
-            font-weight: bold;
-            border: 2px solid var(--card-bg);
-        }
-
-        .image-found {
-            background: var(--success-green);
-            color: white;
-        }
-
-        .image-not-found {
-            background: var(--danger-red);
-            color: white;
         }
 
         .movie-title {
@@ -480,30 +455,6 @@
             margin-top: 16px;
         }
 
-        /* Image Path Info */
-        .image-path-info {
-            background: rgba(66, 133, 244, 0.1);
-            border: 1px solid rgba(66, 133, 244, 0.3);
-            border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 16px;
-        }
-
-        .path-instruction {
-            color: var(--text-secondary);
-            font-size: 0.9rem;
-            margin-bottom: 8px;
-        }
-
-        .path-example {
-            font-family: 'Courier New', monospace;
-            background: var(--darker-bg);
-            padding: 8px 12px;
-            border-radius: 4px;
-            color: var(--primary-blue);
-            font-size: 0.85rem;
-        }
-
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
@@ -584,7 +535,7 @@
     <!-- Stats Cards -->
     <div class="stats-grid fade-in">
         <div class="stat-card">
-            <div class="stat-number">17</div>
+            <div class="stat-number" th:text="${#lists.size(movies)}">0</div>
             <div class="stat-label">Total Movies</div>
         </div>
         <div class="stat-card">
@@ -628,6 +579,8 @@
                         <option value="">All Status</option>
                         <option value="Active" th:selected="${selectedStatus == 'Active'}">Active</option>
                         <option value="Removed" th:selected="${selectedStatus == 'Removed'}">Removed</option>
+                        <option value="Inactive" th:selected="${selectedStatus == 'Inactive'}">Inactive</option>
+                        <option value="Coming_Soon" th:selected="${selectedStatus == 'Coming_Soon'}">Coming Soon</option>
                     </select>
                 </div>
                 <div class="col-md-3">
@@ -676,7 +629,7 @@
         </div>
 
         <div class="showing-info">
-            <small>Showing <span th:text="${#lists.size(movies)}">17</span> movies</small>
+            <small>Showing <span th:text="${#lists.size(movies)}">0</span> movies</small>
         </div>
     </div>
 
@@ -699,20 +652,16 @@
                 <tr th:each="movie : ${movies}">
                     <td>
                         <div class="movie-image-container">
-                            <img th:id="'movieImg_' + ${movie.movieId}"
+                            <img th:src="${movie.image != null ? movie.image : '/uploads/default-movie.jpg'}"
                                  th:alt="${movie.movieName}"
                                  class="movie-image"
-                                 th:data-movie-id="${movie.movieId}"
-                                 src="/images/movies/default.jpg">
-                            <div th:id="'imgStatus_' + ${movie.movieId}" class="image-status image-not-found">
-                                <i class="fas fa-times"></i>
-                            </div>
+                                 onerror="this.src='/uploads/default-movie.jpg'">
                         </div>
                     </td>
                     <td>
-                        <div class="movie-title" th:text="${movie.movieName}">Avengers: Endgame</div>
-                        <div class="movie-description" th:text="${#strings.abbreviate(movie.getMovieName(), 50)}">
-                            The final battle between superheroes and Thanos...
+                        <div class="movie-title" th:text="${movie.movieName}">Movie Name</div>
+                        <div class="movie-description" th:text="${#strings.abbreviate(movie.description != null ? movie.description : 'No description', 50)}">
+                            Movie description...
                         </div>
                     </td>
                     <td>
@@ -722,20 +671,24 @@
                         <small th:if="${movie.genres == null or #lists.isEmpty(movie.genres)}" class="text-muted">No genres</small>
                     </td>
                     <td>
-                        <span class="duration-badge" th:text="${movie.duration} + ' phút'">3h 1m</span>
+                        <span class="duration-badge" th:text="${movie.duration} + ' phút'">0 phút</span>
                     </td>
                     <td>
-                        <div th:text="${#temporals.format(movie.startDate, 'MMM dd, yyyy')}">Jan 15, 2024</div>
-                        <small class="text-muted" th:text="${#temporals.format(movie.endDate, 'MMM dd, yyyy')}">Apr 15, 2024</small>
+                        <div th:if="${movie.startDate != null}" th:text="${#temporals.format(movie.startDate, 'dd/MM/yyyy')}">Date</div>
+                        <small th:if="${movie.endDate != null}" class="text-muted" th:text="${#temporals.format(movie.endDate, 'dd/MM/yyyy')}">End Date</small>
+                        <div th:if="${movie.startDate == null}" class="text-muted">No date</div>
                     </td>
                     <td>
-                                <span th:class="${movie.status == 'Active'} ? 'status-badge status-active' : 'status-badge status-inactive'"
-                                      th:text="${movie.status}">Active</span>
+                        <span th:class="${movie.status == 'Active'} ? 'status-badge status-active' : 'status-badge status-inactive'"
+                              th:text="${movie.status}">Status</span>
                     </td>
                     <td>
                         <div class="action-buttons">
                             <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" class="btn-action btn-view">
                                 <i class="fas fa-eye"></i>
+                            </a>
+                            <a th:href="@{/admin/movies/{id}/edit(id=${movie.movieId})}" class="btn-action btn-view" style="background: #ff9800;">
+                                <i class="fas fa-edit"></i>
                             </a>
                         </div>
                     </td>
@@ -745,11 +698,23 @@
                     <td colspan="7" class="no-results">
                         <i class="fas fa-search"></i>
                         <p>No movies found matching your criteria</p>
-                        <small>Try adjusting your search filters</small>
+                        <small>Try adjusting your search filters or add some movies</small>
                     </td>
                 </tr>
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Simple Debug Info -->
+    <div class="mt-4">
+        <div class="card bg-dark border-secondary">
+            <div class="card-body">
+                <h6 class="text-muted">Debug Info:</h6>
+                <p class="text-muted mb-1">Total movies: <span th:text="${#lists.size(movies)}">0</span></p>
+                <p class="text-muted mb-1">Genres count: <span th:text="${#lists.size(genres)}">0</span></p>
+                <p class="text-muted mb-0">Page Title: <span th:text="${pageTitle}">N/A</span></p>
+            </div>
         </div>
     </div>
 </div>
@@ -797,80 +762,9 @@
             observer.observe(el);
         });
 
-        // Load movie images automatically
-        loadMovieImages();
-    });
-
-    // Load movie images from static folder
-    function loadMovieImages() {
-        const movieImages = document.querySelectorAll('.movie-image');
-        const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
-
-        movieImages.forEach(img => {
-            const movieId = img.getAttribute('data-movie-id');
-            if (movieId) {
-                tryLoadMovieImage(img, movieId, imageExtensions, 0);
-            }
-        });
-    }
-
-    // Try to load image with different extensions
-    function tryLoadMovieImage(img, movieId, extensions, extensionIndex) {
-        if (extensionIndex >= extensions.length) {
-            // No image found, use default
-            img.src = '/images/movies/default.jpg';
-            updateImageStatus(movieId, false);
-            return;
-        }
-
-        const extension = extensions[extensionIndex];
-        const imagePath = `/images/movies/movie_${movieId}.${extension}`;
-
-        // Create a test image to check if file exists
-        const testImg = new Image();
-
-        testImg.onload = function() {
-            // Image found, use it
-            img.src = imagePath;
-            updateImageStatus(movieId, true);
-        };
-
-        testImg.onerror = function() {
-            // Try next extension
-            tryLoadMovieImage(img, movieId, extensions, extensionIndex + 1);
-        };
-
-        testImg.src = imagePath;
-    }
-
-    // Update image status indicator
-    function updateImageStatus(movieId, found) {
-        const statusElement = document.getElementById(`imgStatus_${movieId}`);
-        if (statusElement) {
-            if (found) {
-                statusElement.className = 'image-status image-found';
-                statusElement.innerHTML = '<i class="fas fa-check"></i>';
-                statusElement.title = 'Image found';
-            } else {
-                statusElement.className = 'image-status image-not-found';
-                statusElement.innerHTML = '<i class="fas fa-times"></i>';
-                statusElement.title = 'Image not found - using default';
-            }
-        }
-    }
-
-    // Handle image load errors for fallback
-    document.addEventListener('DOMContentLoaded', function() {
-        const movieImages = document.querySelectorAll('.movie-image');
-        movieImages.forEach(img => {
-            img.addEventListener('error', function() {
-                if (this.src !== '/images/movies/default.jpg') {
-                    this.src = '/images/movies/default.jpg';
-                    const movieId = this.getAttribute('data-movie-id');
-                    updateImageStatus(movieId, false);
-                }
-            });
-        });
+        // Debug: Log movies data to console
+        console.log('Movies loaded:', document.querySelectorAll('tbody tr').length - 1); // -1 for no-results row
+        console.log('Using simple image loading from database paths');
     });
 </script>
 </body>
