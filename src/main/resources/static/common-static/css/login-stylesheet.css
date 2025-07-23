@@ -324,3 +324,19 @@ body::before {
     100% { transform: rotate(360deg); }
 }
 
+.form-checkbox {
+    width: auto;
+    height: auto;
+}
+
+.error {
+    color: #a94442;
+    background-color: #f2dede;
+    border: 1px solid #ebccd1;
+    border-radius: 10px;
+    padding: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 14px;
+    font-weight: bold;
+}

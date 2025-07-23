@@ -6,7 +6,7 @@
             <p>Please try again with different search criteria.</p>
         </div>
         <div class="blog-card" th:each="blog : ${blogs}">
-            <img th:src="@{${blog.image}}" class="blog-image">
+            <img th:src="${blog.image}" class="blog-image">
             <div class="blog-content">
                 <h3 class="blog-title" th:text="${blog.title}"></h3>
                 <div class="blog-meta">

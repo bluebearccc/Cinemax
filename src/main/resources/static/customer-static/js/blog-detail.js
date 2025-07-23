@@ -10,7 +10,7 @@ function attackLikeEvents() {
 
         const customerId = document.getElementById('customerId');
         if (customerId == null) {
-            window.location.href = '/login';
+            window.location.href = '/login?redirect=' + encodeURIComponent(window.location.pathname + window.location.search);
             return;
         }
 

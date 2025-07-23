@@ -3,7 +3,7 @@
 
     <div class="comments-list">
         <div class="comment-section-movie-detail">
-            <div th:if="${session.customer != null}">
+            <div th:if="${session.customer != null and isViewed == true}">
                 <form class="comment-form-main-movie-detail" id="mainCommentFormMovieDetail">
                     <div class="comment-form-movie-detail">
                         <div class="comment-avatar"><i class="fas fa-user"></i></div>

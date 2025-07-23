@@ -10,6 +10,7 @@ import com.bluebear.cinemax.service.employee.EmployeeService;
 import com.bluebear.cinemax.service.genre.GenreService;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.time.LocalDateTime;
@@ -101,13 +103,16 @@ public class BlogManagementController {
     }
 
     @PostMapping("/add-blog")
-    public String blogAdd(@ModelAttribute("blog") BlogDTO blogDTO, RedirectAttributes redirectAttributes) {
+    public String blogAdd(@ModelAttribute("blog") BlogDTO blogDTO, RedirectAttributes redirectAttributes, HttpSession session, @RequestParam("blogImage")MultipartFile file) {
         blogDTO.setCreatedAt(LocalDateTime.now());
         blogDTO.setUpdatedAt(LocalDateTime.now());
-        blogDTO.setAuthorID(1);
+        if (session.getAttribute("employee") != null) {
+            EmployeeDTO employeeDTO = (EmployeeDTO) session.getAttribute("employee");
+            blogDTO.setAuthorID(employeeDTO.getId());
+        }
         blogDTO.setViewCount(0);
         blogDTO.setLikeCount(0);
-        blogService.createBlog(blogDTO);
+        blogService.createBlog(blogDTO, file);
         blogs = blogService.getAllBlogs(PageRequest.of(0, Constant.BLOG_PER_ADMIN_PAGE));
         redirectAttributes.addFlashAttribute("blogs", blogs);
         redirectAttributes.addFlashAttribute("announce", "New blog has been added successfully !");
@@ -115,13 +120,13 @@ public class BlogManagementController {
     }
 
     @PostMapping("/edit-blog")
-    public String blogEdit(@ModelAttribute("blog") BlogDTO blogDTO, RedirectAttributes redirectAttributes) {
+    public String blogEdit(@ModelAttribute("blog") BlogDTO blogDTO, RedirectAttributes redirectAttributes, @RequestParam("blogImage")MultipartFile file) {
         BlogDTO oldBlog = blogService.getBlogById(blogDTO.getBlogID());
         blogDTO.setUpdatedAt(LocalDateTime.now());
         blogDTO.setAuthorID(oldBlog.getAuthorID());
         blogDTO.setViewCount(oldBlog.getViewCount());
         blogDTO.setLikeCount(oldBlog.getLikeCount());
-        blogService.updateBlog(blogDTO.getBlogID(), blogDTO);
+        blogService.updateBlog(blogDTO.getBlogID(), blogDTO, file);
         blogs = blogService.getAllBlogs(PageRequest.of(0, Constant.BLOG_PER_ADMIN_PAGE));
         redirectAttributes.addFlashAttribute("blogs", blogs);
         redirectAttributes.addFlashAttribute("announce", "Blog has been edited successfully !");

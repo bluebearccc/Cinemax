@@ -3,6 +3,7 @@ package com.bluebear.cinemax.controller;
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.Movie;
 import com.bluebear.cinemax.repository.MovieRepository;
+import com.bluebear.cinemax.service.detailseat.DetailSeatService;
 import com.bluebear.cinemax.service.movie.MovieService;
 import com.bluebear.cinemax.service.moviefeedback.MovieFeedbackService;
 import com.bluebear.cinemax.service.moviefeedbackcomment.MovieFeedbackCommentService;
@@ -42,6 +43,8 @@ public class TestController {
     private MovieFeedbackCommentService movieFeedbackCommentService;
     @Autowired
     private MovieRepository movieRepository;
+    @Autowired
+    private DetailSeatService detailSeatService;
 
     @GetMapping("/movieToday")
     public Page<MovieDTO> getMovieToday() {
@@ -106,6 +109,11 @@ public class TestController {
     @GetMapping("/testGetMovieByActor/{actorName}")
     public List<MovieDTO> getMovieByActor(@PathVariable String actorName) {
         return movieService.getMoviesByActor(actorName);
+    }
+
+    @GetMapping("/tesstuser/{customerId}/{movieID}")
+    public boolean testUser(@PathVariable int customerId, @PathVariable int movieID) {
+        return detailSeatService.hasCustomerWatched(customerId, movieID);
     }
 
 }

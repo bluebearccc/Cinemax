@@ -8,10 +8,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.apache.catalina.Context;
 
-//@Configuration
+@Configuration
 public class TomcatConfig {
 
-//    @Bean
+    @Bean
     public TomcatServletWebServerFactory servletContainer() {
         TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory() {
             @Override

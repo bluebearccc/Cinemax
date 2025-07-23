@@ -23,6 +23,8 @@ public interface DetailSeatService {
 
     int countDetailSeatByScheduleId(int scheduleId);
 
+    public boolean hasCustomerWatched(int customerId, int movieId);
+
     DetailSeatDTO toDTO(DetailSeat entity);
 
     DetailSeat toEntity(DetailSeatDTO dto);

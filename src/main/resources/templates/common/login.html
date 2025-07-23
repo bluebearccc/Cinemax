@@ -13,7 +13,7 @@
     <link rel="stylesheet" th:href="@{/customer-static/css/owl.carousel.min.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
-    <link th:href="@{/common-static/css/login-stylesheet.css}" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/common-static/css/login-stylesheet.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
 
@@ -21,77 +21,83 @@
     <title>Login</title>
 </head>
 <body>
-<!-- ==========Preloader========== -->
 <div th:replace="common/fragments/preloader :: preloader">
 </div>
-<!-- ==========Preloader========== -->
-<!-- ==========Overlay========== -->
 <a href="#0" class="scrollToTop">
     <i class="fas fa-angle-up"></i>
 </a>
-<!-- ==========Overlay========== -->
-<!-- ==========Header-Section========== -->
 <header th:replace="common/fragments/header :: header-section">
 </header>
-<!-- ==========Header-Section========== -->
-
-    <div class="login-container">
-        <div class="login-header">
-            <h1 class="login-title">Welcome Back</h1>
-            <p class="login-subtitle">Sign in to continue to CinemaMax</p>
-        </div>
-
-        <form id="loginForm" th:action="@{/login}" method="POST">
-            <div class="form-group">
-                <label for="email" class="form-label">Email Address</label>
-                <input
-                        type="email"
-                        id="email"
-                        name="email"
-                        class="form-input"
-                        placeholder="Enter your email"
-                        required
-                        autocomplete="username"
-                >
-            </div>
-
-            <div class="form-group">
-                <label for="password" class="form-label">Password</label>
-                <input
-                        type="password"
-                        id="password"
-                        name="password"
-                        class="form-input"
-                        placeholder="Enter your password"
-                        required
-                        autocomplete="current-password"
-                >
-            </div>
-
-            <div class="forgot-password">
-                <p class="error" th:text="${error}"></p>
-                <a th:href="@{/forgotpassword}" id="forgotPasswordLink">Forgot Password?</a>
-            </div>
-
-            <button type="submit" class="login-btn" id="loginBtn">
-                Sign In
-            </button>
-        </form>
-
-        <div class="social-buttons">
-            <a th:href="@{oauth/google/login}" class="social-btn google" id="googleLogin" title="Login with Google">
-                <img th:src="@{/common-static/images/google.jpg}" alt="Google"/>
-            </a>
-            <a th:href="@{oauth/github/login}" class="social-btn github" id="githubLogin" title="Login with GitHub">
-                <img th:src="@{/common-static/images/github.png}" alt="GitHub"/>
-            </a>
-        </div>
-
-        <div class="create-account">
-            Don't have an account?
-            <a th:href="@{/register}" id="createAccountLink">Create Account</a>
-        </div>
+<div class="login-container">
+    <div class="login-header">
+        <h1 class="login-title">Welcome Back</h1>
+        <p class="login-subtitle">Sign in to continue to CinemaMax</p>
     </div>
+
+    <form id="loginForm" th:action="@{/login}" method="POST">
+        <div th:if="${error != null}" class="form-group">
+            <p class="error" th:text="${error}"></p>
+        </div>
+        <input type="hidden" name="redirect" id="redirectValue"/>
+        <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input
+                    type="email"
+                    id="email"
+                    name="username"
+                    class="form-input"
+                    placeholder="Enter your email"
+                    required
+                    autocomplete="username"
+            >
+        </div>
+
+        <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <input
+                    type="password"
+                    id="password"
+                    name="password"
+                    class="form-input"
+                    placeholder="Enter your password"
+                    required
+                    autocomplete="current-password"
+            >
+        </div>
+
+        <div class="forgot-password">
+            <div class="form-group-checkbox">
+                <input
+                        type="checkbox"
+                        id="remember-me"
+                        name="remember-me"
+                        class="form-checkbox"
+                >
+                <label for="remember-me" class="form-label-checkbox">Remember Me</label>
+            </div>
+            <a th:href="@{/forgotpassword}" id="forgotPasswordLink">Forgot Password?</a>
+        </div>
+
+        <button type="submit" class="login-btn" id="loginBtn">
+            Sign In
+        </button>
+    </form>
+
+    <div class="social-buttons">
+        <a th:href="@{/oauth2/authorize/google}" class="social-btn google" id="googleLogin" title="Login with Google">
+            <img th:src="@{/common-static/images/google.jpg}" alt="Google"/>
+        </a>
+        <a th:href="@{/oauth2/authorize/github}" class="social-btn github" id="githubLogin" title="Login with GitHub">
+            <img th:src="@{/common-static/images/github.png}" alt="GitHub"/>
+        </a>
+    </div>
+
+    <div class="create-account">
+        Don't have an account?
+        <a th:href="@{/register}" id="createAccountLink">Create Account</a>
+    </div>
+</div>
+<script th:src="@{/common-static/js/login.js}"></script>
 <script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
 <script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
 <script th:src="@{/customer-static/js/plugins.js}"></script>

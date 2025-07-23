@@ -2,6 +2,7 @@ package com.bluebear.cinemax.controller;
 
 import com.bluebear.cinemax.constant.Constant;
 import com.bluebear.cinemax.dto.*;
+import com.bluebear.cinemax.service.detailseat.DetailSeatService;
 import com.bluebear.cinemax.service.genre.GenreService;
 import com.bluebear.cinemax.service.movie.MovieService;
 import com.bluebear.cinemax.service.moviefeedback.MovieFeedbackService;
@@ -9,6 +10,7 @@ import com.bluebear.cinemax.service.moviefeedbackcomment.MovieFeedbackCommentSer
 import com.bluebear.cinemax.service.schedule.ScheduleService;
 import com.bluebear.cinemax.service.theater.TheaterService;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -40,6 +42,8 @@ public class MovieDetailController {
     private MovieFeedbackCommentService commentService;
     @Autowired
     private GenreService genreService;
+    @Autowired
+    private DetailSeatService detailSeatService;
 
     List<GenreDTO> genres;
     Page<TheaterDTO> theaters;
@@ -58,10 +62,17 @@ public class MovieDetailController {
     }
 
     @GetMapping
-    public String movieDetail(Model model, @RequestParam int movieId) {
+    public String movieDetail(Model model, @RequestParam int movieId, HttpSession session) {
+        boolean isViewed = false;
         movieFeedbacks = new LinkedHashMap<>();
         String roomType = "single";
         boolean isNearest = false;
+
+        if (session.getAttribute("customer") != null) {
+            CustomerDTO customerDTO = (CustomerDTO) session.getAttribute("customer");
+            isViewed = detailSeatService.hasCustomerWatched(customerDTO.getId(), movieId);
+        }
+
         currentTheater = theaters.getContent().getFirst();
         MovieDTO movieDTO = movieService.findMovieByIdWithGenresAndActors(movieId);
         if (movieDTO != null) {
@@ -77,6 +88,7 @@ public class MovieDetailController {
 
             currentWebPage = "movies";
 
+            model.addAttribute("isViewed", isViewed);
             model.addAttribute("isNearest", isNearest);
             model.addAttribute("roomType", roomType);
             model.addAttribute("schedules", schedules);
@@ -119,6 +131,7 @@ public class MovieDetailController {
 
     @GetMapping("/loadFeedback")
     public String loadFeedback(Model model, @RequestParam int movieId, @RequestParam int currentPage) {
+        boolean isViewed = false;
         Page<MovieFeedbackDTO> newFeedBacks = movieFeedbackService.getAllByMovieIdWithCommentCount(movieId, PageRequest.of(currentPage + 1, Constant.FEEDBACK_PER_PAGE));
         List<MovieFeedbackDTO> feedbackDTOS = new ArrayList<>();
         feedbackDTOS.addAll(listFeedback.getContent());
@@ -129,7 +142,7 @@ public class MovieDetailController {
         for (MovieFeedbackDTO movieFeedbackDTO : newFeedBacks.getContent()) {
             movieFeedbacks.put(movieFeedbackDTO.getId(), Page.empty());
         }
-
+        model.addAttribute("isViewed", isViewed);
         model.addAttribute("currentPage", newFeedBacks.getNumber());
         model.addAttribute("totalPage", newFeedBacks.getTotalPages());
         model.addAttribute("movieFeedbacks", movieFeedbacks);
@@ -139,6 +152,7 @@ public class MovieDetailController {
 
     @GetMapping("/loadComment")
     public String loadComment(Model model, @RequestParam int currentNumOfComment, @RequestParam int feedbackId) {
+        boolean isViewed = false;
         currentNumOfComment = (int) Math.ceil((double) currentNumOfComment / Constant.COMMENT_PER_FEEDBACK);
         Page<MovieFeedbackCommentDTO> newListComment = commentService.getCommentsByFeedbackId(feedbackId, PageRequest.of(currentNumOfComment, Constant.FEEDBACK_PER_PAGE));
         MovieFeedbackDTO feedbackDTO = movieFeedbackService.getFeedBackWithCommentCountByFeedbackId(feedbackId);
@@ -148,7 +162,7 @@ public class MovieDetailController {
         if (feedbackDTOS.size() > 0) {
             movieFeedbacks.put(feedbackId, new PageImpl<>(feedbackDTOS, PageRequest.of(0, feedbackDTOS.size()), feedbackDTOS.size()));
         }
-
+        model.addAttribute("isViewed", isViewed);
         model.addAttribute("feedback", feedbackDTO);
         model.addAttribute("movieFeedbacks", movieFeedbacks);
         return "customer/fragments/movie-detail/feedback-comment :: feedback-comment";
@@ -156,11 +170,12 @@ public class MovieDetailController {
 
     @PostMapping("/addFeedback")
     public String addFeedback(Model model, @RequestParam Integer movieId, @RequestParam Integer customerId, @RequestParam String content, @RequestParam(required = false) Integer rate, @RequestParam Integer currentPage, @RequestParam Integer totalPage) {
+        boolean isViewed = false;
         MovieFeedbackDTO movieFeedbackDTO = MovieFeedbackDTO.builder().movieId(movieId).customerId(customerId).content(content).movieRate(rate).createdDate(LocalDateTime.now()).build();
         MovieFeedbackDTO createdFeedBack = movieFeedbackService.create(movieFeedbackDTO);
         listFeedback = movieFeedbackService.getAllByMovieIdWithCommentCount(movieId, PageRequest.of(0, Constant.FEEDBACK_PER_PAGE * (currentPage + 1)));
         movieFeedbacks.put(createdFeedBack.getId(), Page.empty());
-
+        model.addAttribute("isViewed", isViewed);
         model.addAttribute("movieFeedbacks", movieFeedbacks);
         model.addAttribute("listFeedback", listFeedback);
         model.addAttribute("currentPage", currentPage);
@@ -170,6 +185,7 @@ public class MovieDetailController {
 
     @PostMapping("/addComment")
     public String addComment(Model model, @RequestParam Integer feedbackId, @RequestParam Integer authorId, @RequestParam Integer repliedId, @RequestParam String content, @RequestParam int currentNumOfComment) {
+        boolean isViewed = false;
         MovieFeedbackCommentDTO commentDTO = MovieFeedbackCommentDTO.builder().feedbackId(feedbackId).authorCustomerId(authorId).repliedToCustomerId(repliedId).content(content).createdDate(LocalDateTime.now()).build();
         commentService.createComment(commentDTO);
 
@@ -177,7 +193,7 @@ public class MovieDetailController {
         Page<MovieFeedbackCommentDTO> newListComment = commentService.getCommentsByFeedbackId(feedbackId, PageRequest.of(0, (Constant.FEEDBACK_PER_PAGE * (currentNumOfComment + 1) + 1)));
         MovieFeedbackDTO feedbackDTO = movieFeedbackService.getFeedBackWithCommentCountByFeedbackId(feedbackId);
         movieFeedbacks.replace(feedbackId, newListComment);
-
+        model.addAttribute("isViewed", isViewed);
         model.addAttribute("feedback", feedbackDTO);
         model.addAttribute("movieFeedbacks", movieFeedbacks);
         return "customer/fragments/movie-detail/feedback-comment :: feedback-comment";

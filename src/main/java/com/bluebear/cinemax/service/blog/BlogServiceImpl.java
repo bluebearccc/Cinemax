@@ -15,7 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -118,7 +124,7 @@ public class BlogServiceImpl implements BlogService {
         return toDTO(blog, true);
     }
 
-    public BlogDTO createBlog(BlogDTO dto) {
+    public BlogDTO createBlog(BlogDTO dto, MultipartFile img) {
         Blog blog = toEntity(dto, false);
         Blog saved = blogRepository.save(blog);
 
@@ -131,8 +137,49 @@ public class BlogServiceImpl implements BlogService {
                 .collect(Collectors.toList());
         saved.setSections(sections);
         BlogDTO newBlog = toDTO(saved, true);
-        updateBlog(newBlog.getBlogID(), newBlog);
+        updateBlog(newBlog.getBlogID(), newBlog, img);
         return toDTO(saved, true);
+    }
+
+    @Override
+    public BlogDTO updateBlog(Integer id, BlogDTO dto, MultipartFile img) {
+            String imageUrl = null;
+            try {
+                imageUrl = "/uploads/blog_images/" + saveImage(img);
+            } catch (IOException e) {
+                System.out.println("Error saving image: " + e.getMessage());
+            }
+
+        Blog existing = blogRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Cannot update. Blog not found with ID: " + id));
+
+        existing.setTitle(dto.getTitle());
+        existing.setContent(dto.getContent());
+        existing.setUpdatedAt(dto.getUpdatedAt());
+        existing.setLikeCount(dto.getLikeCount());
+        existing.setImage(imageUrl);
+        existing.setViewCount(dto.getViewCount());
+        existing.setCategories(dto.getCategories().stream()
+                .map(catDTO -> blogCategoryRepository.findById(catDTO.getCategoryID()).orElse(null))
+                .collect(Collectors.toList())
+        );
+
+        if (dto.getSections() != null) {
+            List<BlogSection> sections = dto.getSections().stream()
+                    .map(sectionDTO -> BlogSection.builder()
+                            .sectionID(sectionDTO.getSectionID())
+                            .sectionTitle(sectionDTO.getSectionTitle())
+                            .sectionContent(sectionDTO.getSectionContent())
+                            .sectionOrder(sectionDTO.getSectionOrder())
+                            .blog(existing)
+                            .build())
+                    .collect(Collectors.toList());
+            existing.getSections().clear();
+            existing.getSections().addAll(sections);
+        }
+
+        Blog updated = blogRepository.save(existing);
+        return toDTO(updated, true);
     }
 
     public BlogDTO updateBlog(Integer id, BlogDTO dto) {
@@ -183,6 +230,31 @@ public class BlogServiceImpl implements BlogService {
     @Override
     public long getTotalViewCount() {
         return blogRepository.getTotalViewCount();
+    }
+
+    @Override
+    public String saveImage(MultipartFile img) throws IOException {
+        String uploadDir = "uploads/blog_images";
+        Path uploadPath = Paths.get(uploadDir);
+        if (!Files.exists(uploadPath)) {
+            Files.createDirectories(uploadPath);
+        }
+        String filename = img.getOriginalFilename();
+        filename = filename.replaceAll("\\s+", "");
+        filename = filename.replaceAll("[\\p{Punct}&&[^.-]]", "");
+        Path filePath = uploadPath.resolve(filename);
+//        if (Files.exists(filePath)) {
+//            int counter = 1;
+//            String nameWithoutExtension = filename.substring(0, filename.lastIndexOf('.'));
+//            String extension = filename.substring(filename.lastIndexOf('.'));
+//            while (Files.exists(filePath)) {
+//                filename = nameWithoutExtension + "(" + counter + ")" + extension;
+//                filePath = uploadPath.resolve(filename);
+//                counter++;
+//            }
+//        }
+        Files.copy(img.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+        return filename;
     }
 }
 

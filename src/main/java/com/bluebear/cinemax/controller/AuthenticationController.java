@@ -3,6 +3,7 @@ package com.bluebear.cinemax.controller;
 import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
+import com.bluebear.cinemax.security.AccountDetailService;
 import com.bluebear.cinemax.service.account.AccountServiceImpl;
 import com.bluebear.cinemax.service.customer.CustomerServiceImpl;
 import com.bluebear.cinemax.service.email.EmailServiceImpl;
@@ -12,15 +13,22 @@ import com.bluebear.cinemax.service.genre.GenreService;
 import com.bluebear.cinemax.service.theater.TheaterService;
 import com.bluebear.cinemax.service.verifytoken.VerifyTokenServiceImpl;
 import jakarta.annotation.PostConstruct;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Controller
@@ -43,6 +51,8 @@ public class AuthenticationController {
     private GenreService genreService;
     @Autowired
     private TheaterService theaterService;
+    @Autowired
+    private AccountDetailService accountDetailService;
 
     private List<GenreDTO> genres;
     private Page<TheaterDTO> theaters;
@@ -57,49 +67,23 @@ public class AuthenticationController {
     }
 
     @GetMapping("/login")
-    public String login(Model model) {
+    public String login(Model model, @CookieValue(name = "LOGIN_ERROR", required = false) String loginError, HttpServletResponse response) {
         model.addAttribute("genres", genres);
         model.addAttribute("theaters", theaters);
-        return "common/login";
-    }
-
-    @PostMapping("/login")
-    public String login(@RequestParam("email") String email, @RequestParam("password") String password, Model model, HttpSession session) {
-        model.addAttribute("genres", genres);
-        model.addAttribute("theaters", theaters);
-        AccountDTO account = accountService.findAccountByEmail(email);
-        if (account == null || !account.getPassword().equals(password)) {
-            model.addAttribute("error", "Invalid email or password");
-            return "common/login";
-        } else if (account.getStatus() == Account_Status.Banned) {
-            model.addAttribute("error", "opps! this account has been banned");
-            return "common/login";
-        } else {
-            session.setAttribute("account", account);
-            CustomerDTO customerDTO = customerService.getUserByAccountID(account.getId());
-            if (customerDTO != null) {
-                session.setAttribute("customer", customerDTO);
-            } else {
-                int id = account.getId();
-                EmployeeDTO employeeDTO = employeeService.findByAccountId(id);
-                session.setAttribute("employee", employeeDTO);
+        if (loginError != null) {
+            try {
+                String decodedError = URLDecoder.decode(loginError, StandardCharsets.UTF_8);
+                model.addAttribute("error", decodedError);
+            } catch (Exception e) {
+                model.addAttribute("error", "Unknown error");
             }
 
-            model.addAttribute("genres", genres);
-            model.addAttribute("theaters", theaters);
-
-            return switch (account.getRole()) {
-                case Admin -> "redirect:/admin/dashboard";
-                case Customer -> "redirect:";
-                case Staff -> "redirect:/staff/home";
-                case Cashier -> "redirect:/cashier/home";
-                case Customer_Officer -> "redirect:/officer/home";
-                default -> {
-                    model.addAttribute("error", "Unknown role");
-                    yield "common/login";
-                }
-            };
+            Cookie cookie = new Cookie("LOGIN_ERROR", null);
+            cookie.setMaxAge(0);
+            cookie.setPath("/");
+            response.addCookie(cookie);
         }
+        return "common/login";
     }
 
     @GetMapping("/register")
@@ -154,7 +138,11 @@ public class AuthenticationController {
             CustomerDTO customerDTO1 = customerService.save(customerDTO);
             session.setAttribute("customer", customerDTO1);
             verifyTokenService.deleteTokenByEmail(verifyTokenDTO.getEmail());
-            return "redirect:";
+            UserDetails userDetails = accountDetailService.loadUserByUsername(accountDTO.getEmail());
+            UsernamePasswordAuthenticationToken authentication =
+                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+            return "redirect:/";
         }
     }
 

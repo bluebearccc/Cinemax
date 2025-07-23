@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link rel="stylesheet" th:href="@{/customer-static/css/bootstrap.min.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/animate.css}">
@@ -12,121 +13,108 @@
     <link rel="stylesheet" th:href="@{/customer-static/css/owl.carousel.min.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
     <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
-    <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
-    <link th:href="@{/common-static/css/register-stylesheet.css}" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
-
+    <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
+    <link rel="stylesheet" th:href="@{/common-static/css/register-stylesheet.css}">
     <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
     <title>Register</title>
+
 </head>
 <body>
-<!-- ==========Preloader========== -->
-<div th:replace="common/fragments/preloader :: preloader">
-</div>
-<!-- ==========Preloader========== -->
-<!-- ==========Overlay========== -->
-<a href="#0" class="scrollToTop">
-    <i class="fas fa-angle-up"></i>
-</a>
-<!-- ==========Overlay========== -->
-<!-- ==========Header-Section========== -->
-<header th:replace="common/fragments/header :: header-section">
-</header>
-<!-- ==========Header-Section========== -->
+<div th:replace="common/fragments/preloader :: preloader"></div>
+<a href="#0" class="scrollToTop"><i class="fas fa-angle-up"></i></a>
+<header th:replace="common/fragments/header :: header-section"></header>
 
-<div class="register-container">
-    <div class="register-header">
-        <h1 class="register-title">Create Account</h1>
-        <p class="register-subtitle">Join CinemaMax for the ultimate movie experience</p>
-    </div>
-
-    <form id="registerForm" th:action="@{/register}" method="POST" onsubmit="return validatePasswords()">
-        <div class="form-group">
-            <label for="fullName" class="form-label">Full Name</label>
-            <input
-                    type="text"
-                    id="fullName"
-                    name="fullName"
-                    class="form-input"
-                    placeholder="Enter your full name"
-                    required
-            >
+<div class="main-container">
+    <div class="register-card">
+        <div class="register-header">
+            <h1 class="register-title">Create Account</h1>
+            <p class="register-subtitle">Join CinemaMax for the ultimate movie experience</p>
         </div>
 
-        <div class="form-group">
-            <label for="email" class="form-label">Email Address</label>
-            <input
-                    type="email"
-                    id="email"
-                    name="email"
-                    class="form-input"
-                    placeholder="Enter your email"
-                    required
-            >
-            <p th:text="${error}" style="color: red; font-size: 14px"></p>
-            <p th:text="${inform}" style="color: green; font-size: 14px"></p>
+        <form id="registerForm" th:action="@{/register}" method="POST">
+
+            <div th:if="${error != null}" id="registererror" style="display:none;" th:text="${error}"></div>
+            <div th:if="${inform != null}" id="informregister" style="display:none;" th:text="${inform}"></div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="fullName" class="form-label">Full Name</label>
+                    <input type="text" class="form-input" id="fullName" name="fullName" placeholder="Enter your full name" required>
+                    <div class="error-message"></div>
+                </div>
+                <div class="form-group">
+                    <label for="email" class="form-label">Email Address</label>
+                    <input type="email" class="form-input" id="email" name="email" placeholder="Enter your email" required>
+                    <div class="error-message"></div>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="password" class="form-label">Password</label>
+                <div class="password-input-wrapper">
+                    <input type="password" class="form-input" id="password" name="password" placeholder="Enter your password" required autocomplete="off">
+                    <button type="button" class="password-toggle" id="passwordToggle">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <line class="eye-slash" x1="1" y1="1" x2="23" y2="23" style="display: none;"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="error-message"></div>
+                <div class="password-strength" id="passwordStrength">
+                    <div class="strength-bar"><div class="strength-fill"></div></div>
+                    <div class="strength-text"></div>
+                </div>
+            </div>
+
+            <div class="form-group full-width">
+                <label for="confirmPassword" class="form-label">Confirm Password</label>
+                <div class="password-input-wrapper">
+                    <input type="password" class="form-input" id="confirmPassword" placeholder="Confirm your password" required autocomplete="off">
+                    <button type="button" class="password-toggle" id="confirmPasswordToggle">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                            <line class="eye-slash" x1="1" y1="1" x2="23" y2="23" style="display: none;"></line>
+                        </svg>
+                    </button>
+                </div>
+                <div class="error-message"></div>
+            </div>
+
+            <button type="submit" class="create-account-btn" id="submitBtn" disabled>Create Account</button>
+        </form>
+
+        <div class="social-login">
+            <div class="social-buttons">
+                <a th:href="@{/oauth2/authorize/google}" class="social-btn google" title="Sign up with Google">
+                    <img th:src="@{/common-static/images/google.jpg}" alt="Google"/>
+                </a>
+                <a th:href="@{/oauth2/authorize/github}" class="social-btn github" title="Sign up with GitHub">
+                    <img th:src="@{/common-static/images/github.png}" alt="GitHub"/>
+                </a>
+            </div>
+            <p class="login-link">Already have an account? <a th:href="@{/login}">Sign In</a></p>
         </div>
-
-        <div class="form-group">
-            <label for="password" class="form-label">Password</label>
-            <input
-                    type="password"
-                    id="password"
-                    name="password"
-                    class="form-input"
-                    placeholder="Create a strong password"
-                    required
-            >
-        </div>
-
-        <div class="form-group">
-            <label for="confirmPassword" class="form-label">Confirm Password</label>
-            <input
-                    type="password"
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    class="form-input"
-                    placeholder="Confirm your password"
-                    required
-            >
-            <p class="error-message" id="confirmError">Passwords do not match</p>
-        </div>
-
-        <button type="submit" class="register-btn" id="registerBtn" onclick="">
-            Create Account
-        </button>
-    </form>
-
-    <div class="social-buttons">
-        <a th:href="@{oauth/google/login}" class="social-btn google" id="googleRegister" title="Sign up with Google">
-            <img th:src="@{/common-static/images/google.jpg}" alt="Google"/>
-        </a>
-        <a th:href="@{oauth/github/login}" class="social-btn github" id="githubRegister" title="Sign up with GitHub">
-            <img th:src="@{/common-static/images/github.png}" alt="GitHub"/>
-        </a>
-    </div>
-
-    <div class="login-link">
-        Already have an account?
-        <a th:href="@{/login}" id="loginLink">Sign In</a>
     </div>
 </div>
-<script>
-    function validatePasswords() {
-        const password = document.getElementById('password').value;
-        const confirmPassword = document.getElementById('confirmPassword').value;
 
-        const confirmError = document.getElementById('confirmError');
+<div class="modal fade" id="notificationModal" tabindex="-1" aria-labelledby="modalTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitle">Notification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">x</button>
+            </div>
+            <div class="modal-body" id="modalBody">
+            </div>
+        </div>
+    </div>
+</div>
 
-        if (password !== confirmPassword) {
-            confirmError.style.display = 'block';
-            return false;
-        } else {
-            confirmError.style.display = 'none';
-            return true;
-        }
-    }
-</script>
+<script th:src="@{/common-static/js/register.js}"></script>
 <script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
 <script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
 <script th:src="@{/customer-static/js/plugins.js}"></script>

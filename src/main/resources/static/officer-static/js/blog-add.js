@@ -21,7 +21,7 @@ function previewImage(input) {
 function setImageName() {
     const file = document.getElementById('blogImage').files[0];
     if (file) {
-        document.getElementById('imageName').value = '/customer-static/images/blog/' + file.name;
+        document.getElementById('imageName').value = file.name;
     }
 }
 

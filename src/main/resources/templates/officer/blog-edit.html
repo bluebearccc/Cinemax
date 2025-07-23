@@ -17,7 +17,7 @@
                 <div class="modal-header">
                     <h2 id="blogModalTitle">Editting Blog</h2>
                 </div>
-                <form id="blogForm" th:object="${blog}" th:action="@{/officer/blog-management/edit-blog}" method="POST" onsubmit="setImageName()">
+                <form id="blogForm" th:object="${blog}" th:action="@{/officer/blog-management/edit-blog}" method="POST" onsubmit="setImageName()" enctype="multipart/form-data">
                     <div class="form-group">
                         <label>Title:</label>
                         <input type="hidden" th:field="*{blogID}">
@@ -26,13 +26,13 @@
                         <input type="hidden" th:field="*{updatedAt}">
                         <input type="hidden" th:field="*{likeCount}">
                         <input type="hidden" th:field="*{viewCount}">
-                        <input type="text" class="form-control" th:field="*{title}" oninput="updatePreview()" required>
+                        <input type="text" class="form-control" th:field="*{title}" required>
                     </div>
                     <div class="form-group">
                         <label for="blogImage">Image:</label>
                         <div class="image-input-container">
                             <div class="image-input-wrapper">
-                                <input type="file" class="image-input" id="blogImage"
+                                <input type="file" class="image-input" id="blogImage" name="blogImage"
                                        onchange="previewImage(this)">
                                 <input type="hidden" th:field="*{image}" id="imageName">
                             </div>
@@ -43,14 +43,8 @@
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Author:</label>
-                        <input type="text" class="form-control" required th:field="*{authorName}"
-                               oninput="updatePreview()">
-                    </div>
-                    <div class="form-group">
                         <label>Overview Content:</label>
-                        <textarea class="form-control" rows="4" required th:field="*{content}"
-                                  oninput="updatePreview()"></textarea>
+                        <textarea class="form-control" rows="4" required th:field="*{content}"></textarea>
                     </div>
 
                     <div class="form-group">
