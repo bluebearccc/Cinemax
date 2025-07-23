@@ -45,7 +45,7 @@
                     <div class="showtimes">
                         <button th:each="schedule : ${movie.schedules}"
                                 th:disabled="${schedule.numberOfSeatsRemain == 0}"
-                                th:class="${schedule.numberOfSeatsRemain == 0} ? 'showtime-btn out-of-slot' : 'showtime-btn'">
+                                th:class="${schedule.numberOfSeatsRemain == 0} ? 'showtime-btn out-of-slot' : 'showtime-btn'" th:onclick="|window.location.href='/booking?scheduleId=${schedule.scheduleID}&roomId=${schedule.roomID}'|">
                             <span class="time-slot"
                                   th:text="${#temporals.format(schedule.startTime, 'HH:mm') + ' - ' + #temporals.format(schedule.endTime, 'HH:mm')}"></span>
                             <span th:class="${schedule.numberOfSeatsRemain == 0} ? 'rem-seat out-of-seat' : 'rem-seat'"

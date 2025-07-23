@@ -12,4 +12,13 @@
             </a>
         </li>
     </ul>
+    <ul class="nav-menu">
+        <li class="nav-item">
+            <a th:href="@{/officer/customer-care/feedbacks}"
+               th:classappend="${currentWebPage == 'customer-care'} ? 'active' : ''"
+               class="nav-link">
+                Customer Care
+            </a>
+        </li>
+    </ul>
 </div>

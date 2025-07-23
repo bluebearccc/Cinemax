@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Quản lý Chăm sóc Khách hàng</title>
+    <title>Customer Care Management</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" th:href="@{/css/customerCare.css}">
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -13,194 +13,125 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.5.0/echarts.min.js"></script>
 </head>
 <body>
-<!-- Header -->
-<header class="header">
-    <div class="header-content">
-        <div class="logo">
-            <i class="fas fa-headset"></i>
-            Cinema Care Dashboard
-        </div>
-        <div class="header-actions">
-            <button class="notification-btn">
-                <i class="fas fa-bell"></i>
-                <span class="notification-badge">5</span>
-            </button>
-            <div class="user-profile">
-                <div class="user-avatar">A</div>
-                <div>
-                    <div style="font-size: 0.875rem; font-weight: 600;">Admin</div>
-                    <div style="font-size: 0.75rem; opacity: 0.8;">Quản lý hệ thống</div>
-                </div>
-                <i class="fas fa-chevron-down"></i>
-            </div>
-        </div>
-    </div>
-</header>
 
-<!-- Sidebar -->
-<aside class="sidebar">
-    <ul class="sidebar-menu">
-        <li><a href="#" class="active">
-            <i class="fas fa-tachometer-alt"></i>
-            Tổng quan
-        </a></li>
-        <li><a href="#">
-            <i class="fas fa-headset"></i>
-            Chăm sóc khách hàng
-        </a></li>
-        <li><a href="#">
-            <i class="fas fa-users"></i>
-            Quản lý khách hàng
-        </a></li>
-        <li><a href="#">
-            <i class="fas fa-film"></i>
-            Quản lý phim
-        </a></li>
-        <li><a href="#">
-            <i class="fas fa-calendar-alt"></i>
-            Lịch chiếu
-        </a></li>
-        <li><a href="#">
-            <i class="fas fa-ticket-alt"></i>
-            Quản lý vé
-        </a></li>
-        <li><a href="#">
-            <i class="fas fa-chart-bar"></i>
-            Báo cáo
-        </a></li>
-        <li><a href="#">
-            <i class="fas fa-cog"></i>
-            Cài đặt
-        </a></li>
-    </ul>
-</aside>
+<div class="sidebar" th:replace="officer/fragments/side-bar :: sidebar"></div>
 
-<!-- Main Content -->
 <main class="main-content">
-    <!-- Statistics -->
     <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-        <!-- Tổng số khách hàng -->
         <div class="stat-card bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
                 <div class="stat-icon total mr-4">
                     <i class="ri-ticket-2-line"></i>
                 </div>
                 <div>
-                    <p class="stat-label">Tổng số khách hàng</p>
+                    <p class="stat-label">Total Customers</p>
                     <h3 class="stat-number">247</h3>
                 </div>
             </div>
             <div class="stat-change positive mt-4 flex items-center text-sm">
                 <i class="fas fa-arrow-up mr-1"></i>
                 <span>12%</span>
-                <span class="ml-2 text-gray-500">so với tuần trước</span>
+                <span class="ml-2 text-gray-500">vs. last week</span>
             </div>
         </div>
 
-        <!-- Đã giải quyết -->
         <div class="stat-card bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
                 <div class="stat-icon resolved mr-4">
                     <i class="ri-checkbox-circle-line ri-lg"></i>
                 </div>
                 <div>
-                    <p class="stat-label">Đã giải quyết</p>
+                    <p class="stat-label">Resolved</p>
                     <h3 class="stat-number" th:text="${resolvedCount}">0</h3>
                 </div>
             </div>
             <div class="stat-change positive mt-4 flex items-center text-sm">
                 <i class="fas fa-arrow-up mr-1"></i>
                 <span>8%</span>
-                <span class="ml-2 text-gray-500">so với tuần trước</span>
+                <span class="ml-2 text-gray-500">vs. last week</span>
             </div>
         </div>
 
-        <!-- Đang xử lý -->
         <div class="stat-card bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
                 <div class="stat-icon processing mr-4">
                     <i class="ri-time-line ri-lg"></i>
                 </div>
                 <div>
-                    <p class="stat-label">Đang xử lý</p>
+                    <p class="stat-label">Processing</p>
                     <h3 class="stat-number" th:text="${processingCount}">0</h3>
                 </div>
             </div>
             <div class="stat-change positive mt-4 flex items-center text-sm">
                 <i class="fas fa-arrow-up mr-1"></i>
                 <span>5%</span>
-                <span class="ml-2 text-gray-500">so với tuần trước</span>
+                <span class="ml-2 text-gray-500">vs. last week</span>
             </div>
         </div>
 
-        <!-- Chưa xử lý -->
         <div class="stat-card bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
                 <div class="stat-icon pending mr-4">
                     <i class="ri-error-warning-line ri-lg"></i>
                 </div>
                 <div>
-                    <p class="stat-label">Chưa xử lý</p>
+                    <p class="stat-label">Pending</p>
                     <h3 class="stat-number" th:text="${pendingCount}">0</h3>
                 </div>
             </div>
             <div class="stat-change negative mt-4 flex items-center text-sm">
                 <i class="fas fa-arrow-down mr-1"></i>
                 <span>3%</span>
-                <span class="ml-2 text-gray-500">so với tuần trước</span>
+                <span class="ml-2 text-gray-500">vs. last week</span>
             </div>
         </div>
     </div>
 
 
-    <!-- Content Grid -->
     <div class="content-grid">
-        <!-- Ticket List -->
         <div>
-            <!-- Search Section -->
             <div class="search-section">
-                <form class="search-form" th:action="@{/customer-care/feedbacks}" method="get">
+                <form class="search-form" th:action="@{/officer/customer-care/feedbacks}" method="get">
                     <div class="form-group">
-                        <label class="form-label">Tìm kiếm</label>
+                        <label class="form-label">Search</label>
                         <div class="input-group">
                             <i class="fas fa-search"></i>
-                            <input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Tên, email hoặc số điện thoại...">
+                            <input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Name, email, or phone number...">
                         </div>
                     </div>
                     <div class="form-group">
-                        <label class="form-label">Mức độ ưu tiên</label>
+                        <label class="form-label">Priority</label>
                         <select name="priority" class="form-control">
-                            <option th:value="''" th:selected="${priority} == null or priority == ''">Tất cả mức độ</option>
-                            <option th:value="HIGH" th:selected="${priority} == 'HIGH'">Khẩn cấp</option>
-                            <option th:value="MEDIUM" th:selected="${priority} == 'MEDIUM'">Trung bình</option>
-                            <option th:value="LOW" th:selected="${priority} == 'LOW'">Cao</option>
+                            <option th:value="''" th:selected="${priority} == null or priority == ''">All Priorities</option>
+                            <option th:value="HIGH" th:selected="${priority} == 'HIGH'">High</option>
+                            <option th:value="MEDIUM" th:selected="${priority} == 'MEDIUM'">Medium</option>
+                            <option th:value="LOW" th:selected="${priority} == 'LOW'">Low</option>
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary">
                         <i class="fas fa-search"></i>
-                        Tìm kiếm
+                        Search
                     </button>
                     <button type="button" class="btn btn-outline" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i>
-                        Làm mới
+                        Refresh
                     </button>
                 </form>
             </div>
 
-            <!-- Ticket Table -->
             <div class="ticket-table">
                 <div class="table-header">
                     <i class="fas fa-ticket-alt"></i>
-                    Danh sách Ticket Hỗ trợ
+                    Support Ticket List
                 </div>
                 <table class="table">
                     <thead>
                     <tr>
                         <th>Ticket ID</th>
-                        <th>Khách hàng</th>
-                        <th>Vấn đề</th>
-                        <th>Trạng thái</th>
-                        <th>Mức độ</th>
+                        <th>Customer</th>
+                        <th>Issue</th>
+                        <th>Status</th>
+                        <th>Priority</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -226,25 +157,24 @@
                             <div class="issue-content" th:text="${ticket.content}"></div>
                         </td>
                         <td>
-                            <span class="badge badge-warning" th:if="${ticket.status == 'Not_Suported'}">Chưa xử lý</span>
-                            <span class="badge badge-success" th:if="${ticket.status != 'Not_Suported'}">Đã hỗ trợ</span>
+                            <span class="badge badge-warning" th:if="${ticket.status == 'Not_Suported'}">Pending</span>
+                            <span class="badge badge-success" th:if="${ticket.status != 'Not_Suported'}">Resolved</span>
                         </td>
                         <td>
-                            <span class="badge badge-danger" th:if="${ticket.serviceRate == 1}">Khẩn cấp</span>
-                            <span class="badge badge-warning" th:if="${ticket.serviceRate == 2}">Cao</span>
-                            <span class="badge badge-info" th:if="${ticket.serviceRate == 3}">Trung bình</span>
-                            <span class="badge badge-info" th:if="${ticket.serviceRate > 3}">Thấp</span>
+                            <span class="badge badge-danger" th:if="${ticket.serviceRate == 1}">Urgent</span>
+                            <span class="badge badge-warning" th:if="${ticket.serviceRate == 2}">High</span>
+                            <span class="badge badge-info" th:if="${ticket.serviceRate == 3}">Medium</span>
+                            <span class="badge badge-info" th:if="${ticket.serviceRate > 3}">Low</span>
                         </td>
                     </tr>
                     </tbody>
                 </table>
 
-                <!-- Pagination -->
                 <div th:if="${totalPages > 1}" class="pagination-wrapper" style="padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0;">
                     <nav>
                         <ul class="pagination" style="display: flex; gap: 0.5rem; list-style: none; margin: 0; padding: 0;">
                             <li th:classappend="${currentPage == 0} ? 'disabled' : ''" style="display: flex;">
-                                <a th:href="@{/customer-care/feedbacks(page=${currentPage - 1}, keyword=${keyword}, priority=${priority})}"
+                                <a th:href="@{/officer/customer-care/feedbacks(page=${currentPage - 1}, keyword=${keyword}, priority=${priority})}"
                                    style="padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; text-decoration: none; color: #6b7280;">
                                     <i class="fas fa-chevron-left"></i>
                                 </a>
@@ -252,14 +182,14 @@
                             <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
                                 th:classappend="${i} == ${currentPage} ? 'active' : ''"
                                 style="display: flex;">
-                                <a th:href="@{/customer-care/feedbacks(page=${i}, keyword=${keyword}, priority=${priority})}"
+                                <a th:href="@{/officer/customer-care/feedbacks(page=${i}, keyword=${keyword}, priority=${priority})}"
                                    th:text="${i + 1}"
                                    style="padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; text-decoration: none; color: #6b7280;"
                                    th:style="${i == currentPage} ? 'background: #3b82f6; color: white; border-color: #3b82f6;' : ''">
                                 </a>
                             </li>
                             <li th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''" style="display: flex;">
-                                <a th:href="@{/customer-care/feedbacks(page=${currentPage + 1}, keyword=${keyword}, priority=${priority})}"
+                                <a th:href="@{/officer/customer-care/feedbacks(page=${currentPage + 1}, keyword=${keyword}, priority=${priority})}"
                                    style="padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; text-decoration: none; color: #6b7280;">
                                     <i class="fas fa-chevron-right"></i>
                                 </a>
@@ -270,14 +200,13 @@
             </div>
         </div>
 
-        <!-- Customer Detail -->
         <div class="customer-detail" th:if="${selectedCustomer != null}">
             <div th:if="${smsStatus}" class="alert alert-info" style="margin: 1rem 1.5rem; padding: 1rem; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 0.5rem; color: #1e40af;" th:text="${smsStatus}"></div>
 
             <div class="customer-header">
                 <div class="customer-avatar-large" th:text="${selectedCustomer.fullName.substring(0,1)}"></div>
                 <div class="customer-name" th:text="${selectedCustomer.fullName}"></div>
-                <div class="customer-subtitle">Thông tin khách hàng</div>
+                <div class="customer-subtitle">Customer Information</div>
             </div>
 
             <div class="detail-section">
@@ -287,41 +216,41 @@
                 </div>
 
                 <div class="detail-row">
-                    <span class="detail-label">Số điện thoại</span>
+                    <span class="detail-label">Phone Number</span>
                     <span class="detail-value" th:text="${selectedCustomer.phone}"></span>
                 </div>
 
                 <div class="detail-row">
-                    <span class="detail-label">Điểm tích lũy</span>
+                    <span class="detail-label">Loyalty Points</span>
                     <span class="detail-value">
-                            <span th:text="${selectedCustomer.point}"></span> điểm
+                            <span th:text="${selectedCustomer.point}"></span> points
                         </span>
                 </div>
 
                 <div class="detail-row">
-                    <span class="detail-label">Vấn đề</span>
+                    <span class="detail-label">Issue</span>
                     <span class="detail-value" th:text="${selectedTicket.content}"></span>
                 </div>
 
                 <div class="detail-row">
-                    <span class="detail-label">Trạng thái</span>
-                    <span class="badge badge-warning" th:if="${selectedTicket.status == 'Not_Suported'}">Chưa xử lý</span>
-                    <span class="badge badge-success" th:if="${selectedTicket.status != 'Not_Suported'}">Đã hỗ trợ</span>
+                    <span class="detail-label">Status</span>
+                    <span class="badge badge-warning" th:if="${selectedTicket.status == 'Not_Suported'}">Pending</span>
+                    <span class="badge badge-success" th:if="${selectedTicket.status != 'Not_Suported'}">Resolved</span>
                 </div>
 
                 <div class="detail-row">
-                    <span class="detail-label">Mức độ ưu tiên</span>
-                    <span class="badge badge-danger" th:if="${selectedTicket.serviceRate == 1}">Khẩn cấp</span>
-                    <span class="badge badge-warning" th:if="${selectedTicket.serviceRate == 2}">Cao</span>
-                    <span class="badge badge-info" th:if="${selectedTicket.serviceRate == 3}">Trung bình</span>
-                    <span class="badge badge-info" th:if="${selectedTicket.serviceRate > 3}">Thấp</span>
+                    <span class="detail-label">Priority</span>
+                    <span class="badge badge-danger" th:if="${selectedTicket.serviceRate == 1}">Urgent</span>
+                    <span class="badge badge-warning" th:if="${selectedTicket.serviceRate == 2}">High</span>
+                    <span class="badge badge-info" th:if="${selectedTicket.serviceRate == 3}">Medium</span>
+                    <span class="badge badge-info" th:if="${selectedTicket.serviceRate > 3}">Low</span>
                 </div>
             </div>
 
             <div class="detail-section">
                 <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; color: #3b82f6; font-size: 1.125rem;">
                     <i class="fas fa-film"></i>
-                    Lịch sử xem phim
+                    Movie History
                 </h3>
                 <div class="movie-history">
                     <div th:if="${watchedMovies != null and !watchedMovies.isEmpty()}">
@@ -337,7 +266,7 @@
                     </div>
                     <div th:if="${watchedMovies == null or watchedMovies.isEmpty()}" class="empty-state">
                         <i class="fas fa-film"></i>
-                        <p>Chưa có lịch sử xem phim</p>
+                        <p>No movie history available</p>
                     </div>
                 </div>
             </div>
@@ -345,17 +274,17 @@
             <div class="action-buttons">
                 <button class="btn btn-primary" style="width: 100%;">
                     <i class="fas fa-reply"></i>
-                    Phản hồi khách hàng
+                    Respond to Customer
                 </button>
-                <form th:action="@{/customer-care/feedbacks/resolve}"
+                <form th:action="@{/officer/customer-care/feedbacks/resolve}"
                       method="post"
                       th:if="${selectedTicket.status == 'Not_Suported'}"
                       style="width: 100%;"
-                      th:onsubmit="|return confirm('Bạn có chắc chắn muốn đánh dấu phản hồi #${selectedTicket.feedbackId} là đã giải quyết không?');|">
+                      th:onsubmit="|return confirm('Are you sure you want to mark feedback #${selectedTicket.feedbackId} as resolved?');|">
                     <input type="hidden" name="feedbackId" th:value="${selectedTicket.feedbackId}" />
                     <button type="submit" class="btn btn-outline" style="width: 100%;">
                         <i class="fas fa-check"></i>
-                        Đánh dấu đã giải quyết
+                        Mark as Resolved
                     </button>
                 </form>
 
@@ -363,19 +292,15 @@
             </div>
         </div>
 
-        <!-- Empty State when no customer selected -->
         <div class="customer-detail" th:if="${selectedCustomer == null}">
             <div class="empty-state">
                 <i class="fas fa-user-circle"></i>
-                <h3>Chọn một ticket để xem chi tiết</h3>
-                <p>Nhấp vào một hàng trong bảng để xem thông tin chi tiết khách hàng</p>
+                <h3>Select a ticket to view details</h3>
+                <p>Click on a row in the table to view customer details</p>
             </div>
         </div>
     </div>
 </main>
-
-<!-- Footer -->
-
 
 <script>
     function handleRowClick(row) {
@@ -392,7 +317,7 @@
         const keyword = row.getAttribute('data-keyword') || '';
         const priority = row.getAttribute('data-priority') || '';
 
-        const url = `/customer-care/feedbacks?id=${id}&page=${page}&keyword=${encodeURIComponent(keyword)}&priority=${encodeURIComponent(priority)}`;
+        const url = `/officer/customer-care/feedbacks?id=${id}&page=${page}&keyword=${encodeURIComponent(keyword)}&priority=${encodeURIComponent(priority)}`;
         window.location.href = url;
     }
 
@@ -424,7 +349,7 @@
         const totalEl = document.getElementById('total-count');
         if (totalEl) totalEl.textContent = totalCount;
 
-        // Count pending tickets (Chưa xử lý)
+        // Count pending tickets
         const pendingCount = document.querySelectorAll('.table tbody tr td span.badge.warning, .table tbody tr td span.badge-warning').length;
         const pendingEl = document.getElementById('pending-count');
         if (pendingEl) pendingEl.textContent = pendingCount;
@@ -434,7 +359,7 @@
         const resolvedEl = document.getElementById('resolved-count');
         if (resolvedEl) resolvedEl.textContent = resolvedCount;
 
-        // Count processing tickets (đang xử lý)
+        // Count processing tickets
         const processingCount = document.querySelectorAll('.table tbody tr td span.badge.processing, .table tbody tr td span.badge-processing').length;
         const processingEl = document.getElementById('processing-count');
         if (processingEl) processingEl.textContent = processingCount;

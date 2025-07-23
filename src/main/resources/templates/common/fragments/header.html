@@ -39,7 +39,7 @@
                 <li class="header-button pr-0" th:if="${session.account == null}">
                     <a th:href="@{/login}">Sign in</a>
                 </li>
-                <li th:if="${session.account != null}">
+                <li th:if="${session.account != null}" th:onclick="|window.location.href='/user/profile'|">
                     <div class="user-info">
                         <div class="user-avatar" id="userAvatar"><i class="fa fa-user"></i></div>
                         <div th:if="${session.customer != null}">

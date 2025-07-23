@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.controller.admin;
+package com.bluebear.cinemax.controller.officer;
 
 import com.bluebear.cinemax.dto.CustomerDTO;
 import com.bluebear.cinemax.dto.CustomerServiceFeedbackDTO;
@@ -18,7 +18,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import java.util.List;
 
 @Controller
-@RequestMapping("/customer-care")
+@RequestMapping("/officer/customer-care")
 public class CustomerCareController {
     private static final Logger log = LoggerFactory.getLogger(CustomerCareController.class);
     @Autowired
@@ -58,6 +58,7 @@ public class CustomerCareController {
         model.addAttribute("totalPages", totalPages);
         model.addAttribute("keyword", keyword);
         model.addAttribute("priority", priority);
+        model.addAttribute("currentWebPage", "customer-care");
         // sau khi lấy allFeedbacks
         model.addAttribute("totalItems", allFeedbacks.size());
         long resolved = serviceFeedbackRepository.countByStatus(FeedbackStatus.Suported);
@@ -84,7 +85,7 @@ public class CustomerCareController {
         if (smsStatus != null && !smsStatus.isEmpty()) {
             model.addAttribute("smsStatus", smsStatus);
         }
-        return "admin/customer-feedbacks";
+        return "officer/customer-feedbacks";
     }
     @PostMapping("/feedbacks/resolve")
     public String resolveFeedback(
@@ -98,7 +99,7 @@ public class CustomerCareController {
             redirectAttributes.addFlashAttribute("smsStatus", "Lỗi khi đánh dấu: " + e.getMessage());
         }
         // quay lại trang feedbacks, giữ lại các param filter/page nếu cần
-        return "redirect:/customer-care/feedbacks";
+        return "redirect:/officer/customer-care/feedbacks";
     }
 //    @PostMapping("/feedbacks/sendSms")
 //    public String sendSmsToCustomer(

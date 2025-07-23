@@ -39,6 +39,8 @@ public class SecurityConfig {
                                 // OAuth2 endpoints
                                 .requestMatchers("/oauth/**").permitAll()
 
+                                .requestMatchers("/booking/**").hasAuthority(Role.Customer.name())
+
                                 // Admin pages
                                 .requestMatchers("/admin/**").hasAuthority(Role.Admin.name())
 
@@ -52,6 +54,8 @@ public class SecurityConfig {
                                 .requestMatchers("/officer/**").hasAuthority(Role.Customer_Officer.name())
 
                                 // Any other request needs authentication
+                                .requestMatchers("/vnpay_return/**").permitAll()
+
                                 .anyRequest().authenticated()
                 ).formLogin(form ->
                         form
