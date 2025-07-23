@@ -53,6 +53,11 @@
             background-color: #f8f9fa;
             cursor: not-allowed;
         }
+        .status-disabled {
+            background-color: #f8f9fa !important;
+            cursor: not-allowed !important;
+            opacity: 0.6;
+        }
     </style>
 </head>
 <body>
@@ -149,7 +154,8 @@
                 <div class="card-body">
                     <form th:action="@{/admin/movies/{id}/edit(id=${movie.movieId})}"
                           method="post"
-                          enctype="multipart/form-data">
+                          enctype="multipart/form-data"
+                          id="movieEditForm">
 
                         <div class="row">
                             <!-- Left Column -->
@@ -308,7 +314,7 @@
                                     </div>
                                 </div>
 
-                                <!-- Status with validation warnings -->
+                                <!-- Status with enhanced validation -->
                                 <div class="mb-3">
                                     <label for="status" class="form-label">
                                         <i class="fas fa-toggle-on me-2"></i>
@@ -317,20 +323,23 @@
                                     <select class="form-select" id="status" name="status" required>
                                         <option value="">-- Chọn trạng thái --</option>
                                         <option value="Active" th:selected="${movie.status == 'Active'}">Đang hoạt động</option>
-                                        <option value="Removed" th:selected="${movie.status == 'Removed'}">Đã xóa</option>
+                                        <option value="Removed" th:selected="${movie.status == 'Removed'}" id="removedOption">Đã xóa</option>
                                     </select>
                                     <small class="form-text text-muted">
                                         Chọn trạng thái hiển thị của phim
                                     </small>
 
-                                    <!-- Warning about Removed status -->
-                                    <div class="alert alert-warning mt-2" id="removedStatusWarning" style="display: none;">
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
-                                        <strong>Cảnh báo:</strong> Không thể chuyển sang trạng thái "Đã xóa" nếu phim đang có lịch chiếu trong hệ thống.
-                                        Vui lòng xóa tất cả lịch chiếu trước khi thay đổi trạng thái.
+                                    <!-- Dynamic status warnings/info -->
+                                    <div class="alert alert-danger mt-2" id="bookedSeatsWarning" style="display: none;">
+                                        <i class="fas fa-ban me-2"></i>
+                                        <strong>Không thể xóa:</strong> Khách hàng đã đặt lịch chiếu phim này. Không thể chuyển sang trạng thái "Đã xóa".
                                     </div>
 
-                                    <!-- Info about Active status -->
+                                    <div class="alert alert-warning mt-2" id="removedStatusWarning" style="display: none;">
+                                        <i class="fas fa-exclamation-triangle me-2"></i>
+                                        <strong>Cảnh báo:</strong> Chuyển sang trạng thái "Đã xóa" sẽ ẩn phim khỏi hệ thống.
+                                    </div>
+
                                     <div class="alert alert-info mt-2" id="activeStatusInfo" style="display: none;">
                                         <i class="fas fa-info-circle me-2"></i>
                                         <strong>Thông tin:</strong> Phim ở trạng thái "Đang hoạt động" sẽ hiển thị cho khách hàng và có thể đặt vé.
@@ -486,7 +495,7 @@
                                             <i class="fas fa-undo me-2"></i>
                                             Đặt lại
                                         </button>
-                                        <button type="submit" class="btn btn-primary btn-lg">
+                                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
                                             <i class="fas fa-save me-2"></i>
                                             Cập nhật phim
                                         </button>
@@ -563,7 +572,73 @@
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- Custom JavaScript -->
-<script>
+<script th:inline="javascript">
+    // Get movie data from Thymeleaf
+    const movieId = /*[[${movie.movieId}]]*/ null;
+    const currentStatus = /*[[${movie.status}]]*/ '';
+
+    // Global variables for status validation
+    let hasBookedSeats = false;
+    let isCheckingStatus = false;
+
+    // Check if movie has booked seats when page loads
+    async function checkMovieBookedSeats() {
+        try {
+            const response = await fetch(`/admin/movies/${movieId}/check-booked-seats`);
+            if (response.ok) {
+                const data = await response.json();
+                hasBookedSeats = data.hasBookedSeats || false;
+                updateStatusOptions();
+            }
+        } catch (error) {
+            console.error('Error checking booked seats:', error);
+        }
+    }
+
+    // Update status options based on booked seats check
+    function updateStatusOptions() {
+        const statusSelect = document.getElementById('status');
+        const removedOption = document.getElementById('removedOption');
+
+        if (hasBookedSeats && currentStatus === 'Active') {
+            // Disable removed option if has booked seats and currently active
+            removedOption.disabled = true;
+            removedOption.className = 'status-disabled';
+            removedOption.title = 'Không thể chọn do có khách hàng đã đặt lịch chiếu';
+        } else {
+            removedOption.disabled = false;
+            removedOption.className = '';
+            removedOption.title = '';
+        }
+    }
+
+    // Enhanced status change handler
+    document.getElementById('status').addEventListener('change', function() {
+        const selectedStatus = this.value;
+        const removedWarning = document.getElementById('removedStatusWarning');
+        const activeInfo = document.getElementById('activeStatusInfo');
+        const bookedSeatsWarning = document.getElementById('bookedSeatsWarning');
+
+        // Hide all alerts first
+        removedWarning.style.display = 'none';
+        activeInfo.style.display = 'none';
+        bookedSeatsWarning.style.display = 'none';
+
+        // Show appropriate alert based on selection and conditions
+        if (selectedStatus === 'Removed') {
+            if (hasBookedSeats && currentStatus === 'Active') {
+                // Show error and reset to previous status
+                bookedSeatsWarning.style.display = 'block';
+                this.value = currentStatus; // Reset to current status
+                return;
+            } else {
+                removedStatusWarning.style.display = 'block';
+            }
+        } else if (selectedStatus === 'Active') {
+            activeInfo.style.display = 'block';
+        }
+    });
+
     // Preview uploaded images
     document.getElementById('posterFile').addEventListener('change', function(e) {
         previewImage(e, 'poster-preview-container');
@@ -613,26 +688,16 @@
         }
     }
 
-    // Status change handler - Show warnings/info based on selection
-    document.getElementById('status').addEventListener('change', function() {
-        const selectedStatus = this.value;
-        const removedWarning = document.getElementById('removedStatusWarning');
-        const activeInfo = document.getElementById('activeStatusInfo');
-
-        // Hide all alerts first
-        removedWarning.style.display = 'none';
-        activeInfo.style.display = 'none';
-
-        // Show appropriate alert based on selection
-        if (selectedStatus === 'Removed') {
-            removedWarning.style.display = 'block';
-        } else if (selectedStatus === 'Active') {
-            activeInfo.style.display = 'block';
+    // Enhanced form validation with status check
+    document.getElementById('movieEditForm').addEventListener('submit', function(e) {
+        // Check if trying to change to Removed with booked seats
+        const selectedStatus = document.getElementById('status').value;
+        if (selectedStatus === 'Removed' && hasBookedSeats && currentStatus === 'Active') {
+            e.preventDefault();
+            alert('Không thể chuyển sang trạng thái "Đã xóa" vì khách hàng đã đặt lịch chiếu phim này!');
+            return false;
         }
-    });
 
-    // Validate form before submit
-    document.querySelector('form').addEventListener('submit', function(e) {
         // Validate required fields
         const movieName = document.getElementById('movieName').value.trim();
         if (!movieName) {

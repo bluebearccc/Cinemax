@@ -126,6 +126,45 @@ public class MovieController {
         return null;
     }
 
+    private String validateRequiredImages(MultipartFile posterFile, MultipartFile bannerFile, boolean isAdd) {
+        // Chỉ validate khi thêm mới (isAdd = true), khi edit thì không bắt buộc
+        if (!isAdd) {
+            return null;
+        }
+
+        // Kiểm tra poster file
+        if (posterFile == null || posterFile.isEmpty()) {
+            return "Phải tải lên ảnh poster cho phim";
+        }
+
+        // Kiểm tra banner file
+        if (bannerFile == null || bannerFile.isEmpty()) {
+            return "Phải tải lên ảnh banner cho phim";
+        }
+
+        // Kiểm tra loại file poster
+        if (!posterFile.getContentType().startsWith("image/")) {
+            return "Poster phải là file hình ảnh";
+        }
+
+        // Kiểm tra loại file banner
+        if (!bannerFile.getContentType().startsWith("image/")) {
+            return "Banner phải là file hình ảnh";
+        }
+
+        // Kiểm tra kích thước file poster (5MB = 5 * 1024 * 1024 bytes)
+        if (posterFile.getSize() > 5 * 1024 * 1024) {
+            return "Poster không được vượt quá 5MB";
+        }
+
+        // Kiểm tra kích thước file banner
+        if (bannerFile.getSize() > 5 * 1024 * 1024) {
+            return "Banner không được vượt quá 5MB";
+        }
+
+        return null;
+    }
+
     private String validateDateParams(Map<String, String> params, boolean isEdit) {
         String startDateStr = params.get("startDate");
         String endDateStr = params.get("endDate");
@@ -164,22 +203,92 @@ public class MovieController {
         return null;
     }
 
+
+
     // ==================== VIEW METHODS ====================
 
     @GetMapping("")
-    public String getAllMovies(Model model) {
+    public String getAllMovies(@RequestParam(value = "keyword", required = false) String keyword,
+                               @RequestParam(value = "genreId", required = false) Integer genreId,
+                               @RequestParam(value = "status", required = false) String status,
+                               Model model) {
         try {
-            List<MovieDTO> movies = movieService.getAllMovies();
+            List<MovieDTO> allMovies = movieService.getAllMovies();
+            List<MovieDTO> filteredMovies = allMovies;
+
+            // Apply filters if any search parameters are provided
+            if ((keyword != null && !keyword.trim().isEmpty()) ||
+                    genreId != null ||
+                    (status != null && !status.trim().isEmpty())) {
+
+                filteredMovies = allMovies.stream()
+                        .filter(movie -> {
+                            boolean matches = true;
+
+                            if (keyword != null && !keyword.trim().isEmpty()) {
+                                matches = matches && movie.getMovieName().toLowerCase()
+                                        .contains(keyword.toLowerCase().trim());
+                            }
+
+                            if (status != null && !status.trim().isEmpty()) {
+                                matches = matches && status.equals(movie.getStatus());
+                            }
+
+                            return matches;
+                        })
+                        .collect(Collectors.toList());
+            }
+
             List<GenreDTO> genres = genreService.getAllGenres();
 
-            model.addAttribute("movies", movies != null ? movies : new ArrayList<>());
+            // Tính toán thống kê dựa trên ngày
+            LocalDateTime now = LocalDateTime.now();
+            int totalMovies = allMovies != null ? allMovies.size() : 0;
+            int nowShowingCount = 0;
+            int upcomingCount = 0;
+
+            if (allMovies != null) {
+                for (MovieDTO movie : allMovies) {
+                    // Chỉ tính những phim có status Active hoặc Coming_Soon
+                    String movieStatus = movie.getStatus();
+                    if (!"Active".equals(movieStatus) && !"Coming_Soon".equals(movieStatus)) {
+                        continue;
+                    }
+
+                    LocalDateTime startDate = movie.getStartDate();
+                    if (startDate != null) {
+                        if (startDate.isAfter(now)) {
+                            upcomingCount++; // Phim chưa chiếu
+                        } else {
+                            LocalDateTime endDate = movie.getEndDate();
+                            if (endDate == null || endDate.isAfter(now)) {
+                                nowShowingCount++; // Phim đang chiếu
+                            }
+                        }
+                    }
+                }
+            }
+
+            model.addAttribute("movies", filteredMovies != null ? filteredMovies : new ArrayList<>());
             model.addAttribute("genres", genres != null ? genres : new ArrayList<>());
-            model.addAttribute("pageTitle", "Tất cả phim");
+
+            model.addAttribute("totalMovies", totalMovies);
+            model.addAttribute("nowShowingCount", nowShowingCount);
+            model.addAttribute("upcomingCount", upcomingCount);
+
+            model.addAttribute("keyword", keyword);
+            model.addAttribute("selectedGenreId", genreId);
+            model.addAttribute("selectedStatus", status);
+
+            model.addAttribute("pageTitle", "Movie Management");
             return "admin/movies";
         } catch (Exception e) {
             model.addAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
             model.addAttribute("movies", new ArrayList<>());
             model.addAttribute("genres", new ArrayList<>());
+            model.addAttribute("totalMovies", 0);
+            model.addAttribute("nowShowingCount", 0);
+            model.addAttribute("upcomingCount", 0);
             return "admin/movies";
         }
     }
@@ -228,10 +337,17 @@ public class MovieController {
                            @RequestParam(value = "bannerFile", required = false) MultipartFile bannerFile,
                            RedirectAttributes redirectAttributes) {
         try {
-            // Validate
+            // Validate required data
             String validationError = validateRequiredData(allParams, false);
             if (validationError != null) {
                 redirectAttributes.addFlashAttribute("error", validationError);
+                return "redirect:/admin/movies/add";
+            }
+
+            // Validate required images - BẮT BUỘC KHI THÊM MỚI
+            String imageValidationError = validateRequiredImages(posterFile, bannerFile, true);
+            if (imageValidationError != null) {
+                redirectAttributes.addFlashAttribute("error", imageValidationError);
                 return "redirect:/admin/movies/add";
             }
 
@@ -263,7 +379,7 @@ public class MovieController {
             newMovie.setEndDate(LocalDateTime.parse(allParams.get("endDate")));
             newMovie.setStatus(Movie_Status.valueOf(allParams.get("status")));
 
-            // Set default images trước
+            // Set default images trước (sẽ được thay thế bằng ảnh upload)
             newMovie.setImage("/uploads/default-movie.jpg");
             newMovie.setBanner("/uploads/default-banner.jpg");
 
@@ -271,45 +387,58 @@ public class MovieController {
             MovieDTO savedMovieDTO = movieService.addMovie(newMovie, genreIds, actorIds);
             Integer savedMovieId = savedMovieDTO.getMovieId();
 
-            // Upload ảnh sau khi có ID
-            String finalImagePath = newMovie.getImage();
-            String finalBannerPath = newMovie.getBanner();
+            // Upload ảnh - BẮT BUỘC
+            String finalImagePath = null;
+            String finalBannerPath = null;
 
             try {
+                // Upload poster - BẮT BUỘC
                 if (posterFile != null && !posterFile.isEmpty()) {
-                    String uploadedImagePath = uploadMovieImage(posterFile, "poster", savedMovieId);
-                    if (uploadedImagePath != null) {
-                        finalImagePath = uploadedImagePath;
-                        System.out.println("Uploaded poster: " + finalImagePath);
+                    finalImagePath = uploadMovieImage(posterFile, "poster", savedMovieId);
+                    if (finalImagePath == null) {
+                        throw new IOException("Không thể upload ảnh poster");
                     }
+                    System.out.println("Uploaded poster: " + finalImagePath);
+                } else {
+                    throw new IOException("Poster file bị thiếu");
                 }
 
+                // Upload banner - BẮT BUỘC
                 if (bannerFile != null && !bannerFile.isEmpty()) {
-                    String uploadedBannerPath = uploadMovieImage(bannerFile, "banner", savedMovieId);
-                    if (uploadedBannerPath != null) {
-                        finalBannerPath = uploadedBannerPath;
-                        System.out.println("Uploaded banner: " + finalBannerPath);
+                    finalBannerPath = uploadMovieImage(bannerFile, "banner", savedMovieId);
+                    if (finalBannerPath == null) {
+                        throw new IOException("Không thể upload ảnh banner");
                     }
+                    System.out.println("Uploaded banner: " + finalBannerPath);
+                } else {
+                    throw new IOException("Banner file bị thiếu");
                 }
 
-                // Update movie với đường dẫn ảnh mới
-                if (!finalImagePath.equals("/uploads/default-movie.jpg") || !finalBannerPath.equals("/uploads/default-banner.jpg")) {
-                    Movie movieToUpdate = movieRepository.findById(savedMovieId).orElse(null);
-                    if (movieToUpdate != null) {
-                        movieToUpdate.setImage(finalImagePath);
-                        movieToUpdate.setBanner(finalBannerPath);
-                        movieRepository.save(movieToUpdate);
-                        System.out.println("Updated movie images - Poster: " + finalImagePath + ", Banner: " + finalBannerPath);
-                    }
+                // Update movie với đường dẫn ảnh thực
+                Movie movieToUpdate = movieRepository.findById(savedMovieId).orElse(null);
+                if (movieToUpdate != null) {
+                    movieToUpdate.setImage(finalImagePath);
+                    movieToUpdate.setBanner(finalBannerPath);
+                    movieRepository.save(movieToUpdate);
+                    System.out.println("Updated movie images - Poster: " + finalImagePath + ", Banner: " + finalBannerPath);
                 }
 
             } catch (IOException e) {
                 System.err.println("Error uploading images: " + e.getMessage());
-                redirectAttributes.addFlashAttribute("warning", "Phim đã được thêm nhưng lỗi upload ảnh: " + e.getMessage());
-                return "redirect:/admin/movies/" + savedMovieId;
+
+                // Nếu upload ảnh thất bại, xóa movie đã tạo vì ảnh là bắt buộc
+                try {
+                    movieRepository.deleteById(savedMovieId);
+                    System.out.println("Deleted movie due to image upload failure: " + savedMovieId);
+                } catch (Exception deleteEx) {
+                    System.err.println("Error deleting movie after image upload failure: " + deleteEx.getMessage());
+                }
+
+                redirectAttributes.addFlashAttribute("error", "Lỗi upload ảnh: " + e.getMessage() + ". Phim không được tạo do ảnh là bắt buộc.");
+                return "redirect:/admin/movies/add";
             }
 
-            redirectAttributes.addFlashAttribute("success", "Thêm phim thành công!");
+            redirectAttributes.addFlashAttribute("success", "Thêm phim thành công với poster và banner!");
             return "redirect:/admin/movies/" + savedMovieId;
 
         } catch (Exception e) {
@@ -381,6 +510,40 @@ public class MovieController {
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
             return "redirect:/admin/movies";
+        }
+    }
+
+    private Map<String, Integer> calculateMovieStats() {
+        try {
+            List<MovieDTO> allMovies = movieService.getAllMovies();
+            Map<String, Integer> stats = new HashMap<>();
+
+            int totalMovies = allMovies != null ? allMovies.size() : 0;
+            int nowShowingCount = 0;
+            int upcomingCount = 0;
+
+            if (allMovies != null) {
+                for (MovieDTO movie : allMovies) {
+                    String status = movie.getStatus();
+                    if ("Active".equals(status)) {
+                        nowShowingCount++;
+                    } else if ("Coming_Soon".equals(status)) {
+                        upcomingCount++;
+                    }
+                }
+            }
+
+            stats.put("totalMovies", totalMovies);
+            stats.put("nowShowingCount", nowShowingCount);
+            stats.put("upcomingCount", upcomingCount);
+
+            return stats;
+        } catch (Exception e) {
+            Map<String, Integer> emptyStats = new HashMap<>();
+            emptyStats.put("totalMovies", 0);
+            emptyStats.put("nowShowingCount", 0);
+            emptyStats.put("upcomingCount", 0);
+            return emptyStats;
         }
     }
 
@@ -576,73 +739,24 @@ public class MovieController {
         }
     }
 
-    // ==================== OTHER OPERATIONS ====================
+    // ==================== API ENDPOINTS ====================
 
-    @PostMapping("/{id}/delete")
-    public String deleteMovie(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
+    /**
+     * API endpoint to check if movie has booked seats
+     * Used by frontend for status validation
+     */
+    @GetMapping("/{id}/check-booked-seats")
+    @ResponseBody
+    public Map<String, Object> checkBookedSeats(@PathVariable Integer id) {
+        Map<String, Object> response = new HashMap<>();
         try {
-            MovieDTO movie = movieService.getMovieById(id);
-            if (movie == null) {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim");
-                return "redirect:/admin/movies";
-            }
-
-            boolean success = movieService.updateMovieStatus(id, Movie_Status.Removed);
-            if (success) {
-                redirectAttributes.addFlashAttribute("success", "Đã xóa phim thành công!");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Không thể xóa phim này");
-            }
+            response.put("hasBookedSeats", movieService.hasBookedSeats(id));
+            response.put("success", true);
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
+            response.put("hasBookedSeats", false);
+            response.put("success", false);
+            response.put("error", e.getMessage());
         }
-        return "redirect:/admin/movies";
-    }
-
-    @PostMapping("/{id}/restore")
-    public String restoreMovie(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        try {
-            MovieDTO movie = movieService.getMovieById(id);
-            if (movie == null) {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim");
-                return "redirect:/admin/movies";
-            }
-
-            boolean success = movieService.updateMovieStatus(id, Movie_Status.Active);
-            if (success) {
-                redirectAttributes.addFlashAttribute("success", "Đã khôi phục phim thành công!");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Không thể khôi phục phim này");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-        }
-        return "redirect:/admin/movies";
-    }
-
-    @PostMapping("/{id}/hard-delete")
-    public String hardDeleteMovie(@PathVariable Integer id, RedirectAttributes redirectAttributes) {
-        try {
-            MovieDTO movie = movieService.getMovieById(id);
-            if (movie == null) {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy phim");
-                return "redirect:/admin/movies";
-            }
-
-            if (!"Removed".equals(movie.getStatus())) {
-                redirectAttributes.addFlashAttribute("error", "Chỉ có thể xóa vĩnh viễn phim đã bị gỡ bỏ");
-                return "redirect:/admin/movies/" + id;
-            }
-
-            boolean success = movieService.hardDeleteMovieComplete(id);
-            if (success) {
-                redirectAttributes.addFlashAttribute("success", "Đã xóa vĩnh viễn phim thành công!");
-            } else {
-                redirectAttributes.addFlashAttribute("error", "Không thể xóa vĩnh viễn phim này");
-            }
-        } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi: " + e.getMessage());
-        }
-        return "redirect:/admin/movies";
+        return response;
     }
 }

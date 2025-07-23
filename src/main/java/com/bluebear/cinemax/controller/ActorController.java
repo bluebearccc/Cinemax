@@ -230,7 +230,7 @@ public class ActorController {
         return "admin/form-actor";
     }
 
-    // Xử lý thêm actor mới
+    // Xử lý thêm actor mới với ảnh bắt buộc
     @PostMapping("/add")
     public String addActor(@ModelAttribute ActorDTO actorDTO,
                            @RequestParam(value = "selectedMovies", required = false) String selectedMovies,
@@ -243,6 +243,27 @@ public class ActorController {
                 throw new IllegalArgumentException("Tên diễn viên không được để trống");
             }
 
+            // ĐIỀU KIỆN MỚI: Bắt buộc phải có ảnh khi thêm diễn viên
+            if (imageFile == null || imageFile.isEmpty()) {
+                throw new IllegalArgumentException("Ảnh diễn viên là bắt buộc khi thêm mới");
+            }
+
+            // Validate ảnh upload ngay từ đầu
+            String originalFilename = imageFile.getOriginalFilename();
+            if (originalFilename == null) {
+                throw new IllegalArgumentException("Tên file ảnh không hợp lệ");
+            }
+
+            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+            if (!fileExtension.matches("\\.(jpg|jpeg|png|gif|webp)")) {
+                throw new IllegalArgumentException("Chỉ chấp nhận file ảnh (jpg, jpeg, png, gif, webp)");
+            }
+
+            // Kiểm tra kích thước file (max 5MB)
+            if (imageFile.getSize() > 5 * 1024 * 1024) {
+                throw new IllegalArgumentException("Kích thước file không được vượt quá 5MB");
+            }
+
             // Đặt ảnh mặc định tạm thời
             actorDTO.setImage("/uploads/default-actor.jpg");
 
@@ -250,27 +271,29 @@ public class ActorController {
             ActorDTO savedActor = actorService.saveActor(actorDTO);
             Integer savedActorId = savedActor.getActorId();
 
-            // XỬ LÝ UPLOAD ẢNH SAU KHI CÓ ID
-            String finalImagePath = "/uploads/default-actor.jpg";
-
+            // XỬ LÝ UPLOAD ẢNH - BẮT BUỘC PHẢI THÀNH CÔNG
             try {
-                // Upload ảnh nếu có
-                if (imageFile != null && !imageFile.isEmpty()) {
-                    String uploadedImagePath = uploadActorImage(imageFile, savedActorId);
-                    if (uploadedImagePath != null) {
-                        finalImagePath = uploadedImagePath;
-                        System.out.println("Đã upload ảnh actor: " + finalImagePath);
-
-                        // Cập nhật lại đường dẫn ảnh trong database
-                        savedActor.setImage(finalImagePath);
-                        actorService.updateActor(savedActor);
-                    }
+                String uploadedImagePath = uploadActorImage(imageFile, savedActorId);
+                if (uploadedImagePath == null) {
+                    // Nếu upload thất bại, xóa actor đã tạo và báo lỗi
+                    actorService.deleteActor(savedActorId);
+                    throw new IOException("Không thể upload ảnh diễn viên");
                 }
+
+                // Cập nhật lại đường dẫn ảnh trong database
+                savedActor.setImage(uploadedImagePath);
+                actorService.updateActor(savedActor);
+                System.out.println("Đã upload ảnh actor: " + uploadedImagePath);
+
             } catch (IOException e) {
-                System.err.println("Lỗi upload ảnh actor: " + e.getMessage());
-                // Không return error vì actor đã được tạo thành công
-                redirectAttributes.addFlashAttribute("warning",
-                        "Diễn viên đã được thêm thành công nhưng có lỗi khi upload ảnh: " + e.getMessage());
+                // Nếu có lỗi upload, xóa actor đã tạo
+                try {
+                    actorService.deleteActor(savedActorId);
+                    System.err.println("Đã xóa actor do lỗi upload ảnh: " + savedActorId);
+                } catch (Exception deleteEx) {
+                    System.err.println("Lỗi khi xóa actor sau lỗi upload: " + deleteEx.getMessage());
+                }
+                throw new IllegalArgumentException("Lỗi khi upload ảnh diễn viên: " + e.getMessage());
             }
 
             // Xử lý danh sách phim đã chọn
@@ -283,7 +306,6 @@ public class ActorController {
 
                 // Cập nhật quan hệ Actor-Movie
                 actorService.updateActorMovies(savedActorId, movieIds);
-
                 System.out.println("DEBUG - Actor assigned to " + movieIds.size() + " movies");
             }
 
@@ -335,13 +357,10 @@ public class ActorController {
         model.addAttribute("isEdit", true);
         model.addAttribute("pageTitle", "Chỉnh sửa diễn viên - " + actor.getActorName());
 
-        // Thay đổi đường dẫn return để khớp với file HTML hiện tại
-        return "/admin/edit-actor";
+        return "admin/edit-actor";
     }
 
     // Xử lý cập nhật actor
-    // Cập nhật method trong ActorController.java
-
     @PostMapping("/edit/{id}")
     public String updateActor(@PathVariable Integer id,
                               @ModelAttribute ActorDTO actorDTO,
@@ -366,7 +385,7 @@ public class ActorController {
             ActorDTO existingActor = actorService.getActorById(id);
             String currentImagePath = existingActor.getImage();
 
-            // XỬ LÝ UPLOAD ẢNH MỚI
+            // XỬ LÝ UPLOAD ẢNH MỚI (không bắt buộc khi edit)
             try {
                 if (imageFile != null && !imageFile.isEmpty()) {
                     String uploadedImagePath = uploadActorImage(imageFile, id);
@@ -426,6 +445,7 @@ public class ActorController {
             return "admin/edit-actor";
         }
     }
+
     // Xóa actor
     @PostMapping("/delete/{id}")
     public String deleteActor(@PathVariable Integer id, RedirectAttributes redirectAttributes) {

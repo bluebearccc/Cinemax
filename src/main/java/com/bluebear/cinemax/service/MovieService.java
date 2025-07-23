@@ -113,8 +113,10 @@ public class MovieService {
         if (movie.getStartDate() == null)
             return "Ngày bắt đầu chiếu không được để trống";
         LocalDateTime today = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0);
-        if (movie.getStartDate().isBefore(today))
-            return "Ngày bắt đầu chiếu phải từ hôm nay trở đi";
+        if (isAdd) {
+            if (movie.getStartDate().isBefore(today))
+                return "Ngày bắt đầu chiếu phải từ hôm nay trở đi";
+        }
 
         // Ngày kết thúc bắt buộc
         if (movie.getEndDate() == null)
@@ -150,14 +152,16 @@ public class MovieService {
 
     /**
      * Kiểm tra xem movie có thể chuyển từ Active sang Removed hay không
+     * Chỉ cho phép chuyển nếu movie KHÔNG có DetailSeat nào với trạng thái "Booked"
      * @param movieId ID của movie cần kiểm tra
      * @return true nếu có thể chuyển, false nếu không
      */
     private boolean canChangeToRemovedStatus(Integer movieId) {
         if (movieId == null) return false;
 
-        // Kiểm tra xem movie có tồn tại trong schedule không
-        return !movieRepository.existsInSchedule(movieId);
+        // Kiểm tra xem movie có schedule với DetailSeat trạng thái "Booked" không
+        // Nếu có DetailSeat "Booked" thì KHÔNG cho phép chuyển sang Removed
+        return !movieRepository.existsInScheduleWithBookedSeats(movieId);
     }
 
     /**
@@ -181,7 +185,7 @@ public class MovieService {
         // Kiểm tra chuyển từ Active sang Removed
         if (currentStatus == Movie_Status.Active && newStatus == Movie_Status.Removed) {
             if (!canChangeToRemovedStatus(currentMovie.getMovieID())) {
-                return "Không thể xóa phim này vì đang có lịch chiếu";
+                return "Không thể xóa phim này vì có ghế đã được đặt (trạng thái Booked)";
             }
         }
 
@@ -285,34 +289,6 @@ public class MovieService {
     }
 
     @Transactional
-    public boolean updateMovieStatus(Integer movieId, Movie_Status newStatus) {
-        try {
-            if (movieId == null || newStatus == null) {
-                return false;
-            }
-
-            Movie movie = movieRepository.findById(movieId).orElse(null);
-            if (movie == null) {
-                return false;
-            }
-
-            // Kiểm tra điều kiện chuyển đổi status
-            String validationError = validateStatusChange(movie, newStatus);
-            if (validationError != null) {
-                throw new IllegalArgumentException(validationError);
-            }
-
-            movie.setStatus(newStatus);
-            movieRepository.save(movie);
-            return true;
-
-        } catch (Exception e) {
-            System.err.println("Lỗi khi cập nhật trạng thái phim: " + e.getMessage());
-            throw e;
-        }
-    }
-
-    @Transactional
     public boolean updateEndDate(Integer movieId, LocalDateTime newEndDate) {
         try {
             if (movieId == null || newEndDate == null) {
@@ -335,23 +311,6 @@ public class MovieService {
 
         } catch (Exception e) {
             System.err.println("Lỗi khi cập nhật ngày kết thúc: " + e.getMessage());
-            return false;
-        }
-    }
-
-    // ==================== DELETE OPERATIONS ====================
-
-    @Transactional
-    public boolean hardDeleteMovieComplete(Integer movieId) {
-        if (movieId == null) return false;
-
-        try {
-            Movie movie = movieRepository.findById(movieId).orElse(null);
-            if (movie == null || movie.getStatus() != Movie_Status.Removed) return false;
-
-            movieRepository.deleteById(movieId);
-            return !movieRepository.existsById(movieId);
-        } catch (Exception e) {
             return false;
         }
     }
@@ -394,6 +353,16 @@ public class MovieService {
     public boolean hasSchedule(Integer movieId) {
         if (movieId == null) return false;
         return movieRepository.existsInSchedule(movieId);
+    }
+
+    /**
+     * Kiểm tra xem movie có schedule với ghế đã được đặt không
+     * @param movieId ID của movie
+     * @return true nếu có ghế đã được đặt, false nếu không
+     */
+    public boolean hasBookedSeats(Integer movieId) {
+        if (movieId == null) return false;
+        return movieRepository.existsInScheduleWithBookedSeats(movieId);
     }
 
     /**

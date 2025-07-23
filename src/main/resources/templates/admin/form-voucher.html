@@ -3,24 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Add/Edit Voucher</title>
+    <title th:text="${pageTitle}">Add/Edit Voucher - BlueBear Cinema</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --primary-gradient-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            --primary-color: #667eea;
-            --success-color: #28a745;
-            --warning-color: #ffc107;
-            --danger-color: #dc3545;
-            --light-bg: #f8f9fa;
-            --white: #ffffff;
-            --border-color: #dee2e6;
-            --card-bg: #ffffff;
-            --text-primary: #212529;
-            --text-secondary: #6c757d;
-            --text-muted: #6c757d;
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --dark-glass: rgba(0, 0, 0, 0.1);
+
+            --text-primary: #1a1a1a;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+            --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
 
         * {
@@ -30,196 +36,352 @@
         }
 
         body {
-            background-color: var(--light-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             color: var(--text-primary);
             min-height: 100vh;
+            overflow-x: hidden;
+            font-weight: 400;
+            line-height: 1.6;
         }
 
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Premium Sidebar */
         .sidebar {
-            background: var(--white);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             min-height: 100vh;
-            width: 260px;
+            width: 280px;
             position: fixed;
             left: 0;
             top: 0;
-            border-right: 1px solid var(--border-color);
             z-index: 1000;
-            transition: all 0.3s ease;
-            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            border-radius: inherit;
+            pointer-events: none;
         }
 
         .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid var(--border-color);
-            background: var(--primary-gradient);
+            padding: 32px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
         }
 
-        .sidebar-header h5 {
-            color: white;
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin: 0;
-        }
-
-        .sidebar-header .fa-film {
-            color: white;
-            margin-right: 10px;
-        }
-
-        .sidebar-nav {
-            padding: 20px 0;
-        }
-
-        .nav-link {
-            color: var(--text-secondary);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: none;
-            background: none;
-            margin: 2px 0;
-        }
-
-        .nav-link:hover {
-            color: var(--primary-color);
-            background: rgba(102, 126, 234, 0.1);
-        }
-
-        .nav-link.active {
-            color: var(--primary-color);
-            background: rgba(102, 126, 234, 0.1);
-            border-right: 3px solid var(--primary-color);
-            font-weight: 600;
-        }
-
-        .nav-link i {
-            width: 20px;
-            margin-right: 12px;
-            font-size: 1rem;
-        }
-
-        .main-content {
-            margin-left: 260px;
-            padding: 24px;
-            min-height: 100vh;
-            background: var(--light-bg);
-        }
-
-        .header-section {
-            background: var(--white);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-
-        .header-content h2 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--text-primary);
-        }
-
-        .breadcrumb-text {
-            color: var(--text-secondary);
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .btn-secondary {
-            background: var(--white);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 20px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .form-container {
-            background: var(--white);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 32px;
-            max-width: 900px;
-            margin: 0 auto;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-
-        .form-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 24px;
-            color: var(--text-primary);
+        .logo-container {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .form-title i {
-            color: var(--primary-color);
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
         }
 
-        .form-group {
+        .logo-icon:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .logo-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .logo-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: -2px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            padding: 24px 16px;
+        }
+
+        .nav-section {
             margin-bottom: 24px;
         }
 
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
+        .nav-section-title {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding: 0 12px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 16px 12px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 12px;
+            margin: 4px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
             font-weight: 500;
-            color: var(--text-primary);
-            font-size: 0.95rem;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover::before {
+            transform: translateX(0);
+        }
+
+        .nav-link:hover {
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        .nav-icon {
+            width: 20px;
+            margin-right: 16px;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 32px;
+            min-height: 100vh;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Premium Back Navigation */
+        .back-nav {
+            margin-bottom: 32px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Premium Form Container */
+        .form-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+
+        .card-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-header h5 {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header small {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .card-body {
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Premium Form Controls */
+        .form-label {
+            color: #2d1b69;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .form-label i {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .form-label .text-danger {
+            color: #e74c3c !important;
         }
 
         .form-label.required::after {
             content: " *";
-            color: var(--danger-color);
+            color: #e74c3c;
         }
 
-        .form-control {
-            background: var(--white);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            padding: 12px 16px;
-            transition: all 0.2s ease;
-            width: 100%;
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #2d1b69;
+            padding: 14px 18px;
+            transition: all 0.3s ease;
             font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .form-control::placeholder {
-            color: var(--text-muted);
+            color: rgba(45, 27, 105, 0.6);
         }
 
-        .form-control:focus {
-            background: var(--white);
-            border-color: var(--primary-color);
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #667eea;
             box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-            color: var(--text-primary);
+            color: #2d1b69;
             outline: none;
         }
 
         .form-control.is-invalid {
-            border-color: var(--danger-color);
-            box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.25);
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
+        }
+
+        .invalid-feedback {
+            color: #e74c3c;
+            font-size: 0.875rem;
+            margin-top: 6px;
+            font-weight: 500;
+        }
+
+        .form-text {
+            color: #4a3577;
+            font-size: 0.875rem;
+            margin-top: 6px;
         }
 
         .date-time-group {
@@ -239,142 +401,193 @@
             letter-spacing: 1px;
         }
 
-        .form-select {
-            background: var(--white);
-            border: 1px solid var(--border-color);
-            color: var(--text-primary);
-            border-radius: 8px;
-            padding: 12px 16px;
-            width: 100%;
-            font-size: 1rem;
-        }
-
-        .form-select option {
-            background: var(--white);
-            color: var(--text-primary);
-        }
-
-        .form-select:focus {
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
-            outline: none;
-        }
-
-        .invalid-feedback {
-            color: var(--danger-color);
-            font-size: 0.875rem;
-            margin-top: 4px;
-        }
-
-        .form-help {
-            color: var(--text-secondary);
-            font-size: 0.875rem;
-            margin-top: 4px;
-        }
-
         .input-group {
             display: flex;
             align-items: center;
         }
 
         .input-group-text {
-            background: var(--light-bg);
-            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-right: none;
-            color: var(--text-primary);
-            padding: 12px 16px;
-            border-radius: 8px 0 0 8px;
+            color: #2d1b69;
+            padding: 14px 18px;
+            border-radius: 12px 0 0 12px;
+            font-weight: 600;
         }
 
         .input-group .form-control {
             border-left: none;
-            border-radius: 0 8px 8px 0;
+            border-radius: 0 12px 12px 0;
         }
 
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border-color);
-        }
-
+        /* Premium Buttons */
         .btn-primary {
-            background: var(--primary-gradient);
+            background: var(--success-gradient);
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             padding: 14px 28px;
             color: white;
-            font-weight: 500;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
             font-size: 1rem;
-            transition: all 0.2s ease;
-            cursor: pointer;
         }
 
         .btn-primary:hover {
-            background: var(--primary-gradient-hover);
-            transform: translateY(-1px);
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-premium);
+            color: white;
         }
 
-        .btn-outline {
-            background: var(--white);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
             padding: 14px 28px;
-            color: var(--text-secondary);
+            color: rgba(255, 255, 255, 0.9);
             font-weight: 500;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            cursor: pointer;
+            transition: all 0.3s ease;
             text-decoration: none;
         }
 
-        .btn-outline:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
             text-decoration: none;
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 -12px;
+        .btn-outline-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 14px 20px;
+            transition: all 0.3s ease;
         }
 
-        .col-md-6 {
-            flex: 0 0 50%;
-            max-width: 50%;
-            padding: 0 12px;
+        .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
         }
 
-        .alert {
-            border-radius: 10px;
-            margin-bottom: 20px;
+        /* Premium Info Cards */
+        .upload-info, .auto-rating-info, .image-required-warning {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
             padding: 16px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+
+        .upload-info .info-title,
+        .auto-rating-info .info-title {
+            color: #2d1b69;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-info .info-item,
+        .auto-rating-info .info-item {
+            color: #4a3577;
+            margin: 4px 0;
+        }
+
+        .image-required-warning {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: rgba(231, 76, 60, 0.3);
+        }
+
+        .image-required-warning .warning-title {
+            color: #e74c3c;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .image-required-warning .warning-item {
+            color: #c0392b;
+            margin: 4px 0;
+        }
+
+        /* Premium Requirements Card */
+        .requirements-card {
+            background: rgba(231, 76, 60, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .requirements-header {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            padding: 16px;
+            font-weight: 600;
+        }
+
+        .requirements-body {
+            padding: 16px;
+            font-size: 0.9rem;
+            color: #4a3577;
+        }
+
+        .requirements-body ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .requirements-body li {
+            margin-bottom: 4px;
+        }
+
+        /* Premium Alerts */
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
         }
 
         .alert-success {
-            background: rgba(40, 167, 69, 0.1);
-            border: 1px solid rgba(40, 167, 69, 0.3);
-            color: var(--success-color);
+            background: rgba(40, 167, 69, 0.2);
+            color: white;
         }
 
         .alert-danger {
-            background: rgba(220, 53, 69, 0.1);
-            border: 1px solid rgba(220, 53, 69, 0.3);
-            color: var(--danger-color);
+            background: rgba(220, 53, 69, 0.2);
+            color: white;
         }
 
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: white;
+        }
+
+        /* Premium Voucher Preview */
         .voucher-preview {
-            margin-top: 24px;
+            margin-top: 32px;
             padding: 24px;
             background: var(--primary-gradient);
-            border-radius: 12px;
+            border-radius: 16px;
             color: white;
             text-align: center;
             position: relative;
             overflow: hidden;
+            box-shadow: var(--shadow-xl);
         }
 
         .voucher-preview::before {
@@ -440,84 +653,131 @@
             opacity: 0.8;
         }
 
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 280px;
+                padding: 24px;
+            }
+        }
+
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
+                width: 280px;
             }
 
             .main-content {
                 margin-left: 0;
-                padding: 16px;
+                padding: 20px;
             }
 
-            .header-section {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-
-            .form-container {
+            .card-header, .card-body {
                 padding: 24px;
-            }
-
-            .col-md-6 {
-                flex: 0 0 100%;
-                max-width: 100%;
             }
 
             .date-time-group {
                 grid-template-columns: 1fr;
             }
-
-            .btn-group {
-                flex-direction: column;
-            }
         }
 
         .fade-in {
-            animation: fadeIn 0.6s ease-in-out;
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
         }
 
-        @keyframes fadeIn {
+        @keyframes fadeInUp {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
                 transform: translateY(0);
             }
         }
+
+        .back-nav { animation-delay: 0.1s; }
+        .form-container { animation-delay: 0.2s; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
     </style>
 </head>
 <body>
-<!-- Sidebar -->
+<!-- Premium Sidebar -->
 <div class="sidebar">
     <div class="sidebar-header">
-        <h5>
-            <i class="fas fa-film"></i>
-            BlueBear Cinema
-        </h5>
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-film"></i>
+            </div>
+            <div>
+                <div class="logo-text">BlueBear</div>
+                <div class="logo-subtitle">CINEMA SUITE</div>
+            </div>
+        </div>
     </div>
 
     <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin/">
-            <i class="fas fa-home"></i>Dashboard
-        </a>
-        <a class="nav-link" href="/admin/movies">
-            <i class="fas fa-film"></i>Movies
-        </a>
-        <a class="nav-link" href="/admin/actors">
-            <i class="fas fa-users"></i>Actors
-        </a>
-        <a class="nav-link active" href="/admin/vouchers">
-            <i class="fas fa-ticket-alt"></i>Vouchers
-        </a>
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a class="nav-link" href="/admin/">
+                <i class="nav-icon fas fa-home"></i>
+                <span class="nav-text">Dashboard</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Content</div>
+            <a class="nav-link" href="/admin/movies">
+                <i class="nav-icon fas fa-film"></i>
+                <span class="nav-text">Movies</span>
+            </a>
+            <a class="nav-link" href="/admin/actors">
+                <i class="nav-icon fas fa-users"></i>
+                <span class="nav-text">Actors</span>
+            </a>
+            <a class="nav-link" href="/admin/genres">
+                <i class="nav-icon fas fa-tags"></i>
+                <span class="nav-text">Genres</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Marketing</div>
+            <a class="nav-link active" href="/admin/vouchers">
+                <i class="nav-icon fas fa-ticket-alt"></i>
+                <span class="nav-text">Vouchers</span>
+            </a>
+        </div>
     </nav>
 </div>
 
 <!-- Main Content -->
 <div class="main-content">
+    <!-- Premium Back Navigation -->
+    <div class="back-nav fade-in">
+        <a href="/admin/vouchers" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Voucher Collection
+        </a>
+    </div>
+
     <!-- Alert Messages -->
     <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
         <i class="fas fa-check-circle me-2"></i>
@@ -531,182 +791,260 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- Header -->
-    <div class="header-section fade-in">
-        <div class="header-content">
-            <h2 th:text="${isEdit} ? 'Chỉnh Sửa Voucher' : 'Thêm Voucher Mới'">Thêm Voucher Mới</h2>
-            <p class="breadcrumb-text">Dashboard > Vouchers > <span th:text="${isEdit} ? 'Chỉnh Sửa' : 'Thêm Mới'">Thêm Mới</span></p>
-        </div>
-        <a href="/admin/vouchers" class="btn-secondary">
-            <i class="fas fa-arrow-left"></i>Quay Lại
-        </a>
-    </div>
-
-    <!-- Form -->
+    <!-- Premium Add Voucher Form -->
     <div class="form-container fade-in">
-        <h3 class="form-title">
-            <i th:class="${isEdit} ? 'fas fa-edit' : 'fas fa-plus'"></i>
-            <span th:text="${isEdit} ? 'Chỉnh Sửa Thông Tin Voucher' : 'Tạo Voucher Mới'">Tạo Voucher Mới</span>
-        </h3>
+        <div class="card-header">
+            <h5>
+                <i th:class="${isEdit} ? 'fas fa-edit' : 'fas fa-plus'"></i>
+                <span th:text="${isEdit} ? 'Edit Voucher Campaign' : 'Create New Voucher Campaign'">Create New Voucher Campaign</span>
+            </h5>
+            <small>All fields marked with (*) are mandatory for voucher creation</small>
+        </div>
 
-        <form th:action="${isEdit} ? @{/admin/vouchers/edit/{id}(id=${voucher.promotionID})} : @{/admin/vouchers/add}"
-              method="post" th:object="${voucher}" id="voucherForm" novalidate>
+        <div class="card-body">
+            <form th:action="${isEdit} ? @{/admin/vouchers/edit/{id}(id=${voucher.promotionID})} : @{/admin/vouchers/add}"
+                  method="post" th:object="${voucher}" id="voucherForm" novalidate>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label required" for="promotionCode">Mã Khuyến Mãi</label>
-                        <input type="text"
-                               class="form-control"
-                               id="promotionCode"
-                               th:field="*{promotionCode}"
-                               placeholder="Ví dụ: SAVE20, WELCOME10"
-                               maxlength="10"
-                               required>
-                        <div class="form-help">
-                            Tối đa 10 ký tự. Mã phải là duy nhất.
-                        </div>
-                        <div class="invalid-feedback" id="promotionCodeError"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label required" for="discount">Phần Trăm Giảm Giá</label>
-                        <div class="input-group">
-                            <input type="number"
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-8">
+                        <!-- Promotion Code -->
+                        <div class="mb-3">
+                            <label for="promotionCode" class="form-label">
+                                <i class="fas fa-ticket-alt"></i>
+                                Voucher Code <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
                                    class="form-control"
-                                   id="discount"
-                                   th:field="*{discount}"
-                                   placeholder="20"
-                                   min="1"
-                                   max="100"
-                                   required>
-                            <span class="input-group-text">%</span>
+                                   id="promotionCode"
+                                   th:field="*{promotionCode}"
+                                   required
+                                   maxlength="10"
+                                   placeholder="Enter unique voucher code (required)...">
+                            <small class="form-text">Unique promotional code (max 10 characters, uppercase)</small>
+                            <div class="invalid-feedback" id="promotionCodeError"></div>
                         </div>
-                        <div class="form-help">
-                            Nhập giá trị nguyên từ 1% đến 100%
+
+                        <!-- Discount -->
+                        <div class="mb-3">
+                            <label for="discount" class="form-label">
+                                <i class="fas fa-percentage"></i>
+                                Discount Percentage <span class="text-danger">*</span>
+                            </label>
+                            <div class="input-group">
+                                <input type="number"
+                                       class="form-control"
+                                       id="discount"
+                                       th:field="*{discount}"
+                                       required
+                                       min="1"
+                                       max="100"
+                                       placeholder="Enter discount percentage...">
+                                <span class="input-group-text">%</span>
+                            </div>
+                            <small class="form-text">Discount value from 1% to 100%</small>
+                            <div class="invalid-feedback" id="discountError"></div>
                         </div>
-                        <div class="invalid-feedback" id="discountError"></div>
+
+                        <!-- Start Date and Time -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        Start Date & Time <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="date-time-group">
+                                        <div>
+                                            <input type="text"
+                                                   class="form-control date-input"
+                                                   id="startDate"
+                                                   placeholder="dd/MM/yyyy"
+                                                   maxlength="10"
+                                                   required>
+                                            <small class="form-text">Campaign start date</small>
+                                        </div>
+                                        <div>
+                                            <input type="text"
+                                                   class="form-control time-input"
+                                                   id="startTime"
+                                                   placeholder="HH:mm"
+                                                   maxlength="5"
+                                                   required>
+                                            <small class="form-text">Campaign start time</small>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="startDateTimeError"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-calendar-times"></i>
+                                        End Date & Time <span class="text-danger">*</span>
+                                    </label>
+                                    <div class="date-time-group">
+                                        <div>
+                                            <input type="text"
+                                                   class="form-control date-input"
+                                                   id="endDate"
+                                                   placeholder="dd/MM/yyyy"
+                                                   maxlength="10"
+                                                   required>
+                                            <small class="form-text">Campaign end date</small>
+                                        </div>
+                                        <div>
+                                            <input type="text"
+                                                   class="form-control time-input"
+                                                   id="endTime"
+                                                   placeholder="HH:mm"
+                                                   maxlength="5"
+                                                   required>
+                                            <small class="form-text">Campaign end time</small>
+                                        </div>
+                                    </div>
+                                    <div class="invalid-feedback" id="endDateTimeError"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Quantity and Status -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="quantity" class="form-label">
+                                        <i class="fas fa-sort-numeric-up"></i>
+                                        Available Quantity <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number"
+                                           class="form-control"
+                                           id="quantity"
+                                           th:field="*{quantity}"
+                                           required
+                                           min="1"
+                                           placeholder="Enter available quantity...">
+                                    <small class="form-text">Number of times this voucher can be used</small>
+                                    <div class="invalid-feedback" id="quantityError"></div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="status" class="form-label">
+                                        <i class="fas fa-toggle-on"></i>
+                                        Campaign Status <span class="text-danger">*</span>
+                                    </label>
+                                    <select class="form-select" id="status" th:field="*{status}" required>
+                                        <option value="">-- Select campaign status --</option>
+                                        <option value="Available" selected>Available</option>
+                                        <option value="Expired">Expired</option>
+                                    </select>
+                                    <small class="form-text">Current voucher campaign status</small>
+                                    <div class="invalid-feedback" id="statusError"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Auto Info -->
+                        <div class="auto-rating-info mb-3">
+                            <div class="info-title">
+                                <i class="fas fa-info-circle"></i>
+                                Voucher Campaign System
+                            </div>
+                            <div class="info-item">• Codes are automatically validated for uniqueness</div>
+                            <div class="info-item">• Campaign dates determine voucher availability</div>
+                            <div class="info-item">• Quantity tracks remaining usage count</div>
+                        </div>
+
+                        <!-- Hidden fields for backend -->
+                        <input type="hidden" id="hiddenStartTime" th:field="*{startTime}">
+                        <input type="hidden" id="hiddenEndTime" th:field="*{endTime}">
+                    </div>
+
+                    <!-- Right Column - Preview & Requirements -->
+                    <div class="col-md-4">
+                        <!-- Voucher Preview -->
+                        <div class="mb-4">
+                            <label class="form-label">
+                                <i class="fas fa-eye"></i>
+                                Campaign Preview
+                            </label>
+
+                            <div id="voucherPreview" style="display: none;">
+                                <div class="voucher-preview">
+                                    <div class="voucher-preview-content">
+                                        <div class="voucher-title">BlueBear Cinema</div>
+                                        <div class="voucher-code-preview" id="previewCode">VOUCHER</div>
+                                        <div class="voucher-discount-preview" id="previewDiscount">0% OFF</div>
+                                        <div class="voucher-period-preview" id="previewPeriod">Period: -</div>
+                                        <div class="voucher-quantity-preview" id="previewQuantity">Available: -</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="upload-info">
+                                <div class="info-title">
+                                    <i class="fas fa-magic"></i>
+                                    Live Preview Features:
+                                </div>
+                                <div class="info-item">• Real-time voucher display</div>
+                                <div class="info-item">• Dynamic code formatting</div>
+                                <div class="info-item">• Campaign period validation</div>
+                            </div>
+                        </div>
+
+                        <!-- Validation Requirements -->
+                        <div class="card requirements-card">
+                            <div class="card-header requirements-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Campaign Requirements
+                                </h6>
+                            </div>
+                            <div class="card-body requirements-body">
+                                <ul class="mb-0">
+                                    <li>Voucher code (unique, ≤10 chars)</li>
+                                    <li>Discount percentage (1-100%)</li>
+                                    <li>Start date & time (from now)</li>
+                                    <li>End date & time (after start)</li>
+                                    <li>Available quantity (≥1)</li>
+                                    <li>Campaign status</li>
+                                </ul>
+                                <hr>
+                                <small class="text-success">
+                                    <i class="fas fa-info-circle"></i>
+                                    Create effective marketing campaigns
+                                </small>
+                            </div>
+                        </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label required">Ngày & Giờ Bắt Đầu</label>
-                        <div class="date-time-group">
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <hr style="border-color: rgba(255, 255, 255, 0.2);">
+                        <div class="d-flex justify-content-between">
                             <div>
-                                <input type="text"
-                                       class="form-control date-input"
-                                       id="startDate"
-                                       placeholder="dd/MM/yyyy"
-                                       maxlength="10">
-                                <div class="form-help">Để trống nếu không thay đổi</div>
+                                <a href="/admin/vouchers" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>
+                                    Cancel Campaign
+                                </a>
                             </div>
                             <div>
-                                <input type="text"
-                                       class="form-control time-input"
-                                       id="startTime"
-                                       placeholder="HH:mm"
-                                       maxlength="5">
-                                <div class="form-help">Để trống nếu không thay đổi</div>
+                                <button type="reset" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-undo me-2"></i>
+                                    Reset Form
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <i th:class="${isEdit} ? 'fas fa-save me-2' : 'fas fa-plus me-2'"></i>
+                                    <span th:text="${isEdit} ? 'Update Campaign' : 'Create Campaign'">Create Campaign</span>
+                                </button>
                             </div>
                         </div>
-                        <div class="invalid-feedback" id="startDateTimeError"></div>
                     </div>
                 </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label required">Ngày & Giờ Kết Thúc</label>
-                        <div class="date-time-group">
-                            <div>
-                                <input type="text"
-                                       class="form-control date-input"
-                                       id="endDate"
-                                       placeholder="dd/MM/yyyy"
-                                       maxlength="10">
-                                <div class="form-help">Để trống nếu không thay đổi</div>
-                            </div>
-                            <div>
-                                <input type="text"
-                                       class="form-control time-input"
-                                       id="endTime"
-                                       placeholder="HH:mm"
-                                       maxlength="5">
-                                <div class="form-help">Để trống nếu không thay đổi</div>
-                            </div>
-                        </div>
-                        <div class="invalid-feedback" id="endDateTimeError"></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label required" for="quantity">Số Lượng Có Sẵn</label>
-                        <input type="number"
-                               class="form-control"
-                               id="quantity"
-                               th:field="*{quantity}"
-                               placeholder="100"
-                               min="1"
-                               required>
-                        <div class="form-help">
-                            Số lần voucher này có thể được sử dụng
-                        </div>
-                        <div class="invalid-feedback" id="quantityError"></div>
-                    </div>
-                </div>
-
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label required" for="status">Trạng Thái</label>
-                        <select class="form-select" id="status" th:field="*{status}" required>
-                            <option value="">Chọn Trạng Thái</option>
-                            <option value="Available">Available</option>
-                            <option value="Expired">Expired</option>
-                        </select>
-                        <div class="form-help">
-                            Trạng thái hiện tại của voucher
-                        </div>
-                        <div class="invalid-feedback" id="statusError"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Hidden fields for backend -->
-            <input type="hidden" id="hiddenStartTime" th:field="*{startTime}">
-            <input type="hidden" id="hiddenEndTime" th:field="*{endTime}">
-
-            <!-- Preview Section -->
-            <div id="voucherPreview" style="display: none;">
-                <div class="voucher-preview">
-                    <div class="voucher-preview-content">
-                        <div class="voucher-title">BlueBear Cinema</div>
-                        <div class="voucher-code-preview" id="previewCode">VOUCHER</div>
-                        <div class="voucher-discount-preview" id="previewDiscount">0% OFF</div>
-                        <div class="voucher-period-preview" id="previewPeriod">Thời gian: -</div>
-                        <div class="voucher-quantity-preview" id="previewQuantity">Còn lại: -</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Form Actions -->
-            <div class="btn-group">
-                <button type="submit" class="btn-primary">
-                    <i th:class="${isEdit} ? 'fas fa-save' : 'fas fa-plus'"></i>
-                    <span th:text="${isEdit} ? 'Cập Nhật Voucher' : 'Tạo Voucher'">Tạo Voucher</span>
-                </button>
-                <a href="/admin/vouchers" class="btn-outline">
-                    <i class="fas fa-times"></i>
-                    Hủy Bỏ
-                </a>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -771,14 +1109,14 @@
 
             if (startTimeValue && document.querySelector('[th\\:field="*{promotionID}"]')) {
                 const startDateTime = formatDateForInput(startTimeValue);
-                startDateInput.placeholder = `Hiện tại: ${startDateTime.date}`;
-                startTimeInput.placeholder = `Hiện tại: ${startDateTime.time}`;
+                startDateInput.placeholder = `Current: ${startDateTime.date}`;
+                startTimeInput.placeholder = `Current: ${startDateTime.time}`;
             }
 
             if (endTimeValue && document.querySelector('[th\\:field="*{promotionID}"]')) {
                 const endDateTime = formatDateForInput(endTimeValue);
-                endDateInput.placeholder = `Hiện tại: ${endDateTime.date}`;
-                endTimeInput.placeholder = `Hiện tại: ${endDateTime.time}`;
+                endDateInput.placeholder = `Current: ${endDateTime.date}`;
+                endTimeInput.placeholder = `Current: ${endDateTime.time}`;
             }
         }
 
@@ -808,12 +1146,12 @@
             previewDiscount.textContent = discount + '% OFF';
 
             if (startDate && endDate) {
-                previewPeriod.textContent = `Thời gian: ${startDate} - ${endDate}`;
+                previewPeriod.textContent = `Period: ${startDate} - ${endDate}`;
             } else {
-                previewPeriod.textContent = 'Thời gian: -';
+                previewPeriod.textContent = 'Period: -';
             }
 
-            previewQuantity.textContent = `Còn lại: ${quantity} lượt`;
+            previewQuantity.textContent = `Available: ${quantity} uses`;
 
             if (code !== 'VOUCHER' || discount !== '0' || startDate || endDate || quantity !== '0') {
                 previewSection.style.display = 'block';
@@ -924,16 +1262,16 @@
             // Validate promotion code
             const promotionCode = promotionCodeInput.value.trim();
             if (!promotionCode) {
-                showError('promotionCode', 'Mã khuyến mãi là bắt buộc');
+                showError('promotionCode', 'Voucher code is required');
                 isValid = false;
             } else if (promotionCode.length < 3) {
-                showError('promotionCode', 'Mã khuyến mãi phải có ít nhất 3 ký tự');
+                showError('promotionCode', 'Voucher code must be at least 3 characters');
                 isValid = false;
             } else if (promotionCode.length > 10) {
-                showError('promotionCode', 'Mã khuyến mãi không được vượt quá 10 ký tự');
+                showError('promotionCode', 'Voucher code cannot exceed 10 characters');
                 isValid = false;
             } else if (!/^[A-Z0-9]+$/.test(promotionCode)) {
-                showError('promotionCode', 'Mã khuyến mãi chỉ được chứa chữ hoa và số');
+                showError('promotionCode', 'Voucher code can only contain uppercase letters and numbers');
                 isValid = false;
             }
 
@@ -941,13 +1279,13 @@
             const discount = parseFloat(discountInput.value);
 
             if (isNaN(discount)) {
-                showError('discount', 'Phần trăm giảm giá phải là số hợp lệ');
+                showError('discount', 'Discount percentage must be a valid number');
                 isValid = false;
             } else if (!Number.isInteger(discount)) {
-                showError('discount', 'Phần trăm giảm giá phải là số nguyên');
+                showError('discount', 'Discount percentage must be a whole number');
                 isValid = false;
             } else if (discount < 1 || discount > 100) {
-                showError('discount', 'Phần trăm giảm giá phải từ 1% đến 100%');
+                showError('discount', 'Discount percentage must be between 1% and 100%');
                 isValid = false;
             }
 
@@ -958,18 +1296,18 @@
 
             if (!isEditMode || startDate || startTime) {
                 if (!startDate) {
-                    showError('startDateTime', 'Ngày bắt đầu là bắt buộc');
+                    showError('startDateTime', 'Start date is required');
                     isValid = false;
                 } else if (!isValidDate(startDate)) {
-                    showError('startDateTime', 'Ngày bắt đầu không hợp lệ (dd/MM/yyyy)');
+                    showError('startDateTime', 'Start date is invalid (dd/MM/yyyy)');
                     isValid = false;
                 }
 
                 if (!startTime) {
-                    showError('startDateTime', 'Giờ bắt đầu là bắt buộc');
+                    showError('startDateTime', 'Start time is required');
                     isValid = false;
                 } else if (!isValidTime(startTime)) {
-                    showError('startDateTime', 'Giờ bắt đầu không hợp lệ (HH:mm)');
+                    showError('startDateTime', 'Start time is invalid (HH:mm)');
                     isValid = false;
                 }
             }
@@ -980,18 +1318,18 @@
 
             if (!isEditMode || endDate || endTime) {
                 if (!endDate) {
-                    showError('endDateTime', 'Ngày kết thúc là bắt buộc');
+                    showError('endDateTime', 'End date is required');
                     isValid = false;
                 } else if (!isValidDate(endDate)) {
-                    showError('endDateTime', 'Ngày kết thúc không hợp lệ (dd/MM/yyyy)');
+                    showError('endDateTime', 'End date is invalid (dd/MM/yyyy)');
                     isValid = false;
                 }
 
                 if (!endTime) {
-                    showError('endDateTime', 'Giờ kết thúc là bắt buộc');
+                    showError('endDateTime', 'End time is required');
                     isValid = false;
                 } else if (!isValidTime(endTime)) {
-                    showError('endDateTime', 'Giờ kết thúc không hợp lệ (HH:mm)');
+                    showError('endDateTime', 'End time is invalid (HH:mm)');
                     isValid = false;
                 }
             }
@@ -1003,12 +1341,12 @@
                 const now = new Date();
 
                 if (startDateTime < now) {
-                    showError('startDateTime', 'Thời gian bắt đầu không thể ở quá khứ');
+                    showError('startDateTime', 'Start time cannot be in the past');
                     isValid = false;
                 }
 
                 if (endDateTime <= startDateTime) {
-                    showError('endDateTime', 'Thời gian kết thúc phải sau thời gian bắt đầu');
+                    showError('endDateTime', 'End time must be after start time');
                     isValid = false;
                 }
             }
@@ -1016,13 +1354,13 @@
             // Validate quantity
             const quantity = parseInt(quantityInput.value);
             if (!quantity || quantity < 1) {
-                showError('quantity', 'Số lượng phải ít nhất là 1');
+                showError('quantity', 'Quantity must be at least 1');
                 isValid = false;
             }
 
             // Validate status
             if (!statusInput.value) {
-                showError('status', 'Trạng thái là bắt buộc');
+                showError('status', 'Campaign status is required');
                 isValid = false;
             }
 
@@ -1058,46 +1396,71 @@
 
         // Form submission
         form.addEventListener('submit', function(e) {
+            e.preventDefault(); // Always prevent default first
+
             updateHiddenFields();
 
             if (!validateForm()) {
-                e.preventDefault();
-
                 const firstError = document.querySelector('.is-invalid');
                 if (firstError) {
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     firstError.focus();
                 }
+                return false;
             }
+
+            // Show loading state
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating campaign...';
+            submitBtn.disabled = true;
+
+            // Submit the form
+            this.submit();
+
+            // Re-enable button after timeout (in case of error)
+            setTimeout(() => {
+                if (submitBtn.disabled) {
+                    submitBtn.innerHTML = originalText;
+                    submitBtn.disabled = false;
+                }
+            }, 10000);
         });
 
         // Initialize form and preview
         initializeForm();
         updatePreview();
 
-        // Add fade-in animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -50px 0px'
-        };
-
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
+        // Auto-dismiss alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
             });
-        }, observerOptions);
+        }, 5000);
 
-        // Observe fade-in elements
-        document.querySelectorAll('.fade-in').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(20px)';
-            el.style.transition = 'opacity 0.6s ease, transform 0.6s ease';
-            observer.observe(el);
+        // Reset form handler
+        document.querySelector('button[type="reset"]').addEventListener('click', function() {
+            setTimeout(() => {
+                updatePreview();
+                updateHiddenFields();
+            }, 50);
         });
+
+        // Premium loading sequence
+        setTimeout(() => {
+            document.querySelectorAll('.fade-in').forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }, 100);
+
+        console.log('Premium voucher creation interface loaded');
     });
 </script>
+
 </body>
 </html>

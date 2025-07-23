@@ -36,9 +36,12 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     // ==================== SCHEDULE VALIDATION QUERIES ====================
 
-    // Kiểm tra xem movie có tồn tại trong schedule không
-    @Query("SELECT COUNT(s) > 0 FROM Schedule s WHERE s.movie.movieID = :movieId")
-    boolean existsInSchedule(@Param("movieId") Integer movieId);
+    // Kiểm tra xem movie có schedule với DetailSeat trạng thái "Booked" không
+    @Query("SELECT COUNT(ds) > 0 FROM Schedule s " +
+            "JOIN s.detailSeatList ds " +
+            "WHERE s.movie.movieID = :movieId " +
+            "AND ds.status = com.bluebear.cinemax.enumtype.DetailSeat_Status.Booked")
+    boolean existsInScheduleWithBookedSeats(@Param("movieId") Integer movieId);
 
     // Kiểm tra xem movie có schedule đang hoạt động không
     @Query("SELECT COUNT(s) > 0 FROM Schedule s " +
@@ -49,6 +52,10 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     // Lấy số lượng schedule của movie
     @Query("SELECT COUNT(s) FROM Schedule s WHERE s.movie.movieID = :movieId")
     long countSchedulesByMovieId(@Param("movieId") Integer movieId);
+
+    // Kiểm tra xem movie có tồn tại trong schedule không (giữ lại method cũ nếu cần)
+    @Query("SELECT COUNT(s) > 0 FROM Schedule s WHERE s.movie.movieID = :movieId")
+    boolean existsInSchedule(@Param("movieId") Integer movieId);
 
     // ==================== MOVIE-GENRE QUERIES (SIMPLIFIED) ====================
 
