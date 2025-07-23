@@ -406,4 +406,9 @@ public class MovieServiceImpl implements MovieService {
     public List<MovieDTO> getMoviesByActor(String actorName) {
         return movieRepository.findMoviesByActors_ActorNameIgnoreCaseAndStatus(actorName, Movie_Status.Active).stream().map(this::toDTO).collect(Collectors.toList());
     }
+
+    @Override
+    public MovieDTO findMovieByMovieName(String movieName) {
+        return toDTO(movieRepository.findMovieByName(movieName));
+    }
 }

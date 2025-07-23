@@ -122,4 +122,6 @@ public interface MovieService {
     Page<MovieDTO> findMoviesByScheduleAndTheater(LocalDateTime schedule, String theaterName);
 
     List<MovieDTO> getMoviesByActor(String actorName);
+
+    MovieDTO findMovieByMovieName(String movieName);
 }

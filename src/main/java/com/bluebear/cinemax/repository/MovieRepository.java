@@ -396,4 +396,6 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     @Query("SELECT DISTINCT s.movie FROM Schedule s JOIN s.room r JOIN r.theater t WHERE t.theaterID = :theaterId AND CAST(s.startTime AS DATE) = CAST(:today AS DATE) AND s.movie.status = :status")
     Page<Movie> findMoviesWithScheduleTodayWithTheater(int theaterId, LocalDateTime today, Pageable pageable, Movie_Status status);
 
+    @Query("SELECT m FROM Movie m WHERE m.movieName = :name")
+    Movie findMovieByName(@Param("name") String name);
 }
