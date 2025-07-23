@@ -15,7 +15,7 @@ public interface BookingServiceSF {
 
     BookingPreviewDTO reconstructBookingPreview(Integer invoiceId);
 
-    InvoiceDTO createTemporaryInvoice(BookingPreviewDTO previewData);
+    InvoiceDTO createTemporaryInvoice(BookingPreviewDTO previewData, Integer customerId);
 
     void cancelInvoice(Integer invoiceId);
 

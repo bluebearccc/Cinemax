@@ -375,9 +375,9 @@ public class BookingServiceSFImp implements BookingServiceSF {
 
         log.info("✅ finalizeBooking hoàn tất cho invoice #{}", invoiceId);
     }
-    public InvoiceDTO createTemporaryInvoice(BookingPreviewDTO previewData) {
+    public InvoiceDTO createTemporaryInvoice(BookingPreviewDTO previewData, Integer customerId) {
         Invoice invoice = new Invoice();
-        invoice.setCustomer(customerRepo.findById(1).orElse(null)); // giả định customer
+        invoice.setCustomer(customerRepo.findById(customerId).orElse(null)); // giả định customer
         invoice.setStatus(InvoiceStatus.Unpaid);
         invoice.setBookingDate(LocalDateTime.now());
         invoice.setTotalPrice(previewData.getFinalPrice());

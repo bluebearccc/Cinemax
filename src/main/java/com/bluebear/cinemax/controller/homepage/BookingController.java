@@ -42,7 +42,6 @@ public class BookingController {
     @GetMapping("")
     public String showBookingPage(@RequestParam("scheduleId") Integer scheduleId,
                                   @RequestParam("roomId") Integer roomId,
-
                                   Model model) {
 
         List<SeatDTO> seats = seatService.getSeatsWithStatus(roomId, scheduleId);
@@ -74,7 +73,7 @@ public class BookingController {
                                      @RequestParam(value = "selectedSeats", required = false) List<Integer> seatIds,
                                      @RequestParam(value = "search", required = false) String search,
                                      @RequestParam(value = "page", defaultValue = "1") int page,
-                                     Model model, RedirectAttributes redirect   ) {
+                                     Model model, RedirectAttributes redirect) {
         try {
             // Xử lý ghế và mã giảm giá
             // Tính sơ bộ tổng tiền mà không áp dụng mã
@@ -92,7 +91,6 @@ public class BookingController {
                         .filter(c -> c.getFoodName().toLowerCase().contains(search.toLowerCase()))
                         .toList();
             }
-            //phan trang
             int pageSize = 6;
             int totalItems = combos.size();
             int totalPages = (int) Math.ceil((double) totalItems / pageSize);
@@ -108,7 +106,7 @@ public class BookingController {
             model.addAttribute("search", search);
             model.addAttribute("currentPage", page);
             model.addAttribute("totalPages", totalPages);
-            return "common/bookingFD"; // Đây là file bookingFD.html
+            return "common/bookingFD";
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute("error", e.getMessage());
             return "redirect:/booking?scheduleId=" + scheduleId + "  &roomId=" + roomId;
@@ -132,18 +130,14 @@ public class BookingController {
                 Optional<PromotionDTO> promoOpt = promotionService.validatePromotionCode(promotionCode);
                 if (promoOpt.isEmpty()) {
                     model.addAttribute("promotionError", "Mã giảm giá không hợp lệ hoặc đã hết hạn.");
-                    promotionCode = null; // Bỏ mã lỗi để tránh áp dụng sai
+                    promotionCode = null;
                 }
             }
 
+            CustomerDTO customerDTO = (CustomerDTO) session.getAttribute("customer");
             BookingPreviewDTO previewData = bookingService.prepareBookingPreview(scheduleId, roomId, seatIds, promotionCode, comboQuantities);
-
-
-            // Tạo hóa đơn tạm
-            InvoiceDTO tempInvoice = bookingService.createTemporaryInvoice(previewData);
-
-            // Tạo link QR từ invoice tạm
-            String qrUrl = vnpayService.createSepayQrUrl(tempInvoice); // gọi hàm vừa tạo
+            InvoiceDTO tempInvoice = bookingService.createTemporaryInvoice(previewData, customerDTO.getId());
+            String qrUrl = vnpayService.createSepayQrUrl(tempInvoice);
 
             model.addAttribute("qrUrl", qrUrl);
             model.addAttribute("invoiceId", tempInvoice.getInvoiceID());
@@ -204,8 +198,7 @@ public class BookingController {
     public String handleSepaySuccessRedirect(@RequestParam("invoiceId") Integer invoiceId,
                                              Model model) {
         InvoiceDTO invoice = bookingService.getInvoiceById(invoiceId);
-        BookingPreviewDTO preview = bookingService.reconstructBookingPreview(invoiceId); // bạn phải viết hàm này
-
+        BookingPreviewDTO preview = bookingService.reconstructBookingPreview(invoiceId);
         model.addAttribute("schedule", preview.getSchedule());
         model.addAttribute("room", preview.getRoom());
         model.addAttribute("selectedSeats", preview.getSelectedSeats());
@@ -215,7 +208,7 @@ public class BookingController {
         model.addAttribute("totalPrice", preview.getTotalPrice());
         model.addAttribute("finalPrice", preview.getFinalPrice());
 
-        return "common/confirm"; // trang xác nhận thành công
+        return "common/confirm";
     }
     @PostMapping("/cancel")
     public String cancelBooking(@RequestParam Integer invoiceId,
@@ -224,10 +217,8 @@ public class BookingController {
                                 HttpSession session,
                                 RedirectAttributes redirectAttributes) {
 
-        // Huỷ giữ ghế và cập nhật trạng thái hóa đơn
         bookingService.cancelInvoice(invoiceId);
 
-        // Xoá thông tin tạm trong session (nếu bạn lưu combo, ghế, promotion)
         session.removeAttribute("selectedSeats");
         session.removeAttribute("comboQuantities");
         session.removeAttribute("promotion");
