@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Blog Management</title>
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/officer-static/css/blog-management.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+</head>
+
+<body>
+<div class="container">
+    <div class="sidebar" th:replace="officer/fragments/side-bar :: sidebar">
+    </div>
+
+    <div class="main-content">
+        <div class="page-header">
+            <h1>Blog Management</h1>
+        </div>
+
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalViews" th:text="${totalViews}"></div>
+                <div class="stat-label">Total Views</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalLikes" th:text="${totalLikes}"></div>
+                <div class="stat-label">Total Likes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="totalBlogs" th:text="${totalBlogs}"></div>
+                <div class="stat-label">Total Blogs</div>
+            </div>
+        </div>
+
+        <div class="content-area">
+            <div class="blog-section">
+                <div class="controls">
+                    <div style="display: flex; gap: 10px; align-items: center;">
+                        <input type="text" class="search-box" placeholder="Search blogs..." id="searchInput"
+                               onchange="filterBlog(null);">
+                        <select class="form-control" style="width: 150px;" id="sortSelect" onchange="filterBlog(null);" th:replace="officer/fragments/blog/category-select :: category-select">
+                        </select>
+                    </div>
+                    <button class="btn btn-primary"
+                            th:onclick="'window.location.href=\'' + @{/officer/blog-management/add} + '\''">Add Blog
+                    </button>
+                </div>
+
+                <div id="list-blog-wrapper">
+                    <div class="main-blog-list" th:replace="officer/fragments/blog/list-blog :: list-blog">
+                    </div>
+                </div>
+            </div>
+
+            <div class="category-panel" id="categoryPanel">
+                <div class="category-header">
+                    <h3 id="categoryTitle">Category Management</h3>
+                    <button class="toggle-btn" onclick="toggleCategoryPanel()">Close</button>
+                </div>
+                <div class="category-content" id="categoryContent">
+                    <button class="btn btn-success" style="width: 100%; margin-bottom: 15px;"
+                            onclick="openAddCategoryModal()">Add Category
+                    </button>
+                    <div id="category-list-mapper">
+                        <div class="category-list" id="categoryList"
+                             th:replace="officer/fragments/blog/list-category :: list-category">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal" id="categoryModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="categoryModalTitle">Add New Category</h2>
+            <span class="close" onclick="closeCategoryModal()">x</span>
+        </div>
+        <form id="categoryForm" onsubmit="interactCategory(event)">
+            <input type="hidden" id="activity">
+            <div class="form-group">
+                <label for="categoryName">Category Name:</label>
+                <input type="text" class="form-control" id="categoryName" required oninput="validateCategory()">
+                <input type="hidden" id="categoryID">
+            </div>
+            <div id="categoryError" class="error-message" style="display: none;"></div>
+            <div style="margin-top: 20px; text-align: right;">
+                <button type="button" class="btn btn-secondary" onclick="closeCategoryModal()">Cancel</button>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/officer-static/js/blog-management.js}"></script>
+</body>
+</html>

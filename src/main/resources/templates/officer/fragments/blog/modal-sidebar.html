@@ -1,0 +1,27 @@
+<div class="modal-sidebar" th:fragment="modal-sidebar">
+    <div class="info-card">
+        <h4>📊 Blog Statistics</h4>
+        <div class="stats-grid">
+            <div class="stat-item">
+                <div class="stat-number" th:text="${totalBlogs}"></div>
+                <div class="stat-label">Total Blogs</div>
+            </div>
+            <div class="stat-item">
+                <div class="stat-number" th:text="${totalViews}"></div>
+                <div class="stat-label">Total Views</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="info-card">
+        <h4>💡 Writing Tips</h4>
+        <ul class="tips-list">
+            <li>Keep titles under 60 characters for better SEO</li>
+            <li>Use engaging images to attract readers</li>
+            <li>Write compelling introductions</li>
+            <li>Break content into digestible sections</li>
+            <li>Use bullet points for easy reading</li>
+            <li>Add relevant categories for better organization</li>
+        </ul>
+    </div>
+</div>
