@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<div class="sidebar" th:fragment="adminSidebar(activeLink)">
+    <div class="sidebar-header">
+        <div class="logo-container">
+            <div class="logo-icon"><i class="fas fa-film"></i></div>
+            <div>
+                <div class="logo-text">BlueBear</div>
+                <div class="logo-subtitle">CINEMA SUITE</div>
+            </div>
+        </div>
+    </div>
+    <nav class="sidebar-nav">
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a class="nav-link" th:classappend="${activeLink == 'dashboard'} ? 'active'" href="/admin/">
+                <i class="nav-icon fas fa-home"></i><span>Dashboard</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Content</div>
+            <a class="nav-link" th:classappend="${activeLink == 'movies'} ? 'active'" th:href="@{/admin/movies}">
+                <i class="nav-icon fas fa-film"></i><span>Movies</span>
+            </a>
+            <a class="nav-link" th:classappend="${activeLink == 'actors'} ? 'active'" href="/admin/actors">
+                <i class="nav-icon fas fa-users"></i><span>Actors</span>
+            </a>
+            <a class="nav-link" th:classappend="${activeLink == 'genres'} ? 'active'" href="/admin/genres">
+                <i class="nav-icon fas fa-tags"></i><span>Genres</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Management</div>
+            <a class="nav-link" th:classappend="${activeLink == 'accounts'} ? 'active'" th:href="@{/admin/account}">
+                <i class="nav-icon fas fa-users-cog"></i><span>Accounts</span>
+            </a>
+            <a class="nav-link" th:classappend="${activeLink == 'vouchers'} ? 'active'" href="/admin/vouchers">
+                <i class="nav-icon fas fa-ticket-alt"></i><span>Vouchers</span>
+            </a>
+        </div>
+    </nav>
+</div>
+
+</body>
+</html>
