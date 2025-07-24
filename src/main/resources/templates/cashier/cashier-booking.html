@@ -20,9 +20,9 @@
         <div class="navbar-nav ms-auto">
                 <span class="navbar-text me-3">
                     <i class="fas fa-user-circle me-1"></i>
-                    Cashier: <span>Admin</span>
+                    Cashier: <span th:text="${session.cashierName != null ? session.cashierName : 'Admin'}">Admin</span>
                 </span>
-            <a href="/logout" class="btn btn-outline-light btn-sm">
+            <a href="/cashier/" class="btn btn-outline-light btn-sm">
                 <i class="fas fa-sign-out-alt me-1"></i>Logout
             </a>
         </div>
@@ -115,6 +115,14 @@
                             <a th:href="@{'/cashier/' + ${movie.movieID} + '/select-schedule'}"
                                class="text-decoration-none">
                                 <div class="card movie-card h-100">
+                                    <div th:if="${movie.ageLimit != null}" class="age-rating-badge"
+                                         th:classappend="${
+                                             movie.ageLimit.name() == 'AGE_P' ? 'age-rating-p' :
+                                             (movie.ageLimit.name() == 'AGE_13_PLUS' ? 'age-rating-13' :
+                                             (movie.ageLimit.name() == 'AGE_16_PLUS' ? 'age-rating-16' :
+                                             (movie.ageLimit.name() == 'AGE_18_PLUS' ? 'age-rating-18' : '')))}"
+                                         th:text="${#strings.replace(movie.ageLimit.name(), 'AGE_', '')}">
+                                    </div>
                                     <img th:src="@{${movie.image}}" class="card-img-top" alt="Movie Poster"
                                          style="height: 320px; object-fit: cover;">
                                     <div class="card-body d-flex flex-column">
@@ -176,7 +184,7 @@
                 <div class="card-body">
                     <div class="mb-3">
                         <h6 th:text="${selectedMovie.movieName}"></h6>
-                        <p class="text-white-50" th:text="${selectedMovie.duration + ' minutes'}"></p>
+                        <p class="text-dark-50" th:text="${selectedMovie.duration + ' minutes'}"></p>
                     </div>
                     <hr>
                     <div th:each="entry : ${schedulesByDate}" class="mb-4">
@@ -200,7 +208,7 @@
                                                 <strong
                                                         th:text="${schedule.seatAvailability.availableSeats + ' / ' + schedule.seatAvailability.totalSeats}"></strong>
                                             </div>
-                                            <div class="small text-white-50" style="font-size: 0.7rem;">
+                                            <div class="small text-dark-50" style="font-size: 0.7rem;">
                                                     <span
                                                             th:text="${'Regular: ' + schedule.seatAvailability.availableRegularSeats}"></span>
                                                 <span class="mx-1">|</span>
@@ -230,6 +238,8 @@
                             <div class="text-center">
                                 <div class="screen mb-3">Screen</div>
                                 <div class="seat-map-container mb-4">
+                                    <div class="exit-left">EMERGENCY EXIT</div>
+                                    <div class="exit-right">EMERGENCY EXIT</div>
                                     <div th:each="rowEntry : ${seatsByRow}"
                                          class="seat-row d-flex justify-content-center align-items-center mb-2">
                                         <span class="row-label me-3 fw-bold" th:text="${rowEntry.key}"></span>
@@ -275,7 +285,7 @@
                         <div class="col-lg-3">
                             <div class="booking-summary p-3">
                                 <h6 th:text="${selectedMovie.movieName}"></h6>
-                                <p class="small text-white-50">
+                                <p class="small text-dark-50">
                                     <i class="far fa-clock"></i> <span
                                         th:text="${#temporals.format(selectedSchedule.startTime, 'HH:mm')}"></span>
                                     |
@@ -318,12 +328,14 @@
                                 <div class="mb-3">
                                     <label for="customerName" class="form-label">Full Name</label>
                                     <input type="text" class="form-control" id="customerName" name="customerName"
-                                           placeholder="Enter customer's name">
+                                           placeholder="Enter customer's name" required
+                                           pattern=".*\S+.*" title="Customer name cannot be empty or just spaces.">
                                 </div>
                                 <div class="mb-3">
                                     <label for="customerPhone" class="form-label">Phone (Optional)</label>
                                     <input type="tel" class="form-control" id="customerPhone" name="customerPhone"
-                                           placeholder="Enter phone number">
+                                           placeholder="Enter 10-11 digit phone number"
+                                           pattern="[0-9]{10,11}" title="Please enter a valid 10 or 11 digit phone number.">
                                 </div>
                                 <div class="mb-3">
                                     <label for="promotion" class="form-label">Promotion (Optional)</label>
@@ -345,31 +357,28 @@
                                 </div>
                                 <div th:if="${theaterStockPage != null and !theaterStockPage.isEmpty()}">
                                     <div th:each="food : ${theaterStockPage.content}" class="mb-3">
-                                        <div class="card h-100 food-card">
-                                            <div
-                                                    class="card-body d-flex justify-content-between align-items-center p-2">
-                                                <div class="flex-grow-1 me-3">
-                                                    <h6 class="mb-1" th:text="${food.foodName}"></h6>
-                                                    <p class="mb-1">Price: <span class="text-warning"
-                                                                                 th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
-                                                    </p>
-                                                </div>
-                                                <div class="input-group" style="max-width: 130px;">
-                                                    <button class="btn btn-outline-secondary btn-sm" type="button"
-                                                            th:onclick="updateQuantity([[${food.theaterStockId}]], -1)">-</button>
-                                                    <input type="text" class="form-control text-center px-1"
-                                                           th:id="'quantity-display-' + ${food.theaterStockId}"
-                                                           value="0" readonly>
-                                                    <button class="btn btn-outline-secondary btn-sm" type="button"
-                                                            th:onclick="updateQuantity([[${food.theaterStockId}]], 1, [[${food.quantity}]])">+</button>
-                                                </div>
-                                                <input type="hidden"
-                                                       th:id="'food-quantity-' + ${food.theaterStockId}"
-                                                       class="food-quantity-input"
-                                                       th:data-stock-id="${food.theaterStockId}"
-                                                       th:name="'foodQuantities[' + ${food.theaterStockId} + ']'"
-                                                       value="0">
+                                        <div class="food-card">
+                                            <div class="food-info">
+                                                <h6 th:text="${food.foodName}"></h6>
+                                                <p>Price: <span class="text-warning fw-bold"
+                                                                th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></span>
+                                                </p>
                                             </div>
+                                            <div class="quantity-control">
+                                                <button class="btn" type="button"
+                                                        th:onclick="updateQuantity([[${food.theaterStockId}]], -1)">-</button>
+                                                <input type="text" class="quantity-display"
+                                                       th:id="'quantity-display-' + ${food.theaterStockId}"
+                                                       value="0" readonly>
+                                                <button class="btn" type="button"
+                                                        th:onclick="updateQuantity([[${food.theaterStockId}]], 1, [[${food.quantity}]])">+</button>
+                                            </div>
+                                            <input type="hidden"
+                                                   th:id="'food-quantity-' + ${food.theaterStockId}"
+                                                   class="food-quantity-input"
+                                                   th:data-stock-id="${food.theaterStockId}"
+                                                   th:name="'foodQuantities[' + ${food.theaterStockId} + ']'"
+                                                   value="0">
                                         </div>
                                     </div>
                                     <div th:if="${theaterStockPage.totalPages > 1}"
@@ -415,7 +424,7 @@
                             <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
                         </div>
                         <h2 class="text-success mb-2">Booking Successful!</h2>
-                        <p class="text-white-50">Thank you for using our service.</p>
+                        <p class="text-dark-50">Thank you for using our service.</p>
                     </div>
                 </div>
 
@@ -511,7 +520,7 @@
                         </div>
                     </div>
                     <div class="col-lg-5 col-md-12">
-                        <div class="card card-custom">
+                        <div class="card card-custom mb-3">
                             <div class="card-header">
                                 <h5 class="mb-0"><i class="fas fa-cogs me-2"></i>Quick Actions</h5>
                             </div>
@@ -519,6 +528,30 @@
                                 <div class="d-grid gap-3">
                                     <a href="/cashier/movie/" class="btn btn-outline-success btn-lg"><i
                                             class="fas fa-plus me-2"></i>New Booking</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="change-calculator-wrapper" class="card card-custom"
+                             th:if="${bookingResult.paymentMethod == 'CASH'}">
+                            <div class="card-header">
+                                <h5 class="mb-0"><i class="fas fa-calculator me-2"></i>Change Calculator</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label">Total Amount</label>
+                                    <input type="text" class="form-control"
+                                           th:value="${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 0, 'POINT')} + ' ₫'"
+                                           readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label for="cash-received-input" class="form-label">Cash Received from Customer</label>
+                                    <input type="number" class="form-control" id="cash-received-input" min="0"
+                                           placeholder="Enter amount here...">
+                                </div>
+                                <hr>
+                                <div>
+                                    <h6 class="text-muted">Change to Give Back:</h6>
+                                    <h4 id="change-due-display" class="fw-bold text-success">0 ₫</h4>
                                 </div>
                             </div>
                         </div>
@@ -617,7 +650,10 @@
         let currentValue = parseInt(display.value);
         let newValue = currentValue + change;
         if (newValue < 0) newValue = 0;
-        if (maxQuantity !== undefined && newValue > maxQuantity) newValue = maxQuantity;
+        if (maxQuantity !== undefined && newValue > maxQuantity) {
+            newValue = maxQuantity;
+            alert('Not enough stock available.');
+        }
         display.value = newValue;
         hiddenInput.value = newValue;
     }
@@ -721,6 +757,34 @@
     });
     document.getElementById('bankPaymentModal').addEventListener('hidden.bs.modal', function () {
         cleanupTimers();
+    });
+</script>
+<script th:inline="javascript" th:if="${currentStep == 5 and bookingResult != null and bookingResult.paymentMethod == 'CASH'}">
+    document.addEventListener('DOMContentLoaded', function() {
+        const totalAmount = /*[[${bookingResult.totalPrice}]]*/ 0;
+        const cashInput = document.getElementById('cash-received-input');
+        const changeDisplay = document.getElementById('change-due-display');
+        const formatter = new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND'
+        });
+
+        cashInput.addEventListener('input', function() {
+            const cashReceived = parseFloat(this.value) || 0;
+            let change = 0;
+
+            if (cashReceived >= totalAmount) {
+                change = cashReceived - totalAmount;
+                changeDisplay.classList.remove('text-danger');
+                changeDisplay.classList.add('text-success');
+            } else {
+                change = totalAmount - cashReceived;
+                changeDisplay.classList.remove('text-success');
+                changeDisplay.classList.add('text-danger');
+            }
+
+            changeDisplay.textContent = formatter.format(change);
+        });
     });
 </script>
 

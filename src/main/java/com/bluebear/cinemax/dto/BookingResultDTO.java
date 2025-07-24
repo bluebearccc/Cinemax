@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.dto;
 
+import com.bluebear.cinemax.enumtype.PaymentMethod;
 import lombok.Builder;
 import lombok.Data;
 import java.math.BigDecimal;
@@ -26,6 +27,7 @@ public class BookingResultDTO {
     private String promotionName;
     private Double discountAmount;
     private Double unitTicketPrice;
+    private String paymentMethod;
 
     @Data
     @Builder

@@ -1,4 +1,4 @@
-package com.bluebear.cinemax.controller;
+package com.bluebear.cinemax.controller.admin;
 
 import com.bluebear.cinemax.dto.GenreDTO;
 import com.bluebear.cinemax.dto.MovieDTO;
