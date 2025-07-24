@@ -8,8 +8,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
@@ -24,6 +32,123 @@ public class ActorController {
 
     @Autowired
     private MovieService movieService;
+
+    // Thư mục upload
+    private static final String UPLOAD_DIR = "uploads/";
+
+    // ==================== PHƯƠNG THỨC UPLOAD ẢNH ACTOR ====================
+
+    /**
+     * Upload file ảnh actor và trả về đường dẫn
+     */
+    private String uploadActorImage(MultipartFile file, Integer actorId) throws IOException {
+        System.out.println("=== DEBUG UPLOAD ACTOR IMAGE ===");
+        System.out.println("File: " + (file != null ? file.getOriginalFilename() : "null"));
+        System.out.println("Actor ID: " + actorId);
+        System.out.println("File empty: " + (file != null ? file.isEmpty() : "file is null"));
+
+        if (file == null || file.isEmpty()) {
+            System.out.println("File null hoặc empty, return null");
+            return null;
+        }
+
+        // Kiểm tra định dạng file
+        String originalFilename = file.getOriginalFilename();
+        if (originalFilename == null) {
+            throw new IOException("Tên file không hợp lệ");
+        }
+
+        String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+        System.out.println("File extension: " + fileExtension);
+
+        if (!fileExtension.matches("\\.(jpg|jpeg|png|gif|webp)")) {
+            throw new IOException("Chỉ chấp nhận file ảnh (jpg, jpeg, png, gif, webp)");
+        }
+
+        // Kiểm tra kích thước file (max 5MB)
+        System.out.println("File size: " + file.getSize() + " bytes");
+        if (file.getSize() > 5 * 1024 * 1024) {
+            throw new IOException("Kích thước file không được vượt quá 5MB");
+        }
+
+        // Tạo thư mục nếu chưa tồn tại
+        File uploadDir = new File(UPLOAD_DIR);
+        System.out.println("Upload directory path: " + uploadDir.getAbsolutePath());
+        System.out.println("Upload directory exists: " + uploadDir.exists());
+
+        if (!uploadDir.exists()) {
+            boolean created = uploadDir.mkdirs();
+            System.out.println("Created upload directory: " + created);
+            if (!created) {
+                throw new IOException("Không thể tạo thư mục upload: " + uploadDir.getAbsolutePath());
+            }
+        }
+
+        // Kiểm tra quyền ghi
+        if (!uploadDir.canWrite()) {
+            throw new IOException("Không có quyền ghi vào thư mục: " + uploadDir.getAbsolutePath());
+        }
+
+        // Xóa ảnh cũ nếu có
+        if (actorId != null) {
+            deleteOldActorImage(actorId);
+        }
+
+        // Tạo tên file theo format: actor_{actorId}.{extension}
+        String uniqueFilename = "actor_" + actorId + fileExtension;
+        Path filePath = Paths.get(UPLOAD_DIR + uniqueFilename);
+        System.out.println("Full file path: " + filePath.toAbsolutePath());
+
+        try {
+            // Lưu file
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            System.out.println("File saved successfully");
+
+            // Kiểm tra file đã được tạo thành công
+            File savedFile = filePath.toFile();
+            System.out.println("File exists after save: " + savedFile.exists());
+            System.out.println("File size after save: " + savedFile.length() + " bytes");
+
+            if (!savedFile.exists()) {
+                throw new IOException("File không được lưu thành công");
+            }
+
+            // Trả về đường dẫn relative
+            String relativePath = "/uploads/" + uniqueFilename;
+            System.out.println("Returning relative path: " + relativePath);
+            System.out.println("=========================");
+            return relativePath;
+
+        } catch (Exception e) {
+            System.err.println("Error saving file: " + e.getMessage());
+            e.printStackTrace();
+            throw new IOException("Lỗi khi lưu file: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Xóa ảnh cũ của actor
+     */
+    private void deleteOldActorImage(Integer actorId) {
+        System.out.println("=== DEBUG DELETE OLD ACTOR IMAGE ===");
+        System.out.println("Actor ID: " + actorId);
+
+        String[] extensions = {".jpg", ".jpeg", ".png", ".gif", ".webp"};
+        for (String ext : extensions) {
+            String oldFilename = "actor_" + actorId + ext;
+            File oldFile = new File(UPLOAD_DIR + oldFilename);
+            System.out.println("Checking file: " + oldFile.getAbsolutePath());
+            System.out.println("File exists: " + oldFile.exists());
+
+            if (oldFile.exists()) {
+                boolean deleted = oldFile.delete();
+                System.out.println("Deleted: " + deleted + " - " + oldFilename);
+            }
+        }
+        System.out.println("==============================");
+    }
+
+    // ==================== CRUD OPERATIONS ====================
 
     // Trang danh sách diễn viên
     @GetMapping("")
@@ -83,7 +208,7 @@ public class ActorController {
         return "admin/list-actor";
     }
 
-    // Hiển thị form thêm actor mới - CHUYỂN VỀ FORM-ACTOR
+    // Hiển thị form thêm actor mới
     @GetMapping("/add")
     public String addActorForm(Model model) {
         ActorDTO actor = new ActorDTO(); // Tạo object rỗng cho form
@@ -102,13 +227,14 @@ public class ActorController {
         model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Thêm diễn viên mới");
 
-        return "admin/form-actor"; // Chuyển về form-actor cho ADD
+        return "admin/form-actor";
     }
 
-    // Xử lý thêm actor mới
+    // Xử lý thêm actor mới với ảnh bắt buộc
     @PostMapping("/add")
     public String addActor(@ModelAttribute ActorDTO actorDTO,
                            @RequestParam(value = "selectedMovies", required = false) String selectedMovies,
+                           @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                            Model model,
                            RedirectAttributes redirectAttributes) {
         try {
@@ -117,26 +243,58 @@ public class ActorController {
                 throw new IllegalArgumentException("Tên diễn viên không được để trống");
             }
 
-            // Validate và xử lý đường dẫn ảnh
-            String imagePath = actorDTO.getImage();
-            if (imagePath != null && !imagePath.trim().isEmpty()) {
-                // Clean up image path
-                imagePath = imagePath.trim();
-                if (!imagePath.startsWith("/")) {
-                    imagePath = "/" + imagePath;
-                }
-                actorDTO.setImage(imagePath);
-
-                // Log for debugging
-                System.out.println("DEBUG - Actor image path set to: " + imagePath);
-            } else {
-                // Use default image if no path provided
-                actorDTO.setImage("/images/default-actor.png");
-                System.out.println("DEBUG - Using default actor image");
+            // ĐIỀU KIỆN MỚI: Bắt buộc phải có ảnh khi thêm diễn viên
+            if (imageFile == null || imageFile.isEmpty()) {
+                throw new IllegalArgumentException("Ảnh diễn viên là bắt buộc khi thêm mới");
             }
 
-            // Lưu actor trước
+            // Validate ảnh upload ngay từ đầu
+            String originalFilename = imageFile.getOriginalFilename();
+            if (originalFilename == null) {
+                throw new IllegalArgumentException("Tên file ảnh không hợp lệ");
+            }
+
+            String fileExtension = originalFilename.substring(originalFilename.lastIndexOf(".")).toLowerCase();
+            if (!fileExtension.matches("\\.(jpg|jpeg|png|gif|webp)")) {
+                throw new IllegalArgumentException("Chỉ chấp nhận file ảnh (jpg, jpeg, png, gif, webp)");
+            }
+
+            // Kiểm tra kích thước file (max 5MB)
+            if (imageFile.getSize() > 5 * 1024 * 1024) {
+                throw new IllegalArgumentException("Kích thước file không được vượt quá 5MB");
+            }
+
+            // Đặt ảnh mặc định tạm thời
+            actorDTO.setImage("/uploads/default-actor.jpg");
+
+            // Lưu actor trước để có ID
             ActorDTO savedActor = actorService.saveActor(actorDTO);
+            Integer savedActorId = savedActor.getActorID();
+
+            // XỬ LÝ UPLOAD ẢNH - BẮT BUỘC PHẢI THÀNH CÔNG
+            try {
+                String uploadedImagePath = uploadActorImage(imageFile, savedActorId);
+                if (uploadedImagePath == null) {
+                    // Nếu upload thất bại, xóa actor đã tạo và báo lỗi
+                    actorService.deleteActor(savedActorId);
+                    throw new IOException("Không thể upload ảnh diễn viên");
+                }
+
+                // Cập nhật lại đường dẫn ảnh trong database
+                savedActor.setImage(uploadedImagePath);
+                actorService.updateActor(savedActor);
+                System.out.println("Đã upload ảnh actor: " + uploadedImagePath);
+
+            } catch (IOException e) {
+                // Nếu có lỗi upload, xóa actor đã tạo
+                try {
+                    actorService.deleteActor(savedActorId);
+                    System.err.println("Đã xóa actor do lỗi upload ảnh: " + savedActorId);
+                } catch (Exception deleteEx) {
+                    System.err.println("Lỗi khi xóa actor sau lỗi upload: " + deleteEx.getMessage());
+                }
+                throw new IllegalArgumentException("Lỗi khi upload ảnh diễn viên: " + e.getMessage());
+            }
 
             // Xử lý danh sách phim đã chọn
             if (selectedMovies != null && !selectedMovies.trim().isEmpty()) {
@@ -147,13 +305,12 @@ public class ActorController {
                         .collect(Collectors.toList());
 
                 // Cập nhật quan hệ Actor-Movie
-                actorService.updateActorMovies(savedActor.getActorID(), movieIds);
-
+                actorService.updateActorMovies(savedActorId, movieIds);
                 System.out.println("DEBUG - Actor assigned to " + movieIds.size() + " movies");
             }
 
             redirectAttributes.addFlashAttribute("success", "Thêm diễn viên thành công!");
-            return "redirect:/admin/actors";
+            return "redirect:/admin/actors/" + savedActorId;
 
         } catch (Exception e) {
             // Lấy lại danh sách phim khi có lỗi
@@ -168,11 +325,11 @@ public class ActorController {
             System.err.println("ERROR - Adding actor: " + e.getMessage());
             e.printStackTrace();
 
-            return "admin/form-actor"; // Quay lại form-actor khi có lỗi
+            return "admin/form-actor";
         }
     }
 
-    // Hiển thị form chỉnh sửa actor - CHUYỂN VỀ EDIT-ACTOR
+    // Hiển thị form chỉnh sửa actor
     @GetMapping("/edit/{id}")
     public String editActorForm(@PathVariable Integer id, Model model) {
         ActorDTO actor = actorService.getActorById(id);
@@ -200,17 +357,22 @@ public class ActorController {
         model.addAttribute("isEdit", true);
         model.addAttribute("pageTitle", "Chỉnh sửa diễn viên - " + actor.getActorName());
 
-        return "admin/edit-actor"; // Chuyển về edit-actor cho EDIT
+        return "admin/edit-actor";
     }
 
     // Xử lý cập nhật actor
     @PostMapping("/edit/{id}")
     public String updateActor(@PathVariable Integer id,
                               @ModelAttribute ActorDTO actorDTO,
-                              @RequestParam(value = "selectedMovies", required = false) String selectedMovies,
+                              @RequestParam(value = "movieIds", required = false) List<Integer> movieIds,
+                              @RequestParam(value = "imageFile", required = false) MultipartFile imageFile,
                               Model model,
                               RedirectAttributes redirectAttributes) {
         try {
+            System.out.println("=== DEBUG UPDATE ACTOR ===");
+            System.out.println("Actor ID: " + id);
+            System.out.println("Movie IDs: " + movieIds);
+
             // Đảm bảo ID được set đúng
             actorDTO.setActorID(id);
 
@@ -219,51 +381,59 @@ public class ActorController {
                 throw new IllegalArgumentException("Tên diễn viên không được để trống");
             }
 
-            // Validate và xử lý đường dẫn ảnh
-            String imagePath = actorDTO.getImage();
-            if (imagePath != null && !imagePath.trim().isEmpty()) {
-                // Clean up image path
-                imagePath = imagePath.trim();
-                if (!imagePath.startsWith("/")) {
-                    imagePath = "/" + imagePath;
-                }
-                actorDTO.setImage(imagePath);
+            // Lấy thông tin actor hiện tại để giữ ảnh cũ
+            ActorDTO existingActor = actorService.getActorById(id);
+            String currentImagePath = existingActor.getImage();
 
-                // Log for debugging
-                System.out.println("DEBUG - Actor image path updated to: " + imagePath);
+            // XỬ LÝ UPLOAD ẢNH MỚI (không bắt buộc khi edit)
+            try {
+                if (imageFile != null && !imageFile.isEmpty()) {
+                    String uploadedImagePath = uploadActorImage(imageFile, id);
+                    if (uploadedImagePath != null) {
+                        actorDTO.setImage(uploadedImagePath);
+                        System.out.println("Đã upload ảnh actor mới: " + uploadedImagePath);
+                    } else {
+                        // Giữ ảnh cũ nếu upload thất bại
+                        actorDTO.setImage(currentImagePath);
+                    }
+                } else {
+                    // Không upload ảnh mới, giữ ảnh cũ
+                    actorDTO.setImage(currentImagePath);
+                }
+            } catch (IOException e) {
+                System.err.println("Lỗi upload ảnh actor: " + e.getMessage());
+                // Giữ ảnh cũ và thông báo warning
+                actorDTO.setImage(currentImagePath);
+                redirectAttributes.addFlashAttribute("warning", "Lỗi upload ảnh: " + e.getMessage());
             }
-            // If imagePath is null or empty, the service will handle keeping existing or using default
 
             // Cập nhật thông tin actor
             ActorDTO updatedActor = actorService.updateActor(actorDTO);
 
             // Xử lý cập nhật danh sách phim
-            List<Integer> movieIds = null;
-            if (selectedMovies != null && !selectedMovies.trim().isEmpty()) {
-                movieIds = Arrays.stream(selectedMovies.split(","))
-                        .map(String::trim)
-                        .filter(s -> !s.isEmpty())
-                        .map(Integer::parseInt)
-                        .collect(Collectors.toList());
-
+            if (movieIds != null && !movieIds.isEmpty()) {
                 System.out.println("DEBUG - Updating actor with " + movieIds.size() + " movies");
             } else {
                 System.out.println("DEBUG - Removing actor from all movies");
+                movieIds = List.of(); // Empty list để xóa tất cả
             }
 
-            // Cập nhật quan hệ Actor-Movie (có thể là danh sách rỗng để xóa tất cả)
-            actorService.updateActorMovies(id, movieIds != null ? movieIds : List.of());
+            // Cập nhật quan hệ Actor-Movie
+            actorService.updateActorMovies(id, movieIds);
 
             redirectAttributes.addFlashAttribute("success", "Cập nhật diễn viên thành công!");
             return "redirect:/admin/actors/" + id;
 
         } catch (Exception e) {
+            System.err.println("ERROR - Updating actor: " + e.getMessage());
+            e.printStackTrace();
+
             // Lấy lại dữ liệu khi có lỗi
             List<MovieDTO> allMovies = movieService.getAllMovies();
             List<MovieDTO> actorMovies = movieService.getMoviesByActor(id);
-            List<Integer> currentMovieIds = actorMovies.stream()
-                    .map(MovieDTO::getMovieID)
-                    .collect(Collectors.toList());
+            List<Integer> currentMovieIds = actorMovies != null ?
+                    actorMovies.stream().map(MovieDTO::getMovieID).collect(Collectors.toList()) :
+                    new ArrayList<>();
 
             model.addAttribute("actor", actorDTO);
             model.addAttribute("allMovies", allMovies);
@@ -272,10 +442,7 @@ public class ActorController {
             model.addAttribute("pageTitle", "Chỉnh sửa diễn viên - " + actorDTO.getActorName());
             model.addAttribute("error", "Có lỗi xảy ra khi cập nhật diễn viên: " + e.getMessage());
 
-            System.err.println("ERROR - Updating actor: " + e.getMessage());
-            e.printStackTrace();
-
-            return "admin/edit-actor"; // Quay lại edit-actor khi có lỗi
+            return "admin/edit-actor";
         }
     }
 
@@ -297,6 +464,10 @@ public class ActorController {
                 return "redirect:/admin/actors/" + id;
             }
 
+            // Xóa ảnh trước khi xóa actor
+            deleteOldActorImage(id);
+
+            // Xóa actor
             actorService.deleteActor(id);
 
             System.out.println("DEBUG - Actor deleted successfully: " + actor.getActorName());
@@ -309,5 +480,39 @@ public class ActorController {
             redirectAttributes.addFlashAttribute("error", "Có lỗi xảy ra khi xóa diễn viên: " + e.getMessage());
             return "redirect:/admin/actors/" + id;
         }
+    }
+
+    // ==================== DEBUG ENDPOINTS ====================
+
+    /**
+     * Debug endpoint để kiểm tra uploads
+     */
+    @GetMapping("/debug/uploads")
+    @ResponseBody
+    public String debugActorUploads() {
+        StringBuilder result = new StringBuilder();
+
+        // Kiểm tra thư mục uploads
+        File uploadDir = new File(UPLOAD_DIR);
+        result.append("Upload Directory: ").append(uploadDir.getAbsolutePath()).append("\n");
+        result.append("Exists: ").append(uploadDir.exists()).append("\n");
+        result.append("Can Write: ").append(uploadDir.canWrite()).append("\n");
+        result.append("Can Read: ").append(uploadDir.canRead()).append("\n");
+
+        if (uploadDir.exists()) {
+            File[] files = uploadDir.listFiles();
+            result.append("Files count: ").append(files != null ? files.length : 0).append("\n");
+            if (files != null) {
+                for (File file : files) {
+                    if (file.getName().startsWith("actor_")) {
+                        result.append("- ").append(file.getName())
+                                .append(" (").append(file.length()).append(" bytes)")
+                                .append("\n");
+                    }
+                }
+            }
+        }
+
+        return result.toString();
     }
 }

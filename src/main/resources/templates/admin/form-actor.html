@@ -3,28 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Add Actor</title>
+    <title th:text="${pageTitle}">Add Actor - BlueBear Cinema</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-blue: #4285f4;
-            --primary-light: #5a9bf8;
-            --primary-dark: #3367d6;
-            --accent-blue: #1976d2;
-            --success-green: #34a853;
-            --warning-orange: #fbbc04;
-            --danger-red: #ea4335;
-            --dark-bg: #1a1a1a;
-            --darker-bg: #0f0f0f;
-            --card-bg: #2d2d2d;
-            --card-hover: #3a3a3a;
-            --border-color: #404040;
-            --text-primary: #ffffff;
-            --text-secondary: #b0b0b0;
-            --text-muted: #808080;
-            --sidebar-bg: #1e1e1e;
-            --sidebar-hover: #333333;
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --dark-glass: rgba(0, 0, 0, 0.1);
+
+            --text-primary: #1a1a1a;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+            --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.15);
         }
 
         * {
@@ -34,251 +36,554 @@
         }
 
         body {
-            background: var(--dark-bg);
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
             color: var(--text-primary);
             min-height: 100vh;
             overflow-x: hidden;
+            font-weight: 400;
+            line-height: 1.6;
         }
 
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Premium Sidebar */
         .sidebar {
-            background: var(--sidebar-bg);
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
             min-height: 100vh;
-            width: 260px;
+            width: 280px;
             position: fixed;
             left: 0;
             top: 0;
-            border-right: 1px solid var(--border-color);
             z-index: 1000;
-            transition: all 0.3s ease;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            border-radius: inherit;
+            pointer-events: none;
         }
 
         .sidebar-header {
-            padding: 24px 20px;
-            border-bottom: 1px solid var(--border-color);
+            padding: 32px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
         }
 
-        .sidebar-header h5 {
-            color: var(--text-primary);
-            font-weight: 600;
-            font-size: 1.2rem;
-            margin: 0;
-        }
-
-        .sidebar-header .fa-film {
-            color: var(--primary-blue);
-            margin-right: 10px;
-        }
-
-        .sidebar-nav {
-            padding: 20px 0;
-        }
-
-        .nav-link {
-            color: var(--text-secondary);
-            padding: 12px 20px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            transition: all 0.2s ease;
-            border: none;
-            background: none;
-            margin: 2px 0;
-        }
-
-        .nav-link:hover {
-            color: var(--text-primary);
-            background: var(--sidebar-hover);
-        }
-
-        .nav-link.active {
-            color: var(--primary-blue);
-            background: rgba(66, 133, 244, 0.1);
-            border-right: 3px solid var(--primary-blue);
-        }
-
-        .nav-link i {
-            width: 20px;
-            margin-right: 12px;
-            font-size: 1rem;
-        }
-
-        .main-content {
-            margin-left: 260px;
-            padding: 24px;
-            min-height: 100vh;
-            background: var(--dark-bg);
-        }
-
-        .header-section {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 24px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .header-content h2 {
-            font-size: 1.75rem;
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--text-primary);
-        }
-
-        .breadcrumb-text {
-            color: var(--text-secondary);
-            margin: 0;
-            font-size: 0.95rem;
-        }
-
-        .btn-secondary {
-            background: none;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 12px 20px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            transition: all 0.2s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-            text-decoration: none;
-        }
-
-        .form-container {
-            background: var(--card-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 32px;
-            max-width: 900px;
-            margin: 0 auto;
-        }
-
-        .form-title {
-            font-size: 1.5rem;
-            font-weight: 600;
-            margin-bottom: 24px;
-            color: var(--text-primary);
+        .logo-container {
             display: flex;
             align-items: center;
             gap: 12px;
         }
 
-        .form-title i {
-            color: var(--success-green);
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
         }
 
-        .form-group {
+        .logo-icon:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .logo-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .logo-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: -2px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            padding: 24px 16px;
+        }
+
+        .nav-section {
             margin-bottom: 24px;
         }
 
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
+        .nav-section-title {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding: 0 12px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 16px 12px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 12px;
+            margin: 4px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
             font-weight: 500;
-            color: var(--text-primary);
-            font-size: 0.95rem;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover::before {
+            transform: translateX(0);
+        }
+
+        .nav-link:hover {
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        .nav-icon {
+            width: 20px;
+            margin-right: 16px;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 32px;
+            min-height: 100vh;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Premium Back Navigation */
+        .back-nav {
+            margin-bottom: 32px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Premium Form Container */
+        .form-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+
+        .card-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-header h5 {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header small {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .card-body {
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Premium Form Controls */
+        .form-label {
+            color: #2d1b69;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .form-label i {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .form-label .text-danger {
+            color: #e74c3c !important;
         }
 
         .form-label.required::after {
             content: " *";
-            color: var(--danger-red);
+            color: #e74c3c;
         }
 
-        .form-control {
-            background: var(--darker-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            color: var(--text-primary);
-            padding: 12px 16px;
-            transition: all 0.2s ease;
-            width: 100%;
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #2d1b69;
+            padding: 14px 18px;
+            transition: all 0.3s ease;
             font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .form-control::placeholder {
-            color: var(--text-muted);
+            color: rgba(45, 27, 105, 0.6);
         }
 
-        .form-control:focus {
-            background: var(--darker-bg);
-            border-color: var(--primary-blue);
-            box-shadow: 0 0 0 0.2rem rgba(66, 133, 244, 0.25);
-            color: var(--text-primary);
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            color: #2d1b69;
             outline: none;
         }
 
         .form-control.is-invalid {
-            border-color: var(--danger-red);
-            box-shadow: 0 0 0 0.2rem rgba(234, 67, 53, 0.25);
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.25);
         }
 
         .invalid-feedback {
-            color: var(--danger-red);
+            color: #e74c3c;
             font-size: 0.875rem;
-            margin-top: 4px;
+            margin-top: 6px;
+            font-weight: 500;
         }
 
-        .form-help {
-            color: var(--text-secondary);
+        .form-text {
+            color: #4a3577;
             font-size: 0.875rem;
-            margin-top: 4px;
+            margin-top: 6px;
         }
 
-        /* Image preview styles */
-        .image-preview-container {
-            background: var(--darker-bg);
-            border: 1px solid var(--border-color);
+        /* Premium Selection Grids */
+        .selection-grid {
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .movies-selection {
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-check {
+            margin-bottom: 12px;
+            padding: 12px;
             border-radius: 8px;
-            padding: 16px;
-            text-align: center;
-            min-height: 120px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid transparent;
+        }
+
+        .form-check:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateX(4px);
+        }
+
+        .movie-checkbox {
+            margin-bottom: 16px;
+            padding: 12px;
+            border-radius: 10px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid transparent;
+        }
+
+        .movie-checkbox:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateX(4px);
+        }
+
+        .movie-checkbox input[type="checkbox"] {
+            margin-right: 12px;
+            transform: scale(1.3);
+            accent-color: #667eea;
+        }
+
+        .movie-checkbox label {
+            color: #2d1b69;
+            cursor: pointer;
+            margin: 0;
             display: flex;
             align-items: center;
-            justify-content: center;
+            font-size: 0.95rem;
+            font-weight: 500;
+        }
+
+        .movie-info {
+            margin-left: 8px;
+        }
+
+        .movie-name {
+            font-weight: 600;
+            color: #2d1b69;
+        }
+
+        .movie-details {
+            font-size: 0.8rem;
+            color: #4a3577;
+            margin-top: 2px;
+        }
+
+        .form-check-input {
+            margin-right: 12px;
+            transform: scale(1.2);
+            accent-color: #667eea;
+        }
+
+        .form-check-label {
+            color: #2d1b69;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Premium Buttons */
+        .btn-primary {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 28px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-premium);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 14px 28px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            text-decoration: none;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-outline-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 14px 20px;
             transition: all 0.3s ease;
         }
 
+        .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Premium Image Preview */
+        .image-preview-container {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 20px;
+            text-align: center;
+            min-height: 150px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
         .image-preview-container.has-image {
-            border-color: var(--success-green);
-            background: rgba(52, 168, 83, 0.05);
+            border-color: #4facfe;
+            background: rgba(79, 172, 254, 0.1);
         }
 
         .image-preview-container.has-error {
-            border-color: var(--danger-red);
-            background: rgba(234, 67, 53, 0.05);
+            border-color: #e74c3c;
+            background: rgba(231, 76, 60, 0.1);
         }
 
         .actor-image-container {
-            width: 80px;
-            height: 80px;
+            width: 100px;
+            height: 100px;
             border-radius: 50%;
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid rgba(255, 255, 255, 0.5);
             display: flex;
             align-items: center;
             justify-content: center;
             overflow: hidden;
             position: relative;
             transition: all 0.3s ease;
-            margin: 0 auto 12px;
+            margin-bottom: 16px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .actor-image-container.has-image {
-            border-color: var(--success-green);
+            border-color: #4facfe;
         }
 
         .actor-image-container.has-error {
-            border-color: var(--danger-red);
+            border-color: #e74c3c;
         }
 
         .actor-image {
@@ -289,291 +594,343 @@
         }
 
         .actor-image-placeholder {
-            color: var(--text-muted);
-            font-size: 2rem;
+            color: rgba(45, 27, 105, 0.6);
+            font-size: 2.5rem;
         }
 
         .image-status {
-            font-size: 0.8rem;
-            margin-top: 4px;
+            font-size: 0.9rem;
+            margin-top: 8px;
+            font-weight: 500;
         }
 
         .image-status.success {
-            color: var(--success-green);
+            color: #4facfe;
         }
 
         .image-status.error {
-            color: var(--danger-red);
+            color: #e74c3c;
         }
 
         .image-status.default {
-            color: var(--text-secondary);
+            color: #4a3577;
         }
 
-        .image-examples {
-            background: rgba(66, 133, 244, 0.1);
-            border: 1px solid rgba(66, 133, 244, 0.3);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 8px;
-            font-size: 0.85rem;
+        /* Premium Info Cards */
+        .upload-info, .auto-rating-info, .image-required-warning, .image-examples, .required-notice {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            font-size: 0.9rem;
         }
 
+        .upload-info .info-title,
+        .auto-rating-info .info-title,
         .image-examples .example-title {
-            color: var(--primary-blue);
-            font-weight: 500;
-            margin-bottom: 6px;
+            color: #2d1b69;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-info .info-item,
+        .auto-rating-info .info-item,
+        .image-examples .example-item {
+            color: #4a3577;
+            margin: 4px 0;
         }
 
         .image-examples .example-item {
-            color: var(--text-secondary);
-            margin: 2px 0;
             font-family: 'Courier New', monospace;
         }
 
-        .movies-selection {
-            background: var(--darker-bg);
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 16px;
-            max-height: 250px;
-            overflow-y: auto;
+        .image-required-warning, .required-notice {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: rgba(231, 76, 60, 0.3);
         }
 
-        .movie-checkbox {
-            margin-bottom: 12px;
-            padding: 8px;
-            border-radius: 6px;
-            transition: background 0.2s ease;
-        }
-
-        .movie-checkbox:hover {
-            background: var(--card-hover);
-        }
-
-        .movie-checkbox input[type="checkbox"] {
-            margin-right: 10px;
-            transform: scale(1.2);
-        }
-
-        .movie-checkbox label {
-            color: var(--text-primary);
-            cursor: pointer;
-            margin: 0;
+        .image-required-warning .warning-title {
+            color: #e74c3c;
+            font-weight: 600;
+            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            font-size: 0.9rem;
+            gap: 8px;
         }
 
-        .movie-info {
-            margin-left: 8px;
+        .image-required-warning .warning-item {
+            color: #c0392b;
+            margin: 4px 0;
         }
 
-        .movie-name {
-            font-weight: 500;
-        }
-
-        .movie-details {
-            font-size: 0.8rem;
-            color: var(--text-secondary);
-            margin-top: 2px;
-        }
-
-        .selected-movies-summary {
-            background: rgba(66, 133, 244, 0.1);
-            border: 1px solid rgba(66, 133, 244, 0.3);
-            border-radius: 8px;
-            padding: 12px;
-            margin-top: 12px;
-        }
-
-        .selected-count {
-            color: var(--primary-blue);
+        .required-notice {
+            color: #e74c3c;
             font-weight: 600;
-            font-size: 0.9rem;
         }
 
-        .btn-group {
-            display: flex;
-            gap: 12px;
-            justify-content: center;
-            margin-top: 32px;
-            padding-top: 24px;
-            border-top: 1px solid var(--border-color);
+        /* Premium Requirements Card */
+        .requirements-card {
+            background: rgba(231, 76, 60, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
         }
 
-        .btn-primary {
-            background: var(--success-green);
-            border: none;
-            border-radius: 8px;
-            padding: 14px 28px;
-            color: white;
-            font-weight: 500;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            cursor: pointer;
-        }
-
-        .btn-primary:hover {
-            background: #2e7b38;
-            transform: translateY(-1px);
-        }
-
-        .btn-outline {
-            background: none;
-            border: 1px solid var(--border-color);
-            border-radius: 8px;
-            padding: 14px 28px;
-            color: var(--text-secondary);
-            font-weight: 500;
-            font-size: 1rem;
-            transition: all 0.2s ease;
-            cursor: pointer;
-            text-decoration: none;
-        }
-
-        .btn-outline:hover {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
-            text-decoration: none;
-        }
-
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: 0 -12px;
-        }
-
-        .col-md-6 {
-            flex: 0 0 50%;
-            max-width: 50%;
-            padding: 0 12px;
-        }
-
-        .col-md-12 {
-            flex: 0 0 100%;
-            max-width: 100%;
-            padding: 0 12px;
-        }
-
-        .alert {
-            border-radius: 8px;
-            margin-bottom: 20px;
+        .requirements-header {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
             padding: 16px;
+            font-weight: 600;
+        }
+
+        .requirements-body {
+            padding: 16px;
+            font-size: 0.9rem;
+            color: #4a3577;
+        }
+
+        .requirements-body ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .requirements-body li {
+            margin-bottom: 4px;
+        }
+
+        /* Premium Alerts */
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
         }
 
         .alert-success {
-            background: rgba(52, 168, 83, 0.1);
-            border: 1px solid rgba(52, 168, 83, 0.3);
-            color: var(--success-green);
+            background: rgba(40, 167, 69, 0.2);
+            color: white;
         }
 
         .alert-danger {
-            background: rgba(234, 67, 53, 0.1);
-            border: 1px solid rgba(234, 67, 53, 0.3);
-            color: var(--danger-red);
+            background: rgba(220, 53, 69, 0.2);
+            color: white;
         }
 
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: white;
+        }
+
+        /* Premium Preview */
         .actor-preview {
-            margin-top: 24px;
-            padding: 20px;
-            background: linear-gradient(135deg, var(--success-green), #4caf50);
-            border-radius: 12px;
+            margin-top: 32px;
+            padding: 24px;
+            background: var(--primary-gradient);
+            border-radius: 16px;
             color: white;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+        }
+
+        .actor-preview::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255, 255, 255, 0.1) 10px,
+                    rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: shimmer 3s linear infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
         }
 
         .actor-preview-content {
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 16px;
+            gap: 20px;
+            position: relative;
+            z-index: 1;
         }
 
         .actor-preview-image {
-            width: 60px;
-            height: 60px;
+            width: 80px;
+            height: 80px;
             border-radius: 50%;
             object-fit: cover;
-            border: 2px solid white;
+            border: 3px solid white;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
         }
 
         .actor-preview-info h4 {
-            margin: 0 0 6px 0;
-            font-size: 1.1rem;
-            font-weight: 600;
+            margin: 0 0 8px 0;
+            font-size: 1.3rem;
+            font-weight: 700;
         }
 
         .actor-preview-info p {
             margin: 0;
-            font-size: 0.8rem;
+            font-size: 0.9rem;
             opacity: 0.9;
+        }
+
+        .selected-movies-summary {
+            background: rgba(79, 172, 254, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(79, 172, 254, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            color: #2d1b69;
+            font-weight: 600;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 280px;
+                padding: 24px;
+            }
         }
 
         @media (max-width: 768px) {
             .sidebar {
                 transform: translateX(-100%);
+                width: 280px;
             }
 
             .main-content {
                 margin-left: 0;
-                padding: 16px;
+                padding: 20px;
             }
 
-            .header-section {
-                flex-direction: column;
-                gap: 16px;
-                align-items: stretch;
-            }
-
-            .form-container {
+            .card-header, .card-body {
                 padding: 24px;
             }
+        }
 
-            .col-md-6 {
-                flex: 0 0 100%;
-                max-width: 100%;
-            }
+        .fade-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
 
-            .btn-group {
-                flex-direction: column;
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
             }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
 
-            .actor-preview-content {
-                flex-direction: column;
-                gap: 12px;
-            }
+        .back-nav { animation-delay: 0.1s; }
+        .form-container { animation-delay: 0.2s; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .char-counter {
+            color: #4a3577;
+            font-size: 0.875rem;
+            margin-top: 6px;
         }
     </style>
 </head>
 <body>
-<!-- Sidebar -->
+<!-- Premium Sidebar -->
 <div class="sidebar">
     <div class="sidebar-header">
-        <h5>
-            <i class="fas fa-film"></i>
-            BlueBear Cinema
-        </h5>
+        <div class="logo-container">
+            <div class="logo-icon">
+                <i class="fas fa-film"></i>
+            </div>
+            <div>
+                <div class="logo-text">BlueBear</div>
+                <div class="logo-subtitle">CINEMA SUITE</div>
+            </div>
+        </div>
     </div>
 
     <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin">
-            <i class="fas fa-home"></i>Dashboard
-        </a>
-        <a class="nav-link" href="/admin/movies">
-            <i class="fas fa-film"></i>Movies
-        </a>
-        <a class="nav-link active" href="/admin/actors">
-            <i class="fas fa-users"></i>Actors
-        </a>
-        <a class="nav-link" href="/admin/vouchers">
-            <i class="fas fa-ticket-alt"></i>Vouchers
-        </a>
+        <div class="nav-section">
+            <div class="nav-section-title">Main</div>
+            <a class="nav-link" href="/admin/">
+                <i class="nav-icon fas fa-home"></i>
+                <span class="nav-text">Dashboard</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Content</div>
+            <a class="nav-link" href="/admin/movies">
+                <i class="nav-icon fas fa-film"></i>
+                <span class="nav-text">Movies</span>
+            </a>
+            <a class="nav-link active" href="/admin/actors">
+                <i class="nav-icon fas fa-users"></i>
+                <span class="nav-text">Actors</span>
+            </a>
+            <a class="nav-link" href="/admin/genres">
+                <i class="nav-icon fas fa-tags"></i>
+                <span class="nav-text">Genres</span>
+            </a>
+        </div>
+
+        <div class="nav-section">
+            <div class="nav-section-title">Marketing</div>
+            <a class="nav-link" href="/admin/vouchers">
+                <i class="nav-icon fas fa-ticket-alt"></i>
+                <span class="nav-text">Vouchers</span>
+            </a>
+        </div>
     </nav>
 </div>
 
 <!-- Main Content -->
 <div class="main-content">
+    <!-- Premium Back Navigation -->
+    <div class="back-nav fade-in">
+        <a href="/admin/actors" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Talent Portfolio
+        </a>
+    </div>
+
     <!-- Alert Messages -->
     <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
         <i class="fas fa-check-circle me-2"></i>
@@ -587,150 +944,188 @@
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- Header -->
-    <div class="header-section">
-        <div class="header-content">
-            <h2>Thêm Diễn Viên Mới</h2>
-            <p class="breadcrumb-text">Dashboard > Actors > Thêm Mới</p>
+    <!-- Premium Add Actor Form -->
+    <div class="form-container fade-in">
+        <div class="card-header">
+            <h5>
+                <i class="fas fa-user-plus"></i>
+                Create New Cinema Star
+            </h5>
+            <small>All fields marked with (*) are mandatory for talent registration</small>
         </div>
-        <a href="/admin/actors" class="btn-secondary">
-            <i class="fas fa-arrow-left"></i>Quay Lại
-        </a>
-    </div>
 
-    <!-- Form -->
-    <div class="form-container">
-        <h3 class="form-title">
-            <i class="fas fa-user-plus"></i>
-            <span>Tạo Diễn Viên Mới</span>
-        </h3>
+        <div class="card-body">
+            <form th:action="@{/admin/actors/add}" method="post" th:object="${actor}" id="actorForm" enctype="multipart/form-data" novalidate>
 
-        <form th:action="@{/admin/actors/add}" method="post" th:object="${actor}" id="actorForm" novalidate>
-
-            <div class="row">
-                <!-- Actor Name - Required -->
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label required" for="actorName">Tên Diễn Viên</label>
-                        <input type="text"
-                               class="form-control"
-                               id="actorName"
-                               th:field="*{actorName}"
-                               placeholder="Ví dụ: Tom Hanks, Scarlett Johansson"
-                               maxlength="255"
-                               required>
-                        <div class="form-help">
-                            Tên đầy đủ của diễn viên (bắt buộc)
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-8">
+                        <!-- Actor Name -->
+                        <div class="mb-3">
+                            <label for="actorName" class="form-label">
+                                <i class="fas fa-user"></i>
+                                Star Identity <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control"
+                                   id="actorName"
+                                   th:field="*{actorName}"
+                                   required
+                                   maxlength="255"
+                                   placeholder="Enter professional star name (required)...">
+                            <small class="form-text">Full professional name of the talent (max 255 characters)</small>
+                            <div class="invalid-feedback" id="actorNameError"></div>
                         </div>
-                        <div class="invalid-feedback" id="actorNameError"></div>
+
+                        <!-- Movies Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-film"></i>
+                                Cinema Portfolio (Optional)
+                            </label>
+                            <div class="selection-grid" id="moviesSelection">
+                                <div class="text-center" style="padding: 20px;">
+                                    <i class="fas fa-spinner fa-spin"></i>
+                                    <div class="form-text mt-2">Loading cinema collection...</div>
+                                </div>
+                            </div>
+                            <small class="form-text">
+                                Select movies the talent has participated in (optional)
+                            </small>
+                            <div class="selected-movies-summary" id="selectedSummary" style="display: none;">
+                                <div class="selected-count">Portfolio selected: <span id="selectedCount">0</span> productions</div>
+                            </div>
+                        </div>
+
+                        <!-- Hidden fields -->
+                        <input type="hidden" name="selectedMovies" id="selectedMoviesInput">
+
+                        <!-- Hidden data for JavaScript -->
+                        <script th:inline="javascript">
+                            window.moviesData = /*[[${allMovies}]]*/ [];
+                            window.currentMovieIds = /*[[${currentMovieIds}]]*/ [];
+                        </script>
                     </div>
-                </div>
 
-                <!-- Image Link Input -->
-                <div class="col-md-6">
-                    <div class="form-group">
-                        <label class="form-label" for="imageLink">Đường Dẫn Ảnh (Tùy chọn)</label>
-                        <input type="text"
-                               class="form-control"
-                               id="imageLink"
-                               th:field="*{image}"
-                               placeholder="/images/actors/actor-name.jpg"
-                               maxlength="500">
-                        <div class="form-help">
-                            Nhập đường dẫn ảnh từ thư mục static (không bắt buộc)
-                        </div>
-                        <div class="invalid-feedback" id="imageLinkError"></div>
+                    <!-- Right Column - Images & Requirements -->
+                    <div class="col-md-4">
+                        <!-- Upload Professional Portrait - REQUIRED -->
+                        <div class="mb-4">
+                            <label for="imageFile" class="form-label">
+                                <i class="fas fa-upload"></i>
+                                Professional Portrait <span class="text-danger">*</span>
+                            </label>
 
-                        <!-- Image Examples -->
-                        <div class="image-examples">
-                            <div class="example-title">Ví dụ đường dẫn:</div>
-                            <div class="example-item">/images/actors/tom-hanks.jpg</div>
-                            <div class="example-item">/images/actors/scarlett-johansson.png</div>
-                            <div class="example-item">/images/default-actor.png</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Image Preview -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label class="form-label">Xem Trước Ảnh</label>
-                        <div class="image-preview-container" id="imagePreviewContainer">
-                            <div>
+                            <!-- Image Preview Container -->
+                            <div class="image-preview-container" id="imagePreviewContainer">
                                 <div class="actor-image-container" id="actorImageContainer">
-                                    <img class="actor-image"
-                                         id="previewImage"
-                                         src="/images/default-actor.png"
-                                         alt="Actor Preview"
-                                         style="display: none;">
-                                    <i class="fas fa-user actor-image-placeholder" id="imagePlaceholder"></i>
+                                    <img class="actor-image" id="previewImage" alt="Actor Image" style="display: none;">
+                                    <div class="actor-image-placeholder" id="imagePlaceholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
                                 </div>
                                 <div class="image-status default" id="imageStatus">
-                                    <i class="fas fa-info-circle"></i> Nhập đường dẫn ảnh để xem trước
+                                    <i class="fas fa-exclamation-triangle"></i> Please select professional image (required)
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
 
-            <!-- Movies Selection -->
-            <div class="row">
-                <div class="col-md-12">
-                    <div class="form-group">
-                        <label class="form-label" for="moviesSelection">Phim Đã Tham Gia (Tùy chọn)</label>
-                        <div class="movies-selection" id="moviesSelection">
-                            <div class="text-center" style="padding: 20px;">
-                                <i class="fas fa-spinner fa-spin"></i>
-                                <div class="form-help mt-2">Đang tải danh sách phim...</div>
+                            <!-- File Input -->
+                            <input type="file"
+                                   class="form-control"
+                                   id="imageFile"
+                                   name="imageFile"
+                                   accept="image/*"
+                                   style="margin-top: 12px;"
+                                   required>
+
+                            <small class="form-text">
+                                JPG, PNG, GIF, WEBP - Max 5MB (REQUIRED)
+                            </small>
+
+                            <div class="image-required-warning">
+                                <div class="warning-title">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Portrait image required
+                                </div>
+                                <div class="warning-item">• Must upload professional portrait</div>
+                                <div class="warning-item">• Displays in talent collection</div>
+                            </div>
+
+                            <div class="upload-info">
+                                <div class="info-title">
+                                    <i class="fas fa-info-circle"></i>
+                                    Image storage format:
+                                </div>
+                                <div class="info-item">actor_{id}.extension</div>
+                                <div class="info-item">Example: actor_1.jpg</div>
+                            </div>
+
+                            <div class="invalid-feedback" id="imageFileError"></div>
+                        </div>
+
+                        <!-- Validation Requirements -->
+                        <div class="card requirements-card">
+                            <div class="card-header requirements-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Talent Requirements
+                                </h6>
+                            </div>
+                            <div class="card-body requirements-body">
+                                <ul class="mb-0">
+                                    <li>Star identity (unique, ≤255 chars)</li>
+                                    <li><strong>Professional portrait (REQUIRED)</strong></li>
+                                    <li>Cinema portfolio (optional)</li>
+                                </ul>
+                                <hr>
+                                <small class="text-success">
+                                    <i class="fas fa-info-circle"></i>
+                                    Create professional talent profile
+                                </small>
                             </div>
                         </div>
-                        <div class="form-help">
-                            Chọn các phim mà diễn viên đã tham gia (có thể bỏ qua)
-                        </div>
-                        <div class="selected-movies-summary" id="selectedSummary" style="display: none;">
-                            <div class="selected-count">Đã chọn: <span id="selectedCount">0</span> phim</div>
+                    </div>
+                </div>
+
+                <!-- Actor Preview -->
+                <div id="actorPreview" style="display: none;">
+                    <div class="actor-preview">
+                        <div class="actor-preview-content">
+                            <img class="actor-preview-image" id="previewActorImage" alt="Actor Preview" src="/images/default-actor.png">
+                            <div class="actor-preview-info">
+                                <h4 id="previewActorName">Cinema Star</h4>
+                                <p><i class="fas fa-star"></i> BlueBear Cinema Talent</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Hidden fields -->
-            <input type="hidden" name="selectedMovies" id="selectedMoviesInput">
-
-            <!-- Hidden data for JavaScript -->
-            <script th:inline="javascript">
-                window.moviesData = /*[[${allMovies}]]*/ [];
-                window.currentMovieIds = /*[[${currentMovieIds}]]*/ [];
-            </script>
-
-            <!-- Actor Preview -->
-            <div id="actorPreview" style="display: none;">
-                <div class="actor-preview">
-                    <div class="actor-preview-content">
-                        <img class="actor-preview-image" id="previewActorImage" alt="Actor Preview" src="/images/default-actor.png">
-                        <div class="actor-preview-info">
-                            <h4 id="previewActorName">Tên Diễn Viên</h4>
-                            <p><i class="fas fa-user"></i> BlueBear Cinema Actor</p>
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <hr style="border-color: rgba(255, 255, 255, 0.2);">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a href="/admin/actors" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>
+                                    Cancel Registration
+                                </a>
+                            </div>
+                            <div>
+                                <button type="reset" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-undo me-2"></i>
+                                    Reset Form
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <i class="fas fa-user-plus me-2"></i>
+                                    Register New Talent
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- Form Actions -->
-            <div class="btn-group">
-                <button type="submit" class="btn-primary">
-                    <i class="fas fa-user-plus"></i>
-                    <span>Tạo Diễn Viên</span>
-                </button>
-                <a href="/admin/actors" class="btn-outline">
-                    <i class="fas fa-times"></i>
-                    Hủy Bỏ
-                </a>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
 </div>
 
@@ -739,7 +1134,7 @@
     document.addEventListener('DOMContentLoaded', function() {
         const form = document.getElementById('actorForm');
         const actorNameInput = document.getElementById('actorName');
-        const imageLinkInput = document.getElementById('imageLink');
+        const imageFileInput = document.getElementById('imageFile');
         const previewImage = document.getElementById('previewImage');
         const imagePlaceholder = document.getElementById('imagePlaceholder');
         const actorImageContainer = document.getElementById('actorImageContainer');
@@ -752,6 +1147,75 @@
         const selectedSummary = document.getElementById('selectedSummary');
         const selectedCount = document.getElementById('selectedCount');
         const selectedMoviesInput = document.getElementById('selectedMoviesInput');
+
+        // File input change handler
+        imageFileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            clearError('imageFile');
+
+            if (!file) {
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Please select image (required)';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                previewActorImage.src = '/images/default-actor.png';
+                return;
+            }
+
+            // Validate file
+            const maxSize = 5 * 1024 * 1024; // 5MB
+            const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+            if (!allowedTypes.includes(file.type)) {
+                showError('imageFile', 'Only image files accepted (JPG, PNG, GIF, WEBP)');
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Invalid file format';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                return;
+            }
+
+            if (file.size > maxSize) {
+                showError('imageFile', 'File size cannot exceed 5MB');
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> File too large (max 5MB)';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                return;
+            }
+
+            // Show loading state
+            imageStatus.className = 'image-status default';
+            imageStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading image...';
+
+            // Preview the image
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                previewImage.src = e.target.result;
+                previewActorImage.src = e.target.result;
+                showImage();
+
+                const fileSizeKB = Math.round(file.size / 1024);
+                imageStatus.className = 'image-status success';
+                imageStatus.innerHTML = `<i class="fas fa-check-circle"></i> Professional portrait ready (${fileSizeKB}KB)`;
+                imagePreviewContainer.className = 'image-preview-container has-image';
+                actorImageContainer.className = 'actor-image-container has-image';
+            };
+
+            reader.onerror = function() {
+                showError('imageFile', 'Cannot read image file');
+                showImagePlaceholder();
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> File read error';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+            };
+
+            reader.readAsDataURL(file);
+        });
 
         // Load movies from server data
         function loadMovies() {
@@ -776,9 +1240,9 @@
         function renderEmptyState() {
             moviesSelection.innerHTML = `
                 <div class="text-center" style="padding: 20px;">
-                    <i class="fas fa-film" style="font-size: 2rem; opacity: 0.5; margin-bottom: 8px;"></i>
-                    <div class="form-help">Không có phim nào trong hệ thống</div>
-                    <div class="form-help">Vui lòng thêm phim trước khi gán cho diễn viên</div>
+                    <i class="fas fa-film fa-3x mb-3" style="color: #4a3577;"></i>
+                    <div class="form-text">No movies available in cinema collection</div>
+                    <div class="form-text">Please add movies before assigning to talent</div>
                 </div>
             `;
         }
@@ -790,19 +1254,22 @@
             const searchInput = document.createElement('input');
             searchInput.type = 'text';
             searchInput.className = 'form-control';
-            searchInput.placeholder = 'Tìm kiếm phim...';
-            searchInput.style.marginBottom = '12px';
+            searchInput.placeholder = 'Search cinema collection...';
+            searchInput.style.marginBottom = '16px';
             searchInput.addEventListener('input', handleMovieSearch);
             moviesSelection.appendChild(searchInput);
 
             // Add select all button
             const buttonContainer = document.createElement('div');
-            buttonContainer.style.marginBottom = '12px';
+            buttonContainer.style.marginBottom = '16px';
 
             const selectAllBtn = document.createElement('button');
             selectAllBtn.type = 'button';
-            selectAllBtn.className = 'btn btn-sm btn-outline-primary';
-            selectAllBtn.textContent = 'Chọn tất cả';
+            selectAllBtn.className = 'btn btn-sm btn-outline-secondary';
+            selectAllBtn.textContent = 'Select All';
+            selectAllBtn.style.background = 'rgba(102, 126, 234, 0.1)';
+            selectAllBtn.style.border = '1px solid rgba(102, 126, 234, 0.3)';
+            selectAllBtn.style.color = '#2d1b69';
             selectAllBtn.addEventListener('click', handleSelectAll);
 
             buttonContainer.appendChild(selectAllBtn);
@@ -854,7 +1321,7 @@
             });
 
             updateSelectedMovies();
-            this.textContent = allChecked ? 'Chọn tất cả' : 'Bỏ chọn tất cả';
+            this.textContent = allChecked ? 'Select All' : 'Deselect All';
         }
 
         // Update selected movies
@@ -876,52 +1343,6 @@
             }
         };
 
-        // Image preview handling
-        function updateImagePreview() {
-            const imagePath = imageLinkInput.value.trim();
-
-            if (!imagePath) {
-                // No image path - show placeholder
-                showImagePlaceholder();
-                imageStatus.className = 'image-status default';
-                imageStatus.innerHTML = '<i class="fas fa-info-circle"></i> Nhập đường dẫn ảnh để xem trước';
-                imagePreviewContainer.className = 'image-preview-container';
-                actorImageContainer.className = 'actor-image-container';
-                return;
-            }
-
-            // Show loading state
-            imageStatus.className = 'image-status default';
-            imageStatus.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tải ảnh...';
-
-            // Test if image exists
-            const testImage = new Image();
-            testImage.onload = function() {
-                // Image loaded successfully
-                previewImage.src = imagePath;
-                previewActorImage.src = imagePath;
-                showImage();
-                imageStatus.className = 'image-status success';
-                imageStatus.innerHTML = '<i class="fas fa-check-circle"></i> Ảnh tải thành công';
-                imagePreviewContainer.className = 'image-preview-container has-image';
-                actorImageContainer.className = 'actor-image-container has-image';
-                clearError('imageLink');
-            };
-
-            testImage.onerror = function() {
-                // Image failed to load
-                showImagePlaceholder();
-                imageStatus.className = 'image-status error';
-                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Không thể tải ảnh từ đường dẫn này';
-                imagePreviewContainer.className = 'image-preview-container has-error';
-                actorImageContainer.className = 'actor-image-container has-error';
-                previewActorImage.src = '/images/default-actor.png';
-                showError('imageLink', 'Đường dẫn ảnh không hợp lệ hoặc ảnh không tồn tại');
-            };
-
-            testImage.src = imagePath;
-        }
-
         function showImage() {
             previewImage.style.display = 'block';
             imagePlaceholder.style.display = 'none';
@@ -932,29 +1353,12 @@
             imagePlaceholder.style.display = 'flex';
         }
 
-        // Image link input event
-        imageLinkInput.addEventListener('input', function() {
-            clearError('imageLink');
-            updateImagePreview();
-            updatePreview();
-        });
-
-        // Auto-format image path
-        imageLinkInput.addEventListener('blur', function() {
-            let value = this.value.trim();
-            if (value && !value.startsWith('/')) {
-                value = '/' + value;
-                this.value = value;
-                updateImagePreview();
-            }
-        });
-
         // Update main preview
         function updatePreview() {
-            const actorName = actorNameInput.value.trim() || 'Tên Diễn Viên';
+            const actorName = actorNameInput.value.trim() || 'Cinema Star';
             previewActorName.textContent = actorName;
 
-            if (actorName !== 'Tên Diễn Viên') {
+            if (actorName !== 'Cinema Star') {
                 actorPreviewSection.style.display = 'block';
             } else {
                 actorPreviewSection.style.display = 'none';
@@ -967,7 +1371,7 @@
             updatePreview();
         });
 
-        // Form validation
+        // Form validation with image requirement
         function validateForm() {
             let isValid = true;
 
@@ -982,32 +1386,36 @@
             // Validate actor name
             const actorName = actorNameInput.value.trim();
             if (!actorName) {
-                showError('actorName', 'Tên diễn viên là bắt buộc');
+                showError('actorName', 'Talent name is required');
                 isValid = false;
             } else if (actorName.length < 2) {
-                showError('actorName', 'Tên diễn viên phải có ít nhất 2 ký tự');
+                showError('actorName', 'Talent name must be at least 2 characters');
                 isValid = false;
             } else if (actorName.length > 255) {
-                showError('actorName', 'Tên diễn viên không được vượt quá 255 ký tự');
+                showError('actorName', 'Talent name cannot exceed 255 characters');
                 isValid = false;
             }
 
-            // Validate image link if provided
-            const imageLink = imageLinkInput.value.trim();
-            if (imageLink) {
-                if (imageLink.length > 500) {
-                    showError('imageLink', 'Đường dẫn ảnh không được vượt quá 500 ký tự');
+            // VALIDATE IMAGE FILE - NOW REQUIRED
+            const imageFile = imageFileInput.files[0];
+            if (!imageFile) {
+                showError('imageFile', 'Professional portrait is required for talent registration');
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-circle"></i> Please select image (required)';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                isValid = false;
+            } else {
+                const maxSize = 5 * 1024 * 1024; // 5MB
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+
+                if (!allowedTypes.includes(imageFile.type)) {
+                    showError('imageFile', 'Only image files accepted (JPG, PNG, GIF, WEBP)');
                     isValid = false;
                 }
 
-                // Check if it looks like a valid image path
-                const imageExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-                const hasValidExtension = imageExtensions.some(ext =>
-                    imageLink.toLowerCase().includes(ext)
-                );
-
-                if (!hasValidExtension) {
-                    showError('imageLink', 'Đường dẫn ảnh nên có phần mở rộng hợp lệ (.jpg, .png, .gif, .webp)');
+                if (imageFile.size > maxSize) {
+                    showError('imageFile', 'File size cannot exceed 5MB');
                     isValid = false;
                 }
             }
@@ -1043,30 +1451,41 @@
             }
         });
 
-        // Form submission
+        // Form submission with enhanced validation
         form.addEventListener('submit', function(e) {
-            if (!validateForm()) {
-                e.preventDefault();
+            e.preventDefault(); // Always prevent default first
 
+            if (!validateForm()) {
                 const firstError = document.querySelector('.is-invalid');
                 if (firstError) {
                     firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
                     firstError.focus();
                 }
-                return;
+                return false;
+            }
+
+            // Additional check for image file before submission
+            const imageFile = imageFileInput.files[0];
+            if (!imageFile) {
+                alert('Please select professional portrait before registering talent!');
+                imageFileInput.focus();
+                return false;
             }
 
             // Show loading state
             const submitBtn = this.querySelector('button[type="submit"]');
             const originalText = submitBtn.innerHTML;
-            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang tạo diễn viên...';
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering talent...';
             submitBtn.disabled = true;
 
             // Log form data for debugging
             console.log('Form submission:');
             console.log('Actor name:', actorNameInput.value);
-            console.log('Image link:', imageLinkInput.value);
+            console.log('Image file:', imageFile.name, imageFile.size + ' bytes');
             console.log('Selected movies:', selectedMoviesInput.value);
+
+            // Submit the form
+            this.submit();
 
             // Re-enable button after timeout (in case of error)
             setTimeout(() => {
@@ -1080,8 +1499,14 @@
         // Initialize everything
         function initialize() {
             loadMovies();
-            updateImagePreview();
+            showImagePlaceholder();
             updatePreview();
+
+            // Set initial error state for image
+            imageStatus.className = 'image-status error';
+            imageStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Please select professional image (required)';
+            imagePreviewContainer.className = 'image-preview-container has-error';
+            actorImageContainer.className = 'actor-image-container has-error';
 
             // Auto-hide alerts
             setTimeout(function() {
@@ -1108,41 +1533,28 @@
             let counter = this.parentNode.querySelector('.char-counter');
             if (!counter) {
                 counter = document.createElement('div');
-                counter.className = 'char-counter form-help';
+                counter.className = 'char-counter form-text';
                 this.parentNode.appendChild(counter);
             }
 
-            counter.textContent = `${currentLength}/${maxLength} ký tự`;
+            counter.textContent = `${currentLength}/${maxLength} characters`;
 
             if (currentLength > maxLength * 0.9) {
-                counter.style.color = 'var(--warning-orange)';
+                counter.style.color = '#f39c12';
             } else if (currentLength === maxLength) {
-                counter.style.color = 'var(--danger-red)';
+                counter.style.color = '#e74c3c';
             } else {
-                counter.style.color = 'var(--text-secondary)';
+                counter.style.color = '#4a3577';
             }
         });
 
-        // Character counter for image link
-        imageLinkInput.addEventListener('input', function() {
-            const currentLength = this.value.length;
-            const maxLength = 500;
-
-            let counter = this.parentNode.querySelector('.char-counter');
-            if (!counter) {
-                counter = document.createElement('div');
-                counter.className = 'char-counter form-help';
-                this.parentNode.appendChild(counter);
-            }
-
-            counter.textContent = `${currentLength}/${maxLength} ký tự`;
-
-            if (currentLength > maxLength * 0.9) {
-                counter.style.color = 'var(--warning-orange)';
-            } else if (currentLength === maxLength) {
-                counter.style.color = 'var(--danger-red)';
-            } else {
-                counter.style.color = 'var(--text-secondary)';
+        // Enhanced image validation feedback
+        imageFileInput.addEventListener('focus', function() {
+            if (!this.files || this.files.length === 0) {
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Professional portrait is required';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
             }
         });
 
@@ -1156,16 +1568,87 @@
 
             // Escape to cancel
             if (e.key === 'Escape') {
-                const cancelBtn = document.querySelector('.btn-outline');
+                const cancelBtn = document.querySelector('.btn-secondary');
                 if (cancelBtn) {
                     window.location.href = cancelBtn.href;
                 }
             }
         });
 
+        // Drag and drop support for image upload
+        const dropZone = imagePreviewContainer;
+
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, preventDefaults, false);
+        });
+
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropZone.addEventListener(eventName, highlight, false);
+        });
+
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropZone.addEventListener(eventName, unhighlight, false);
+        });
+
+        function highlight(e) {
+            dropZone.style.borderColor = '#667eea';
+            dropZone.style.backgroundColor = 'rgba(102, 126, 234, 0.1)';
+        }
+
+        function unhighlight(e) {
+            dropZone.style.borderColor = '';
+            dropZone.style.backgroundColor = '';
+        }
+
+        dropZone.addEventListener('drop', handleDrop, false);
+
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+
+            if (files.length > 0) {
+                imageFileInput.files = files;
+                imageFileInput.dispatchEvent(new Event('change', { bubbles: true }));
+            }
+        }
+
+        // Reset form handler
+        document.querySelector('button[type="reset"]').addEventListener('click', function() {
+            setTimeout(() => {
+                updateSelectedMovies();
+                showImagePlaceholder();
+                updatePreview();
+
+                // Clear image previews
+                imageStatus.className = 'image-status error';
+                imageStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Please select professional image (required)';
+                imagePreviewContainer.className = 'image-preview-container has-error';
+                actorImageContainer.className = 'actor-image-container has-error';
+                previewActorImage.src = '/images/default-actor.png';
+            }, 50);
+        });
+
+        // Premium loading sequence
+        setTimeout(() => {
+            document.querySelectorAll('.fade-in').forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }, 100);
+
         // Initialize
         initialize();
     });
+
+    console.log('Premium talent creation interface loaded');
 </script>
+
 </body>
 </html>
