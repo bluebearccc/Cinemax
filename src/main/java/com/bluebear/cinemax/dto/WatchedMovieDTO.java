@@ -18,6 +18,6 @@ public class WatchedMovieDTO {
     private Schedule schedule;
     private Integer invoiceId;
     private LocalDateTime bookingDate;
-
+    private boolean canFeedback;
 
 }

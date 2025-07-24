@@ -17,6 +17,8 @@ public class InvoiceDetailDTO {
     private Integer invoiceId;
     private String theaterName;
     private List<String> foodName;
+    private String movieName;
+    private String scheduleTime;
     private String roomName;
     private LocalDateTime bookingDate;
     private List<String> seats;
