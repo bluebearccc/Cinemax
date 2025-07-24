@@ -34,6 +34,13 @@ public class ScheduleFunction {
         return scheduleService.getScheduleByMovieIdAndTheaterIdAndDateAndRoomType(movieService.findMovieByMovieName(movieName).getMovieID(), theaterService.getTheaterByName(theaterName).getTheaterID(), date, roomType).getContent();
     }
 
+    @Tool(description = "Get the number of seat available in a schedule (you need to ask user to get the scheduleId)")
+    public ScheduleDTO getAvailableSeatCount(int scheduleId) {
+        ScheduleDTO scheduleDTO = scheduleService.getScheduleById(scheduleId);
+        scheduleService.calculateNumOfSeatLeft(scheduleDTO);
+        return scheduleDTO;
+    }
+
     public LocalDateTime calculateDate(int dayOffSet) {
         if ( dayOffSet == 0 ) {
             return LocalDateTime.now();

@@ -1,15 +1,19 @@
 package com.bluebear.cinemax.function;
 
+import com.bluebear.cinemax.dto.CustomerDTO;
 import com.bluebear.cinemax.dto.GenreDTO;
 import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.dto.TheaterDTO;
 import com.bluebear.cinemax.enumtype.TypeOfRoom;
+import com.bluebear.cinemax.service.customer.CustomerService;
 import com.bluebear.cinemax.service.genre.GenreService;
 import com.bluebear.cinemax.service.movie.MovieService;
 import com.bluebear.cinemax.service.theater.TheaterService;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDate;
@@ -25,6 +29,8 @@ public class MovieFunction {
     private TheaterService theaterService;
     @Autowired
     private GenreService genreService;
+    @Autowired
+    private CustomerService customerService;
 
     @Tool(description = "Get best movies")
     public MovieDTO getBestMovie() {
@@ -55,6 +61,17 @@ public class MovieFunction {
         LocalDateTime date = calculateDate( dayOffSet);
         GenreDTO genreDTO = genreService.findGenreByName(genreName);
         return movieService.findMoviesByScheduleAndTheaterAndRoomTypeAndGenre(date, theaterDTO.getTheaterID(), roomType.name(), genreName).getContent();
+    }
+
+    @Tool(description = "Get user's booking history (if user is not authenticated recommed the hottest movies)")
+    public List<MovieDTO> getBookingHistory() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("User is not authenticated ");
+        }
+        String email = authentication.getName();
+        CustomerDTO customerDTO = customerService.getCustomerByEmail(email);
+        return movieService.findMoviesBooked(customerDTO.getId());
     }
 
     public LocalDateTime calculateDate(int dayOffSet) {

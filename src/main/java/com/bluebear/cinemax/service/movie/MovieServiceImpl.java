@@ -411,4 +411,9 @@ public class MovieServiceImpl implements MovieService {
     public MovieDTO findMovieByMovieName(String movieName) {
         return toDTO(movieRepository.findMovieByName(movieName));
     }
+
+    @Override
+    public List<MovieDTO> findMoviesBooked(Integer customerId) {
+        return movieRepository.findMoviesByCustomerId(customerId).stream().map(this::toDTO).collect(Collectors.toList());
+    }
 }
