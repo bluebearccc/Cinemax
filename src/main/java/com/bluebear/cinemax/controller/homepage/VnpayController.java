@@ -60,11 +60,14 @@ public class VnpayController {
             model.addAttribute("message", "Thanh toán thành công!");
 
             try {
-                int invoiceId = Integer.parseInt(txnRef);
-                String email = "nguyentavan188@gmail.com"; // ← thay bằng email thật
+                int invoiceId = Integer.parseInt(txnRef.split("_")[0].replace("INV", ""));
+
+                InvoiceDTO invoiceDTO = vnpayService.getInvoiceDTOById(invoiceId);
+                String email = invoiceDTO.getCustomer().getAccount().getEmail();
+
                 String subject = "🎟️ Vé xem phim thành công - Hóa đơn #" + txnRef;
                 vnpayService.confirmInvoiceAfterPayment(invoiceId);
-                InvoiceDTO invoiceDTO = vnpayService.getInvoiceDTOById(Integer.parseInt(txnRef));
+
 
                 // Lấy lịch chiếu từ ghế đầu tiên
                 DetailSeatDTO firstSeat = invoiceDTO.getDetailSeats().getFirst();

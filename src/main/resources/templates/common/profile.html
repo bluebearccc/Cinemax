@@ -107,7 +107,10 @@
                                 </div>
 
                                 <div th:if="${!watchedMovies.isEmpty()}" class="movie-history-grid">
+
+
                                     <div class="movie-item" th:each="items, iterStat : ${watchedMovies}">
+                                        <p>Found <span th:text="${#lists.size(watchedMovies)}">0</span> movies in this page</p>
                                         <button class="btn btn-outline-info mb-3"
                                                 th:attr="data-invoice-id=${items.invoiceId}"
                                                 onclick="showInvoiceDetail(this)">
@@ -141,7 +144,7 @@
                                                     Theater District 1
                                                 </div>
 
-                                                <div class="movie-datetime">
+                                                <div class="movie-datetime" th:text="${items.bookingDate}">
                                                     25/08/2025 | 19:30 - 22:15
                                                 </div>
 

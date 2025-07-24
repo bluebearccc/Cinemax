@@ -40,7 +40,7 @@ public class VnpayService {
         String vnp_Command = "pay";
         String orderType = "other";
         long vnp_Amount = Math.round(invoice.getTotalPrice() * 100);
-        String vnp_TxnRef = String.valueOf(invoice.getInvoiceID());
+        String vnp_TxnRef = "INV" + invoice.getInvoiceID() + "_" + System.currentTimeMillis();
         String vnp_IpAddr = getIpAddress(request);
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -82,6 +82,12 @@ public class VnpayService {
                 hashData.append('&');
                 query.append('&');
             }
+        }
+        Invoice entity = invoiceRepo.findById(invoice.getInvoiceID())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+
+        if (entity.getStatus() == InvoiceStatus.Booked) {
+            throw new IllegalStateException("Hóa đơn đã được thanh toán. Không thể tạo lại giao dịch.");
         }
 
         String vnp_SecureHash = hmacSHA512(vnpayConfig.getHashSecret(), hashData.toString());
@@ -137,6 +143,21 @@ public class VnpayService {
         dto.setBookingDate(invoice.getBookingDate());
         dto.setDiscount(invoice.getDiscount());
         dto.setTotalPrice(invoice.getTotalPrice() != null ? invoice.getTotalPrice().doubleValue() : null);
+
+        Customer customer = invoice.getCustomer();
+        if (customer != null) {
+            CustomerDTO customerDTO = new CustomerDTO();
+            customerDTO.setId(customer.getId());
+
+            Account account = customer.getAccount();
+            if (account != null) {
+                AccountDTO accountDTO = new AccountDTO();
+                accountDTO.setEmail(account.getEmail());
+                customerDTO.setAccount(accountDTO);
+            }
+
+            dto.setCustomer(customerDTO);
+        }
 
         // Map danh sách ghế
         List<DetailSeatDTO> seatDTOs = invoice.getDetailSeats().stream().map(ds -> {

@@ -19,6 +19,7 @@ public class CustomerDTO {
     private String phone;
     private Integer point;
     private String email;
+    private AccountDTO account;
     private List<MovieFeedbackDTO> movieFeedback;
     private List<InvoiceDTO> invoice;
 }

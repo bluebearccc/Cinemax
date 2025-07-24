@@ -175,12 +175,14 @@ public class UserProfileService {
         Movie movie = schedule.getMovie();
         Theater theater = schedule.getRoom().getTheater();
         Integer invoiceId = detailSeat.getInvoice().getInvoiceID();
+        LocalDateTime bookingDate =detailSeat.getInvoice().getBookingDate();
 
         return WatchedMovieDTO.builder()
                 .movie(movie)
                 .theater(theater)
                 .schedule(schedule)
-                .invoiceId(invoiceId) // BẮT BUỘC phải có dòng này
+                .invoiceId(invoiceId)
+                .bookingDate(bookingDate)// BẮT BUỘC phải có dòng này
                 .build();
     }
     public ServiceFeedbackDTO prepareFeedbackFromInvoice(Integer invoiceId) {
