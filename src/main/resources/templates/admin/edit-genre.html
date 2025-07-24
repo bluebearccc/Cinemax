@@ -8,12 +8,11 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --primary-gradient-hover: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            --primary-color: #667eea;
+            --primary-color: #007bff;
             --success-color: #28a745;
             --warning-color: #ffc107;
             --danger-color: #dc3545;
+            --dark-bg: #343a40;
             --light-bg: #f8f9fa;
             --border-color: #dee2e6;
         }
@@ -24,9 +23,8 @@
         }
 
         .navbar {
-            background: var(--primary-gradient) !important;
+            background-color: var(--dark-bg) !important;
             margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
         .navbar-brand {
@@ -34,31 +32,15 @@
             font-weight: bold;
         }
 
-        .nav-link {
-            color: rgba(255, 255, 255, 0.8) !important;
-            transition: color 0.2s ease;
-        }
-
-        .nav-link:hover {
-            color: white !important;
-        }
-
-        .nav-link.active {
-            color: white !important;
-            font-weight: 600;
-        }
-
         .card {
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-            border: none;
-            border-radius: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
 
         .card-header {
-            background: var(--primary-gradient);
+            background-color: var(--primary-color);
             color: white;
             font-weight: bold;
-            border-radius: 15px 15px 0 0 !important;
         }
 
         .form-label {
@@ -73,19 +55,13 @@
 
         .form-control:focus, .form-select:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
         .btn-primary {
-            background: var(--primary-gradient);
-            border: none;
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
             border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-
-        .btn-primary:hover {
-            background: var(--primary-gradient-hover);
-            transform: translateY(-1px);
         }
 
         .btn-secondary {
@@ -124,7 +100,6 @@
         .movie-checkbox input[type="checkbox"] {
             margin-right: 10px;
             transform: scale(1.2);
-            accent-color: var(--primary-color);
         }
 
         .movie-checkbox label {
@@ -151,15 +126,15 @@
         }
 
         .selected-movies-summary {
-            background: rgba(102, 126, 234, 0.1);
-            border: 1px solid rgba(102, 126, 234, 0.3);
+            background: rgba(0, 123, 255, 0.1);
+            border: 1px solid rgba(0, 123, 255, 0.3);
             border-radius: 8px;
             padding: 12px;
             margin-top: 12px;
         }
 
         .genre-preview-card {
-            background: var(--primary-gradient);
+            background: linear-gradient(135deg, #007bff, #6610f2);
             color: white;
             border-radius: 12px;
             padding: 20px;
@@ -205,19 +180,6 @@
             letter-spacing: 2px;
         }
 
-        .alert {
-            border-radius: 10px;
-        }
-
-        .breadcrumb-item a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .breadcrumb-item a:hover {
-            color: var(--primary-gradient-hover);
-        }
-
         @media (max-width: 768px) {
             .btn-group-mobile {
                 flex-direction: column;
@@ -251,11 +213,12 @@
             <i class="fas fa-film"></i> BlueBear Cinema
         </a>
         <div class="navbar-nav ms-auto">
-            <a class="nav-link" href="/admin/">Dashboard</a>
+            <a class="nav-link" href="/admin">Dashboard</a>
             <a class="nav-link" href="/admin/movies">Movies</a>
             <a class="nav-link" href="/admin/actors">Actors</a>
             <a class="nav-link active" href="/admin/genres">Genres</a>
             <a class="nav-link" href="/admin/vouchers">Vouchers</a>
+            <a class="nav-link" href="/admin/accounts">Accounts</a>
         </div>
     </div>
 </nav>
@@ -283,7 +246,7 @@
             </h2>
             <nav aria-label="breadcrumb">
                 <ol class="breadcrumb">
-                    <li class="breadcrumb-item"><a href="/admin/">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
                     <li class="breadcrumb-item"><a href="/admin/genres">Genres</a></li>
                     <li class="breadcrumb-item active" th:text="${isEdit ? 'Edit' : 'Add New'}">Edit</li>
                 </ol>
@@ -593,6 +556,8 @@
                 const movieId = movie.movieId || movie.id;
                 const movieName = movie.movieName || movie.title || 'Untitled Movie';
 
+
+
                 // Check if this movie is currently selected
                 const isChecked = window.movieData.currentMovieIds &&
                     window.movieData.currentMovieIds.includes(movieId);
@@ -606,6 +571,7 @@
                                    onchange="updateSelectedMovies()">
                             <div class="movie-info">
                                 <div class="movie-name">${movieName}</div>
+
                             </div>
                         </label>
                     </div>

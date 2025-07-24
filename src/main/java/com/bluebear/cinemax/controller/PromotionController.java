@@ -115,15 +115,16 @@ public class PromotionController {
         }
 
         Promotion voucher = voucherOpt.get();
-        PromotionDTO voucherDTO = new PromotionDTO(
-                voucher.getPromotionID(),
-                voucher.getPromotionCode(),
-                voucher.getDiscount(),
-                voucher.getStartTime(),
-                voucher.getEndTime(),
-                voucher.getQuantity(),
-                voucher.getStatus()
-        );
+        
+        PromotionDTO voucherDTO = PromotionDTO.builder()
+                .promotionID(voucher.getPromotionID())
+                .promotionCode(voucher.getPromotionCode())
+                .discount(voucher.getDiscount())
+                .startTime(voucher.getStartTime())
+                .endTime(voucher.getEndTime())
+                .quantity(voucher.getQuantity())
+                .status(voucher.getStatus())
+                .build();
 
         model.addAttribute("voucher", voucherDTO);
         model.addAttribute("pageTitle", "Edit Voucher");

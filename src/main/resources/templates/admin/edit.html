@@ -1,814 +1,629 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chỉnh sửa phim - Admin Panel</title>
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <!-- Custom CSS -->
+    <title th:text="${pageTitle}">Edit Movie</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
+        :root {
+            --primary-blue: #4285f4;
+            --primary-light: #5a9bf8;
+            --primary-dark: #3367d6;
+            --accent-blue: #1976d2;
+            --success-green: #34a853;
+            --warning-orange: #fbbc04;
+            --danger-red: #ea4335;
+            --dark-bg: #1a1a1a;
+            --darker-bg: #0f0f0f;
+            --card-bg: #2d2d2d;
+            --card-hover: #3a3a3a;
+            --border-color: #404040;
+            --text-primary: #ffffff;
+            --text-secondary: #b0b0b0;
+            --text-muted: #808080;
+            --sidebar-bg: #1e1e1e;
+            --sidebar-hover: #333333;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: var(--dark-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-primary);
+            min-height: 100vh;
+        }
+
         .sidebar {
+            background: var(--sidebar-bg);
             min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            width: 260px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            border-right: 1px solid var(--border-color);
+            z-index: 1000;
         }
-        .content-wrapper {
-            background-color: #f8f9fa;
+
+        .sidebar-header {
+            padding: 24px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .sidebar-header h5 {
+            color: var(--text-primary);
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin: 0;
+        }
+
+        .sidebar-header .fa-film {
+            color: var(--primary-blue);
+            margin-right: 10px;
+        }
+
+        .sidebar-nav {
+            padding: 20px 0;
+        }
+
+        .nav-link {
+            color: var(--text-secondary);
+            padding: 12px 20px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            transition: all 0.2s ease;
+        }
+
+        .nav-link:hover {
+            color: var(--text-primary);
+            background: var(--sidebar-hover);
+        }
+
+        .nav-link.active {
+            color: var(--primary-blue);
+            background: rgba(66, 133, 244, 0.1);
+            border-right: 3px solid var(--primary-blue);
+        }
+
+        .nav-link i {
+            width: 20px;
+            margin-right: 12px;
+        }
+
+        .main-content {
+            margin-left: 260px;
+            padding: 24px;
             min-height: 100vh;
         }
-        .card {
-            border: none;
-            border-radius: 15px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+
+        .page-header {
+            margin-bottom: 32px;
         }
+
+        .page-title {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        .breadcrumb a {
+            color: var(--primary-blue);
+            text-decoration: none;
+        }
+
+        .breadcrumb a:hover {
+            text-decoration: underline;
+        }
+
+        .edit-form-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 800px;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+        }
+
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .section-title i {
+            color: var(--primary-blue);
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            color: var(--text-primary);
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .required {
+            color: var(--danger-red);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px 16px;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 1rem;
+            transition: all 0.2s ease;
+        }
+
         .form-control:focus {
-            border-color: #667eea;
-            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            outline: none;
+            border-color: var(--primary-blue);
+            box-shadow: 0 0 0 3px rgba(66, 133, 244, 0.1);
         }
-        .btn-primary {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            border: none;
+
+        .form-control::placeholder {
+            color: var(--text-muted);
         }
-        .btn-primary:hover {
-            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
-            transform: translateY(-1px);
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
         }
-        .image-preview {
-            max-width: 200px;
-            max-height: 200px;
-            object-fit: cover;
-            border-radius: 10px;
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
         }
+
+        .genre-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+            margin-top: 8px;
+        }
+
         .genre-checkbox {
-            margin-right: 15px;
-            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 12px;
+            background: var(--darker-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
         }
+
+        .genre-checkbox:hover {
+            background: var(--card-hover);
+        }
+
+        .genre-checkbox input[type="checkbox"] {
+            margin: 0;
+        }
+
+        .genre-checkbox.selected {
+            background: rgba(66, 133, 244, 0.1);
+            border-color: var(--primary-blue);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .btn-primary {
+            background: var(--primary-blue);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background: var(--card-hover);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .btn-danger {
+            background: var(--danger-red);
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #d32f2f;
+        }
+
         .alert {
-            border-radius: 10px;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
         }
-        .readonly-field {
-            background-color: #f8f9fa;
-            cursor: not-allowed;
+
+        .alert-success {
+            background: rgba(52, 168, 83, 0.1);
+            border: 1px solid rgba(52, 168, 83, 0.3);
+            color: var(--success-green);
         }
-        .status-disabled {
-            background-color: #f8f9fa !important;
-            cursor: not-allowed !important;
-            opacity: 0.6;
+
+        .alert-danger {
+            background: rgba(234, 67, 53, 0.1);
+            border: 1px solid rgba(234, 67, 53, 0.3);
+            color: var(--danger-red);
+        }
+
+        .help-text {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .form-actions {
+                flex-direction: column;
+            }
+
+            .genre-grid {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
-<div class="container-fluid">
-    <div class="row">
-        <!-- Sidebar -->
-        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
-            <div class="position-sticky pt-3">
-                <div class="text-center mb-4">
-                    <h4 class="text-white">
-                        <i class="fas fa-film me-2"></i>
-                        BlueBear Cinema
-                    </h4>
+<!-- Sidebar -->
+<div class="sidebar">
+    <div class="sidebar-header">
+        <h5>
+            <i class="fas fa-film"></i>
+            BlueBear Cinema
+        </h5>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a class="nav-link" th:href="@{/admin/}">
+            <i class="fas fa-home"></i>Dashboard
+        </a>
+        <a class="nav-link active" th:href="@{/admin/movies}">
+            <i class="fas fa-film"></i>Movies
+        </a>
+        <a class="nav-link" href="/admin/actors">
+            <i class="fas fa-users"></i>Actors
+        </a>
+        <a class="nav-link" href="/admin/genres">
+            <i class="fas fa-tags"></i>Genres
+        </a>
+    </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <h1 class="page-title" th:text="${pageTitle}">Edit Movie</h1>
+        <div class="breadcrumb">
+            <a th:href="@{/admin/movies}">Movies</a>
+            <i class="fas fa-chevron-right"></i>
+            <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" th:text="${movie.movieName}">Movie Detail</a>
+            <i class="fas fa-chevron-right"></i>
+            <span>Edit</span>
+        </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div th:if="${success}" class="alert alert-success">
+        <i class="fas fa-check-circle"></i>
+        <span th:text="${success}">Success message</span>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger">
+        <i class="fas fa-exclamation-circle"></i>
+        <span th:text="${error}">Error message</span>
+    </div>
+
+    <!-- Edit Form -->
+    <div class="edit-form-container">
+        <!-- Updated form with proper action and method -->
+        <form th:action="@{/admin/movies/{id}/edit(id=${movie.movieId})}" method="POST">
+
+            <!-- Basic Information -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-info-circle"></i>
+                    Basic Information
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">
+                        Movie Name <span class="required">*</span>
+                    </label>
+                    <input type="text"
+                           name="movieName"
+                           class="form-control"
+                           th:value="${movie.movieName}"
+                           placeholder="Enter movie name"
+                           required
+                           maxlength="100">
+                    <div class="help-text">Maximum 100 characters</div>
                 </div>
 
-                <ul class="nav flex-column">
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/admin/">
-                            <i class="fas fa-tachometer-alt me-2"></i>
-                            Dashboard
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white active" href="/admin/movies">
-                            <i class="fas fa-video me-2"></i>
-                            Quản lý phim
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/admin/genres">
-                            <i class="fas fa-tags me-2"></i>
-                            Thể loại
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/admin/actors">
-                            <i class="fas fa-users me-2"></i>
-                            Diễn viên
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link text-white" href="/admin/vouchers">
-                            <i class="fas fa-ticket-alt me-2"></i>
-                            Vouchers
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </nav>
-
-        <!-- Main content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-wrapper">
-            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
-                <h1 class="h2">
-                    <i class="fas fa-edit me-2"></i>
-                    Chỉnh sửa phim
-                </h1>
-                <div class="btn-toolbar mb-2 mb-md-0">
-                    <a href="/admin/movies" class="btn btn-outline-secondary">
-                        <i class="fas fa-arrow-left me-2"></i>
-                        Quay lại
-                    </a>
-                </div>
-            </div>
-
-            <!-- Alert Messages -->
-            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
-                <i class="fas fa-check-circle me-2"></i>
-                <span th:text="${success}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-circle me-2"></i>
-                <span th:text="${error}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <span th:text="${warning}"></span>
-                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-            </div>
-
-            <!-- Edit Form -->
-            <div class="card">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0">
-                        <i class="fas fa-film me-2"></i>
-                        Thông tin phim: <span th:text="${movie.movieName}"></span>
-                    </h5>
+                <div class="form-group">
+                    <label class="form-label">Description</label>
+                    <textarea name="description"
+                              class="form-control"
+                              th:text="${movie.description}"
+                              placeholder="Enter movie description"
+                              maxlength="1000"></textarea>
+                    <div class="help-text">Maximum 1000 characters</div>
                 </div>
 
-                <div class="card-body">
-                    <form th:action="@{/admin/movies/{id}/edit(id=${movie.movieId})}"
-                          method="post"
-                          enctype="multipart/form-data"
-                          id="movieEditForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Duration (minutes) <span class="required">*</span></label>
+                        <input type="number"
+                               name="duration"
+                               class="form-control"
+                               th:value="${movie.duration}"
+                               placeholder="180"
+                               required
+                               min="1"
+                               max="500">
+                        <div class="help-text">Between 1-500 minutes</div>
+                    </div>
 
-                        <div class="row">
-                            <!-- Left Column -->
-                            <div class="col-md-8">
-                                <!-- Movie Name -->
-                                <div class="mb-3">
-                                    <label for="movieName" class="form-label">
-                                        <i class="fas fa-film me-2"></i>
-                                        Tên phim <span class="text-danger">*</span>
-                                    </label>
-                                    <input type="text"
-                                           class="form-control"
-                                           id="movieName"
-                                           name="movieName"
-                                           th:value="${movie.movieName}"
-                                           required
-                                           maxlength="255"
-                                           placeholder="Nhập tên phim...">
-                                </div>
+                    <div class="form-group">
+                        <label class="form-label">Rating</label>
+                        <input type="number"
+                               name="movieRate"
+                               class="form-control"
+                               th:value="${movie.movieRate}"
+                               placeholder="4.5"
+                               step="0.1"
+                               min="0"
+                               max="5">
+                        <div class="help-text">0.0 to 5.0</div>
+                    </div>
+                </div>
 
-                                <!-- Description -->
-                                <div class="mb-3">
-                                    <label for="description" class="form-label">
-                                        <i class="fas fa-align-left me-2"></i>
-                                        Mô tả <span class="text-danger">*</span>
-                                    </label>
-                                    <textarea class="form-control"
-                                              id="description"
-                                              name="description"
-                                              rows="4"
-                                              required
-                                              maxlength="2000"
-                                              placeholder="Nhập mô tả phim..."
-                                              th:text="${movie.description}"></textarea>
-                                </div>
-
-                                <!-- Studio and Duration -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="studio" class="form-label">
-                                                <i class="fas fa-building me-2"></i>
-                                                Hãng sản xuất <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="text"
-                                                   class="form-control"
-                                                   id="studio"
-                                                   name="studio"
-                                                   th:value="${movie.studio}"
-                                                   required
-                                                   maxlength="100"
-                                                   placeholder="Nhập hãng sản xuất...">
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="duration" class="form-label">
-                                                <i class="fas fa-clock me-2"></i>
-                                                Thời lượng (phút) <span class="text-danger">*</span>
-                                            </label>
-                                            <input type="number"
-                                                   class="form-control"
-                                                   id="duration"
-                                                   name="duration"
-                                                   th:value="${movie.duration}"
-                                                   required
-                                                   min="1"
-                                                   max="500"
-                                                   placeholder="120">
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Trailer URL -->
-                                <div class="mb-3">
-                                    <label for="trailer" class="form-label">
-                                        <i class="fas fa-play me-2"></i>
-                                        URL Trailer (tùy chọn)
-                                    </label>
-                                    <input type="url"
-                                           class="form-control"
-                                           id="trailer"
-                                           name="trailer"
-                                           th:value="${movie.trailer}"
-                                           placeholder="https://youtube.com/watch?v=...">
-                                </div>
-
-                                <!-- Movie Rate -->
-                                <div class="mb-3">
-                                    <label for="movieRate" class="form-label">
-                                        <i class="fas fa-star me-2"></i>
-                                        Đánh giá hiện tại
-                                        <span class="badge bg-info ms-2">Chỉ đọc</span>
-                                    </label>
-                                    <input type="number"
-                                           class="form-control readonly-field"
-                                           id="movieRate"
-                                           th:value="${movie.movieRate}"
-                                           readonly
-                                           disabled
-                                           min="0"
-                                           max="5"
-                                           step="0.1"
-                                           title="Đánh giá không thể thay đổi">
-                                    <!-- Hidden field để gửi giá trị movieRate -->
-                                    <input type="hidden"
-                                           name="movieRate"
-                                           th:value="${movie.movieRate}">
-                                    <small class="form-text text-muted">
-                                        Đánh giá không thể thay đổi
-                                    </small>
-                                </div>
-
-                                <!-- Start and End Date -->
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="startDate" class="form-label">
-                                                <i class="fas fa-calendar-alt me-2"></i>
-                                                Ngày bắt đầu
-                                                <span class="badge bg-info ms-2">Chỉ đọc</span>
-                                            </label>
-                                            <input type="datetime-local"
-                                                   class="form-control readonly-field"
-                                                   id="startDate"
-                                                   th:value="${movie.startDate != null ? #temporals.format(movie.startDate, 'yyyy-MM-dd''T''HH:mm') : ''}"
-                                                   readonly
-                                                   disabled
-                                                   title="Ngày bắt đầu không thể thay đổi">
-                                            <!-- Hidden field để gửi giá trị startDate -->
-                                            <input type="hidden"
-                                                   name="startDate"
-                                                   th:value="${movie.startDate != null ? #temporals.format(movie.startDate, 'yyyy-MM-dd''T''HH:mm:ss') : ''}">
-                                            <small class="form-text text-muted">
-                                                Ngày bắt đầu không thể thay đổi
-                                            </small>
-                                        </div>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="endDate" class="form-label">
-                                                <i class="fas fa-calendar-times me-2"></i>
-                                                Ngày kết thúc
-                                                <span class="text-muted">(Tùy chọn)</span>
-                                            </label>
-                                            <input type="datetime-local"
-                                                   class="form-control"
-                                                   id="endDate"
-                                                   name="endDate"
-                                                   th:value="${movie.endDate != null ? #temporals.format(movie.endDate, 'yyyy-MM-dd''T''HH:mm') : ''}"
-                                                   title="Để trống nếu không muốn thay đổi">
-                                            <small class="form-text text-muted">
-                                                Để trống nếu không muốn thay đổi ngày kết thúc
-                                            </small>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Status with enhanced validation -->
-                                <div class="mb-3">
-                                    <label for="status" class="form-label">
-                                        <i class="fas fa-toggle-on me-2"></i>
-                                        Trạng thái <span class="text-danger">*</span>
-                                    </label>
-                                    <select class="form-select" id="status" name="status" required>
-                                        <option value="">-- Chọn trạng thái --</option>
-                                        <option value="Active" th:selected="${movie.status == 'Active'}">Đang hoạt động</option>
-                                        <option value="Removed" th:selected="${movie.status == 'Removed'}" id="removedOption">Đã xóa</option>
-                                    </select>
-                                    <small class="form-text text-muted">
-                                        Chọn trạng thái hiển thị của phim
-                                    </small>
-
-                                    <!-- Dynamic status warnings/info -->
-                                    <div class="alert alert-danger mt-2" id="bookedSeatsWarning" style="display: none;">
-                                        <i class="fas fa-ban me-2"></i>
-                                        <strong>Không thể xóa:</strong> Khách hàng đã đặt lịch chiếu phim này. Không thể chuyển sang trạng thái "Đã xóa".
-                                    </div>
-
-                                    <div class="alert alert-warning mt-2" id="removedStatusWarning" style="display: none;">
-                                        <i class="fas fa-exclamation-triangle me-2"></i>
-                                        <strong>Cảnh báo:</strong> Chuyển sang trạng thái "Đã xóa" sẽ ẩn phim khỏi hệ thống.
-                                    </div>
-
-                                    <div class="alert alert-info mt-2" id="activeStatusInfo" style="display: none;">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        <strong>Thông tin:</strong> Phim ở trạng thái "Đang hoạt động" sẽ hiển thị cho khách hàng và có thể đặt vé.
-                                    </div>
-                                </div>
-
-                                <!-- Genres -->
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        <i class="fas fa-tags me-2"></i>
-                                        Thể loại phim <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                                        <div th:each="genre : ${genres}" class="form-check genre-checkbox">
-                                            <input class="form-check-input"
-                                                   type="checkbox"
-                                                   th:id="'genre_' + ${genre.genreID}"
-                                                   name="genreIds"
-                                                   th:value="${genre.genreID}"
-                                                   th:checked="${movieGenreIds != null and movieGenreIds.contains(genre.genreID)}">
-                                            <label class="form-check-label" th:for="'genre_' + ${genre.genreID}">
-                                                <span th:text="${genre.genreName}"></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <small class="form-text text-muted">
-                                        Chọn các thể loại phù hợp với phim (tối đa 5 thể loại)
-                                    </small>
-                                </div>
-
-                                <!-- Actors -->
-                                <div class="mb-3">
-                                    <label class="form-label">
-                                        <i class="fas fa-users me-2"></i>
-                                        Diễn viên <span class="text-danger">*</span>
-                                    </label>
-                                    <div class="border rounded p-3" style="max-height: 200px; overflow-y: auto;">
-                                        <div th:each="actor : ${actors}" class="form-check genre-checkbox">
-                                            <input class="form-check-input"
-                                                   type="checkbox"
-                                                   th:id="'actor_' + ${actor.actorId}"
-                                                   name="actorIds"
-                                                   th:value="${actor.actorId}"
-                                                   th:checked="${movieActorIds != null and movieActorIds.contains(actor.actorId)}">
-                                            <label class="form-check-label" th:for="'actor_' + ${actor.actorId}">
-                                                <span th:text="${actor.actorName}"></span>
-                                            </label>
-                                        </div>
-                                    </div>
-                                    <small class="form-text text-muted">
-                                        Chọn các diễn viên tham gia phim (tối đa 10 diễn viên)
-                                    </small>
-                                </div>
-                            </div>
-
-                            <!-- Right Column - Images -->
-                            <div class="col-md-4">
-                                <!-- Current Poster -->
-                                <div class="mb-4">
-                                    <label class="form-label">
-                                        <i class="fas fa-image me-2"></i>
-                                        Poster hiện tại
-                                    </label>
-                                    <div class="text-center">
-                                        <div th:if="${movie.image != null and !#strings.isEmpty(movie.image)}">
-                                            <img th:src="@{${movie.image}}"
-                                                 alt="Current Poster"
-                                                 class="img-fluid image-preview mb-2"
-                                                 onerror="this.src='/uploads/default-movie.jpg'">
-                                            <p class="text-muted small">Poster hiện tại</p>
-                                        </div>
-                                        <div th:if="${movie.image == null or #strings.isEmpty(movie.image)}">
-                                            <div class="border rounded p-4 text-muted">
-                                                <i class="fas fa-image fa-3x mb-2"></i>
-                                                <p>Chưa có poster</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Upload New Poster -->
-                                <div class="mb-4">
-                                    <label for="posterFile" class="form-label">
-                                        <i class="fas fa-upload me-2"></i>
-                                        Tải lên poster mới
-                                    </label>
-                                    <input type="file"
-                                           class="form-control"
-                                           id="posterFile"
-                                           name="posterFile"
-                                           accept="image/*">
-                                    <small class="form-text text-muted">
-                                        JPG, PNG, GIF, WEBP - Tối đa 5MB
-                                    </small>
-                                    <div id="poster-preview-container" class="mt-2"></div>
-                                </div>
-
-                                <!-- Current Banner -->
-                                <div class="mb-4">
-                                    <label class="form-label">
-                                        <i class="fas fa-panorama me-2"></i>
-                                        Banner hiện tại
-                                    </label>
-                                    <div class="text-center">
-                                        <div th:if="${movie.banner != null and !#strings.isEmpty(movie.banner)}">
-                                            <img th:src="@{${movie.banner}}"
-                                                 alt="Current Banner"
-                                                 class="img-fluid image-preview mb-2"
-                                                 onerror="this.src='/uploads/default-banner.jpg'">
-                                            <p class="text-muted small">Banner hiện tại</p>
-                                        </div>
-                                        <div th:if="${movie.banner == null or #strings.isEmpty(movie.banner)}">
-                                            <div class="border rounded p-4 text-muted">
-                                                <i class="fas fa-panorama fa-3x mb-2"></i>
-                                                <p>Chưa có banner</p>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <!-- Upload New Banner -->
-                                <div class="mb-4">
-                                    <label for="bannerFile" class="form-label">
-                                        <i class="fas fa-upload me-2"></i>
-                                        Tải lên banner mới
-                                    </label>
-                                    <input type="file"
-                                           class="form-control"
-                                           id="bannerFile"
-                                           name="bannerFile"
-                                           accept="image/*">
-                                    <small class="form-text text-muted">
-                                        JPG, PNG, GIF, WEBP - Tối đa 5MB
-                                    </small>
-                                    <div id="banner-preview-container" class="mt-2"></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div class="row mt-4">
-                            <div class="col-12">
-                                <hr>
-                                <div class="d-flex justify-content-between">
-                                    <div>
-                                        <a href="/admin/movies" class="btn btn-secondary">
-                                            <i class="fas fa-times me-2"></i>
-                                            Hủy bỏ
-                                        </a>
-                                    </div>
-                                    <div>
-                                        <button type="reset" class="btn btn-outline-secondary me-2">
-                                            <i class="fas fa-undo me-2"></i>
-                                            Đặt lại
-                                        </button>
-                                        <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
-                                            <i class="fas fa-save me-2"></i>
-                                            Cập nhật phim
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </form>
+                <div class="form-group">
+                    <label class="form-label">Studio</label>
+                    <input type="text"
+                           name="studio"
+                           class="form-control"
+                           th:value="${movie.studio}"
+                           placeholder="Marvel Studios"
+                           maxlength="50">
+                    <div class="help-text">Maximum 50 characters</div>
                 </div>
             </div>
 
-            <!-- Movie Info Card -->
-            <div class="card mt-4">
-                <div class="card-header">
-                    <h6 class="mb-0">
-                        <i class="fas fa-info-circle me-2"></i>
-                        Thông tin bổ sung
-                    </h6>
+            <!-- Media Information -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-photo-video"></i>
+                    Media Information
+                </h3>
+
+                <div class="form-group">
+                    <label class="form-label">Image URL</label>
+                    <input type="text"
+                           name="image"
+                           class="form-control"
+                           th:value="${movie.image}"
+                           placeholder="https://example.com/movie-poster.jpg">
                 </div>
-                <div class="card-body">
-                    <div class="row">
-                        <div class="col-md-6">
-                            <p><strong>ID phim:</strong> <span th:text="${movie.movieId}"></span></p>
-                            <p><strong>Thể loại hiện tại:</strong>
-                                <span th:if="${movie.genres != null and !movie.genres.isEmpty()}">
-                                    <span th:each="genre, iterStat : ${movie.genres}"
-                                          th:text="${genre} + ${!iterStat.last ? ', ' : ''}"></span>
-                                </span>
-                                <span th:if="${movie.genres == null or movie.genres.isEmpty()}"
-                                      class="text-muted">Chưa có thể loại</span>
-                            </p>
-                            <p><strong>Diễn viên hiện tại:</strong>
-                                <span th:if="${movie.actors != null and !movie.actors.isEmpty()}">
-                                    <span th:each="actor, iterStat : ${movie.actors}"
-                                          th:text="${actor} + ${!iterStat.last ? ', ' : ''}"></span>
-                                </span>
-                                <span th:if="${movie.actors == null or movie.actors.isEmpty()}"
-                                      class="text-muted">Chưa có diễn viên</span>
-                            </p>
-                        </div>
-                        <div class="col-md-6">
-                            <p><strong>Trạng thái:</strong>
-                                <span class="badge"
-                                      th:classappend="${movie.status == 'Active'} ? 'bg-success' : 'bg-danger'"
-                                      th:text="${movie.status == 'Active'} ? 'Đang hoạt động' : 'Đã xóa'">
-                                </span>
-                            </p>
-                            <p><strong>Đánh giá:</strong>
-                                <span th:if="${movie.movieRate != null and movie.movieRate > 0}">
-                                    <span th:text="${#numbers.formatDecimal(movie.movieRate, 1, 1)}"></span>
-                                    <i class="fas fa-star text-warning"></i>
-                                </span>
-                                <span th:if="${movie.movieRate == null or movie.movieRate == 0}" class="text-muted">Chưa có đánh giá</span>
-                            </p>
-                            <p><strong>Ngày bắt đầu:</strong>
-                                <span th:if="${movie.startDate != null}"
-                                      th:text="${#temporals.format(movie.startDate, 'dd/MM/yyyy HH:mm')}"></span>
-                                <span th:if="${movie.startDate == null}" class="text-muted">Chưa có</span>
-                            </p>
-                            <p><strong>Ngày kết thúc:</strong>
-                                <span th:if="${movie.endDate != null}"
-                                      th:text="${#temporals.format(movie.endDate, 'dd/MM/yyyy HH:mm')}"></span>
-                                <span th:if="${movie.endDate == null}" class="text-muted">Chưa có</span>
-                            </p>
-                        </div>
+
+                <div class="form-group">
+                    <label class="form-label">Banner URL</label>
+                    <input type="text"
+                           name="banner"
+                           class="form-control"
+                           th:value="${movie.banner}"
+                           placeholder="https://example.com/movie-banner.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Trailer URL</label>
+                    <input type="text"
+                           name="trailer"
+                           class="form-control"
+                           th:value="${movie.trailer}"
+                           placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+            </div>
+
+            <!-- Schedule Information -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-calendar-alt"></i>
+                    Schedule Information
+                </h3>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="form-label">Start Date <span class="required">*</span></label>
+                        <input type="date"
+                               name="startDate"
+                               class="form-control"
+                               th:value="${movie.startDate}"
+                               required>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">End Date <span class="required">*</span></label>
+                        <input type="date"
+                               name="endDate"
+                               class="form-control"
+                               th:value="${movie.endDate}"
+                               required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Status <span class="required">*</span></label>
+                    <select name="status" class="form-control" required>
+                        <option value="Active" th:selected="${movie.status == 'Active'}">Active</option>
+                        <option value="Removed" th:selected="${movie.status == 'Removed'}">Removed</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Genres -->
+            <div class="form-section">
+                <h3 class="section-title">
+                    <i class="fas fa-tags"></i>
+                    Genres
+                </h3>
+
+                <div class="genre-grid">
+                    <div th:each="genre : ${allGenres}" class="genre-checkbox">
+                        <input type="checkbox"
+                               name="genreIds"
+                               th:value="${genre.genreId}"
+                               th:checked="${#lists.contains(movieGenreIds, genre.genreId)}"
+                               th:id="'genre_' + ${genre.genreId}">
+                        <label th:for="'genre_' + ${genre.genreId}" th:text="${genre.genreName}">Action</label>
                     </div>
                 </div>
             </div>
-        </main>
+
+            <!-- Form Actions -->
+            <div class="form-actions">
+                <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" class="btn btn-secondary">
+                    <i class="fas fa-times"></i>
+                    Cancel
+                </a>
+                <button type="submit" class="btn btn-primary" id="saveButton">
+                    <i class="fas fa-save"></i>
+                    Save Changes
+                </button>
+            </div>
+        </form>
     </div>
 </div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Genre checkbox styling
+        document.querySelectorAll('.genre-checkbox input[type="checkbox"]').forEach(checkbox => {
+            const container = checkbox.closest('.genre-checkbox');
 
-<!-- Custom JavaScript -->
-<script th:inline="javascript">
-    // Get movie data from Thymeleaf
-    const movieId = /*[[${movie.movieId}]]*/ null;
-    const currentStatus = /*[[${movie.status}]]*/ '';
-
-    // Global variables for status validation
-    let hasBookedSeats = false;
-    let isCheckingStatus = false;
-
-    // Check if movie has booked seats when page loads
-    async function checkMovieBookedSeats() {
-        try {
-            const response = await fetch(`/admin/movies/${movieId}/check-booked-seats`);
-            if (response.ok) {
-                const data = await response.json();
-                hasBookedSeats = data.hasBookedSeats || false;
-                updateStatusOptions();
-            }
-        } catch (error) {
-            console.error('Error checking booked seats:', error);
-        }
-    }
-
-    // Update status options based on booked seats check
-    function updateStatusOptions() {
-        const statusSelect = document.getElementById('status');
-        const removedOption = document.getElementById('removedOption');
-
-        if (hasBookedSeats && currentStatus === 'Active') {
-            // Disable removed option if has booked seats and currently active
-            removedOption.disabled = true;
-            removedOption.className = 'status-disabled';
-            removedOption.title = 'Không thể chọn do có khách hàng đã đặt lịch chiếu';
-        } else {
-            removedOption.disabled = false;
-            removedOption.className = '';
-            removedOption.title = '';
-        }
-    }
-
-    // Enhanced status change handler
-    document.getElementById('status').addEventListener('change', function() {
-        const selectedStatus = this.value;
-        const removedWarning = document.getElementById('removedStatusWarning');
-        const activeInfo = document.getElementById('activeStatusInfo');
-        const bookedSeatsWarning = document.getElementById('bookedSeatsWarning');
-
-        // Hide all alerts first
-        removedWarning.style.display = 'none';
-        activeInfo.style.display = 'none';
-        bookedSeatsWarning.style.display = 'none';
-
-        // Show appropriate alert based on selection and conditions
-        if (selectedStatus === 'Removed') {
-            if (hasBookedSeats && currentStatus === 'Active') {
-                // Show error and reset to previous status
-                bookedSeatsWarning.style.display = 'block';
-                this.value = currentStatus; // Reset to current status
-                return;
-            } else {
-                removedStatusWarning.style.display = 'block';
-            }
-        } else if (selectedStatus === 'Active') {
-            activeInfo.style.display = 'block';
-        }
-    });
-
-    // Preview uploaded images
-    document.getElementById('posterFile').addEventListener('change', function(e) {
-        previewImage(e, 'poster-preview-container');
-    });
-
-    document.getElementById('bannerFile').addEventListener('change', function(e) {
-        previewImage(e, 'banner-preview-container');
-    });
-
-    function previewImage(event, containerId) {
-        const file = event.target.files[0];
-        const container = document.getElementById(containerId);
-
-        // Clear previous preview
-        container.innerHTML = '';
-
-        if (file) {
-            // Check file size (5MB limit)
-            if (file.size > 5 * 1024 * 1024) {
-                alert('File không được vượt quá 5MB!');
-                event.target.value = '';
-                return;
+            function updateStyle() {
+                if (checkbox.checked) {
+                    container.classList.add('selected');
+                } else {
+                    container.classList.remove('selected');
+                }
             }
 
-            // Check file type
-            if (!file.type.startsWith('image/')) {
-                alert('Vui lòng chọn file hình ảnh!');
-                event.target.value = '';
-                return;
-            }
+            checkbox.addEventListener('change', updateStyle);
+            updateStyle(); // Initial state
+        });
 
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                const preview = document.createElement('img');
-                preview.className = 'img-fluid image-preview';
-                preview.src = e.target.result;
-                preview.alt = 'Preview';
+        // Form validation - NON-BLOCKING
+        const form = document.getElementById('editMovieForm');
+        const saveButton = document.getElementById('saveButton');
 
-                const label = document.createElement('p');
-                label.className = 'text-muted small text-center mt-1';
-                label.textContent = 'Ảnh mới sẽ tải lên';
+        form.addEventListener('submit', function(e) {
+            console.log('=== FORM SUBMISSION DEBUG ===');
+            console.log('Form action:', this.action);
+            console.log('Form method:', this.method);
 
-                container.appendChild(preview);
-                container.appendChild(label);
-            }
-            reader.readAsDataURL(file);
-        }
-    }
-
-    // Enhanced form validation with status check
-    document.getElementById('movieEditForm').addEventListener('submit', function(e) {
-        // Check if trying to change to Removed with booked seats
-        const selectedStatus = document.getElementById('status').value;
-        if (selectedStatus === 'Removed' && hasBookedSeats && currentStatus === 'Active') {
-            e.preventDefault();
-            alert('Không thể chuyển sang trạng thái "Đã xóa" vì khách hàng đã đặt lịch chiếu phim này!');
-            return false;
-        }
-
-        // Validate required fields
-        const movieName = document.getElementById('movieName').value.trim();
-        if (!movieName) {
-            e.preventDefault();
-            alert('Tên phim không được để trống!');
-            return false;
-        }
-
-        const description = document.getElementById('description').value.trim();
-        if (!description) {
-            e.preventDefault();
-            alert('Mô tả phim không được để trống!');
-            return false;
-        }
-
-        const studio = document.getElementById('studio').value.trim();
-        if (!studio) {
-            e.preventDefault();
-            alert('Hãng sản xuất không được để trống!');
-            return false;
-        }
-
-        // Validate end date if provided
-        const endDateInput = document.getElementById('endDate');
-        const startDateValue = document.querySelector('input[name="startDate"]').value;
-
-        if (endDateInput.value && startDateValue) {
-            const startDate = new Date(startDateValue);
-            const endDate = new Date(endDateInput.value);
-
-            if (startDate >= endDate) {
+            // Basic validation only - don't prevent submission for minor issues
+            const movieName = document.querySelector('input[name="movieName"]').value;
+            if (!movieName || movieName.trim() === '') {
                 e.preventDefault();
-                alert('Ngày kết thúc phải sau ngày bắt đầu!');
+                alert('Tên phim không được để trống');
                 return false;
             }
-        }
 
-        // Validate duration
-        const duration = parseInt(document.getElementById('duration').value);
-        if (duration <= 0 || duration > 500) {
-            e.preventDefault();
-            alert('Thời lượng phim phải từ 1 đến 500 phút!');
-            return false;
-        }
-
-        // Validate genres (at least 1, max 5)
-        const checkedGenres = document.querySelectorAll('input[name="genreIds"]:checked');
-        if (checkedGenres.length === 0) {
-            e.preventDefault();
-            alert('Phải chọn ít nhất một thể loại!');
-            return false;
-        }
-        if (checkedGenres.length > 5) {
-            e.preventDefault();
-            alert('Chỉ được chọn tối đa 5 thể loại!');
-            return false;
-        }
-
-        // Validate actors (at least 1, max 10)
-        const checkedActors = document.querySelectorAll('input[name="actorIds"]:checked');
-        if (checkedActors.length === 0) {
-            e.preventDefault();
-            alert('Phải chọn ít nhất một diễn viên!');
-            return false;
-        }
-        if (checkedActors.length > 10) {
-            e.preventDefault();
-            alert('Chỉ được chọn tối đa 10 diễn viên!');
-            return false;
-        }
-
-        // Validate status
-        const status = document.getElementById('status').value;
-        if (!status) {
-            e.preventDefault();
-            alert('Phải chọn trạng thái phim!');
-            return false;
-        }
-    });
-
-    // Auto-dismiss alerts after 5 seconds
-    setTimeout(function() {
-        const alerts = document.querySelectorAll('.alert');
-        alerts.forEach(function(alert) {
-            const bsAlert = new bootstrap.Alert(alert);
-            bsAlert.close();
-        });
-    }, 5000);
-
-    // Genre checkbox counter
-    const genreCheckboxes = document.querySelectorAll('input[name="genreIds"]');
-    genreCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const checkedCount = document.querySelectorAll('input[name="genreIds"]:checked').length;
-            if (checkedCount > 5) {
-                this.checked = false;
-                alert('Chỉ được chọn tối đa 5 thể loại!');
+            const duration = document.querySelector('input[name="duration"]').value;
+            if (!duration || parseInt(duration) <= 0) {
+                e.preventDefault();
+                alert('Thời lượng phim phải lớn hơn 0');
+                return false;
             }
-        });
-    });
 
-    // Actor checkbox counter
-    const actorCheckboxes = document.querySelectorAll('input[name="actorIds"]');
-    actorCheckboxes.forEach(checkbox => {
-        checkbox.addEventListener('change', function() {
-            const checkedCount = document.querySelectorAll('input[name="actorIds"]:checked').length;
-            if (checkedCount > 10) {
-                this.checked = false;
-                alert('Chỉ được chọn tối đa 10 diễn viên!');
-            }
+            // Show loading state
+            saveButton.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang lưu...';
+            saveButton.disabled = true;
+
+            console.log('Form submitted successfully');
+            return true;
         });
+
+        // Debug form submission
+        console.log('Form action:', form.action);
+        console.log('Form method:', form.method);
     });
 </script>
 </body>

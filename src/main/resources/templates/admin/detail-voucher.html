@@ -3,497 +3,93 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Voucher Details - BlueBear Cinema</title>
+    <title th:text="${pageTitle}">Voucher Details</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
-            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
-
-            --glass-bg: rgba(255, 255, 255, 0.25);
-            --glass-border: rgba(255, 255, 255, 0.18);
-            --dark-glass: rgba(0, 0, 0, 0.1);
-
-            --text-primary: #1a1a1a;
-            --text-secondary: #64748b;
-            --text-light: #94a3b8;
-
-            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
-            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
-            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
-            --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.15);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
+            --primary-color: #007bff;
+            --success-color: #28a745;
+            --warning-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-bg: #343a40;
+            --light-bg: #f8f9fa;
+            --border-color: #dee2e6;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
-            color: var(--text-primary);
-            min-height: 100vh;
-            overflow-x: hidden;
-            font-weight: 400;
-            line-height: 1.6;
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background:
-                    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                    radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
+        .navbar {
+            background-color: var(--dark-bg) !important;
+            margin-bottom: 20px;
         }
 
-        /* Premium Sidebar */
-        .sidebar {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            min-height: 100vh;
-            width: 280px;
-            position: fixed;
-            left: 0;
-            top: 0;
-            z-index: 1000;
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: var(--shadow-premium);
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
         }
 
-        .sidebar::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(180deg,
-            rgba(255, 255, 255, 0.1) 0%,
-            rgba(255, 255, 255, 0.05) 100%);
-            border-radius: inherit;
-            pointer-events: none;
-        }
-
-        .sidebar-header {
-            padding: 32px 24px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-            position: relative;
-        }
-
-        .logo-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--primary-gradient);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            box-shadow: var(--shadow-lg);
-            transition: transform 0.3s ease;
-        }
-
-        .logo-icon:hover {
-            transform: rotate(5deg) scale(1.05);
-        }
-
-        .logo-icon i {
-            font-size: 1.5rem;
-            color: white;
-        }
-
-        .logo-text {
-            color: white;
-            font-weight: 700;
-            font-size: 1.3rem;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .logo-subtitle {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 0.75rem;
-            font-weight: 500;
-            margin-top: -2px;
-            letter-spacing: 0.5px;
-        }
-
-        .sidebar-nav {
-            padding: 24px 16px;
-        }
-
-        .nav-section {
-            margin-bottom: 24px;
-        }
-
-        .nav-section-title {
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 0.75rem;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-bottom: 12px;
-            padding: 0 12px;
-        }
-
-        .nav-link {
-            color: rgba(255, 255, 255, 0.8);
-            padding: 16px 12px;
-            display: flex;
-            align-items: center;
-            text-decoration: none;
-            border-radius: 12px;
-            margin: 4px 0;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            position: relative;
-            overflow: hidden;
-            font-weight: 500;
-        }
-
-        .nav-link::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateX(-100%);
-            transition: transform 0.3s ease;
-        }
-
-        .nav-link:hover::before {
-            transform: translateX(0);
-        }
-
-        .nav-link:hover {
-            color: white;
-            transform: translateX(4px);
-        }
-
-        .nav-link.active {
-            color: white;
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow-md);
-        }
-
-        .nav-link.active::after {
-            content: '';
-            position: absolute;
-            right: 0;
-            top: 20%;
-            bottom: 20%;
-            width: 3px;
-            background: white;
-            border-radius: 2px;
-        }
-
-        .nav-icon {
-            width: 20px;
-            margin-right: 16px;
-            font-size: 1.1rem;
-            position: relative;
-            z-index: 1;
-        }
-
-        .nav-text {
-            position: relative;
-            z-index: 1;
-        }
-
-        .main-content {
-            margin-left: 280px;
-            padding: 32px;
-            min-height: 100vh;
-            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-
-        /* Premium Back Navigation */
-        .back-nav {
-            margin-bottom: 32px;
-        }
-
-        .back-btn {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 12px;
-            padding: 14px 20px;
-            color: rgba(255, 255, 255, 0.9);
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 10px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            box-shadow: var(--shadow-md);
-        }
-
-        .back-btn:hover {
-            background: rgba(255, 255, 255, 0.25);
-            color: white;
-            text-decoration: none;
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-        }
-
-        /* Premium Voucher Hero Section */
-        .voucher-hero {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 20px;
-            overflow: hidden;
-            margin-bottom: 32px;
-            position: relative;
-            box-shadow: var(--shadow-xl);
-            padding: 40px;
-        }
-
-        .voucher-hero::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.1) 0%,
-            rgba(255, 255, 255, 0.05) 100%);
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        .voucher-main-info {
-            display: flex;
-            gap: 32px;
-            align-items: center;
-            position: relative;
-            z-index: 2;
-            justify-content: center;
-            text-align: center;
-            flex-direction: column;
-        }
-
-        .voucher-code {
-            background: rgba(255, 255, 255, 0.2);
-            backdrop-filter: blur(10px);
-            border: 2px dashed rgba(255, 255, 255, 0.5);
-            padding: 20px 40px;
-            text-align: center;
-            font-family: 'Courier New', monospace;
-            font-size: 2.5rem;
-            font-weight: 900;
-            color: white;
-            letter-spacing: 4px;
-            border-radius: 15px;
-            box-shadow: var(--shadow-lg);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .voucher-code::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -50%;
-            width: 200%;
-            height: 200%;
-            background: repeating-linear-gradient(
-                    45deg,
-                    transparent,
-                    transparent 10px,
-                    rgba(255, 255, 255, 0.1) 10px,
-                    rgba(255, 255, 255, 0.1) 20px
-            );
-            animation: shimmer 3s linear infinite;
-        }
-
-        @keyframes shimmer {
-            0% { transform: translateX(-100%) translateY(-100%); }
-            100% { transform: translateX(100%) translateY(100%); }
-        }
-
-        .voucher-code:hover {
-            transform: scale(1.05);
-            border-color: white;
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .discount-badge {
-            background: var(--success-gradient);
-            color: white;
-            padding: 15px 30px;
-            border-radius: 50px;
-            font-size: 2rem;
-            font-weight: 900;
-            display: inline-block;
-            box-shadow: var(--shadow-lg);
-            margin: 20px 0;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
-        }
-
-        .action-buttons {
-            display: flex;
-            gap: 12px;
-            margin-top: 24px;
-            flex-wrap: wrap;
-            justify-content: center;
-        }
-
-        .btn-action {
-            padding: 12px 24px;
-            border-radius: 12px;
-            font-weight: 600;
-            border: none;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            backdrop-filter: blur(10px);
-        }
-
-        .btn-primary {
-            background: var(--success-gradient);
-            color: white;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-premium);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-warning {
-            background: var(--warning-gradient);
-            color: white;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .btn-warning:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-premium);
-            color: white;
-            text-decoration: none;
-        }
-
-        .btn-danger {
-            background: var(--danger-gradient);
-            color: white;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .btn-danger:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-premium);
-            color: white;
-        }
-
-        .btn-outline {
-            background: rgba(255, 255, 255, 0.15);
-            color: rgba(255, 255, 255, 0.9);
-            border: 1px solid rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-outline:hover {
-            background: rgba(255, 255, 255, 0.25);
-            color: white;
-            text-decoration: none;
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        /* Premium Information Cards */
-        .info-card {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-xl);
-            position: relative;
-        }
-
-        .info-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.1) 0%,
-            rgba(255, 255, 255, 0.05) 100%);
-            border-radius: inherit;
-            pointer-events: none;
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: 1px solid var(--border-color);
         }
 
         .card-header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            padding: 20px 24px;
-            position: relative;
-            z-index: 1;
-            border-radius: 15px 15px 0 0;
-        }
-
-        .card-header h5 {
+            background-color: var(--primary-color);
             color: white;
-            font-weight: 600;
-            font-size: 1.1rem;
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            font-weight: bold;
         }
 
-        .card-header h5 i {
-            color: #4facfe;
+        .voucher-code {
+            background-color: #e9ecef;
+            border: 2px dashed var(--primary-color);
+            padding: 15px;
+            text-align: center;
+            font-family: monospace;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            letter-spacing: 2px;
         }
 
-        .card-body {
-            padding: 24px;
-            position: relative;
-            z-index: 1;
+        .discount-badge {
+            background-color: var(--success-color);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            display: inline-block;
+        }
+
+        .status-badge {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .status-active {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-expired {
+            background-color: var(--danger-color);
+            color: white;
+        }
+
+        .status-pending {
+            background-color: var(--warning-color);
+            color: #212529;
         }
 
         .info-row {
+            border-bottom: 1px solid #eee;
             padding: 12px 0;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
         }
 
         .info-row:last-child {
@@ -501,390 +97,171 @@
         }
 
         .info-label {
-            color: rgba(255, 255, 255, 0.8);
-            font-weight: 500;
+            font-weight: bold;
+            color: #666;
         }
 
         .info-value {
-            color: white;
-            font-weight: 600;
+            color: #333;
         }
 
-        .status-badge {
-            padding: 8px 16px;
-            border-radius: 20px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            backdrop-filter: blur(10px);
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .status-active {
-            background: rgba(40, 167, 69, 0.2);
-            color: #28a745;
-            border: 1px solid rgba(40, 167, 69, 0.3);
-        }
-
-        .status-expired {
-            background: rgba(220, 53, 69, 0.2);
-            color: #dc3545;
-            border: 1px solid rgba(220, 53, 69, 0.3);
-        }
-
-        .status-pending {
-            background: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
-            border: 1px solid rgba(255, 193, 7, 0.3);
+        .btn-group-custom {
+            gap: 10px;
         }
 
         .quantity-display {
             font-size: 2rem;
-            font-weight: 900;
-            color: white;
+            font-weight: bold;
+            color: var(--warning-color);
             text-align: center;
-            background: rgba(79, 172, 254, 0.2);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 15px;
-            border: 2px solid #4facfe;
-            box-shadow: var(--shadow-md);
         }
 
         .date-display {
-            background: var(--primary-gradient);
-            color: white;
-            padding: 12px 16px;
-            border-radius: 12px;
-            border-left: 4px solid white;
-            box-shadow: var(--shadow-md);
-            font-weight: 600;
-        }
-
-        /* Premium Alerts */
-        .alert {
-            border-radius: 12px;
-            margin-bottom: 24px;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            font-weight: 500;
-        }
-
-        .alert-success {
-            background: rgba(40, 167, 69, 0.2);
-            color: white;
-        }
-
-        .alert-danger {
-            background: rgba(220, 53, 69, 0.2);
-            color: white;
-        }
-
-        .alert-warning {
-            background: rgba(255, 193, 7, 0.2);
-            color: white;
-        }
-
-        .alert-info {
-            background: rgba(79, 172, 254, 0.2);
-            color: white;
-        }
-
-        /* Premium Modal */
-        .modal-content {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px;
-        }
-
-        .modal-header {
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
-            border-radius: 15px 15px 0 0;
-        }
-
-        .modal-title {
-            color: white;
-            font-weight: 600;
-        }
-
-        .modal-body {
-            color: white;
-        }
-
-        .modal-footer {
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-close {
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 50%;
-            opacity: 1;
-        }
-
-        .btn-close:hover {
-            background: rgba(255, 255, 255, 0.3);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.15);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.25);
-            color: white;
-            border-color: rgba(255, 255, 255, 0.4);
-        }
-
-        @media (max-width: 1024px) {
-            .main-content {
-                margin-left: 280px;
-                padding: 24px;
-            }
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            border-left: 4px solid var(--primary-color);
         }
 
         @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-                width: 280px;
-            }
-
-            .main-content {
-                margin-left: 0;
-                padding: 16px;
-            }
-
-            .voucher-hero {
-                padding: 24px;
+            .btn-group-custom {
+                flex-direction: column;
             }
 
             .voucher-code {
-                font-size: 1.8rem;
-                padding: 15px 25px;
-                letter-spacing: 2px;
+                font-size: 1.2rem;
             }
-
-            .discount-badge {
-                font-size: 1.5rem;
-                padding: 12px 24px;
-            }
-
-            .action-buttons {
-                flex-direction: column;
-            }
-        }
-
-        .fade-in {
-            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            opacity: 0;
-        }
-
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .back-nav { animation-delay: 0.1s; }
-        .voucher-hero { animation-delay: 0.2s; }
-        .info-card { animation-delay: 0.3s; }
-
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: rgba(255, 255, 255, 0.5);
         }
     </style>
 </head>
 <body>
-<!-- Premium Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-container">
-            <div class="logo-icon">
-                <i class="fas fa-film"></i>
-            </div>
-            <div>
-                <div class="logo-text">BlueBear</div>
-                <div class="logo-subtitle">CINEMA SUITE</div>
-            </div>
-        </div>
-    </div>
-
-    <nav class="sidebar-nav">
-        <div class="nav-section">
-            <div class="nav-section-title">Main</div>
-            <a class="nav-link" href="/admin/">
-                <i class="nav-icon fas fa-home"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Content</div>
-            <a class="nav-link" href="/admin/movies">
-                <i class="nav-icon fas fa-film"></i>
-                <span class="nav-text">Movies</span>
-            </a>
-            <a class="nav-link" href="/admin/actors">
-                <i class="nav-icon fas fa-users"></i>
-                <span class="nav-text">Actors</span>
-            </a>
-            <a class="nav-link" href="/admin/genres">
-                <i class="nav-icon fas fa-tags"></i>
-                <span class="nav-text">Genres</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Marketing</div>
-            <a class="nav-link active" href="/admin/vouchers">
-                <i class="nav-icon fas fa-ticket-alt"></i>
-                <span class="nav-text">Vouchers</span>
-            </a>
-        </div>
-    </nav>
-</div>
-
-<!-- Main Content -->
-<div class="main-content">
-    <!-- Premium Back Navigation -->
-    <div class="back-nav fade-in">
-        <a href="/admin/vouchers" class="back-btn">
-            <i class="fas fa-arrow-left"></i>
-            Back to Voucher Collection
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/admin">
+            <i class="fas fa-film"></i> BlueBear Cinema
         </a>
+        <div class="navbar-nav ms-auto">
+            <a class="nav-link" href="/admin">Dashboard</a>
+            <a class="nav-link" href="/admin/movies">Movies</a>
+            <a class="nav-link" href="/admin/actors">Actors</a>
+            <a class="nav-link active" href="/admin/vouchers">Vouchers</a>
+        </div>
     </div>
+</nav>
 
+<div class="container">
     <!-- Alert Messages -->
     <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
-        <i class="fas fa-check-circle me-2"></i>
+        <i class="fas fa-check-circle"></i>
         <span th:text="${success}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
     <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
-        <i class="fas fa-exclamation-circle me-2"></i>
+        <i class="fas fa-exclamation-circle"></i>
         <span th:text="${error}"></span>
         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
     </div>
 
-    <!-- Premium Voucher Hero Section -->
-    <div class="voucher-hero fade-in">
-        <div class="voucher-main-info">
-            <div class="voucher-code" th:text="${voucher.promotionCode}">SAVE20</div>
-
-            <div class="discount-badge" th:text="${voucher.discount + '% OFF'}">20% OFF</div>
-
-            <div th:switch="${voucher.status.name()}">
-                <span th:case="'Available'" class="status-badge status-active">
-                    <i class="fas fa-check-circle"></i> Campaign Active
-                </span>
-                <span th:case="'Expired'" class="status-badge status-expired">
-                    <i class="fas fa-times-circle"></i> Campaign Expired
-                </span>
-            </div>
-
-            <div class="action-buttons">
-                <a th:href="@{/admin/vouchers/edit/{id}(id=${voucher.promotionID})}" class="btn-action btn-warning">
-                    <i class="fas fa-edit"></i>
-                    Edit Voucher
-                </a>
-                <button th:if="${voucher.status.name() == 'Expired'}"
-                        type="button"
-                        class="btn-action btn-danger"
-                        data-bs-toggle="modal"
-                        data-bs-target="#deleteModal">
-                    <i class="fas fa-trash"></i>
-                    Delete Voucher
-                </button>
-                <a href="/admin/vouchers" class="btn-action btn-outline">
-                    <i class="fas fa-ticket-alt"></i>
-                    All Vouchers
-                </a>
-            </div>
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2>Chi Tiết Voucher</h2>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/vouchers">Vouchers</a></li>
+                    <li class="breadcrumb-item active" th:text="${voucher.promotionCode}">SAVE20</li>
+                </ol>
+            </nav>
+        </div>
+        <div class="btn-group-custom d-flex">
+            <a href="/admin/vouchers" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Quay Lại
+            </a>
+            <a th:href="@{/admin/vouchers/edit/{id}(id=${voucher.promotionID})}" class="btn btn-warning">
+                <i class="fas fa-edit"></i> Chỉnh Sửa
+            </a>
+            <!-- Only show delete button if voucher status is Expired -->
+            <button th:if="${voucher.status.name() == 'Expired'}"
+                    type="button"
+                    class="btn btn-danger"
+                    data-bs-toggle="modal"
+                    data-bs-target="#deleteModal">
+                <i class="fas fa-trash"></i> Xóa
+            </button>
         </div>
     </div>
 
     <div class="row">
         <!-- Main Information -->
         <div class="col-lg-8">
-            <div class="info-card fade-in">
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h5>
-                        <i class="fas fa-ticket-alt"></i>
-                        Voucher Campaign Details
-                    </h5>
+                    <i class="fas fa-ticket-alt"></i> Thông Tin Voucher
                 </div>
                 <div class="card-body">
                     <div class="row">
                         <div class="col-md-6">
                             <div class="info-row">
-                                <span class="info-label">Voucher Code</span>
-                                <span class="info-value" th:text="${voucher.promotionCode}">SAVE20</span>
+                                <div class="info-label">Mã Voucher</div>
+                                <div class="voucher-code mt-2" th:text="${voucher.promotionCode}">SAVE20</div>
                             </div>
 
                             <div class="info-row">
-                                <span class="info-label">Discount Value</span>
-                                <span class="info-value" th:text="${voucher.discount + '%'}">20%</span>
+                                <div class="info-label">Giá Trị Giảm Giá</div>
+                                <div class="mt-2">
+                                    <span class="discount-badge" th:text="${voucher.discount + '%'}">20%</span>
+                                </div>
                             </div>
 
                             <div class="info-row">
-                                <span class="info-label">Remaining Quantity</span>
+                                <div class="info-label">Số Lượng Còn Lại</div>
                                 <div class="quantity-display" th:text="${voucher.quantity}">100</div>
                             </div>
                         </div>
 
                         <div class="col-md-6">
                             <div class="info-row">
-                                <span class="info-label">Start Date</span>
+                                <div class="info-label">Ngày Bắt Đầu</div>
                                 <div class="date-display mt-2">
                                     <div th:text="${#temporals.format(voucher.startTime, 'dd/MM/yyyy HH:mm')}">15/01/2024 10:00</div>
                                 </div>
                             </div>
 
                             <div class="info-row">
-                                <span class="info-label">End Date</span>
+                                <div class="info-label">Ngày Kết Thúc</div>
                                 <div class="date-display mt-2">
                                     <div th:text="${#temporals.format(voucher.endTime, 'dd/MM/yyyy HH:mm')}">15/04/2024 23:59</div>
                                 </div>
                             </div>
 
                             <div class="info-row">
-                                <span class="info-label">Campaign Status</span>
+                                <div class="info-label">Trạng Thái</div>
                                 <div class="mt-2">
+                                    <!-- Cách 1: Sử dụng trực tiếp enum status từ voucher -->
                                     <div th:switch="${voucher.status.name()}">
                                         <span th:case="'Available'" class="status-badge status-active">
-                                            <i class="fas fa-check-circle"></i> Active
+                                            <i class="fas fa-check-circle"></i> Đang Hoạt Động
                                         </span>
                                         <span th:case="'Expired'" class="status-badge status-expired">
-                                            <i class="fas fa-times-circle"></i> Expired
+                                            <i class="fas fa-times-circle"></i> Đã Hết Hạn
                                         </span>
                                     </div>
+
+                                    <!-- Cách 2: Nếu muốn kiểm tra thêm thời gian thực tế -->
+                                    <!-- Uncomment phần này nếu muốn check theo thời gian thực
+                                    <div th:if="${#temporals.createNow().isAfter(voucher.endTime)}" class="status-badge status-expired">
+                                        <i class="fas fa-times-circle"></i> Đã Hết Hạn
+                                    </div>
+                                    <div th:if="${#temporals.createNow().isBefore(voucher.startTime)}" class="status-badge status-pending">
+                                        <i class="fas fa-clock"></i> Chưa Bắt Đầu
+                                    </div>
+                                    <div th:if="${#temporals.createNow().isAfter(voucher.startTime) and #temporals.createNow().isBefore(voucher.endTime)}" class="status-badge status-active">
+                                        <i class="fas fa-check-circle"></i> Đang Hoạt Động
+                                    </div>
+                                    -->
                                 </div>
                             </div>
                         </div>
@@ -895,70 +272,64 @@
 
         <!-- Side Information -->
         <div class="col-lg-4">
-            <div class="info-card fade-in">
+            <div class="card mb-4">
                 <div class="card-header">
-                    <h5>
-                        <i class="fas fa-info-circle"></i>
-                        Campaign Information
-                    </h5>
+                    <i class="fas fa-info-circle"></i> Thông Tin Thêm
                 </div>
                 <div class="card-body">
                     <div class="info-row">
-                        <span class="info-label">Voucher ID</span>
-                        <span class="info-value" th:text="${'#' + voucher.promotionID}">#001</span>
+                        <div class="info-label">ID Voucher</div>
+                        <div class="info-value" th:text="${'#' + voucher.promotionID}">#001</div>
                     </div>
 
                     <div class="info-row">
-                        <span class="info-label">Discount Type</span>
-                        <span class="info-value">Percentage</span>
+                        <div class="info-label">Loại Giảm Giá</div>
+                        <div class="info-value">Phần Trăm</div>
                     </div>
 
                     <div class="info-row">
-                        <span class="info-label">Applied To</span>
-                        <span class="info-value">All Showtimes</span>
+                        <div class="info-label">Áp Dụng Cho</div>
+                        <div class="info-value">Tất Cả Suất Chiếu</div>
                     </div>
 
                     <div class="info-row">
-                        <span class="info-label">Usage Limit</span>
-                        <span class="info-value">One Per Customer</span>
+                        <div class="info-label">Giới Hạn</div>
+                        <div class="info-value">Mỗi Khách Hàng 1 Lần</div>
                     </div>
 
                     <div class="info-row">
-                        <span class="info-label">System Status</span>
-                        <span class="info-value">
+                        <div class="info-label">Trạng Thái Hệ Thống</div>
+                        <div class="info-value">
                             <span th:switch="${voucher.status.name()}">
-                                <span th:case="'Available'">Available</span>
-                                <span th:case="'Expired'">Expired</span>
+                                <span th:case="'Available'">Khả Dụng</span>
+                                <span th:case="'Expired'">Hết Hạn</span>
                             </span>
-                        </span>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div class="info-card fade-in">
+            <div class="card">
                 <div class="card-header">
-                    <h5>
-                        <i class="fas fa-lightbulb"></i>
-                        Usage Guidelines
-                    </h5>
+                    <i class="fas fa-lightbulb"></i> Hướng Dẫn
                 </div>
                 <div class="card-body">
-                    <ul class="list-unstyled" style="color: rgba(255, 255, 255, 0.9);">
+                    <ul class="list-unstyled">
                         <li class="mb-2">
                             <i class="fas fa-check text-success"></i>
-                            Enter code at checkout for discount
+                            Nhập mã khi thanh toán để giảm giá
                         </li>
                         <li class="mb-2">
                             <i class="fas fa-check text-success"></i>
-                            Each code can only be used once
+                            Mỗi mã chỉ sử dụng được 1 lần
                         </li>
                         <li class="mb-2">
                             <i class="fas fa-check text-success"></i>
-                            Cannot be refunded after use
+                            Không thể hoàn lại sau khi sử dụng
                         </li>
                         <li>
                             <i class="fas fa-check text-success"></i>
-                            Check expiration date before applying
+                            Kiểm tra hạn sử dụng trước khi áp dụng
                         </li>
                     </ul>
                 </div>
@@ -967,37 +338,33 @@
     </div>
 </div>
 
-<!-- Premium Delete Modal -->
+<!-- Delete Modal - Only shown when voucher is expired -->
 <div th:if="${voucher.status.name() == 'Expired'}" class="modal fade" id="deleteModal" tabindex="-1">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">
                     <i class="fas fa-exclamation-triangle text-danger"></i>
-                    Confirm Deletion
+                    Xác Nhận Xóa
                 </h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <p>Are you sure you want to delete voucher <strong th:text="${voucher.promotionCode}">SAVE20</strong>?</p>
-
+                <p>Bạn có chắc chắn muốn xóa voucher <strong th:text="${voucher.promotionCode}">SAVE20</strong> không?</p>
                 <div class="alert alert-warning">
                     <i class="fas fa-exclamation-triangle"></i>
-                    <strong>Warning:</strong> This action cannot be undone!
+                    Hành động này không thể hoàn tác!
                 </div>
-
                 <div class="alert alert-info">
                     <i class="fas fa-info-circle"></i>
-                    <strong>Notice:</strong> Only expired vouchers can be deleted to ensure data integrity.
+                    Chỉ có thể xóa voucher đã hết hạn để đảm bảo tính toàn vẹn dữ liệu.
                 </div>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn-action btn-secondary" data-bs-dismiss="modal">
-                    <i class="fas fa-times"></i> Cancel
-                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
                 <form th:action="@{/admin/vouchers/delete/{id}(id=${voucher.promotionID})}" method="post" class="d-inline">
-                    <button type="submit" class="btn-action btn-danger">
-                        <i class="fas fa-trash"></i> Delete Voucher
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Xóa Voucher
                     </button>
                 </form>
             </div>
@@ -1007,20 +374,17 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
+    // Auto-hide alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+
+    // Copy voucher code to clipboard
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize fade-in animations
-        initializeFadeInAnimations();
-
-        // Auto-hide alerts after 5 seconds
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert');
-            alerts.forEach(function(alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
-
-        // Copy voucher code to clipboard
         const voucherCode = document.querySelector('.voucher-code');
         if (voucherCode) {
             voucherCode.addEventListener('click', function() {
@@ -1028,74 +392,22 @@
                     const originalText = voucherCode.textContent;
                     const originalBg = voucherCode.style.backgroundColor;
 
-                    voucherCode.textContent = 'Copied!';
-                    voucherCode.style.backgroundColor = 'rgba(40, 167, 69, 0.3)';
-                    voucherCode.style.borderColor = '#28a745';
+                    voucherCode.textContent = 'Đã sao chép!';
+                    voucherCode.style.backgroundColor = '#d4edda';
+                    voucherCode.style.color = '#155724';
 
                     setTimeout(function() {
                         voucherCode.textContent = originalText;
                         voucherCode.style.backgroundColor = originalBg;
-                        voucherCode.style.borderColor = 'rgba(255, 255, 255, 0.5)';
-                    }, 2000);
-                }).catch(function() {
-                    // Fallback for older browsers
-                    const textArea = document.createElement('textarea');
-                    textArea.value = voucherCode.textContent;
-                    document.body.appendChild(textArea);
-                    textArea.select();
-                    document.execCommand('copy');
-                    document.body.removeChild(textArea);
-
-                    const originalText = voucherCode.textContent;
-                    voucherCode.textContent = 'Copied!';
-                    voucherCode.style.backgroundColor = 'rgba(40, 167, 69, 0.3)';
-                    voucherCode.style.borderColor = '#28a745';
-
-                    setTimeout(function() {
-                        voucherCode.textContent = originalText;
-                        voucherCode.style.backgroundColor = '';
-                        voucherCode.style.borderColor = 'rgba(255, 255, 255, 0.5)';
+                        voucherCode.style.color = 'var(--primary-color)';
                     }, 2000);
                 });
             });
 
             voucherCode.style.cursor = 'pointer';
-            voucherCode.title = 'Click to copy voucher code';
-        }
-
-        // Delete confirmation
-        const deleteForm = document.querySelector('#deleteModal form');
-        if (deleteForm) {
-            deleteForm.addEventListener('submit', function(e) {
-                const voucherCode = document.querySelector('.voucher-code').textContent;
-                const confirmed = confirm(
-                    `⚠️ WARNING: You are about to permanently delete this voucher!\n\n` +
-                    `Voucher Code: ${voucherCode}\n\n` +
-                    `This action cannot be undone. Are you sure?`
-                );
-
-                if (!confirmed) {
-                    e.preventDefault();
-                }
-            });
+            voucherCode.title = 'Click để sao chép mã voucher';
         }
     });
-
-    // Initialize fade-in animations
-    function initializeFadeInAnimations() {
-        // Premium loading sequence
-        setTimeout(() => {
-            document.querySelectorAll('.fade-in').forEach((el, index) => {
-                setTimeout(() => {
-                    el.style.opacity = '1';
-                    el.style.transform = 'translateY(0)';
-                }, index * 100);
-            });
-        }, 100);
-    }
-
-    // Console log for debugging
-    console.log('Premium voucher detail page loaded');
 </script>
 </body>
 </html>
