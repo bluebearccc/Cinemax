@@ -304,7 +304,7 @@
                     <i class="fas fa-tags"></i> Genre Information
                 </div>
                 <div class="card-body">
-                    <form th:action="${isEdit ? '/admin/genres/' + genre.genreId + '/edit' : '/admin/genres/add'}"
+                    <form th:action="${isEdit ? '/admin/genres/' + genre.genreID + '/edit' : '/admin/genres/add'}"
                           method="post" th:object="${genre}">
 
                         <!-- Genre Name -->
@@ -590,18 +590,18 @@
             moviesHTML = '<div class="text-center text-muted p-3">No movies available</div>';
         } else {
             window.movieData.allMovies.forEach(movie => {
-                const movieId = movie.movieId || movie.id;
+                const movieID = movie.movieID || movie.id;
                 const movieName = movie.movieName || movie.title || 'Untitled Movie';
 
                 // Check if this movie is currently selected
                 const isChecked = window.movieData.currentMovieIds &&
-                    window.movieData.currentMovieIds.includes(movieId);
+                    window.movieData.currentMovieIds.includes(movieID);
 
                 moviesHTML += `
                     <div class="movie-checkbox">
                         <label>
                             <input type="checkbox"
-                                   value="${movieId}"
+                                   value="${movieID}"
                                    ${isChecked ? 'checked' : ''}
                                    onchange="updateSelectedMovies()">
                             <div class="movie-info">

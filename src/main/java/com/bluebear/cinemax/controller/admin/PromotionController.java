@@ -90,7 +90,7 @@ public class PromotionController {
         return "admin/form-voucher";
     }
 
-    // Process add voucher
+    // Process add voucher - FIX URL
     @PostMapping("/add")
     public String addVoucher(@ModelAttribute PromotionDTO voucherDTO,
                              RedirectAttributes redirectAttributes) {
@@ -101,11 +101,12 @@ public class PromotionController {
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             redirectAttributes.addFlashAttribute("voucher", voucherDTO);
+            // FIX: Redirect về đúng đường dẫn form
             return "redirect:/admin/vouchers/add";
         }
     }
 
-    // Show edit voucher form
+    // Show edit voucher form - FIX: Xử lý đúng kiểu dữ liệu
     @GetMapping("/edit/{id}")
     public String showEditForm(@PathVariable Integer id, Model model, RedirectAttributes redirectAttributes) {
         Optional<Promotion> voucherOpt = promotionService.getVoucherById(id);
@@ -122,17 +123,19 @@ public class PromotionController {
                 voucher.getStartTime(),
                 voucher.getEndTime(),
                 voucher.getQuantity(),
-                voucher.getStatus()
+                voucher.getStatus()// FIX: Convert enum to String
         );
 
-        model.addAttribute("voucher", voucherDTO);
+        // Kiểm tra nếu có voucher từ redirect (khi có lỗi)
+        if (!model.containsAttribute("voucher")) {
+            model.addAttribute("voucher", voucherDTO);
+        }
         model.addAttribute("pageTitle", "Edit Voucher");
         model.addAttribute("isEdit", true);
 
-        return "admin/edit-voucher";
+        return "admin/form-voucher";
     }
-
-    // Process edit voucher
+    // Process edit voucher - FIX URL
     @PostMapping("/edit/{id}")
     public String editVoucher(@PathVariable Integer id,
                               @ModelAttribute PromotionDTO voucherDTO,
@@ -144,6 +147,7 @@ public class PromotionController {
         } catch (IllegalArgumentException e) {
             redirectAttributes.addFlashAttribute("error", e.getMessage());
             redirectAttributes.addFlashAttribute("voucher", voucherDTO);
+            // FIX: Redirect về đúng đường dẫn edit
             return "redirect:/admin/vouchers/edit/" + id;
         }
     }

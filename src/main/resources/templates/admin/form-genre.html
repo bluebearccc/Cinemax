@@ -856,7 +856,7 @@
         </div>
 
         <div class="card-body">
-            <form th:action="${isEdit} ? @{/admin/genres/{id}/edit(id=${genre.genreId})} : @{/admin/genres/add}"
+            <form th:action="${isEdit} ? @{/admin/genres/{id}/edit(id=${genre.genreID})} : @{/admin/genres/add}"
                   method="post" th:object="${genre}" id="genreForm" novalidate>
 
                 <div class="row">
@@ -1010,7 +1010,7 @@
                     Once you delete this genre, it will be removed from all associated movies.
                     This action cannot be undone and will permanently affect your movie categorization.
                 </div>
-                <form th:action="@{/admin/genres/{id}/delete(id=${genre.genreId})}"
+                <form th:action="@{/admin/genres/{id}/delete(id=${genre.genreID})}"
                       method="post"
                       id="deleteForm"
                       style="display: inline;">
@@ -1051,9 +1051,9 @@
 
             if (!moviesContainer) return;
 
-            const genreId = window.location.pathname.match(/\/genres\/(\d+)\/edit/)?.[1];
+            const genreID = window.location.pathname.match(/\/genres\/(\d+)\/edit/)?.[1];
 
-            if (!genreId) {
+            if (!genreID) {
                 moviesContainer.innerHTML = '<div class="text-center" style="color: #4a3577;">Genre ID not found</div>';
                 return;
             }
@@ -1069,7 +1069,7 @@
             // Fetch all movies and current genre's movies
             Promise.all([
                 fetch('/admin/movies/api/all').then(r => r.json()).catch(() => []),
-                fetch(`/admin/genres/${genreId}/movies`).then(r => r.json()).catch(() => [])
+                fetch(`/admin/genres/${genreID}/movies`).then(r => r.json()).catch(() => [])
             ]).then(([allMovies, currentMovies]) => {
                 console.log('All movies:', allMovies.length);
                 console.log('Current movies:', currentMovies.length);

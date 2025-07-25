@@ -573,6 +573,7 @@
             backdrop-filter: blur(10px);
         }
 
+        /* OPTIMIZED IMAGE CONTAINER */
         .actor-image-container {
             width: 60px;
             height: 60px;
@@ -600,37 +601,62 @@
             object-fit: cover;
             display: block;
             transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .actor-image.loaded {
+            opacity: 1;
+        }
+
+        .actor-image.failed {
+            display: none;
         }
 
         .actor-image-placeholder {
             color: rgba(255, 255, 255, 0.7);
             font-size: 1.5rem;
             transition: color 0.3s ease;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
         }
 
         .actor-image-container:hover .actor-image-placeholder {
             color: white;
         }
 
-        .image-not-found {
-            position: relative;
+        .image-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
         }
 
-        .image-not-found::after {
-            content: '!';
+        .image-status {
             position: absolute;
             top: -2px;
             right: -2px;
-            background: #ff4757;
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
             width: 16px;
             height: 16px;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .image-status.success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .image-status.error {
+            background: #ef4444;
+            color: white;
         }
 
         .actor-name {
@@ -1038,36 +1064,38 @@
                 <tbody>
                 <tr th:each="actor : ${actors}">
                     <td>
-                        <div class="actor-id" th:text="${actor.actorId}">1</div>
+                        <div class="actor-id" th:text="${actor.actorID}">1</div>
                     </td>
                     <td>
                         <div class="actor-name" th:text="${actor.actorName}">John Doe</div>
                     </td>
                     <td>
-                        <div class="actor-image-container"
-                             th:classappend="${actor.image == null or #strings.isEmpty(actor.image)} ? 'image-not-found' : ''">
+                        <div class="actor-image-container" th:data-actor-id="${actor.actorID}">
+                            <!-- Loading indicator -->
+                            <div class="image-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
 
-                            <!-- Show image if image exists in database -->
+                            <!-- Image element (hidden initially) -->
                             <img th:if="${actor.image != null and !#strings.isEmpty(actor.image)}"
-                                 th:src="${actor.image}"
+                                 th:data-src="@{${actor.image}}"
                                  th:alt="${actor.actorName}"
-                                 class="actor-image"
-                                 th:onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                                 class="actor-image lazy-load"
+                                 loading="lazy">
 
-                            <!-- Fallback placeholder -->
-                            <i th:if="${actor.image == null or #strings.isEmpty(actor.image)}"
-                               class="fas fa-user actor-image-placeholder"></i>
+                            <!-- Placeholder (hidden initially) -->
+                            <div class="actor-image-placeholder" style="display: none;">
+                                <i class="fas fa-user"></i>
+                            </div>
 
-                            <!-- Hidden placeholder for error fallback -->
-                            <i th:if="${actor.image != null and !#strings.isEmpty(actor.image)}"
-                               class="fas fa-user actor-image-placeholder"
-                               style="display: none;"></i>
+                            <!-- Default placeholder for no image -->
+                            <div th:if="${actor.image == null or #strings.isEmpty(actor.image)}"
+                                 class="actor-image-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
 
                             <!-- Image info tooltip -->
-                            <div th:if="${actor.image != null and !#strings.isEmpty(actor.image)}"
-                                 class="image-info"
-                                 th:text="${actor.image}">
-                            </div>
+                            <div class="image-info">Loading...</div>
                         </div>
                     </td>
                     <td>
@@ -1083,7 +1111,7 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <a th:href="@{/admin/actors/{id}(id=${actor.actorId})}"
+                            <a th:href="@{/admin/actors/{id}(id=${actor.actorID})}"
                                class="btn-action btn-view" title="View Talent Profile">
                                 <i class="fas fa-eye"></i>
                             </a>
@@ -1107,7 +1135,216 @@
 <!-- JavaScript -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
 <script>
+    // OPTIMIZED IMAGE LOADING SYSTEM
+    class ImageCache {
+        constructor() {
+            this.cache = new Map();
+            this.loadingPromises = new Map();
+        }
+
+        async loadImage(src) {
+            // Return cached result if available
+            if (this.cache.has(src)) {
+                return this.cache.get(src);
+            }
+
+            // Return existing promise if already loading
+            if (this.loadingPromises.has(src)) {
+                return this.loadingPromises.get(src);
+            }
+
+            // Create new loading promise
+            const loadPromise = new Promise((resolve, reject) => {
+                const img = new Image();
+
+                img.onload = () => {
+                    const result = { success: true, img, src };
+                    this.cache.set(src, result);
+                    this.loadingPromises.delete(src);
+                    resolve(result);
+                };
+
+                img.onerror = () => {
+                    const result = { success: false, error: 'Failed to load', src };
+                    this.cache.set(src, result);
+                    this.loadingPromises.delete(src);
+                    resolve(result); // Don't reject, just return failed result
+                };
+
+                img.src = src;
+            });
+
+            this.loadingPromises.set(src, loadPromise);
+            return loadPromise;
+        }
+
+        getCacheSize() {
+            return this.cache.size;
+        }
+
+        clearCache() {
+            this.cache.clear();
+            this.loadingPromises.clear();
+        }
+    }
+
+    // Create global image cache instance
+    const imageCache = new ImageCache();
+
+    // OPTIMIZED LAZY LOADING WITH INTERSECTION OBSERVER
+    class LazyImageLoader {
+        constructor() {
+            this.observer = null;
+            this.loadedImages = new Set();
+            this.init();
+        }
+
+        init() {
+            // Create intersection observer
+            this.observer = new IntersectionObserver(
+                (entries) => this.handleIntersection(entries),
+                {
+                    root: null,
+                    rootMargin: '50px',
+                    threshold: 0.1
+                }
+            );
+
+            // Observe all lazy load images
+            this.observeImages();
+        }
+
+        observeImages() {
+            const lazyImages = document.querySelectorAll('.lazy-load');
+            lazyImages.forEach(img => {
+                if (!this.loadedImages.has(img)) {
+                    this.observer.observe(img);
+                }
+            });
+        }
+
+        async handleIntersection(entries) {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const container = img.closest('.actor-image-container');
+
+                    if (!this.loadedImages.has(img)) {
+                        await this.loadImage(img, container);
+                        this.loadedImages.add(img);
+                        this.observer.unobserve(img);
+                    }
+                }
+            }
+        }
+
+        async loadImage(imgElement, container) {
+            const src = imgElement.dataset.src;
+            const actorId = container.dataset.actorId;
+            const loadingIndicator = container.querySelector('.image-loading');
+            const placeholder = container.querySelector('.actor-image-placeholder');
+            const tooltip = container.querySelector('.image-info');
+
+            if (!src) {
+                this.showPlaceholder(imgElement, container, placeholder, tooltip, 'No image source');
+                return;
+            }
+
+            try {
+                // Show loading state
+                if (loadingIndicator) loadingIndicator.style.display = 'block';
+                if (tooltip) tooltip.textContent = 'Loading portrait...';
+
+                console.log(`Loading image for actor ${actorId}: ${src}`);
+
+                // Use cached loading
+                const result = await imageCache.loadImage(src);
+
+                if (result.success) {
+                    // Success: show image
+                    imgElement.src = src;
+                    imgElement.classList.add('loaded');
+                    imgElement.style.display = 'block';
+
+                    if (placeholder) placeholder.style.display = 'none';
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    if (tooltip) tooltip.textContent = 'Portrait loaded successfully';
+
+                    // Add success indicator
+                    this.addStatusIndicator(container, 'success', '✓');
+
+                    console.log(`✓ Image loaded successfully for actor ${actorId}`);
+                } else {
+                    // Failed: show placeholder
+                    this.showPlaceholder(imgElement, container, placeholder, tooltip, 'Failed to load portrait');
+                    console.log(`✗ Image failed to load for actor ${actorId}: ${result.error}`);
+                }
+            } catch (error) {
+                console.error(`Error loading image for actor ${actorId}:`, error);
+                this.showPlaceholder(imgElement, container, placeholder, tooltip, 'Loading error');
+            }
+        }
+
+        showPlaceholder(imgElement, container, placeholder, tooltip, message) {
+            const loadingIndicator = container.querySelector('.image-loading');
+
+            // Hide image and loading
+            imgElement.classList.add('failed');
+            imgElement.style.display = 'none';
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+
+            // Show placeholder
+            if (placeholder) {
+                placeholder.style.display = 'flex';
+            }
+
+            // Update tooltip
+            if (tooltip) tooltip.textContent = message;
+
+            // Add error indicator
+            this.addStatusIndicator(container, 'error', '!');
+        }
+
+        addStatusIndicator(container, type, symbol) {
+            // Remove existing status indicator
+            const existingStatus = container.querySelector('.image-status');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+
+            // Add new status indicator
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `image-status ${type}`;
+            statusDiv.textContent = symbol;
+            container.appendChild(statusDiv);
+        }
+
+        // Method to reload failed images
+        retryFailedImages() {
+            const failedImages = document.querySelectorAll('.actor-image.failed');
+            failedImages.forEach(img => {
+                const container = img.closest('.actor-image-container');
+                if (container) {
+                    // Reset state
+                    img.classList.remove('failed');
+                    this.loadedImages.delete(img);
+
+                    // Retry loading
+                    this.loadImage(img, container);
+                }
+            });
+        }
+    }
+
+    // Initialize lazy loader when DOM is ready
+    let lazyLoader;
+
     document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== OPTIMIZED IMAGE LOADING SYSTEM INITIALIZED ===');
+
+        // Initialize lazy image loader
+        lazyLoader = new LazyImageLoader();
+
         // Enhanced intersection observer for staggered animations
         const observerOptions = {
             threshold: 0.1,
@@ -1136,32 +1373,6 @@
                 }
             });
         }
-
-        // Enhanced image loading with premium effects
-        document.querySelectorAll('.actor-image').forEach(img => {
-            img.addEventListener('error', function() {
-                console.log('Portrait failed to load:', this.src);
-                this.style.display = 'none';
-                const placeholder = this.nextElementSibling;
-                if (placeholder && placeholder.classList.contains('actor-image-placeholder')) {
-                    placeholder.style.display = 'flex';
-                }
-
-                // Add premium not-found indicator
-                const container = this.closest('.actor-image-container');
-                if (container) {
-                    container.classList.add('image-not-found');
-                }
-            });
-
-            img.addEventListener('load', function() {
-                console.log('Portrait loaded successfully:', this.src);
-                const container = this.closest('.actor-image-container');
-                if (container) {
-                    container.classList.remove('image-not-found');
-                }
-            });
-        });
 
         // Premium hover effects for stat cards
         document.querySelectorAll('.stat-card').forEach(card => {
@@ -1240,15 +1451,38 @@
         // Create premium floating particles
         setInterval(createParticle, 3000);
 
-        // Log premium image paths for debugging
-        const imageContainers = document.querySelectorAll('.actor-image-container');
-        imageContainers.forEach(container => {
-            const img = container.querySelector('.actor-image');
-            if (img) {
-                console.log('Premium portrait path:', img.src);
+        // Add debugging tools
+        window.imageDebug = {
+            getCacheSize: () => imageCache.getCacheSize(),
+            clearCache: () => imageCache.clearCache(),
+            retryFailedImages: () => lazyLoader.retryFailedImages(),
+            getLoadedImagesCount: () => lazyLoader.loadedImages.size,
+            showCacheContents: () => {
+                console.log('Image Cache Contents:');
+                imageCache.cache.forEach((value, key) => {
+                    console.log(`${key}: ${value.success ? 'SUCCESS' : 'FAILED'}`);
+                });
             }
-        });
+        };
+
+        console.log('=== DEBUG TOOLS AVAILABLE ===');
+        console.log('Use window.imageDebug for debugging:');
+        console.log('- getCacheSize(): Get number of cached images');
+        console.log('- clearCache(): Clear image cache');
+        console.log('- retryFailedImages(): Retry loading failed images');
+        console.log('- getLoadedImagesCount(): Get number of loaded images');
+        console.log('- showCacheContents(): Show cache contents');
     });
+
+    // Add CSS animation for floating particles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+    `;
+    document.head.appendChild(style);
 </script>
 </body>
 </html>

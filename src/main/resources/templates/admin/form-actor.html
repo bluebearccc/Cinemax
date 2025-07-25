@@ -1224,13 +1224,29 @@
                 let currentMovieIds = window.currentMovieIds || [];
 
                 console.log('Movies data loaded:', allMoviesData);
+                console.log('Current movie IDs:', currentMovieIds);
 
                 if (!allMoviesData || allMoviesData.length === 0) {
                     renderEmptyState();
                     return;
                 }
 
-                renderMovies(allMoviesData, currentMovieIds);
+                // KIỂM TRA: Validate movie data trước khi render
+                const validMovies = allMoviesData.filter(movie => {
+                    const movieId = movie.movieID || movie.movieId || movie.id;
+                    const isValid = movieId && !isNaN(parseInt(movieId));
+                    if (!isValid) {
+                        console.warn('Skipping invalid movie:', movie);
+                    }
+                    return isValid;
+                });
+
+                if (validMovies.length === 0) {
+                    renderEmptyState();
+                    return;
+                }
+
+                renderMovies(validMovies, currentMovieIds);
             } catch (error) {
                 console.error('Error loading movies data:', error);
                 renderEmptyState();
@@ -1275,27 +1291,38 @@
             buttonContainer.appendChild(selectAllBtn);
             moviesSelection.appendChild(buttonContainer);
 
+
             // Add movie checkboxes
             movies.forEach(movie => {
                 const movieDiv = document.createElement('div');
                 movieDiv.className = 'movie-checkbox';
 
-                const isSelected = selectedIds.includes(movie.movieId || movie.id);
+                // SỬA: Xử lý movieID đúng cách để tránh NaN
+                const movieId = movie.movieID || movie.movieId || movie.id;
+                const movieName = movie.movieName || movie.name || 'Unnamed Movie';
+
+                // KIỂM TRA: movieId phải là số hợp lệ
+                if (!movieId || isNaN(parseInt(movieId))) {
+                    console.warn('Invalid movie ID:', movieId, movie);
+                    return; // Bỏ qua movie này nếu ID không hợp lệ
+                }
+
+                const isSelected = selectedIds.includes(parseInt(movieId));
                 const movieStatus = movie.status || 'Unknown';
                 const movieYear = movie.startDate ? new Date(movie.startDate).getFullYear() : 'Unknown';
 
                 movieDiv.innerHTML = `
-                    <label>
-                        <input type="checkbox"
-                               value="${movie.movieId || movie.id}"
-                               ${isSelected ? 'checked' : ''}
-                               onchange="updateSelectedMovies()">
-                        <div class="movie-info">
-                            <div class="movie-name">${movie.movieName || movie.name}</div>
-                            <div class="movie-details">${movieYear} • ${movieStatus}</div>
-                        </div>
-                    </label>
-                `;
+            <label>
+                <input type="checkbox"
+                       value="${movieId}"
+                       ${isSelected ? 'checked' : ''}
+                       onchange="updateSelectedMovies()">
+                <div class="movie-info">
+                    <div class="movie-name">${movieName}</div>
+                    <div class="movie-details">${movieYear} • ${movieStatus}</div>
+                </div>
+            </label>
+        `;
                 moviesSelection.appendChild(movieDiv);
             });
 
@@ -1324,13 +1351,21 @@
             this.textContent = allChecked ? 'Select All' : 'Deselect All';
         }
 
-        // Update selected movies
+        // SỬA: Update selected movies với validation
         window.updateSelectedMovies = function() {
             const selectedMovies = [];
             const checkboxes = moviesSelection.querySelectorAll('input[type="checkbox"]:checked');
 
             checkboxes.forEach(checkbox => {
-                selectedMovies.push(parseInt(checkbox.value));
+                const value = checkbox.value;
+                const movieId = parseInt(value);
+
+                // KIỂM TRA: Chỉ thêm ID hợp lệ
+                if (!isNaN(movieId) && movieId > 0) {
+                    selectedMovies.push(movieId);
+                } else {
+                    console.warn('Invalid movie ID in checkbox:', value);
+                }
             });
 
             selectedMoviesInput.value = selectedMovies.join(',');
@@ -1341,6 +1376,8 @@
             } else {
                 selectedSummary.style.display = 'none';
             }
+
+            console.log('Selected movie IDs:', selectedMovies);
         };
 
         function showImage() {

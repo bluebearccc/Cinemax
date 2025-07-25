@@ -7,6 +7,7 @@ import com.bluebear.cinemax.entity.Actor;
 import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
 import com.bluebear.cinemax.enumtype.Movie_Status;
+import com.bluebear.cinemax.enumtype.AgeLimit;
 import com.bluebear.cinemax.repository.repos.*;
 import com.bluebear.cinemax.service.admins.*;
 import jakarta.transaction.Transactional;
@@ -120,6 +121,18 @@ public class MovieController {
                     return "Đánh giá phim không hợp lệ";
                 }
             }
+        }
+        // Validate age limit
+        String ageLimitStr = params.get("ageLimit");
+        if (ageLimitStr == null || ageLimitStr.trim().isEmpty()) {
+            return "Age rating cannot be empty";
+        }
+
+        // Validate age limit enum values
+        try {
+            AgeLimit.valueOf(ageLimitStr.trim());
+        } catch (IllegalArgumentException e) {
+            return "Invalid age rating selected. Must be one of: AGE_P, AGE_13_PLUS, AGE_16_PLUS, AGE_18_PLUS";
         }
 
         return null;
@@ -371,6 +384,8 @@ public class MovieController {
             newMovie.setTrailer(allParams.get("trailer") != null && !allParams.get("trailer").trim().isEmpty() ?
                     allParams.get("trailer").trim() : null);
 
+            // Set age limit enum
+            newMovie.setAgeLimit(AgeLimit.valueOf(allParams.get("ageLimit").trim()));
             // Set default rating to 0.0 for new movies
             newMovie.setMovieRate(0.0);
 
@@ -475,26 +490,9 @@ public class MovieController {
                 }
 
                 if (movieEntity.getActors() != null) {
-                    movieActorIds = new ArrayList<>();
-                    for (Object actor : movieEntity.getActors()) {
-                        try {
-                            Method getIdMethod = actor.getClass().getMethod("getId");
-                            Integer actorId = (Integer) getIdMethod.invoke(actor);
-                            if (actorId != null) {
-                                movieActorIds.add(actorId);
-                            }
-                        } catch (Exception e) {
-                            try {
-                                Method getActorIdMethod = actor.getClass().getMethod("getActorId");
-                                Integer actorId = (Integer) getActorIdMethod.invoke(actor);
-                                if (actorId != null) {
-                                    movieActorIds.add(actorId);
-                                }
-                            } catch (Exception e2) {
-                                // Ignore
-                            }
-                        }
-                    }
+                    movieActorIds = movieEntity.getActors().stream()
+                            .map(Actor::getActorID)  // Sử dụng trực tiếp method của Actor
+                            .collect(Collectors.toList());
                 }
             }
 
@@ -631,6 +629,9 @@ public class MovieController {
             movieToUpdate.setDuration(Integer.parseInt(allParams.get("duration").trim()));
             movieToUpdate.setTrailer(allParams.get("trailer") != null && !allParams.get("trailer").trim().isEmpty() ?
                     allParams.get("trailer").trim() : null);
+
+            // Set age limit enum
+            movieToUpdate.setAgeLimit(AgeLimit.valueOf(allParams.get("ageLimit").trim()));
 
             // Giữ nguyên movieRate và startDate
             movieToUpdate.setMovieRate(existingMovie.getMovieRate());

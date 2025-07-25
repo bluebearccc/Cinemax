@@ -6,6 +6,7 @@ import com.bluebear.cinemax.dto.MovieDTO;
 import com.bluebear.cinemax.entity.Actor;
 import com.bluebear.cinemax.entity.Genre;
 import com.bluebear.cinemax.entity.Movie;
+import com.bluebear.cinemax.enumtype.AgeLimit;
 import com.bluebear.cinemax.enumtype.Movie_Status;
 import com.bluebear.cinemax.repository.repos.*;
 import jakarta.transaction.Transactional;
@@ -136,6 +137,26 @@ public class MovieService {
         if (isAdd && isMovieNameExists(movie.getMovieName(), null))
             return "Tên phim đã tồn tại";
 
+        // Age limit validation
+        if (movie.getAgeLimit() == null) {
+            return "Age rating cannot be empty";
+        }
+
+        // Validate age limit values
+        try {
+            AgeLimit ageLimit = movie.getAgeLimit();
+            // Check if it's one of the valid enum values
+            boolean isValid = ageLimit == AgeLimit.AGE_P ||
+                    ageLimit == AgeLimit.AGE_13_PLUS ||
+                    ageLimit == AgeLimit.AGE_16_PLUS ||
+                    ageLimit == AgeLimit.AGE_18_PLUS;
+            if (!isValid) {
+                return "Invalid age rating. Must be one of: AGE_P, AGE_13_PLUS, AGE_16_PLUS, AGE_18_PLUS";
+            }
+        } catch (Exception e) {
+            return "Invalid age rating format";
+        }
+
         return null;
     }
 
@@ -254,6 +275,7 @@ public class MovieService {
             existingMovie.setStartDate(updatedMovie.getStartDate());
             existingMovie.setEndDate(updatedMovie.getEndDate());
             existingMovie.setStatus(updatedMovie.getStatus());
+            existingMovie.setAgeLimit(updatedMovie.getAgeLimit());
 
             // Cập nhật thể loại
             List<Genre> newGenres = new ArrayList<>();
@@ -405,6 +427,9 @@ public class MovieService {
         if (movie.getBanner() == null || movie.getBanner().trim().isEmpty()) {
             movie.setBanner("/uploads/default-banner.jpg");
         }
+        if (movie.getAgeLimit() == null) {
+            movie.setAgeLimit(AgeLimit.AGE_P); // Set default value to General Audiences
+        }
         movie.setTrailer(getOrDefault(movie.getTrailer(), null));
     }
 
@@ -458,7 +483,7 @@ public class MovieService {
         dto.setStartDate(movie.getStartDate());
         dto.setEndDate(movie.getEndDate());
         dto.setStatus(movie.getStatus() != null ? movie.getStatus() : Movie_Status.Removed);
-
+        dto.setAgeLimit(movie.getAgeLimit());
         // Chuyển đổi Genre entities thành GenreDTO objects
         dto.setGenres(movie.getGenres() != null ?
                 movie.getGenres().stream()
