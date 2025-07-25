@@ -52,22 +52,6 @@
             </div>
         </div>
 
-        <div class="stat-card bg-white rounded-lg shadow-sm p-6">
-            <div class="flex items-center">
-                <div class="stat-icon processing mr-4">
-                    <i class="ri-time-line ri-lg"></i>
-                </div>
-                <div>
-                    <p class="stat-label">Processing</p>
-                    <h3 class="stat-number" th:text="${processingCount}">0</h3>
-                </div>
-            </div>
-            <div class="stat-change positive mt-4 flex items-center text-sm">
-                <i class="fas fa-arrow-up mr-1"></i>
-                <span>5%</span>
-                <span class="ml-2 text-gray-500">vs. last week</span>
-            </div>
-        </div>
 
         <div class="stat-card bg-white rounded-lg shadow-sm p-6">
             <div class="flex items-center">
@@ -161,10 +145,10 @@
                             <span class="badge badge-success" th:if="${ticket.status != 'Not_Suported'}">Resolved</span>
                         </td>
                         <td>
-                            <span class="badge badge-danger" th:if="${ticket.serviceRate == 1}">Urgent</span>
-                            <span class="badge badge-warning" th:if="${ticket.serviceRate == 2}">High</span>
-                            <span class="badge badge-info" th:if="${ticket.serviceRate == 3}">Medium</span>
-                            <span class="badge badge-info" th:if="${ticket.serviceRate > 3}">Low</span>
+                            <span class="badge badge-danger" th:if="${ticket.serviceRate == 1}">high</span>
+                            <span class="badge badge-warning" th:if="${ticket.serviceRate == 2}">low</span>
+                            <span class="badge badge-info" th:if="${ticket.serviceRate == 3}">medium</span>
+                            <span class="badge badge-info" th:if="${ticket.serviceRate > 3}">good</span>
                         </td>
                     </tr>
                     </tbody>
@@ -240,8 +224,8 @@
 
                 <div class="detail-row">
                     <span class="detail-label">Priority</span>
-                    <span class="badge badge-danger" th:if="${selectedTicket.serviceRate == 1}">Urgent</span>
-                    <span class="badge badge-warning" th:if="${selectedTicket.serviceRate == 2}">High</span>
+                    <span class="badge badge-danger" th:if="${selectedTicket.serviceRate == 1}">high</span>
+                    <span class="badge badge-warning" th:if="${selectedTicket.serviceRate == 2}">low</span>
                     <span class="badge badge-info" th:if="${selectedTicket.serviceRate == 3}">Medium</span>
                     <span class="badge badge-info" th:if="${selectedTicket.serviceRate > 3}">Low</span>
                 </div>

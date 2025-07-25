@@ -4,6 +4,7 @@ import com.bluebear.cinemax.dto.ScheduleDTO;
 import com.bluebear.cinemax.entity.Schedule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.repository.Query;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

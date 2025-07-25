@@ -657,53 +657,8 @@
 </head>
 <body>
 <!-- Premium Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-container">
-            <div class="logo-icon">
-                <i class="fas fa-film"></i>
-            </div>
-            <div>
-                <div class="logo-text">BlueBear</div>
-                <div class="logo-subtitle">CINEMA SUITE</div>
-            </div>
-        </div>
-    </div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
 
-    <nav class="sidebar-nav">
-        <div class="nav-section">
-            <div class="nav-section-title">Main</div>
-            <a class="nav-link" th:href="@{/admin/}">
-                <i class="nav-icon fas fa-home"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Content</div>
-            <a class="nav-link active" th:href="@{/admin/movies}">
-                <i class="nav-icon fas fa-film"></i>
-                <span class="nav-text">Movies</span>
-            </a>
-            <a class="nav-link" href="/admin/actors">
-                <i class="nav-icon fas fa-users"></i>
-                <span class="nav-text">Actors</span>
-            </a>
-            <a class="nav-link" href="/admin/genres">
-                <i class="nav-icon fas fa-tags"></i>
-                <span class="nav-text">Genres</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Marketing</div>
-            <a class="nav-link" href="/admin/vouchers">
-                <i class="nav-icon fas fa-ticket-alt"></i>
-                <span class="nav-text">Vouchers</span>
-            </a>
-        </div>
-    </nav>
-</div>
 
 <!-- Main Content -->
 <div class="main-content">

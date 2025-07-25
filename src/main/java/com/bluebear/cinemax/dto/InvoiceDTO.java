@@ -26,5 +26,6 @@ public class InvoiceDTO {
     private String guestEmail;
     private String guestPhone;
     private InvoiceStatus status;
+    private CustomerDTO customer;
     private List<DetailSeatDTO> detailSeats;
 }

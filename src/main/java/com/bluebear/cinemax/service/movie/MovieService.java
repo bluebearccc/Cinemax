@@ -124,4 +124,6 @@ public interface MovieService {
     List<MovieDTO> getMoviesByActor(String actorName);
 
     MovieDTO findMovieByMovieName(String movieName);
+
+    List<MovieDTO> findMoviesBooked (Integer customerId);
 }

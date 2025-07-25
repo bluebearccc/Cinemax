@@ -192,7 +192,7 @@ public class MovieServiceImpl implements MovieService {
         Iterator<MovieDTO> iterator = movieDTOS.iterator();
         while (iterator.hasNext()) {
             MovieDTO movieDTO = iterator.next();
-            List<ScheduleDTO> scheduleDTOS = scheduleService.getScheduleByMovieIdAndDate(movieDTO.getMovieID(), schedule).getContent();
+            List<ScheduleDTO> scheduleDTOS = scheduleService.getScheduleByMovieIdAndTheaterIdAndDateAndRoomType(movieDTO.getMovieID(), theaterId, schedule, roomType).getContent();
             for (ScheduleDTO scheduleDTO : scheduleDTOS) {
                 scheduleService.calculateNumOfSeatLeft(scheduleDTO);
             }
@@ -410,5 +410,10 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieDTO findMovieByMovieName(String movieName) {
         return toDTO(movieRepository.findMovieByName(movieName));
+    }
+
+    @Override
+    public List<MovieDTO> findMoviesBooked(Integer customerId) {
+        return movieRepository.findMoviesByCustomerId(customerId).stream().map(this::toDTO).collect(Collectors.toList());
     }
 }

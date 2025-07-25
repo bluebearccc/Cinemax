@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.service;
 import com.bluebear.cinemax.config.VnpayConfig;
+import com.bluebear.cinemax.config.sepayConfig;
 import com.bluebear.cinemax.dto.InvoiceDTO;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.dto.*;
@@ -31,6 +32,8 @@ public class VnpayService {
     private final VnpayConfig vnpayConfig;
     private final BookingServiceSF bookingServiceImp;
     private final TheaterStockRepository theaterStockRepo;
+    private final sepayConfig sepayConfig;
+
     public String createPaymentUrl(InvoiceDTO invoice, HttpServletRequest request) {
         if (invoice.getTotalPrice() == null) {
             throw new IllegalStateException("Invoice chưa có tổng tiền.");
@@ -40,7 +43,7 @@ public class VnpayService {
         String vnp_Command = "pay";
         String orderType = "other";
         long vnp_Amount = Math.round(invoice.getTotalPrice() * 100);
-        String vnp_TxnRef = String.valueOf(invoice.getInvoiceID());
+        String vnp_TxnRef = "INV" + invoice.getInvoiceID() + "_" + System.currentTimeMillis();
         String vnp_IpAddr = getIpAddress(request);
 
         Map<String, String> vnp_Params = new HashMap<>();
@@ -82,6 +85,12 @@ public class VnpayService {
                 hashData.append('&');
                 query.append('&');
             }
+        }
+        Invoice entity = invoiceRepo.findById(invoice.getInvoiceID())
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+
+        if (entity.getStatus() == InvoiceStatus.Booked) {
+            throw new IllegalStateException("Hóa đơn đã được thanh toán. Không thể tạo lại giao dịch.");
         }
 
         String vnp_SecureHash = hmacSHA512(vnpayConfig.getHashSecret(), hashData.toString());
@@ -137,6 +146,21 @@ public class VnpayService {
         dto.setBookingDate(invoice.getBookingDate());
         dto.setDiscount(invoice.getDiscount());
         dto.setTotalPrice(invoice.getTotalPrice() != null ? invoice.getTotalPrice().doubleValue() : null);
+
+        Customer customer = invoice.getCustomer();
+        if (customer != null) {
+            CustomerDTO customerDTO = new CustomerDTO();
+            customerDTO.setId(customer.getId());
+
+            Account account = customer.getAccount();
+            if (account != null) {
+                AccountDTO accountDTO = new AccountDTO();
+                accountDTO.setEmail(account.getEmail());
+                customerDTO.setAccount(accountDTO);
+            }
+
+            dto.setCustomer(customerDTO);
+        }
 
         // Map danh sách ghế
         List<DetailSeatDTO> seatDTOs = invoice.getDetailSeats().stream().map(ds -> {
@@ -201,10 +225,10 @@ public class VnpayService {
         detailSeatRepo.saveAll(detailSeats);
     }
     public String createSepayQrUrl(InvoiceDTO invoice) {
-        String accountNumber = "0916897138"; // Số tài khoản nhận (MB Bank của bạn)
-        String bankCode = "MB";              // Mã ngân hàng (ví dụ: MB, VCB,...)
-        double amount = invoice.getTotalPrice(); // Đơn vị: VND
-        String description = "DH" + invoice.getInvoiceID(); // Nội dung chuyển khoản phải chứa DHxxx
+        String accountNumber = sepayConfig.getAccount();
+        String bankCode = sepayConfig.getBank();
+        double amount = invoice.getTotalPrice();
+        String description = "DH" + invoice.getInvoiceID(); // Chú ý dùng getInvoiceID()
 
         return String.format(
                 "https://qr.sepay.vn/img?acc=%s&bank=%s&amount=%.0f&des=%s",

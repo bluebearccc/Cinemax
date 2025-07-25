@@ -46,7 +46,7 @@ public class AccountController {
             model.addAttribute("totalItems", listAccount.getTotalElements());
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Lỗi tải danh sách tài khoản!");
+            redirectAttributes.addFlashAttribute("error", "Error loading account list!"); // Translated
             return "redirect:/admin/account";
         }
 
@@ -63,7 +63,7 @@ public class AccountController {
                 .filter(r -> r != Role.Customer)
                 .collect(Collectors.toList());
 
-        model.addAttribute("roles", filteredRoles); // Gửi danh sách đã lọc sang view
+        model.addAttribute("roles", filteredRoles);
         model.addAttribute("statuses", Account_Status.values());
         return "admin/account-add";
     }
@@ -75,12 +75,12 @@ public class AccountController {
                                  Model model) {
 
         if (accountDTO.getPassword() == null || accountDTO.getPassword().trim().isEmpty()) {
-            bindingResult.rejectValue("password", "error.accountDTO", "Mật khẩu không được để trống.");
+            bindingResult.rejectValue("password", "error.accountDTO", "Password cannot be empty."); // Translated
         }
 
         if (accountDTO.getEmail() != null && !accountDTO.getEmail().trim().isEmpty()
                 && accountService.findAccountByEmail(accountDTO.getEmail()).getEmail() != null) {
-            bindingResult.rejectValue("email", "error.accountDTO", "Email đã tồn tại, vui lòng nhập email khác.");
+            bindingResult.rejectValue("email", "error.accountDTO", "Email already exists, please enter a different email."); // Translated
         }
 
         if (bindingResult.hasErrors()) {
@@ -94,9 +94,9 @@ public class AccountController {
 
         try {
             accountService.saveAccount(accountDTO);
-            redirectAttributes.addFlashAttribute("success", "Thêm tài khoản thành công!");
+            redirectAttributes.addFlashAttribute("success", "Account added successfully!"); // Translated
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Thêm thất bại! Đã có lỗi xảy ra.");
+            redirectAttributes.addFlashAttribute("error", "Failed to add account! An error occurred."); // Translated
             redirectAttributes.addFlashAttribute("accountDTO", accountDTO);
             return "redirect:/admin/account/add";
         }
@@ -112,7 +112,7 @@ public class AccountController {
         } else {
             accountDTO = accountService.findById(accountId);
             if (accountDTO == null) {
-                redirectAttributes.addFlashAttribute("error", "Không tìm thấy tài khoản!");
+                redirectAttributes.addFlashAttribute("error", "Account not found!"); // Translated
                 return "redirect:/admin/account";
             }
         }
@@ -131,43 +131,62 @@ public class AccountController {
         try {
             AccountDTO originalAccount = accountService.findById(accountDTO.getId());
             if (originalAccount == null) {
-                redirectAttributes.addFlashAttribute("error", "Lỗi: không tìm thấy tài khoản!");
+                redirectAttributes.addFlashAttribute("error", "Error: account not found!"); // Translated
                 return "redirect:/admin/account";
             }
 
             if (originalAccount.getRole() == Role.Customer && !originalAccount.getEmail().equals(accountDTO.getEmail())) {
-                redirectAttributes.addFlashAttribute("error", "Không được phép thay đổi email của tài khoản Customer!");
+                redirectAttributes.addFlashAttribute("error", "Changing the email of a Customer account is not allowed!"); // Translated
                 redirectAttributes.addFlashAttribute("accountDTO", originalAccount);
                 return "redirect:/admin/account/edit/" + accountDTO.getId();
             }
 
             if (originalAccount.getRole() == Role.Customer && accountDTO.getPassword() != null && !accountDTO.getPassword().trim().isEmpty()) {
-                redirectAttributes.addFlashAttribute("error", "Không được phép thay đổi mật khẩu của tài khoản Customer!");
+                redirectAttributes.addFlashAttribute("error", "Changing the password of a Customer account is not allowed!"); // Translated
                 redirectAttributes.addFlashAttribute("accountDTO", originalAccount);
                 return "redirect:/admin/account/edit/" + accountDTO.getId();
             }
 
             if (originalAccount.getRole() == Role.Customer && accountDTO.getRole() != Role.Customer) {
-                redirectAttributes.addFlashAttribute("error", "Không được phép thay đổi vai trò của tài khoản Customer!");
+                redirectAttributes.addFlashAttribute("error", "Changing the role of a Customer account is not allowed!"); // Translated
                 redirectAttributes.addFlashAttribute("accountDTO", originalAccount);
                 return "redirect:/admin/account/edit/" + accountDTO.getId();
             }
 
             AccountDTO existingEmailAccount = accountService.findAccountByEmail(accountDTO.getEmail());
             if (existingEmailAccount != null && !existingEmailAccount.getId().equals(originalAccount.getId())) {
-                redirectAttributes.addFlashAttribute("error", "Email này đã được sử dụng bởi một tài khoản khác!");
-                redirectAttributes.addFlashAttribute("accountDTO", accountDTO); // Gửi lại dữ liệu người dùng vừa nhập
+                redirectAttributes.addFlashAttribute("error", "This email is already in use by another account!"); // Translated
+                redirectAttributes.addFlashAttribute("accountDTO", accountDTO);
                 return "redirect:/admin/account/edit/" + accountDTO.getId();
             }
 
-
             accountService.updateAccount(accountDTO);
-            redirectAttributes.addFlashAttribute("success", "Cập nhật tài khoản thành công!");
+            redirectAttributes.addFlashAttribute("success", "Account updated successfully!"); // Translated
 
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Cập nhật tài khoản thất bại! " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to update account! " + e.getMessage()); // Translated
             redirectAttributes.addFlashAttribute("accountDTO", accountDTO);
             return "redirect:/admin/account/edit/" + accountDTO.getId();
+        }
+        return "redirect:/admin/account";
+    }
+
+    @GetMapping("/delete/{accountId}")
+    public String deleteAccount(@PathVariable Integer accountId, RedirectAttributes redirectAttributes) {
+        try {
+            AccountDTO accountToUpdate = accountService.findById(accountId);
+            if (accountToUpdate == null) {
+                redirectAttributes.addFlashAttribute("error", "Account not found!"); // Translated
+                return "redirect:/admin/account";
+            }
+
+            accountToUpdate.setStatus(Account_Status.Banned);
+            accountService.updateAccount(accountToUpdate);
+
+            redirectAttributes.addFlashAttribute("success", "Account status successfully changed to 'Removed'!"); // Translated
+
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("error", "Error! Could not update account status. " + e.getMessage()); // Translated
         }
         return "redirect:/admin/account";
     }

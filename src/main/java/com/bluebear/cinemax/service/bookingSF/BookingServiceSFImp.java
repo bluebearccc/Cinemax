@@ -13,12 +13,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
 @Service
 public class BookingServiceSFImp implements BookingServiceSF {
+    @Autowired
+    private TransactionRepository transactionRepo;
     @Autowired
     private TheaterStockService theaterStockService;
     @Autowired
@@ -50,8 +53,12 @@ public class BookingServiceSFImp implements BookingServiceSF {
         return toDTO(invoice);
     }
 
-    public List<TheaterStockDTO> getAvailableCombos() {
-        List<TheaterStock> activeCombos = theaterStockRepo.findByStatus(TheaterStock_Status.Active);
+    public List<TheaterStockDTO> getAvailableCombos(Integer roomId) {
+        Room room = roomRepo.findById(roomId)
+                .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy phòng chiếu #" + roomId));
+        Integer theaterId = room.getTheater().getTheaterID();
+
+        List<TheaterStock> activeCombos = theaterStockRepo.findByTheater_TheaterIDAndStatus(theaterId, TheaterStock_Status.Active);
         return activeCombos.stream()
                 .map(theaterStockService::convertToDTO)
                 .collect(Collectors.toList());
@@ -241,8 +248,8 @@ public class BookingServiceSFImp implements BookingServiceSF {
     public List<TheaterStockDTO> toTheaterStockDTOList(List<TheaterStock> stocks) {
         return stocks.stream().map(theaterStockService::convertToDTO).toList();
     }
-    public List<TheaterStockDTO> filterCombosByKeyword(String keyword) {
-        List<TheaterStockDTO> combos = getAvailableCombos();
+    public List<TheaterStockDTO> filterCombosByKeyword(String keyword,Integer roomId) {
+        List<TheaterStockDTO> combos = getAvailableCombos(roomId);
         if (keyword == null || keyword.trim().isEmpty()) {
             return combos;
         }
@@ -281,16 +288,19 @@ public class BookingServiceSFImp implements BookingServiceSF {
 
 
     @Override
+    @Transactional
     public void saveTransactionFromWebhook(SepayWebhookDTO payload) {
-        // Tạm thời chỉ log. Có thể mở rộng lưu vào DB nếu cần.
-        log.info("💬 Sepay Webhook Transaction Received:");
-        log.info(" - ID: {}", payload.getSepayTransactionId());
-        log.info(" - Account: {}", payload.getAccountNumber());
-        log.info(" - Date: {}", payload.getTransactionDate());
-        log.info(" - Content: {}", payload.getContent());
-        log.info(" - Amount: {} VND", payload.getTransferAmount());
-        log.info(" - Reference: {}", payload.getReferenceCode());
+        log.info("💬 Nhận webhook từ Sepay: {}", payload);
+
+        try {
+            Transaction tx = mapToTransaction(payload);
+            transactionRepo.save(tx);
+            log.info("✅ Giao dịch Sepay đã lưu vào DB với reference: {}", tx.getReferenceNumber());
+        } catch (Exception e) {
+            log.error("❌ Lỗi khi lưu giao dịch Sepay: {}", e.getMessage(), e);
+        }
     }
+
     @Override
     @Transactional
     public void finalizeBooking(Integer invoiceId) {
@@ -581,5 +591,34 @@ public class BookingServiceSFImp implements BookingServiceSF {
         dto.setStatus(detailSeat.getStatus());
         return dto;
     }
+
+
+    private Transaction mapToTransaction(SepayWebhookDTO dto) {
+        Transaction tx = new Transaction();
+        tx.setGateway(dto.getGateway());
+
+        // Format thời gian
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            tx.setTransactionDate(LocalDateTime.parse(dto.getTransactionDate(), formatter));
+        } catch (Exception e) {
+            log.warn("⚠ Không thể parse transactionDate '{}'", dto.getTransactionDate(), e);
+        }
+
+        tx.setAccountNumber(dto.getAccountNumber());
+        tx.setSubAccount(dto.getSubAccount());
+
+        // Suy đoán loại giao dịch
+        tx.setAmountIn(dto.getTransferAmount() != null && dto.getTransferAmount() > 0 ? dto.getTransferAmount() : 0.0);
+        tx.setAmountOut(0.0); // vì Sepay gửi đến hệ thống mình nên là tiền vào
+
+        tx.setAccumulated(dto.getAccumulated());
+        tx.setCode(dto.getCode());
+        tx.setTransactionContent(dto.getContent());
+        tx.setReferenceNumber(dto.getReferenceCode());
+        tx.setBody(dto.toString()); // JSON raw lưu để debug nếu cần
+        return tx;
+    }
+
 
 }

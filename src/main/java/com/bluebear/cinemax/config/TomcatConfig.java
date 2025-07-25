@@ -11,7 +11,7 @@ import org.apache.catalina.Context;
 //@Configuration
 public class TomcatConfig {
 
-    //    @Bean
+//        @Bean
     public TomcatServletWebServerFactory servletContainer() {
         TomcatServletWebServerFactory factory = new TomcatServletWebServerFactory() {
             @Override

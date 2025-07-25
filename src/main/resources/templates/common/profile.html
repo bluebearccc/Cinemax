@@ -81,11 +81,7 @@
                                 <i class="fas fa-ticket-alt me-2"></i>Booking History
                             </button>
                         </li>
-                        <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="tab-points" data-bs-toggle="tab" data-bs-target="#points" type="button" role="tab">
-                                <i class="fas fa-gift me-2"></i>Points & Rewards
-                            </button>
-                        </li>
+
                     </ul>
 
                     <div class="tab-content" id="profileTabContent">
@@ -94,7 +90,7 @@
                                 <input type="hidden" name="size" th:value="${pageSize}" />
                                 <input type="text" name="keyword" class="form-control me-2" placeholder="Search movie name..."
                                        th:value="${keyword}" />
-                                <button type="submit" class="btn btn-outline-primary">
+                                <button type="submit" class="btn btn-outline-info btn-sm mb-2 px-3 py-1 w-autobtn btn-outline-info btn-sm mb-2 px-3 py-1 w-auto">
                                     <i class="fas fa-search me-1"></i>Search
                                 </button>
                             </form>
@@ -107,8 +103,11 @@
                                 </div>
 
                                 <div th:if="${!watchedMovies.isEmpty()}" class="movie-history-grid">
+
+
                                     <div class="movie-item" th:each="items, iterStat : ${watchedMovies}">
-                                        <button class="btn btn-outline-info mb-3"
+                                        <p>Found <span th:text="${#lists.size(watchedMovies)}">0</span> movies in this page</p>
+                                        <button class="btn btn-outline-info btn-sm mb-2 px-3 py-1 w-auto"
                                                 th:attr="data-invoice-id=${items.invoiceId}"
                                                 onclick="showInvoiceDetail(this)">
                                             <i class="fas fa-receipt me-1"></i>Invoice Details
@@ -141,7 +140,7 @@
                                                     Theater District 1
                                                 </div>
 
-                                                <div class="movie-datetime">
+                                                <div class="movie-datetime" th:text="${items.bookingDate}">
                                                     25/08/2025 | 19:30 - 22:15
                                                 </div>
 
@@ -154,7 +153,7 @@
                                             </div>
                                         </div>
 
-                                        <div class="movie-feedback">
+                                        <div class="movie-feedback" th:if="${items.canFeedback}">
                                             <form th:action="@{/feedback/submit}" method="post" class="feedback-form">
                                                 <input type="hidden" name="theaterId" th:value="${items.theater.theaterID}" />
 
@@ -208,70 +207,7 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="points" role="tabpanel">
-                            <div class="p-4">
-                                <div class="mb-4">
-                                    <p class="mb-3">You currently have <strong class="points-display" th:text="${customer.point}">150</strong> reward points.</p>
-                                    <p class="text-muted">Keep accumulating points to receive many attractive gifts!</p>
-                                </div>
 
-                                <hr class="my-4">
-
-                                <h5 class="mt-4 mb-3"><i class="fas fa-exchange-alt me-2"></i>Redeem Rewards</h5>
-                                <div class="table-responsive">
-                                    <table class="table table-hover align-middle">
-                                        <thead>
-                                        <tr>
-                                            <th scope="col">Point Threshold</th>
-                                            <th scope="col">Reward</th>
-                                            <th scope="col">Status</th>
-                                        </tr>
-                                        </thead>
-                                        <tbody>
-                                        <tr>
-                                            <td><strong>100 points</strong></td>
-                                            <td>1 free movie ticket</td>
-                                            <td>
-                                                <span class="badge bg-success" th:if="${customer.point >= 100}">Eligible</span>
-                                                <span class="badge bg-secondary" th:unless="${customer.point >= 100}">Not enough</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>200 points</strong></td>
-                                            <td>1 popcorn + drink combo</td>
-                                            <td>
-                                                <span class="badge bg-success" th:if="${customer.point >= 200}">Eligible</span>
-                                                <span class="badge bg-secondary" th:unless="${customer.point >= 200}">Not enough</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>300 points</strong></td>
-                                            <td>50% off voucher for next ticket</td>
-                                            <td>
-                                                <span class="badge bg-success" th:if="${customer.point >= 300}">Eligible</span>
-                                                <span class="badge bg-secondary" th:unless="${customer.point >= 300}">Not enough</span>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <td><strong>500 points</strong></td>
-                                            <td>2 VIP tickets + Special Combo</td>
-                                            <td>
-                                                <span class="badge bg-success" th:if="${customer.point >= 500}">Eligible</span>
-                                                <span class="badge bg-secondary" th:unless="${customer.point >= 500}">Not enough</span>
-                                            </td>
-                                        </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-
-                                <div class="mt-4 p-3 bg-light rounded">
-                                    <p class="mb-0 text-muted">
-                                        <i class="fas fa-info-circle me-2"></i>
-                                        Reward points can be redeemed at the ticket counter or in the "Rewards" section of the app.
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
                     </div>
                 </div>
             </div>
@@ -379,25 +315,40 @@
                 <h5 class="modal-title" id="invoiceDetailLabel">Invoice Details</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
+
             <div class="modal-body">
-                <div class="row">
+                <div class="row mb-3">
                     <div class="col-md-6">
-                        <p><strong>Theater:</strong> <span id="modalTheater"></span></p>
-                        <p><strong>Room:</strong> <span id="modalRoom"></span></p>
-                        <p><strong>Booking Date:</strong> <span id="modalDate"></span></p>
-                        <p><strong>Seats:</strong> <span id="modalSeats"></span></p>
+                        <p><strong>Rạp chiếu:</strong> <span id="modalTheater"></span></p>
+                        <p><strong>Phòng:</strong> <span id="modalRoom"></span></p>
+                        <p><strong>Ngày đặt:</strong> <span id="modalDate"></span></p>
+                        <p><strong>Ghế ngồi:</strong> <span id="modalSeats"></span></p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Food & Drinks:</strong> <span id="modalFoods"></span></p>
-                        <p><strong>Discount:</strong> <span id="modalDiscount"></span></p>
-                        <p><strong>Total Price:</strong> <span id="modalTotal"></span></p>
-                        <p><strong>Status:</strong> <span id="modalStatus"></span></p>
+                        <!-- ❗️Xóa th:if -->
+                        <p><strong>Đồ ăn & thức uống:</strong> <span id="modalFoods"></span></p>
+                        <p><strong>Giảm giá:</strong> <span id="modalDiscount"></span></p>
+                        <p><strong>Tổng tiền:</strong> <span id="modalTotal"></span></p>
+                        <p><strong>Trạng thái:</strong> <span id="modalStatus"></span></p>
                     </div>
+                </div>
+
+                <div class="bg-light rounded p-3">
+                    <p><strong>Phim:</strong> <span id="modalMovie"></span></p>
+                    <p><strong>Suất chiếu:</strong> <span id="modalShowtime"></span></p>
+                    <p><strong>Đồ ăn & nước uống:</strong> <span id="modalFoodsAlt"></span></p>
+                    <p><strong>Giảm giá:</strong> <span id="modalDiscountAlt"></span></p>
+                    <hr>
+                    <h5 class="text-end fw-bold text-primary">
+                        Tổng cộng: <span id="modalTotalAlt"></span>
+                    </h5>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+
 <!-- ==========Footer-Section========== -->
 <footer class="footer-section" th:replace="common/fragments/footer :: footer">
 </footer>
@@ -531,19 +482,35 @@
                 return res.json();
             })
             .then(data => {
-                document.getElementById("modalTheater").textContent = data.theaterName;
-                document.getElementById("modalRoom").textContent = data.roomName;
-                document.getElementById("modalDate").textContent = new Date(data.bookingDate).toLocaleString('en-US');
-                document.getElementById("modalSeats").textContent = data.seats.join(', ');
-                document.getElementById("modalFoods").textContent = data.foodName.length > 0 ? data.foodName.join(', ') : "None";
-                document.getElementById("modalDiscount").textContent = new Intl.NumberFormat('en-US').format(data.discount) + " VND";
-                document.getElementById("modalTotal").textContent = new Intl.NumberFormat('en-US').format(data.totalPrice) + " VND";
-                document.getElementById("modalStatus").textContent = data.status;
+                document.getElementById("modalTheater").textContent = data.theaterName ?? 'Không rõ';
+                document.getElementById("modalRoom").textContent = data.roomName ?? 'Không rõ';
+                document.getElementById("modalDate").textContent = new Date(data.bookingDate).toLocaleString('vi-VN');
+                document.getElementById("modalSeats").textContent = (data.seats && data.seats.length > 0) ? data.seats.join(', ') : "Không có";
+
+                const foodStr = (data.foodName && data.foodName.length > 0) ? data.foodName.join(', ') : "Không có";
+                document.getElementById("modalFoods").textContent = foodStr;
+                document.getElementById("modalFoodsAlt").textContent = foodStr;
+
+                const formattedDiscount = new Intl.NumberFormat('vi-VN').format(data.discount) + " VND";
+                const formattedTotal = new Intl.NumberFormat('vi-VN').format(data.totalPrice) + " VND";
+
+                document.getElementById("modalDiscount").textContent = formattedDiscount;
+                document.getElementById("modalDiscountAlt").textContent = formattedDiscount;
+
+                document.getElementById("modalTotal").textContent = formattedTotal;
+                document.getElementById("modalTotalAlt").textContent = formattedTotal;
+
+                document.getElementById("modalStatus").textContent = data.status ?? 'Không rõ';
+
+                // Movie info: optional (chỉ hiển thị nếu bạn trả về từ server)
+                document.getElementById("modalMovie").textContent = data.movieName ?? 'Không rõ';
+                document.getElementById("modalShowtime").textContent = data.scheduleTime ?? 'Không rõ';
 
                 const modal = new bootstrap.Modal(document.getElementById("invoiceDetailModal"));
                 modal.show();
             })
-            .catch(err => {
+
+                .catch(err => {
                 alert("Error loading invoice details.");
                 console.error("Error details:", err);
             })

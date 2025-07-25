@@ -398,4 +398,7 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
 
     @Query("SELECT m FROM Movie m WHERE m.movieName = :name")
     Movie findMovieByName(@Param("name") String name);
+
+    @Query("SELECT m FROM Invoice i JOIN i.detailSeats d JOIN d.schedule s JOIN s.movie m WHERE i.customer.id = :customerId")
+    List<Movie> findMoviesByCustomerId(@Param("customerId") Integer customerId);
 }

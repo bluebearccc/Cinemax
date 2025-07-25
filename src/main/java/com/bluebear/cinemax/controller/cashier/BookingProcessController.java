@@ -62,7 +62,6 @@ public class BookingProcessController {
                            @RequestParam(defaultValue = "6") Integer pageSize,
                            HttpSession session,
                            Model model) {
-        clearSessionData(session);
         EmployeeDTO employee = (EmployeeDTO) session.getAttribute("employee");
         theaterId = employee.getTheaterId();
         session.setAttribute("theaterId", theaterId);

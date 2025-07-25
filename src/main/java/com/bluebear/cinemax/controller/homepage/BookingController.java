@@ -84,7 +84,7 @@ public class BookingController {
 
 
             // Chuẩn bị dữ liệu cho bước 2
-            List<TheaterStockDTO> combos = bookingService.getAvailableCombos();
+            List<TheaterStockDTO> combos = bookingService.getAvailableCombos(roomId);
             //locj theo ten
             if (search != null && !search.isBlank()) {
                 combos = combos.stream()

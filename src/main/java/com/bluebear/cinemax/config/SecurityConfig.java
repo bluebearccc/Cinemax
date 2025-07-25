@@ -31,11 +31,11 @@ public class SecurityConfig {
                                 // Public pages
                                 .requestMatchers("/", "/login", "/register", "/forgotpassword", "/verifyemail",
                                         "/otp", "/newpass", "/updatepassword", "/verifytoken", "/resendotp",
-                                        "/chat/**", "/customer/**", "/home/**", "/test/**", "/uploads/**").permitAll()
+                                        "/chat/**", "/customer/**", "/home/**", "/test/**", "/uploads/**", "/webhook/**").permitAll()
 
                                 // Static resources
-                                .requestMatchers("/customer-static/**", "/common-static/**", "/admin-static/**",
-                                        "/staff-static/**", "/cashier-static/**", "/officer-static/**").permitAll()
+                                .requestMatchers("/static/**", "/customer-static/**", "/common-static/**", "/admin-static/**",
+                                        "/staff-static/**", "/cashier-static/**", "/officer-static/**", "/docs/**", "/data/**").permitAll()
                                 // OAuth2 endpoints
                                 .requestMatchers("/oauth/**").permitAll()
 
@@ -56,7 +56,7 @@ public class SecurityConfig {
                                 // Any other request needs authentication
                                 .requestMatchers("/vnpay_return/**").permitAll()
 
-                                .anyRequest().authenticated()
+                                .anyRequest().permitAll()
                 ).formLogin(form ->
                         form
                                 .loginPage("/login")

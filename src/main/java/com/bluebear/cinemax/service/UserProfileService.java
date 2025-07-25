@@ -9,6 +9,7 @@ import com.bluebear.cinemax.service.serviceFeedback.ServiceFeedbackService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -129,7 +130,7 @@ public class UserProfileService {
 
         return bookedInvoices.stream()
                 .flatMap(invoice -> invoice.getDetailSeats().stream())
-                .filter(detailSeat -> detailSeat.getSchedule().getEndTime().isBefore(LocalDateTime.now()))
+//                .filter(detailSeat -> detailSeat.getSchedule().getEndTime().isBefore(LocalDateTime.now()))
                 .map(this::toWatchedMovieDTO) // sử dụng hàm toDTO thay vì constructor
                 .distinct() // nếu cần loại trùng, cần override equals/hashCode
                 .collect(Collectors.toList());
@@ -143,6 +144,9 @@ public class UserProfileService {
 
         Room room = firstSeat.getSchedule().getRoom();
         Theater theater = room.getTheater();
+        Schedule schedule=firstSeat.getSchedule();
+        Movie movie=schedule.getMovie();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm");
 
         List<String> seatNames = invoice.getDetailSeats()
                 .stream()
@@ -168,6 +172,8 @@ public class UserProfileService {
                 .totalPrice(invoice.getTotalPrice())
                 .discount(invoice.getDiscount())
                 .status(invoice.getStatus())
+                .movieName(movie.getMovieName())
+                .scheduleTime(schedule.getStartTime().format(formatter) + " - " + schedule.getEndTime().format(DateTimeFormatter.ofPattern("HH:mm")))
                 .build();
     }
     public WatchedMovieDTO toWatchedMovieDTO(DetailSeat detailSeat) {
@@ -175,12 +181,15 @@ public class UserProfileService {
         Movie movie = schedule.getMovie();
         Theater theater = schedule.getRoom().getTheater();
         Integer invoiceId = detailSeat.getInvoice().getInvoiceID();
+        LocalDateTime bookingDate =detailSeat.getInvoice().getBookingDate();
 
         return WatchedMovieDTO.builder()
                 .movie(movie)
                 .theater(theater)
                 .schedule(schedule)
-                .invoiceId(invoiceId) // BẮT BUỘC phải có dòng này
+                .invoiceId(invoiceId)
+                .bookingDate(bookingDate)
+                .canFeedback(schedule.getEndTime().isBefore(LocalDateTime.now()))
                 .build();
     }
     public ServiceFeedbackDTO prepareFeedbackFromInvoice(Integer invoiceId) {

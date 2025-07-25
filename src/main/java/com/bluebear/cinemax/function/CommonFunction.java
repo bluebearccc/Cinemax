@@ -1,6 +1,10 @@
 package com.bluebear.cinemax.function;
 
 import com.bluebear.cinemax.dto.GenreDTO;
+import com.bluebear.cinemax.dto.PromotionDTO;
+import com.bluebear.cinemax.entity.Promotion;
+import com.bluebear.cinemax.enumtype.Promotion_Status;
+import com.bluebear.cinemax.service.PromotionService;
 import com.bluebear.cinemax.service.genre.GenreService;
 import org.springframework.ai.tool.annotation.Tool;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +19,8 @@ public class CommonFunction {
 
     @Autowired
     private GenreService genreService;
+    @Autowired
+    private PromotionService promotionService;
 
     @Tool(description = "Get the current date and time in the user's timezone")
     String getCurrentDateTime() {
@@ -26,6 +32,9 @@ public class CommonFunction {
         return genreService.getAllGenres();
     }
 
-
+    @Tool(description = "get the promotions currently available")
+    public List<Promotion> getPromotions() {
+        return promotionService.searchVouchers("", Promotion_Status.Available.name());
+    }
 
 }

@@ -1,44 +1,63 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" lang="vi">
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Kết quả thanh toán VNPAY</title>
+    <title>VNPAY Payment Result</title>
     <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
     <link rel="stylesheet" th:href="@{/css/vnpay.css}">
 </head>
-<body class="container mt-5">
-<h2 class="mb-4 text-primary">Kết quả thanh toán VNPAY</h2>
+<body>
+<div class="container">
+    <div class="payment-card fade-in">
+        <div class="card-header">
+            <div class="vnpay-logo">VNPAY</div>
+            <h1>Payment Result</h1>
+            <p class="subtitle">Transaction Status & Details</p>
+        </div>
 
-<div class="alert" th:classappend="${responseCode} == '00' ? 'alert-success' : 'alert-danger'">
-    <strong th:text="${message}">[Thông báo]</strong>
+        <div class="status-section">
+            <div class="status-alert" th:classappend="${responseCode} == '00' ? 'status-success' : 'status-error'">
+                <span class="status-icon" th:text="${responseCode} == '00' ? '✓' : '✗'">✓</span>
+                <span th:text="${message}">[Notification Message]</span>
+            </div>
+        </div>
+
+        <div class="details-section">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Invoice ID</span>
+                    <span class="detail-value" th:text="${invoiceId}">[Invoice ID]</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Amount</span>
+                    <span class="detail-value amount-highlight" th:text="${amount} + ' VND'">[Amount] VND</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Response Code</span>
+                    <span class="detail-value" th:text="${responseCode ?: 'N/A'}">[Response Code]</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Transaction Status</span>
+                    <span class="detail-value" th:text="${transactionStatus}">[Transaction Status]</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Payment Bank</span>
+                    <span class="detail-value" th:text="${bankCode}">[Bank Code]</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <a href="/" class="btn-home">
+                <span class="btn-icon">🏠</span>
+                Back to Homepage
+            </a>
+        </div>
+    </div>
 </div>
-
-<table class="table table-bordered">
-    <tbody>
-    <tr>
-        <th>Mã hóa đơn</th>
-        <td th:text="${invoiceId}">[Invoice ID]</td>
-    </tr>
-    <tr>
-        <th>Số tiền</th>
-        <td th:text="${amount} + ' VND'">[Amount]</td>
-    </tr>
-    <tr>
-        <th>Mã phản hồi</th>
-        <td th:text="${responseCode ?: 'N/A'}">[Response Code]</td>
-    </tr>
-    <tr>
-        <th>Trạng thái giao dịch</th>
-        <td th:text="${transactionStatus}">[Transaction Status]</td>
-    </tr>
-    <tr>
-        <th>Ngân hàng thanh toán</th>
-        <td th:text="${bankCode}">[Bank Code]</td>
-    </tr>
-    </tbody>
-</table>
-
-<a href="/" class="btn btn-primary mt-3">Quay lại trang chủ</a>
 </body>
 </html>
-
