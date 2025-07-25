@@ -53,7 +53,6 @@ const chatToggle = document.getElementById('chatToggle');
 const chatWidget = document.getElementById('chatWidget');
 const chatMessages = document.getElementById('chatMessages');
 const chatInput = document.getElementById('chatInput');
-const notificationBadge = document.getElementById('notificationBadge');
 
 // Toggle chat widget
 chatToggle.addEventListener('click', function() {
@@ -63,7 +62,6 @@ chatToggle.addEventListener('click', function() {
         chatWidget.classList.add('active');
         chatToggle.classList.add('active');
         chatInput.focus();
-        notificationBadge.style.display = 'none';
     } else {
         chatWidget.classList.remove('active');
         chatToggle.classList.remove('active');
@@ -130,9 +128,6 @@ function addMessage(sender, text) {
     messageCount++;
 
     if (!isOpen && sender === 'bot') {
-        notificationBadge.style.display = 'flex';
-        notificationBadge.textContent = '!';
-
         chatToggle.style.animation = 'bounce 0.6s ease-in-out 3';
         setTimeout(() => {
             chatToggle.style.animation = 'bounce 2s infinite';

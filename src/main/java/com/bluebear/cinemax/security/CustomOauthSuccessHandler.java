@@ -1,13 +1,13 @@
-
 package com.bluebear.cinemax.security;
 
 import com.bluebear.cinemax.dto.AccountDTO;
 import com.bluebear.cinemax.dto.CustomerDTO;
+import com.bluebear.cinemax.dto.EmployeeDTO;
 import com.bluebear.cinemax.enumtype.Account_Status;
 import com.bluebear.cinemax.enumtype.Role;
-import com.bluebear.cinemax.service.account.AccountServiceImpl;
-import com.bluebear.cinemax.service.customer.CustomerServiceImpl;
-import com.bluebear.cinemax.service.employee.EmployeeServiceImpl;
+import com.bluebear.cinemax.service.account.AccountService;
+import com.bluebear.cinemax.service.customer.CustomerService;
+import com.bluebear.cinemax.service.employee.EmployeeService;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -19,68 +19,53 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.util.UUID;
 
 @Component
 public class CustomOauthSuccessHandler implements AuthenticationSuccessHandler {
 
-    @Autowired private AccountServiceImpl accountService;
-    @Autowired private CustomerServiceImpl customerService;
-    @Autowired private EmployeeServiceImpl employeeService;
+    @Autowired
+    private AccountService accountService;
+    @Autowired
+    private CustomerService customerService;
+    @Autowired
+    private EmployeeService employeeService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
                                         Authentication authentication) throws IOException, ServletException {
 
         OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
-        String email = oAuth2User.getAttribute("email");
-        String name = oAuth2User.getAttribute("name");
+        String email = (String) oAuth2User.getAttributes().get("email");
+        AccountDTO account = accountService.findAccountByEmail(email);
 
-        if (email == null || email.trim().isEmpty()) {
-            response.sendRedirect("/login?error=invalid_email");
+        if (account.getStatus() == Account_Status.Banned) {
+            response.sendRedirect("/login?error=banned");
             return;
         }
 
         HttpSession session = request.getSession();
+        session.setAttribute("account", account);
 
-        AccountDTO account = accountService.findAccountByEmail(email);
-
-        if (account == null) {
-            String password = UUID.randomUUID().toString();
-            account = AccountDTO.builder()
-                    .email(email.trim())
-                    .password(password)
-                    .role(Role.Customer)
-                    .status(Account_Status.Active)
-                    .build();
-
-            // Verify the account DTO has email before saving
-            if (account.getEmail() == null || account.getEmail().trim().isEmpty()) {
-                response.sendRedirect("/login?error=account_creation_failed");
+        if (account.getRole() == Role.Customer) {
+            CustomerDTO customer = customerService.getUserByAccountID(account.getId());
+            if (customer == null) {
+                response.sendRedirect("/login?error=customer_data_missing");
                 return;
             }
-
-            accountService.save(account);
-
-            account = accountService.findAccountByEmail(email);
-
-            CustomerDTO customer = CustomerDTO.builder()
-                    .accountID(account.getId())
-                    .fullName(name != null ? name : "Unknown User")
-                    .phone("")
-                    .build();
-            customerService.save(customer);
-
             session.setAttribute("customer", customer);
-        } else if (account.getStatus() == Account_Status.Banned) {
-            response.sendRedirect("/login?error=banned");
-            return;
+            session.removeAttribute("employee");
+        } else if (account.getRole() == Role.Admin || account.getRole() == Role.Cashier || account.getRole() == Role.Customer_Officer || account.getRole() == Role.Staff) {
+            EmployeeDTO employee = employeeService.findByAccountId(account.getId());
+            if (employee == null) {
+                response.sendRedirect("/login?error=employee_data_missing");
+                return;
+            }
+            session.setAttribute("employee", employee);
+            session.removeAttribute("customer");
         } else {
-            CustomerDTO customer = customerService.getUserByAccountID(account.getId());
-            session.setAttribute("customer", customer);
+            response.sendRedirect("/login?error=unknown_user_type");
+            return;
         }
-
-        session.setAttribute("account", account);
 
         String redirectUrl = getRedirectUrl(account.getRole());
         response.sendRedirect(redirectUrl);

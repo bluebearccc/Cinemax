@@ -1,9 +1,11 @@
 package com.bluebear.cinemax.config;
 
 import org.springframework.ai.chat.client.ChatClient;
+import org.springframework.ai.embedding.EmbeddingModel;
 import org.springframework.ai.ollama.OllamaChatModel;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -21,7 +23,6 @@ public class ChatConfig {
     public ChatClient.Builder groqChatClient() {
         String baseUrl = "https://api.groq.com/openai";
         String modelName = "llama3-70b-8192";
-
         var openAiApi = OpenAiApi.builder().baseUrl(baseUrl).apiKey(apiKey).build();
         var options = OpenAiChatOptions.builder().model(modelName).build();
         var groqChatModel = OpenAiChatModel.builder().openAiApi(openAiApi).defaultOptions(options).build();
@@ -33,6 +34,14 @@ public class ChatConfig {
 //    public ChatClient.Builder ollamaChatClientBuilder(OllamaChatModel ollamaChatModel) {
 //        return ChatClient.builder(ollamaChatModel);
 //    }
+
+
+//    @Bean
+//    @Qualifier("openAiEmbeddingModel")
+//    public EmbeddingModel openAiEmbeddingModel(OpenAiEmbeddingModel openAiEmbeddingModel) {
+//        return openAiEmbeddingModel;
+//    }
+
 
     @Bean
     @Qualifier("openAiChatClientBuilder")

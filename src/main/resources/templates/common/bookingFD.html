@@ -64,9 +64,6 @@
 
                     <div class="combo-content">
                         <h3 class="combo-title" th:text="${combo.foodName}">Special Combo</h3>
-                        <p class="combo-description">
-                            This combo is prepared in-house with fresh ingredients, ensuring the highest quality for your movie experience.
-                        </p>
 
                         <div class="combo-price-section">
                             <div class="combo-price" th:text="${#numbers.formatInteger(combo.unitPrice, 0, 'POINT')} + '₫'">

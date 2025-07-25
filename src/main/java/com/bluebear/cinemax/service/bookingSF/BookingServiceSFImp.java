@@ -189,7 +189,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
         double totalComboPrice = combos.stream()
                 .mapToDouble(combo -> combo.getPrice().doubleValue() * comboQuantities.getOrDefault(combo.getStockID(), 0))
                 .sum();
-        double totalPrice = totalSeatPrice + (totalComboPrice*1000);
+        double totalPrice = totalSeatPrice + (totalComboPrice);
         double discount = (promotionDTO != null && promotionDTO.isValid()) ? promotionDTO.getDiscount() / 100.0 : 0.0;
         double finalPrice = totalPrice * (1 - discount);
 
