@@ -62,7 +62,7 @@ body {
 .container {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 2rem;
+    padding: 0 0 1rem 9rem;
 }
 
 .page-title {

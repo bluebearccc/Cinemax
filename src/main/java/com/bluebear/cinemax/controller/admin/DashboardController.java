@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
 
 @Controller
@@ -30,20 +32,15 @@ public class DashboardController {
                             @RequestParam(defaultValue = "1") int minRate,
                             @RequestParam(defaultValue = "5") int maxRate,
                             @RequestParam(defaultValue = "0") int feedbackPage,
-                            @RequestParam(defaultValue = "now") String yearFilter,
+                            @RequestParam(required = false) String startDate,
+                            @RequestParam(required = false) String endDate,
                             Model model) {
         int year = LocalDate.now().getYear();
-        switch (yearFilter) {
-            case "last":
-                year -= 1;
-                break;
-            case "twoYearsAgo":
-                year -= 2;
-                break;
-            default:
-                break;
-        }
-        DashboardDTO dashboard = dashboardService.toDTOByYear(year);
+        LocalDateTime start = (startDate != null) ? LocalDate.parse(startDate).atStartOfDay()
+                : LocalDate.now().withDayOfYear(1).atStartOfDay();
+        LocalDateTime end = (endDate != null) ? LocalDate.parse(endDate).atTime(LocalTime.MAX)
+                : LocalDateTime.now();
+        DashboardDTO dashboard = dashboardService.toDTOByRange(start, end);
         String statusFilter = null;
         if ("showing".equalsIgnoreCase(filter)) statusFilter = "SHOWING";
         else if ("coming".equalsIgnoreCase(filter)) statusFilter = "COMING_SOON";
@@ -72,7 +69,8 @@ public class DashboardController {
         model.addAttribute("feedbackTotalPages", feedbackPageData.getTotalPages());
         model.addAttribute("minRate", minRate);
         model.addAttribute("maxRate", maxRate);
-        model.addAttribute("yearFilter", yearFilter);
+        model.addAttribute("startDate", start.toLocalDate());
+        model.addAttribute("endDate", end.toLocalDate());
         return "admin/dashboard";
     }
     @GetMapping("/dashboard/revenue-trend")

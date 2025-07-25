@@ -562,32 +562,7 @@
 </head>
 <body>
 <!-- Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <h5>
-            <i class="fas fa-film"></i>
-            BlueBear Cinema
-        </h5>
-    </div>
-
-    <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin/">
-            <i class="fas fa-home"></i>Dashboard
-        </a>
-        <a class="nav-link" href="/admin/movies">
-            <i class="fas fa-film"></i>Movies
-        </a>
-        <a class="nav-link" href="/admin/actors">
-            <i class="fas fa-users"></i>Actors
-        </a>
-        <a class="nav-link active" href="/admin/genres">
-            <i class="fas fa-tags"></i>Genres
-        </a>
-        <a class="nav-link" href="/admin/vouchers">
-            <i class="fas fa-ticket-alt"></i>Vouchers
-        </a>
-    </nav>
-</div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
 
 <!-- Main Content -->
 <div class="main-content">

@@ -211,15 +211,19 @@ public class BookingServiceSFImp implements BookingServiceSF {
                 String idStr = key.substring(16, key.length() - 1);
                 try {
                     Integer comboId = Integer.parseInt(idStr);
-                    Integer quantity = Integer.parseInt(entry.getValue());
+                    Integer quantity = Integer.parseInt(entry.getValue().replaceAll("\\D", ""));
                     if (quantity > 0) {
                         result.put(comboId, quantity);
                     }
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException e) {
+                    // Ghi log cảnh báo nhưng bỏ qua lỗi
+                    System.out.println("⚠️ Không thể parse combo ID hoặc quantity: " + entry);
+                }
             }
         }
         return result;
     }
+
 
 
     public double calculateTotalAmount(Integer scheduleId, List<Integer> seatIds, String promotionCode) {
@@ -368,7 +372,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
                         variables.put("total", invoiceDTO.getTotalPrice());
 
                         emailService.sendTicketHtmlTemplate(
-                                "nguyentavan188@gmail.com",//sau sửa email trong dto
+                                account.getEmail(),//sau sửa email trong dto
                                 "Xác nhận đặt vé thành công",
                                 variables
                         );

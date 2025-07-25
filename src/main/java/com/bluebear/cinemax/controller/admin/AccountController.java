@@ -44,7 +44,7 @@ public class AccountController {
             model.addAttribute("sort", sort);
             model.addAttribute("totalPages", listAccount.getTotalPages());
             model.addAttribute("totalItems", listAccount.getTotalElements());
-
+            model.addAttribute("activeLink", "accounts");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error loading account list!"); // Translated
             return "redirect:/admin/account";
@@ -62,7 +62,7 @@ public class AccountController {
         List<Role> filteredRoles = Arrays.stream(Role.values())
                 .filter(r -> r != Role.Customer)
                 .collect(Collectors.toList());
-
+        model.addAttribute("activeLink", "accounts");
         model.addAttribute("roles", filteredRoles);
         model.addAttribute("statuses", Account_Status.values());
         return "admin/account-add";
@@ -121,6 +121,7 @@ public class AccountController {
         model.addAttribute("roles", Role.values());
         model.addAttribute("statuses", Account_Status.values());
         model.addAttribute("isCustomer", accountDTO.getRole() == Role.Customer);
+        model.addAttribute("activeLink", "accounts");
 
         return "admin/account-edit";
     }
