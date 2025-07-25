@@ -20,7 +20,7 @@ public interface BookingServiceSF {
     void cancelInvoice(Integer invoiceId);
 
 
-    List<TheaterStockDTO> getAvailableCombos();
+    List<TheaterStockDTO> getAvailableCombos(Integer roomId);
 
     InvoiceDTO bookSeatsAndCombos(Integer scheduleId, List<Integer> seatIds, String promotionCode, Map<Integer, Integer> selectedCombos);
 
@@ -38,7 +38,7 @@ public interface BookingServiceSF {
 
 
     List<TheaterStockDTO> toTheaterStockDTOList(List<TheaterStock> stocks);
-    List<TheaterStockDTO> filterCombosByKeyword(String keyword);
+    List<TheaterStockDTO> filterCombosByKeyword(String keyword,Integer roomId);
     void saveTransactionFromWebhook(SepayWebhookDTO payload);
     void finalizeBooking(Integer invoiceId);
 }

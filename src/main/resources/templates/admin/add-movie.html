@@ -482,7 +482,7 @@
         }
 
         /* Premium Info Cards */
-        .upload-info, .auto-rating-info, .image-required-warning {
+        .upload-info, .auto-rating-info, .image-required-warning, .trailer-required-warning {
             background: rgba(255, 255, 255, 0.2);
             backdrop-filter: blur(10px);
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -508,12 +508,13 @@
             margin: 4px 0;
         }
 
-        .image-required-warning {
+        .image-required-warning, .trailer-required-warning {
             background: rgba(231, 76, 60, 0.2);
             border-color: rgba(231, 76, 60, 0.3);
         }
 
-        .image-required-warning .warning-title {
+        .image-required-warning .warning-title,
+        .trailer-required-warning .warning-title {
             color: #e74c3c;
             font-weight: 600;
             margin-bottom: 8px;
@@ -522,7 +523,8 @@
             gap: 8px;
         }
 
-        .image-required-warning .warning-item {
+        .image-required-warning .warning-item,
+        .trailer-required-warning .warning-item {
             color: #c0392b;
             margin: 4px 0;
         }
@@ -694,7 +696,7 @@
                 <i class="fas fa-plus"></i>
                 Create New Cinema Experience
             </h5>
-            <small>All fields marked with (*) are mandatory for content creation</small>
+            <small>All fields marked with (*) are mandatory. Database requires all fields to be filled completely.</small>
         </div>
 
         <div class="card-body">
@@ -778,18 +780,44 @@
                             </div>
                         </div>
 
-                        <!-- Trailer URL -->
+                        <!-- Age Limit -->
+                        <div class="mb-3">
+                            <label for="ageLimit" class="form-label">
+                                <i class="fas fa-shield-alt"></i>
+                                Age Rating <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select required-field" id="ageLimit" name="ageLimit" required>
+                                <option value="">-- Select age rating --</option>
+                                <option value="AGE_P">AGE_P - General Audiences (All ages)</option>
+                                <option value="AGE_13_PLUS">AGE_13_PLUS - For ages 13 and above</option>
+                                <option value="AGE_16_PLUS">AGE_16_PLUS - For ages 16 and above</option>
+                                <option value="AGE_18_PLUS">AGE_18_PLUS - For ages 18 and above (Adults only)</option>
+                            </select>
+                            <small class="form-text">Select appropriate age rating for content (required)</small>
+                        </div>
+
+                        <!-- Trailer URL - REQUIRED -->
                         <div class="mb-3">
                             <label for="trailer" class="form-label">
                                 <i class="fas fa-play"></i>
-                                Trailer Experience
+                                Trailer Experience <span class="text-danger">*</span>
                             </label>
                             <input type="url"
-                                   class="form-control"
+                                   class="form-control required-field"
                                    id="trailer"
                                    name="trailer"
-                                   placeholder="https://youtube.com/watch?v=...">
-                            <small class="form-text">Official movie trailer URL (optional)</small>
+                                   required
+                                   placeholder="https://youtube.com/watch?v=... (REQUIRED - database constraint)">
+                            <small class="form-text">Official movie trailer URL (REQUIRED - database cannot be null)</small>
+                            <div class="trailer-required-warning">
+                                <div class="warning-title">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Trailer URL is mandatory
+                                </div>
+                                <div class="warning-item">• Database requires valid trailer URL</div>
+                                <div class="warning-item">• Cannot be empty or null</div>
+                                <div class="warning-item">• Must be valid YouTube/video URL</div>
+                            </div>
                         </div>
 
                         <!-- Auto Rating Info -->
@@ -883,10 +911,10 @@
                                 <div th:each="actor : ${actors}" class="form-check actor-checkbox">
                                     <input class="form-check-input actor-input"
                                            type="checkbox"
-                                           th:id="'actor_' + ${actor.actorId}"
+                                           th:id="'actor_' + ${actor.actorID}"
                                            name="actorIds"
-                                           th:value="${actor.actorId}">
-                                    <label class="form-check-label" th:for="'actor_' + ${actor.actorId}">
+                                           th:value="${actor.actorID}">
+                                    <label class="form-check-label" th:for="'actor_' + ${actor.actorID}">
                                         <span th:text="${actor.actorName}"></span>
                                     </label>
                                 </div>
@@ -976,6 +1004,8 @@
                                     <li>Story description (engaging, ≤2000 chars)</li>
                                     <li>Production studio (≤100 chars)</li>
                                     <li>Runtime (1-500 minutes)</li>
+                                    <li>Age rating (P/13+/16+/18+)</li>
+                                    <li><strong>Trailer URL (REQUIRED - cannot be null)</strong></li>
                                     <li>Release date (from today)</li>
                                     <li>End screening (after release)</li>
                                     <li>Release status</li>
@@ -985,8 +1015,13 @@
                                     <li><strong>Banner image (REQUIRED)</strong></li>
                                 </ul>
                                 <hr>
+                                <small class="text-danger">
+                                    <i class="fas fa-database"></i>
+                                    All fields are required by database constraints
+                                </small>
+                                <br>
                                 <small class="text-success">
-                                    <i class="fas fa-info-circle"></i>
+                                    <i class="fas fa-star"></i>
                                     Rating automatically set to 0.0
                                 </small>
                             </div>
@@ -1137,7 +1172,7 @@
         });
     });
 
-    // Enhanced form validation with required images
+    // Enhanced form validation with required trailer and images
     document.querySelector('#movieForm').addEventListener('submit', function(e) {
         let isValid = true;
         let errorMessages = [];
@@ -1177,6 +1212,35 @@
         if (!duration || duration <= 0 || duration > 500) {
             errorMessages.push('Runtime must be between 1-500 minutes');
             isValid = false;
+        }
+
+        // Validate age limit
+        const ageLimit = document.getElementById('ageLimit').value;
+        if (!ageLimit) {
+            errorMessages.push('Must select age rating');
+            isValid = false;
+        }
+
+        // Validate age limit enum values
+        const validAgeLimits = ['AGE_P', 'AGE_13_PLUS', 'AGE_16_PLUS', 'AGE_18_PLUS'];
+        if (ageLimit && !validAgeLimits.includes(ageLimit)) {
+            errorMessages.push('Invalid age rating selected');
+            isValid = false;
+        }
+
+        // Validate trailer URL - REQUIRED (database constraint)
+        const trailer = document.getElementById('trailer').value.trim();
+        if (!trailer) {
+            errorMessages.push('Trailer URL cannot be empty (database requires this field)');
+            isValid = false;
+        } else {
+            // Basic URL validation
+            try {
+                new URL(trailer);
+            } catch (e) {
+                errorMessages.push('Trailer URL must be a valid URL format');
+                isValid = false;
+            }
         }
 
         // Validate dates
@@ -1242,12 +1306,12 @@
         const bannerFile = document.getElementById('bannerFile').files[0];
 
         if (!posterFile) {
-            errorMessages.push('Must upload poster image');
+            errorMessages.push('Must upload poster image (required by database)');
             isValid = false;
         }
 
         if (!bannerFile) {
-            errorMessages.push('Must upload banner image');
+            errorMessages.push('Must upload banner image (required by database)');
             isValid = false;
         }
 
@@ -1295,6 +1359,49 @@
         }, 10000);
     });
 
+    // Age limit change handler for visual feedback
+    document.getElementById('ageLimit').addEventListener('change', function() {
+        const selectedValue = this.value;
+        const ageInfoMap = {
+            'AGE_P': 'General Audiences - All ages admitted, suitable for everyone',
+            'AGE_13_PLUS': 'For ages 13 and above - May contain mild violence or suggestive themes',
+            'AGE_16_PLUS': 'For ages 16 and above - May contain moderate violence, strong language',
+            'AGE_18_PLUS': 'Adults only (18+) - May contain strong violence, sexual content, adult themes'
+        };
+
+        // Update form text with description
+        const formText = this.parentElement.querySelector('.form-text');
+        if (selectedValue && ageInfoMap[selectedValue]) {
+            formText.textContent = ageInfoMap[selectedValue];
+            formText.style.color = '#4facfe';
+            formText.style.fontWeight = '500';
+        } else {
+            formText.textContent = 'Select appropriate age rating for content (required)';
+            formText.style.color = '#4a3577';
+            formText.style.fontWeight = 'normal';
+        }
+
+        // Add visual feedback with color coding
+        const selectElement = this;
+        selectElement.style.borderColor = '';
+        if (selectedValue) {
+            switch(selectedValue) {
+                case 'AGE_P':
+                    selectElement.style.borderColor = '#28a745';
+                    break;
+                case 'AGE_13_PLUS':
+                    selectElement.style.borderColor = '#ffc107';
+                    break;
+                case 'AGE_16_PLUS':
+                    selectElement.style.borderColor = '#ff9800';
+                    break;
+                case 'AGE_18_PLUS':
+                    selectElement.style.borderColor = '#dc3545';
+                    break;
+            }
+        }
+    });
+
     // Auto-dismiss alerts after 5 seconds
     setTimeout(function() {
         const alerts = document.querySelectorAll('.alert');
@@ -1333,7 +1440,7 @@
         });
     }, 100);
 
-    console.log('Premium cinema creation interface loaded');
+    console.log('Premium cinema creation interface loaded with database constraints validation');
 </script>
 
 <style>

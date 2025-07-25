@@ -177,6 +177,18 @@ public class DashboardService {
                 .ticketsThisYear(countTicketsInRange(startOfYear, endOfYear))
                 .build();
     }
+    public DashboardDTO toDTOByRange(LocalDateTime start, LocalDateTime end) {
+        return DashboardDTO.builder()
+                .showingMovies(countCurrentlyShowingMovies())
+                .revenueToday(getRevenueToday())
+                .revenueMonth(getRevenueInRange(LocalDate.now().withDayOfMonth(1).atStartOfDay(), LocalDateTime.now()))
+                .revenueYear(getRevenueInRange(start, end))
+                .ticketsToday(countTicketsToday())
+                .ticketsMonth(countTicketsInRange(LocalDate.now().withDayOfMonth(1).atStartOfDay(), LocalDateTime.now()))
+                .ticketsThisYear(countTicketsInRange(start, end))
+                .build();
+    }
+
 
     public ServiceFeedbackDTO toDTO(ServiceFeedback feedback) {
         return ServiceFeedbackDTO.builder()

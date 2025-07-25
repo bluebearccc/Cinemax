@@ -58,7 +58,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
     private String getRedirectUrl(Role role) {
         return switch (role) {
-            case Admin -> "/admin/dashboard";
+            case Admin -> "/admin/";
             case Customer -> "/";
             case Staff -> "/staff/home";
             case Cashier -> "/cashier/movie/";

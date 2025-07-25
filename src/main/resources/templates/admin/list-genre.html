@@ -775,53 +775,7 @@
 </head>
 <body>
 <!-- Premium Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-container">
-            <div class="logo-icon">
-                <i class="fas fa-film"></i>
-            </div>
-            <div>
-                <div class="logo-text">BlueBear</div>
-                <div class="logo-subtitle">CINEMA SUITE</div>
-            </div>
-        </div>
-    </div>
-
-    <nav class="sidebar-nav">
-        <div class="nav-section">
-            <div class="nav-section-title">Main</div>
-            <a class="nav-link" href="/admin/">
-                <i class="nav-icon fas fa-home"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Content</div>
-            <a class="nav-link" href="/admin/movies">
-                <i class="nav-icon fas fa-film"></i>
-                <span class="nav-text">Movies</span>
-            </a>
-            <a class="nav-link" href="/admin/actors">
-                <i class="nav-icon fas fa-users"></i>
-                <span class="nav-text">Actors</span>
-            </a>
-            <a class="nav-link active" href="/admin/genres">
-                <i class="nav-icon fas fa-tags"></i>
-                <span class="nav-text">Genres</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Marketing</div>
-            <a class="nav-link" href="/admin/vouchers">
-                <i class="nav-icon fas fa-ticket-alt"></i>
-                <span class="nav-text">Vouchers</span>
-            </a>
-        </div>
-    </nav>
-</div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -931,16 +885,16 @@
                 </thead>
                 <tbody>
                 <tr th:each="genre : ${genres}">
-                    <td th:text="${genre.genreId}">1</td>
+                    <td th:text="${genre.genreID}">1</td>
                     <td>
                         <span class="genre-name" th:text="${genre.genreName}">Action</span>
                     </td>
                     <td>
-                        <span class="movie-count-badge" th:text="${movieCounts[genre.genreId] ?: 0}">0</span>
+                        <span class="movie-count-badge" th:text="${movieCounts[genre.genreID] ?: 0}">0</span>
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <a th:href="@{/admin/genres/{id}(id=${genre.genreId})}"
+                            <a th:href="@{/admin/genres/{id}(id=${genre.genreID})}"
                                class="btn-action btn-view" title="View Classification Details">
                                 <i class="fas fa-eye"></i>
                             </a>
@@ -1065,12 +1019,12 @@
     });
 
     // Delete confirmation function
-    function confirmDelete(genreId) {
+    function confirmDelete(genreID) {
         if (confirm('Are you sure you want to delete this genre? This action cannot be undone.')) {
             // Create a form to submit DELETE request
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '/admin/genres/' + genreId + '/delete';
+            form.action = '/admin/genres/' + genreID + '/delete';
 
             // Add CSRF token if using Spring Security
             const csrfToken = document.querySelector('meta[name="_csrf"]');

@@ -230,6 +230,40 @@
             transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        .age-rating-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .age-rating-badge::before {
+            content: '';
+            width: 6px;
+            height: 6px;
+            background: #4facfe;
+            border-radius: 50%;
+        }
+
+        .age-rating-badge[data-rating="AGE_P"] { border-color: rgba(40, 167, 69, 0.5); }
+        .age-rating-badge[data-rating="AGE_P"]::before { background: #28a745; }
+
+        .age-rating-badge[data-rating="AGE_13_PLUS"] { border-color: rgba(255, 193, 7, 0.5); }
+        .age-rating-badge[data-rating="AGE_13_PLUS"]::before { background: #ffc107; }
+
+        .age-rating-badge[data-rating="AGE_16_PLUS"] { border-color: rgba(255, 152, 0, 0.5); }
+        .age-rating-badge[data-rating="AGE_16_PLUS"]::before { background: #ff9800; }
+
+        .age-rating-badge[data-rating="AGE_18_PLUS"] { border-color: rgba(220, 53, 69, 0.5); }
+        .age-rating-badge[data-rating="AGE_18_PLUS"]::before { background: #dc3545; }
+
         /* Premium Back Navigation */
         .back-nav {
             margin-bottom: 32px;
@@ -960,6 +994,40 @@
         ::-webkit-scrollbar-thumb:hover {
             background: rgba(255, 255, 255, 0.5);
         }
+
+        .age-rating-info {
+            background: rgba(79, 172, 254, 0.2);
+            color: #4facfe;
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            border: 1px solid rgba(79, 172, 254, 0.3);
+        }
+
+        .age-rating-info[data-rating="AGE_P"] {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border-color: rgba(40, 167, 69, 0.3);
+        }
+
+        .age-rating-info[data-rating="AGE_13_PLUS"] {
+            background: rgba(255, 193, 7, 0.2);
+            color: #ffc107;
+            border-color: rgba(255, 193, 7, 0.3);
+        }
+
+        .age-rating-info[data-rating="AGE_16_PLUS"] {
+            background: rgba(255, 152, 0, 0.2);
+            color: #ff9800;
+            border-color: rgba(255, 152, 0, 0.3);
+        }
+
+        .age-rating-info[data-rating="AGE_18_PLUS"] {
+            background: rgba(220, 53, 69, 0.2);
+            color: #dc3545;
+            border-color: rgba(220, 53, 69, 0.3);
+        }
     </style>
 </head>
 <body>
@@ -1055,6 +1123,10 @@
                             <i class="fas fa-building"></i>
                             <span th:text="${movie.studio}">Marvel Studios</span>
                         </div>
+                        <div class="meta-item" th:if="${movie.ageLimit}">
+                            <i class="fas fa-shield-alt"></i>
+                            <span class="age-rating-badge" th:text="${movie.ageLimit.name()}">AGE_P</span>
+                        </div>
                     </div>
 
                     <div class="rating-display">
@@ -1067,7 +1139,7 @@
                     </div>
 
                     <div class="genre-list" th:if="${movie.genres != null and !#lists.isEmpty(movie.genres)}">
-                        <span th:each="genre : ${movie.genres}" class="genre-tag" th:text="${genre}">Action</span>
+                        <span th:each="genre : ${movie.genres}" class="genre-tag" th:text="${genre.genreName}">Action</span>
                     </div>
 
                     <div th:class="${movie.status == 'Active'} ? 'status-indicator status-active' : 'status-indicator status-inactive'">
@@ -1088,7 +1160,7 @@
                             <i class="fab fa-youtube"></i>
                             Watch Trailer
                         </button>
-                        <a th:href="@{/admin/movies/{id}/edit(id=${movie.movieId})}" class="btn-action btn-primary">
+                        <a th:href="@{/admin/movies/{id}/edit(id=${movie.movieID})}" class="btn-action btn-primary">
                             <i class="fas fa-edit"></i>
                             Edit Movie
                         </a>
@@ -1136,6 +1208,15 @@
                     <span class="info-label">Status</span>
                     <span class="info-value" th:text="${movie.status}">Active</span>
                 </li>
+                <li>
+                    <span class="info-label">Age Rating</span>
+                    <span class="info-value">
+        <span th:if="${movie.ageLimit}" class="age-rating-info"
+              th:text="${movie.ageLimit.name()}"
+              th:attr="data-rating=${movie.ageLimit.name()}">AGE_P</span>
+        <span th:if="${movie.ageLimit == null}" class="text-muted">Not specified</span>
+    </span>
+                </li>
             </ul>
         </div>
 
@@ -1169,7 +1250,7 @@
         </h2>
         <div class="movies-grid">
             <div th:each="relatedMovie : ${relatedMovies}" class="movie-card"
-                 th:onclick="'window.location.href=\'/admin/movies/' + ${relatedMovie.movieId} + '\''">
+                 th:onclick="'window.location.href=\'/admin/movies/' + ${relatedMovie.movieID} + '\''">
                 <img th:src="${relatedMovie.image != null ? relatedMovie.image : '/uploads/default-movie.jpg'}"
                      th:alt="${relatedMovie.movieName}"
                      class="movie-card-image"

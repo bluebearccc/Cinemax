@@ -766,61 +766,7 @@
 </head>
 <body>
 <!-- Premium Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-container">
-            <div class="logo-icon">
-                <i class="fas fa-film"></i>
-            </div>
-            <div>
-                <div class="logo-text">BlueBear</div>
-                <div class="logo-subtitle">CINEMA SUITE</div>
-            </div>
-        </div>
-    </div>
-
-    <nav class="sidebar-nav">
-        <div class="nav-section">
-            <div class="nav-section-title">Main</div>
-            <a class="nav-link" href="/admin/">
-                <i class="nav-icon fas fa-home"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Content</div>
-            <a class="nav-link" href="/admin/movies">
-                <i class="nav-icon fas fa-film"></i>
-                <span class="nav-text">Movies</span>
-            </a>
-            <a class="nav-link" href="/admin/actors">
-                <i class="nav-icon fas fa-users"></i>
-                <span class="nav-text">Actors</span>
-            </a>
-            <a class="nav-link active" href="/admin/genres">
-                <i class="nav-icon fas fa-tags"></i>
-                <span class="nav-text">Genres</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Marketing</div>
-            <a class="nav-link" href="/admin/vouchers">
-                <i class="nav-icon fas fa-ticket-alt"></i>
-                <span class="nav-text">Vouchers</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">System</div>
-            <a class="nav-link" href="/admin/accounts">
-                <i class="nav-icon fas fa-user-circle"></i>
-                <span class="nav-text">Accounts</span>
-            </a>
-        </div>
-    </nav>
-</div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -856,7 +802,7 @@
         </div>
 
         <div class="card-body">
-            <form th:action="${isEdit} ? @{/admin/genres/{id}/edit(id=${genre.genreId})} : @{/admin/genres/add}"
+            <form th:action="${isEdit} ? @{/admin/genres/{id}/edit(id=${genre.genreID})} : @{/admin/genres/add}"
                   method="post" th:object="${genre}" id="genreForm" novalidate>
 
                 <div class="row">
@@ -1010,7 +956,7 @@
                     Once you delete this genre, it will be removed from all associated movies.
                     This action cannot be undone and will permanently affect your movie categorization.
                 </div>
-                <form th:action="@{/admin/genres/{id}/delete(id=${genre.genreId})}"
+                <form th:action="@{/admin/genres/{id}/delete(id=${genre.genreID})}"
                       method="post"
                       id="deleteForm"
                       style="display: inline;">
@@ -1051,9 +997,9 @@
 
             if (!moviesContainer) return;
 
-            const genreId = window.location.pathname.match(/\/genres\/(\d+)\/edit/)?.[1];
+            const genreID = window.location.pathname.match(/\/genres\/(\d+)\/edit/)?.[1];
 
-            if (!genreId) {
+            if (!genreID) {
                 moviesContainer.innerHTML = '<div class="text-center" style="color: #4a3577;">Genre ID not found</div>';
                 return;
             }
@@ -1069,7 +1015,7 @@
             // Fetch all movies and current genre's movies
             Promise.all([
                 fetch('/admin/movies/api/all').then(r => r.json()).catch(() => []),
-                fetch(`/admin/genres/${genreId}/movies`).then(r => r.json()).catch(() => [])
+                fetch(`/admin/genres/${genreID}/movies`).then(r => r.json()).catch(() => [])
             ]).then(([allMovies, currentMovies]) => {
                 console.log('All movies:', allMovies.length);
                 console.log('Current movies:', currentMovies.length);

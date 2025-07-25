@@ -84,7 +84,7 @@ public class BookingController {
 
 
             // Chuẩn bị dữ liệu cho bước 2
-            List<TheaterStockDTO> combos = bookingService.getAvailableCombos();
+            List<TheaterStockDTO> combos = bookingService.getAvailableCombos(roomId);
             //locj theo ten
             if (search != null && !search.isBlank()) {
                 combos = combos.stream()
@@ -151,7 +151,7 @@ public class BookingController {
             model.addAttribute("totalPrice", previewData.getTotalPrice());
             model.addAttribute("finalPrice", previewData.getFinalPrice());
             model.addAttribute("promotion", previewData.getPromotion());
-
+            System.out.println("🧾 Invoice ID trên QR: " + tempInvoice.getInvoiceID());
             return "common/preview";
         } catch (IllegalStateException e) {
             redirect.addFlashAttribute("error", "Một hoặc nhiều ghế bạn chọn đã được người khác đặt trước đó. Vui lòng chọn lại ghế khác.");
@@ -235,6 +235,12 @@ public class BookingController {
             return Map.of("status", "BOOKED");
         }
         return Map.of("status", "PENDING");
+    }
+    @GetMapping("/simulate-payment")
+    @ResponseBody
+    public String simulateWebhook(@RequestParam Integer invoiceId) {
+        bookingService.finalizeBooking(invoiceId);
+        return "OK";
     }
 
 

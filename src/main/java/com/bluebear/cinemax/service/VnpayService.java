@@ -1,5 +1,6 @@
 package com.bluebear.cinemax.service;
 import com.bluebear.cinemax.config.VnpayConfig;
+import com.bluebear.cinemax.config.sepayConfig;
 import com.bluebear.cinemax.dto.InvoiceDTO;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.dto.*;
@@ -31,6 +32,8 @@ public class VnpayService {
     private final VnpayConfig vnpayConfig;
     private final BookingServiceSF bookingServiceImp;
     private final TheaterStockRepository theaterStockRepo;
+    private final sepayConfig sepayConfig;
+
     public String createPaymentUrl(InvoiceDTO invoice, HttpServletRequest request) {
         if (invoice.getTotalPrice() == null) {
             throw new IllegalStateException("Invoice chưa có tổng tiền.");
@@ -222,10 +225,10 @@ public class VnpayService {
         detailSeatRepo.saveAll(detailSeats);
     }
     public String createSepayQrUrl(InvoiceDTO invoice) {
-        String accountNumber = "0916897138"; // Số tài khoản nhận (MB Bank của bạn)
-        String bankCode = "MB";              // Mã ngân hàng (ví dụ: MB, VCB,...)
-        double amount = invoice.getTotalPrice(); // Đơn vị: VND
-        String description = "DH" + invoice.getInvoiceID(); // Nội dung chuyển khoản phải chứa DHxxx
+        String accountNumber = sepayConfig.getAccount();
+        String bankCode = sepayConfig.getBank();
+        double amount = invoice.getTotalPrice();
+        String description = "DH" + invoice.getInvoiceID(); // Chú ý dùng getInvoiceID()
 
         return String.format(
                 "https://qr.sepay.vn/img?acc=%s&bank=%s&amount=%.0f&des=%s",

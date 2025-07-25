@@ -41,4 +41,5 @@ public interface TheaterStockRepository extends JpaRepository<TheaterStock, Inte
     boolean existsByItemNameIgnoreCaseAndTheater_TheaterID(String itemName, Integer theaterId);
     List<TheaterStock> findByItemNameIgnoreCase(String itemName);
 
+
 }

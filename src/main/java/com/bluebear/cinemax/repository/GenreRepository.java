@@ -23,10 +23,12 @@ public interface GenreRepository extends JpaRepository<Genre, Integer> {
             "INNER JOIN Movie_Genre mg ON g.GenreID = mg.GenreID", nativeQuery = true)
     long countGenresWithMovies();
 
-    @Query(value = "SELECT TOP 1 g.* FROM Genre g " +
-            "LEFT JOIN Movie_Genre mg ON g.GenreID = mg.GenreID " +
-            "GROUP BY g.GenreID, g.GenreName " +
-            "ORDER BY COUNT(mg.MovieID) DESC", nativeQuery = true)
+    @Query(value = "SELECT g.* \n" +
+            "FROM Genre g \n" +
+            "LEFT JOIN Movie_Genre mg ON g.GenreID = mg.GenreID \n" +
+            "GROUP BY g.GenreID, g.GenreName \n" +
+            "ORDER BY COUNT(mg.MovieID) DESC \n" +
+            "LIMIT 1;", nativeQuery = true)
     Optional<Genre> findMostPopularGenre();
 
     // Movie-Genre Association Queries

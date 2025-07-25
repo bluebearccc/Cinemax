@@ -562,32 +562,7 @@
 </head>
 <body>
 <!-- Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <h5>
-            <i class="fas fa-film"></i>
-            BlueBear Cinema
-        </h5>
-    </div>
-
-    <nav class="sidebar-nav">
-        <a class="nav-link" href="/admin/">
-            <i class="fas fa-home"></i>Dashboard
-        </a>
-        <a class="nav-link" href="/admin/movies">
-            <i class="fas fa-film"></i>Movies
-        </a>
-        <a class="nav-link" href="/admin/actors">
-            <i class="fas fa-users"></i>Actors
-        </a>
-        <a class="nav-link active" href="/admin/genres">
-            <i class="fas fa-tags"></i>Genres
-        </a>
-        <a class="nav-link" href="/admin/vouchers">
-            <i class="fas fa-ticket-alt"></i>Vouchers
-        </a>
-    </nav>
-</div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -608,13 +583,13 @@
     <div class="header-section fade-in">
         <div class="header-content">
             <h2>Genre Details</h2>
-            <p class="breadcrumb-text">Dashboard > Genres > <span th:text="${genre.genreId}">1</span></p>
+            <p class="breadcrumb-text">Dashboard > Genres > <span th:text="${genre.genreID}">1</span></p>
         </div>
         <div class="action-buttons">
             <a href="/admin/genres" class="btn-secondary">
                 <i class="fas fa-arrow-left"></i>Back to Genres
             </a>
-            <a th:href="@{/admin/genres/{id}/edit(id=${genre.genreId})}" class="btn-warning">
+            <a th:href="@{/admin/genres/{id}/edit(id=${genre.genreID})}" class="btn-warning">
                 <i class="fas fa-edit"></i>Edit Genre
             </a>
         </div>
@@ -634,7 +609,7 @@
                     <i class="fas fa-id-card"></i>
                     Genre ID
                 </div>
-                <div class="genre-id-display" th:text="${genre.genreId}">1</div>
+                <div class="genre-id-display" th:text="${genre.genreID}">1</div>
             </div>
 
             <div class="detail-item">
@@ -666,7 +641,7 @@
             <div class="genre-preview">
                 <div class="genre-preview-content">
                     <div class="genre-title">BlueBear Cinema Genre</div>
-                    <div class="genre-id-preview" th:text="${genre.genreId}">1</div>
+                    <div class="genre-id-preview" th:text="${genre.genreID}">1</div>
                     <div class="genre-name-preview" th:text="${genre.genreName}">Action</div>
                     <div style="font-size: 0.9rem; margin-top: 10px; opacity: 0.9;">
                         Movie Category System
@@ -701,13 +676,13 @@
                         <i class="fas fa-copy"></i>Copy Genre Name
                     </button>
 
-                    <a th:href="@{/admin/movies/genre/{id}(id=${genre.genreId})}"
+                    <a th:href="@{/admin/movies/genre/{id}(id=${genre.genreID})}"
                        class="btn-primary w-100">
                         <i class="fas fa-film"></i>View Movies in Genre
                     </a>
 
                     <button type="button" class="btn-danger w-100"
-                            th:data-genre-id="${genre.genreId}"
+                            th:data-genre-id="${genre.genreID}"
                             th:data-genre-name="${genre.genreName}"
                             onclick="confirmDelete(this.getAttribute('data-genre-id'), this.getAttribute('data-genre-name'))">
                         <i class="fas fa-trash"></i>Delete Genre
@@ -735,7 +710,7 @@
                     <h5>Are you sure you want to delete this genre?</h5>
                 </div>
                 <div style="background: var(--light-bg); border-radius: 8px; padding: 16px; margin-bottom: 16px;">
-                    <strong>Genre ID: <span id="deleteGenreId" style="color: var(--primary-blue);"></span></strong><br>
+                    <strong>Genre ID: <span id="deletegenreID" style="color: var(--primary-blue);"></span></strong><br>
                     <strong>Genre Name: <span id="deleteGenreName" style="color: var(--success-green);"></span></strong>
                 </div>
                 <p class="text-danger">
@@ -828,10 +803,10 @@
     }
 
     // Delete confirmation
-    function confirmDelete(genreId, genreName) {
-        document.getElementById('deleteGenreId').textContent = genreId;
+    function confirmDelete(genreID, genreName) {
+        document.getElementById('deletegenreID').textContent = genreID;
         document.getElementById('deleteGenreName').textContent = genreName;
-        document.getElementById('deleteForm').action = '/admin/genres/' + genreId + '/delete';
+        document.getElementById('deleteForm').action = '/admin/genres/' + genreID + '/delete';
         new bootstrap.Modal(document.getElementById('deleteModal')).show();
     }
 </script>

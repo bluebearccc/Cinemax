@@ -800,53 +800,7 @@
 </head>
 <body>
 <!-- Premium Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-container">
-            <div class="logo-icon">
-                <i class="fas fa-film"></i>
-            </div>
-            <div>
-                <div class="logo-text">BlueBear</div>
-                <div class="logo-subtitle">CINEMA SUITE</div>
-            </div>
-        </div>
-    </div>
-
-    <nav class="sidebar-nav">
-        <div class="nav-section">
-            <div class="nav-section-title">Main</div>
-            <a class="nav-link" href="/admin/">
-                <i class="nav-icon fas fa-home"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Content</div>
-            <a class="nav-link" href="/admin/movies">
-                <i class="nav-icon fas fa-film"></i>
-                <span class="nav-text">Movies</span>
-            </a>
-            <a class="nav-link active" href="/admin/actors">
-                <i class="nav-icon fas fa-users"></i>
-                <span class="nav-text">Actors</span>
-            </a>
-            <a class="nav-link" href="/admin/genres">
-                <i class="nav-icon fas fa-tags"></i>
-                <span class="nav-text">Genres</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Marketing</div>
-            <a class="nav-link" href="/admin/vouchers">
-                <i class="nav-icon fas fa-ticket-alt"></i>
-                <span class="nav-text">Vouchers</span>
-            </a>
-        </div>
-    </nav>
-</div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -876,9 +830,10 @@
         <div class="actor-main-info">
             <div class="actor-image-container">
                 <div th:if="${actor.image != null and !#strings.isEmpty(actor.image)}">
-                    <img th:src="${actor.image}"
+                    <img th:src="@{${actor.image}}"
                          th:alt="${actor.actorName}"
-                         class="actor-image">
+                         class="actor-image"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
                 </div>
                 <div th:if="${actor.image == null or #strings.isEmpty(actor.image)}"
                      class="actor-image-placeholder">
@@ -889,12 +844,12 @@
             <div class="actor-details">
                 <h1 class="actor-name" th:text="${actor.actorName}">Actor Name</h1>
 
-                <div class="actor-id-badge" th:text="'Actor ID: #' + ${actor.actorId}">#001</div>
+                <div class="actor-id-badge" th:text="'Actor ID: #' + ${actor.actorID}">#001</div>
 
                 <div class="movie-count-badge" th:text="${movies.size() + ' Movies Featured'}">0 Movies Featured</div>
 
                 <div class="action-buttons">
-                    <a th:href="@{/admin/actors/edit/{id}(id=${actor.actorId})}" class="btn-action btn-warning">
+                    <a th:href="@{/admin/actors/edit/{id}(id=${actor.actorID})}" class="btn-action btn-warning">
                         <i class="fas fa-edit"></i>
                         Edit Profile
                     </a>
@@ -942,10 +897,13 @@
                                 <div class="movie-title" th:text="${movie.movieName}">Movie Title</div>
                                 <div class="movie-year" th:text="${#temporals.year(movie.startDate)}">2024</div>
                                 <div class="movie-badges">
-                                    <span class="badge" th:text="${movie.genres != null and !movie.genres.isEmpty() ? movie.genres[0] : 'Unknown'}">Action</span>
+                                    <div th:if="${movie.genres != null and !movie.genres.isEmpty()}">
+                                        <span th:each="genre : ${movie.genres}" class="badge" th:text="${genre.genreName}">Genre</span>
+                                    </div>
+                                    <span th:if="${movie.genres == null or movie.genres.isEmpty()}" class="badge">No Genre</span>
                                     <span class="badge bg-info" th:text="${movie.duration + ' min'}">120 min</span>
                                 </div>
-                                <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" class="btn-action btn-primary btn-sm">
+                                <a th:href="@{/admin/movies/{id}(id=${movie.movieID})}" class="btn-action btn-primary btn-sm">
                                     <i class="fas fa-eye"></i> View Details
                                 </a>
                             </div>
@@ -967,7 +925,7 @@
                 <div class="card-body">
                     <div class="info-row">
                         <span class="info-label">Actor ID</span>
-                        <span class="info-value" th:text="'#' + ${actor.actorId}">#001</span>
+                        <span class="info-value" th:text="'#' + ${actor.actorID}">#001</span>
                     </div>
 
                     <div class="info-row">
@@ -1062,7 +1020,7 @@
                 <button type="button" class="btn-action btn-secondary" data-bs-dismiss="modal">
                     <i class="fas fa-times"></i> Cancel
                 </button>
-                <form th:action="@{/admin/actors/delete/{id}(id=${actor.actorId})}" method="post" class="d-inline">
+                <form th:action="@{/admin/actors/delete/{id}(id=${actor.actorID})}" method="post" class="d-inline">
                     <button type="submit" class="btn-action btn-danger">
                         <i class="fas fa-trash"></i>
                         <span th:text="${movies.size() > 0 ? 'Delete Actor & Affect ' + movies.size() + ' Movies' : 'Delete Actor'}">
