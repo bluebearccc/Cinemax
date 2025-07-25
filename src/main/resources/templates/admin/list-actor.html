@@ -1038,7 +1038,7 @@
                 <tbody>
                 <tr th:each="actor : ${actors}">
                     <td>
-                        <div class="actor-id" th:text="${actor.actorId}">1</div>
+                        <div class="actor-id" th:text="${actor.actorID}">1</div>
                     </td>
                     <td>
                         <div class="actor-name" th:text="${actor.actorName}">John Doe</div>
@@ -1083,7 +1083,7 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <a th:href="@{/admin/actors/{id}(id=${actor.actorId})}"
+                            <a th:href="@{/admin/actors/{id}(id=${actor.actorID})}"
                                class="btn-action btn-view" title="View Talent Profile">
                                 <i class="fas fa-eye"></i>
                             </a>

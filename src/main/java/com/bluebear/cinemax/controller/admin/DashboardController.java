@@ -18,17 +18,8 @@ import java.util.Map;
 
 @Controller
 @RequestMapping("/admin")
+
 public class DashboardController {
-
-    /**
-     * Trang Dashboard chính - Đơn giản
-     */
-    @GetMapping("/")
-    public String dashboard(Model model) {
-        model.addAttribute("pageTitle", "Dashboard - BlueBear Cinema");
-        return "admin/index";
-    }
-
     @Autowired
     private DashboardService dashboardService;
 
@@ -89,4 +80,7 @@ public class DashboardController {
     public Map<String, Double> getRevenueTrendByBookingDate(@RequestParam(defaultValue = "7") int days) {
         return dashboardService.getRevenueTrendByBookingDate(days);
     }
+
 }
+
+

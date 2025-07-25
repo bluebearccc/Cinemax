@@ -843,53 +843,8 @@
 </head>
 <body>
 <!-- Premium Sidebar -->
-<div class="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-container">
-            <div class="logo-icon">
-                <i class="fas fa-film"></i>
-            </div>
-            <div>
-                <div class="logo-text">BlueBear</div>
-                <div class="logo-subtitle">CINEMA SUITE</div>
-            </div>
-        </div>
-    </div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
 
-    <nav class="sidebar-nav">
-        <div class="nav-section">
-            <div class="nav-section-title">Main</div>
-            <a class="nav-link" href="/admin/">
-                <i class="nav-icon fas fa-home"></i>
-                <span class="nav-text">Dashboard</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Content</div>
-            <a class="nav-link active" th:href="@{/admin/movies}">
-                <i class="nav-icon fas fa-film"></i>
-                <span class="nav-text">Movies</span>
-            </a>
-            <a class="nav-link" href="/admin/actors">
-                <i class="nav-icon fas fa-users"></i>
-                <span class="nav-text">Actors</span>
-            </a>
-            <a class="nav-link" href="/admin/genres">
-                <i class="nav-icon fas fa-tags"></i>
-                <span class="nav-text">Genres</span>
-            </a>
-        </div>
-
-        <div class="nav-section">
-            <div class="nav-section-title">Marketing</div>
-            <a class="nav-link" href="/admin/vouchers">
-                <i class="nav-icon fas fa-ticket-alt"></i>
-                <span class="nav-text">Vouchers</span>
-            </a>
-        </div>
-    </nav>
-</div>
 
 <!-- Main Content -->
 <div class="main-content">
@@ -934,12 +889,12 @@
                            th:value="${keyword}" placeholder="Search by title or content">
                 </div>
                 <div class="col-md-3">
-                    <select class="form-select" name="genreId">
+                    <select class="form-select" name="genreID">
                         <option value="">All Categories</option>
                         <option th:each="genre : ${genres}"
-                                th:value="${genre.genreId}"
+                                th:value="${genre.genreID}"
                                 th:text="${genre.genreName}"
-                                th:selected="${genre.genreId == selectedGenreId}">
+                                th:selected="${genre.genreID == selectedgenreID}">
                         </option>
                     </select>
                 </div>
@@ -964,7 +919,7 @@
         </form>
 
         <!-- Search Results Info -->
-        <div th:if="${keyword != null and !#strings.isEmpty(keyword)} or ${selectedGenreId != null} or ${selectedStatus != null and !#strings.isEmpty(selectedStatus)}" class="search-results-info">
+        <div th:if="${keyword != null and !#strings.isEmpty(keyword)} or ${selectedgenreID != null} or ${selectedStatus != null and !#strings.isEmpty(selectedStatus)}" class="search-results-info">
             <div class="d-flex justify-content-between align-items-center flex-wrap">
                 <div>
                     <i class="fas fa-filter me-2"></i>
@@ -975,10 +930,10 @@
                         Title: "<span th:text="${keyword}"></span>"
                     </span>
 
-                    <span th:if="${selectedGenreId != null}" class="filter-badge">
+                    <span th:if="${selectedgenreID != null}" class="filter-badge">
                         <i class="fas fa-tags"></i>
                         Category:
-                        <span th:each="genre : ${genres}" th:if="${genre.genreId == selectedGenreId}" th:text="${genre.genreName}"></span>
+                        <span th:each="genre : ${genres}" th:if="${genre.genreID == selectedgenreID}" th:text="${genre.genreName}"></span>
                     </span>
 
                     <span th:if="${selectedStatus != null and !#strings.isEmpty(selectedStatus)}" class="filter-badge">
@@ -1033,7 +988,7 @@
                     </td>
                     <td>
                         <div th:if="${movie.genres != null and !#lists.isEmpty(movie.genres)}">
-                            <span th:each="genre : ${movie.genres}" class="genre-badge" th:text="${genre}">Genre</span>
+                            <span th:each="genre : ${movie.genres}" class="genre-badge" th:text="${genre.genreName}">Genre</span>
                         </div>
                         <small th:if="${movie.genres == null or #lists.isEmpty(movie.genres)}" style="color: rgba(255, 255, 255, 0.7);">No categories assigned</small>
                     </td>
@@ -1051,10 +1006,10 @@
                     </td>
                     <td>
                         <div class="action-buttons">
-                            <a th:href="@{/admin/movies/{id}(id=${movie.movieId})}" class="btn-action btn-view">
+                            <a th:href="@{/admin/movies/{id}(id=${movie.movieID})}" class="btn-action btn-view">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a th:href="@{/admin/movies/{id}/edit(id=${movie.movieId})}" class="btn-action btn-edit">
+                            <a th:href="@{/admin/movies/{id}/edit(id=${movie.movieID})}" class="btn-action btn-edit">
                                 <i class="fas fa-edit"></i>
                             </a>
                         </div>
@@ -1107,7 +1062,7 @@
         });
 
         // Auto-submit premium form interactions
-        const genreSelect = document.querySelector('select[name="genreId"]');
+        const genreSelect = document.querySelector('select[name="genreID"]');
         const statusSelect = document.querySelector('select[name="status"]');
         const searchForm = document.getElementById('searchForm');
 
