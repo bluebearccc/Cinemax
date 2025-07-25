@@ -192,7 +192,7 @@ public class MovieServiceImpl implements MovieService {
         Iterator<MovieDTO> iterator = movieDTOS.iterator();
         while (iterator.hasNext()) {
             MovieDTO movieDTO = iterator.next();
-            List<ScheduleDTO> scheduleDTOS = scheduleService.getScheduleByMovieIdAndDate(movieDTO.getMovieID(), schedule).getContent();
+            List<ScheduleDTO> scheduleDTOS = scheduleService.getScheduleByMovieIdAndTheaterIdAndDateAndRoomType(movieDTO.getMovieID(), theaterId, schedule, roomType).getContent();
             for (ScheduleDTO scheduleDTO : scheduleDTOS) {
                 scheduleService.calculateNumOfSeatLeft(scheduleDTO);
             }

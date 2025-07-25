@@ -49,15 +49,11 @@ public class HomeController {
     int maximumFeedback;
     int currentNumberOfFeedback;
     String currentWebPage;
-
-    @PostConstruct public void init() {
+    @GetMapping()
+    public String home(Model model) {
         genres = genreService.getAllGenres();
         theaters = theaterService.getAllTheaters();
         maximumFeedback = movieFeedbackService.countDistinctMovieByFeedBack();
-    }
-
-    @GetMapping()
-    public String home(Model model) {
         movieFeedbacks = new LinkedHashMap<>();
         currentMovies = movieService.findAllMoviesCurrentlyShow();
         moviesHaveFeedback = movieService.findMoviesThatHaveFeedback(Pageable.unpaged());
@@ -118,6 +114,7 @@ public class HomeController {
         }
         theaterMovies = movieService.findMoviesByScheduleAndTheaterAndRoomType(dateTime, theaterId, roomType);
         currentTheater = theaterService.getTheaterById(theaterId);
+
         model.addAttribute("isNearest", isNearest);
         model.addAttribute("roomType", roomType);
         model.addAttribute("theaterMovies", theaterMovies);

@@ -48,14 +48,10 @@ public class BlogController {
     private List<BlogDTO> sameCateBlogs;
     private Map<String, LocalDateTime> viewTracking = new HashMap<>();
 
-    @PostConstruct
-    public void init() {
-        theaters = theaterService.getAllTheaters();
-        genres = genreService.getAllGenres();
-    }
-
     @GetMapping("/blog")
     public String blog(Model model) {
+        theaters = theaterService.getAllTheaters();
+        genres = genreService.getAllGenres();
         categories = blogCategoryService.getAllCategories();
         blogs = blogService.getAllBlogs(PageRequest.of(0, Constant.BLOGS_PER_PAGE));
 
@@ -90,6 +86,8 @@ public class BlogController {
             isLiked = blogLikeService.hasLiked(blogDTO.getBlogID(), customerDTO.getId());
         }
 
+        theaters = theaterService.getAllTheaters();
+        genres = genreService.getAllGenres();
         sameCateBlogs = blogService.getBlogsWithSameCate(blogDTO);
         model.addAttribute("isLiked", isLiked);
         model.addAttribute("genres", genres);

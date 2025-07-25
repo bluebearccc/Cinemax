@@ -20,9 +20,9 @@
         <div class="navbar-nav ms-auto">
                 <span class="navbar-text me-3">
                     <i class="fas fa-user-circle me-1"></i>
-                    Cashier: <span th:text="${session.cashierName != null ? session.cashierName : 'Admin'}">Admin</span>
+                    Cashier: <span th:text="${session.employee != null ? session.employee.fullName : 'Admin'}">Admin</span>
                 </span>
-            <a href="/login" class="btn btn-outline-light btn-sm">
+            <a href="/logout" class="btn btn-outline-light btn-sm">
                 <i class="fas fa-sign-out-alt me-1"></i>Logout
             </a>
         </div>
@@ -672,7 +672,7 @@
     function startPaymentCheck(invoiceId) {
         cleanupTimers();
         paymentPoller = setInterval(function () {
-            $.post("/cashier/check-payment-status", { order_id: invoiceId })
+            $.post("/cashier/booking/check-payment-status", { order_id: invoiceId })
                 .done(function (data) {
                     if (data.payment_status === "Booked" || data.payment_status === "Paid") {
                         cleanupTimers();

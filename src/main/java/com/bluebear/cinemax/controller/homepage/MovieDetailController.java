@@ -54,15 +54,11 @@ public class MovieDetailController {
     TheaterDTO currentTheater;
     String currentWebPage;
 
-    @PostConstruct
-    public void preInit() {
+    @GetMapping
+    public String movieDetail(Model model, @RequestParam int movieId, HttpSession session) {
         genres = genreService.getAllGenres();
         top5movies = movieService.findTop5MoviesHighestRate();
         theaters = theaterService.getAllTheaters();
-    }
-
-    @GetMapping
-    public String movieDetail(Model model, @RequestParam int movieId, HttpSession session) {
         boolean isViewed = false;
         movieFeedbacks = new LinkedHashMap<>();
         String roomType = "single";

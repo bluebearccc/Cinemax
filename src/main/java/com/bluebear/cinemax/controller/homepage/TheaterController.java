@@ -35,21 +35,15 @@ public class TheaterController {
     Page<MovieDTO> top5movies;
     String currentWebPage;
 
-
-    @PostConstruct
-    public void preInit() {
-        top5movies = movieService.findTop5MoviesHighestRate();
-        theaters = theaterService.getAllTheaters();
-        genres = genreService.getAllGenres();
-    }
-
     @GetMapping()
     public String theaterDetail(Model model, @RequestParam(name = "theaterId") int theaterId) {
         String roomType = "single";
         currentWebPage = "theaters";
         TheaterDTO theaterDTO = theaterService.getTheaterByIdWithRateCounts(theaterId);
         theaterMovies = movieService.findMoviesByScheduleAndTheaterAndRoomType(LocalDateTime.now(), theaterId, roomType);
-
+        top5movies = movieService.findTop5MoviesHighestRate();
+        theaters = theaterService.getAllTheaters();
+        genres = genreService.getAllGenres();
         model.addAttribute("genres", genres);
         model.addAttribute("theaterMovies", theaterMovies);
         model.addAttribute("roomType", roomType);
@@ -66,6 +60,9 @@ public class TheaterController {
         if (selectedIndex > 0) {
             dateTime = LocalDateTime.now().plusDays(selectedIndex).toLocalDate().atStartOfDay();
         }
+        top5movies = movieService.findTop5MoviesHighestRate();
+        theaters = theaterService.getAllTheaters();
+        genres = genreService.getAllGenres();
         theaterMovies = movieService.findMoviesByScheduleAndTheaterAndRoomType(dateTime, theaterId, roomType);
         model.addAttribute("roomType", roomType);
         model.addAttribute("theaterMovies", theaterMovies);
