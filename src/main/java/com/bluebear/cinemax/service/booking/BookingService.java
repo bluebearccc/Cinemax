@@ -130,8 +130,6 @@ public class BookingService {
                         if (stockItem.getQuantity() < quantity) {
                             throw new RuntimeException("Not enough stock for " + stockItem.getItemName());
                         }
-                        // **ĐÃ XÓA LOGIC TRỪ TỒN KHO TẠI ĐÂY**
-                        // Việc trừ tồn kho sẽ do trigger của database xử lý khi Detail_FD được lưu.
 
                         double itemTotalPrice = stockItem.getPrice() * quantity;
                         Detail_FD detailFd = Detail_FD.builder()
@@ -316,38 +314,5 @@ public class BookingService {
         return buildBookingResult(savedInvoice, schedule, seats, foodItemsDTO, totalTicketPrice, totalFoodPrice);
     }
 
-
-    public CheckinDTO performCheckIn(Integer invoiceId) {
-        LocalDateTime now = LocalDateTime.now();
-        Invoice invoice = invoiceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Hóa đơn không tồn tại với ID: " + invoiceId));
-
-        if (invoice.getStatus() == InvoiceStatus.CHECKED_IN) {
-            throw new IllegalStateException("Vé này đã được check-in trước đó.");
-        }
-
-        if (invoice.getStatus() != InvoiceStatus.Booked && invoice.getStatus() != InvoiceStatus.Unpaid) {
-            throw new IllegalStateException("Vé không hợp lệ để check-in (chưa thanh toán hoặc đã hủy).");
-        }
-
-        // Optional: Kiểm tra thời gian check-in so với suất chiế
-        if (now.isBefore(invoice.getBookingDate()) || now.isEqual(invoice.getBookingDate())) {
-
-        }
-        else {
-
-        }
-        // Ví dụ: chỉ cho phép check-in trong khoảng 1 giờ trước và sau giờ chiếu
-        // ...
-
-        // Cập nhật trạng thái
-        invoice.setStatus(InvoiceStatus.CHECKED_IN);
-        // Optional: Ghi nhận thời gian check-in
-        // invoice.setCheckInTime(LocalDateTime.now());
-        invoiceRepository.save(invoice);
-
-        // Trả về kết quả để hiển thị cho nhân viên
-        BookingResultDTO bookingResult = getBookingResult(invoiceId); // Tái sử dụng hàm đã có
-        return new CheckinDTO("success", "Check-in thành công!", bookingResult);
-    }
+    
 }
