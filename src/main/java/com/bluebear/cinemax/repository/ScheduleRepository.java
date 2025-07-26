@@ -17,6 +17,7 @@ import java.util.Optional;
 
 @Repository
 public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
+
     @Query("SELECT s FROM Schedule s JOIN FETCH s.movie JOIN FETCH s.room WHERE s.scheduleID = :scheduleId")
     Optional<Schedule> findByIdWithMovieAndRoom(@Param("scheduleId") Integer scheduleId);
     Page<Schedule> findByStatus(Schedule_Status status, Pageable pageable);
@@ -98,5 +99,8 @@ public interface ScheduleRepository extends JpaRepository<Schedule, Integer> {
             @Param("dateTime") LocalDateTime dateTime
     );
     List<Schedule> findByRoom_RoomID(Integer roomId);
-
+    @Query(value = "SELECT s.* " +
+            "FROM Schedule s JOIN Detail_Seat d ON d.ScheduleID = s.ScheduleID " +
+            "WHERE s.ScheduleID = :id AND s.StartTime < CURRENT_TIMESTAMP", nativeQuery = true)
+    List<Schedule> findSchedulesByDetailSeatInthePast(@Param("id") Integer id);
 }

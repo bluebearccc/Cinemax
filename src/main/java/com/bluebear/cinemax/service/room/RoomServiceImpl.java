@@ -3,14 +3,12 @@ package com.bluebear.cinemax.service.room;
 import com.bluebear.cinemax.dto.RoomDTO;
 import com.bluebear.cinemax.dto.ScheduleDTO;
 import com.bluebear.cinemax.dto.SeatDTO;
-import com.bluebear.cinemax.entity.Room;
-import com.bluebear.cinemax.entity.Schedule;
-import com.bluebear.cinemax.entity.Seat;
-import com.bluebear.cinemax.entity.Theater;
+import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.enumtype.*;
 import com.bluebear.cinemax.repository.*;
 import com.bluebear.cinemax.service.schedule.ScheduleService;
 import com.bluebear.cinemax.service.seat.SeatService;
+import com.bluebear.cinemax.service.email.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -25,6 +23,10 @@ import java.util.stream.Collectors;
 
 @Service
 public class RoomServiceImpl implements RoomService {
+    @Autowired
+    private InvoiceRepository invoiceRepository;
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private DetailSeatRepository detailSeatRepository;
 
@@ -61,8 +63,12 @@ public class RoomServiceImpl implements RoomService {
         room.setRow(dto.getRow());
         room.setTypeOfRoom(dto.getTypeOfRoom());
         room.setStatus(dto.getStatus());
-        if (dto.getSeats() != null) {room.setSeats(dto.getSeats().stream().map(seatDTO -> seatService.toEntity(seatDTO)).collect(Collectors.toList()));}
-        if (dto.getSchedules() != null) {room.setSchedules(dto.getSchedules().stream().map(scheduleDTO -> scheduleService.toEntity(scheduleDTO)).collect(Collectors.toList()));}
+        if (dto.getSeats() != null) {
+            room.setSeats(dto.getSeats().stream().map(seatDTO -> seatService.toEntity(seatDTO)).collect(Collectors.toList()));
+        }
+        if (dto.getSchedules() != null) {
+            room.setSchedules(dto.getSchedules().stream().map(scheduleDTO -> scheduleService.toEntity(scheduleDTO)).collect(Collectors.toList()));
+        }
 
         return toDTO(roomRepository.save(room));
     }
@@ -106,6 +112,7 @@ public class RoomServiceImpl implements RoomService {
         }
         return dto;
     }
+
     private SeatDTO convertSeatToDTO(Seat seat) {
         if (seat == null) {
             return null;
@@ -121,6 +128,7 @@ public class RoomServiceImpl implements RoomService {
                 .status(seat.getStatus())
                 .build();
     }
+
     private ScheduleDTO convertScheduleToDTO(Schedule schedule) {
         if (schedule == null) {
             return null;
@@ -134,6 +142,7 @@ public class RoomServiceImpl implements RoomService {
                 .status(schedule.getStatus())
                 .build();
     }
+
     public Room toEntity(RoomDTO dto) {
         Room entity = new Room();
         entity.setRoomID(dto.getRoomID());
@@ -145,8 +154,12 @@ public class RoomServiceImpl implements RoomService {
         Optional<Theater> optionalTheater = theaterRepository.findById(dto.getTheaterID());
         optionalTheater.ifPresent(entity::setTheater);
 
-        if (dto.getSeats() != null) {entity.setSeats(dto.getSeats().stream().map(seatDTO -> seatService.toEntity(seatDTO)).collect(Collectors.toList()));}
-        if (dto.getSchedules() != null) {entity.setSchedules(dto.getSchedules().stream().map(scheduleDTO -> scheduleService.toEntity(scheduleDTO)).collect(Collectors.toList()));}
+        if (dto.getSeats() != null) {
+            entity.setSeats(dto.getSeats().stream().map(seatDTO -> seatService.toEntity(seatDTO)).collect(Collectors.toList()));
+        }
+        if (dto.getSchedules() != null) {
+            entity.setSchedules(dto.getSchedules().stream().map(scheduleDTO -> scheduleService.toEntity(scheduleDTO)).collect(Collectors.toList()));
+        }
         return entity;
     }
 
@@ -157,6 +170,7 @@ public class RoomServiceImpl implements RoomService {
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
+
     @Transactional
     @Override
     public RoomDTO addRoom(RoomDTO roomDTO) throws Exception {
@@ -204,12 +218,14 @@ public class RoomServiceImpl implements RoomService {
 
         return toDTO(savedRoom);
     }
+
     @Override
     public Integer findTheaterIdByRoomId(Integer roomId) {
         Room room = roomRepository.findById(roomId)
                 .orElseThrow(() -> new RuntimeException("Room not found with ID: " + roomId));
         return room.getTheater().getTheaterID();
     }
+
     @Override
     @Transactional
     public void deleteRoomById(Integer roomId) throws Exception {
@@ -257,31 +273,11 @@ public class RoomServiceImpl implements RoomService {
 
         roomRepository.delete(roomToDelete);
     }
+
     @Override
     @Transactional
     public RoomDTO updateRoom(RoomDTO roomDTO) throws Exception {
         LocalDateTime today = LocalDate.now().atStartOfDay();
-        List<Schedule> conflictingSchedules = scheduleRepository.findConflictingSchedulesFromDate(
-                roomDTO.getRoomID(), Schedule_Status.Active, today);
-
-        if (!conflictingSchedules.isEmpty()) {
-            StringBuilder conflictDetails = new StringBuilder();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy 'time' HH:mm");
-
-            for (Schedule conflict : conflictingSchedules) {
-                String movieName = (conflict.getMovie() != null) ? conflict.getMovie().getMovieName() : "N/A";
-                String formattedDateTime = conflict.getStartTime().format(formatter);
-
-                conflictDetails.append(String.format("\n- Movie '%s' at %s", movieName, formattedDateTime));
-            }
-
-            String errorMessage = String.format(
-                    "Cannot delete this room '%s'. This room already has active schedules in the future :%s",
-                    roomDTO.getName(),
-                    conflictDetails.toString()
-            );
-            throw new Exception(errorMessage);
-        }
 
         Room existingRoom = roomRepository.findById(roomDTO.getRoomID())
                 .orElseThrow(() -> new Exception("Room not found with ID: " + roomDTO.getRoomID()));
@@ -359,14 +355,91 @@ public class RoomServiceImpl implements RoomService {
             seatRepository.saveAll(seatsToCreate);
         }
 
+        // Lưu lại các thuộc tính cũ để so sánh
+        Room_Status oldStatus = existingRoom.getStatus();
+        int oldRows = existingRoom.getRow();
+        int oldCols = existingRoom.getCollumn();
+
+        // Tìm tất cả các hóa đơn bị ảnh hưởng TRƯỚC KHI cập nhật
+        List<Invoice> relatedInvoices = invoiceRepository.findActiveBookingsForRoom(roomDTO.getRoomID(), LocalDateTime.now());
+        StringBuilder changesSummary = new StringBuilder();
+
+        // 1. So sánh kích thước phòng
+        if (oldRows != roomDTO.getRow() || oldCols != roomDTO.getCollumn()) {
+            changesSummary.append(String.format(
+                    "  - The room layout has changed from %d rows x %d columns to %d rows x %d columns.\n",
+                    oldRows, oldCols, roomDTO.getRow(), roomDTO.getCollumn()
+            ));
+        }
+
+        // 2. So sánh loại phòng
+        if (oldType != roomDTO.getTypeOfRoom()) {
+            changesSummary.append(String.format(
+                    "  - The room type has been changed from '%s' to '%s'.\n",
+                    oldType, roomDTO.getTypeOfRoom()
+            ));
+        }
+
+        // 3. So sánh trạng thái
+        if (oldStatus != roomDTO.getStatus()) {
+            String statusChangeMessage;
+            if (roomDTO.getStatus() == Room_Status.Active) { // Inactive -> Active
+                statusChangeMessage = "  - This screening room has reopened and is now available.\n";
+            } else { // Active -> Inactive
+                statusChangeMessage = "  - This screening room is temporarily unavailable for maintenance.\n";
+            }
+            changesSummary.append(statusChangeMessage);
+        }
         existingRoom.setName(roomDTO.getName());
         existingRoom.setTypeOfRoom(roomDTO.getTypeOfRoom());
         existingRoom.setStatus(roomDTO.getStatus());
         existingRoom.setRow(newRows);
         existingRoom.setCollumn(newCols);
+        if (!relatedInvoices.isEmpty() && changesSummary.length() > 0) {
+            for (Invoice invoice : relatedInvoices) {
+                String recipientEmail = null;
+                String recipientName = "Valued Customer";
+
+                if (invoice.getCustomer() != null && invoice.getCustomer().getAccount() != null) {
+                    recipientEmail = invoice.getCustomer().getAccount().getEmail();
+                    recipientName = invoice.getCustomer().getFullName();
+                } else if (invoice.getGuestEmail() != null) {
+                    recipientEmail = invoice.getGuestEmail();
+                    recipientName = invoice.getGuestName() != null ? invoice.getGuestName() : recipientName;
+                }
+
+                if (recipientEmail != null) {
+                    Schedule schedule = invoice.getDetailSeats().get(0).getSchedule();
+                    String movieName = schedule.getMovie().getMovieName();
+                    String theaterName = schedule.getRoom().getTheater().getTheaterName();
+                    String showtime = schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm, EEEE, dd MMMM yyyy", new Locale("en")));
+
+                    String subject = "Important Update to Your Screening Room for '" + movieName + "'";
+                    String body = String.format(
+                            "Dear %s,\n\n" +
+                                    "Please note that the screening room for your upcoming movie has been updated.\n\n" +
+                                    "Booking Details:\n" +
+                                    "  - Movie: %s\n" +
+                                    "  - Theater: %s\n" +
+                                    "  - Showtime: %s\n\n" +
+                                    "Details of the changes are as follows:\n" +
+                                    "%s\n" +
+                                    "Your existing tickets remain valid with these changes. " +
+                                    "If you have any questions, please contact our support team.\n\n" +
+                                    "Sincerely,\n" +
+                                    "The Cinemax Team",
+                            recipientName,
+                            movieName,
+                            theaterName,
+                            showtime,
+                            changesSummary.toString()
+                    );
+                    emailService.sendNotifyScheduleEmail(recipientEmail, subject, body);
+                }
+            }
+        }
 
         Room finalUpdatedRoom = roomRepository.save(existingRoom);
-
         return toDTO(finalUpdatedRoom);
     }
 }

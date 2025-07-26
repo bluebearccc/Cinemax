@@ -1,24 +1,24 @@
 package com.bluebear.cinemax.service.seat;
 
 import com.bluebear.cinemax.dto.SeatUpdateRequest;
-import com.bluebear.cinemax.entity.DetailSeat;
-import com.bluebear.cinemax.entity.Invoice;
+import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.enumtype.DetailSeat_Status;
 import com.bluebear.cinemax.enumtype.Seat_Status;
 import com.bluebear.cinemax.repository.DetailSeatRepository;
-import com.bluebear.cinemax.service.EmailService;
+import com.bluebear.cinemax.repository.InvoiceRepository;
+import com.bluebear.cinemax.service.email.EmailService;
+import com.bluebear.cinemax.service.invoice.InvoiceService;
 import jakarta.transaction.Transactional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.bluebear.cinemax.dto.SeatDTO;
-import com.bluebear.cinemax.entity.Room;
-import com.bluebear.cinemax.entity.Seat;
 import com.bluebear.cinemax.repository.RoomRepository;
 import com.bluebear.cinemax.repository.SeatRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -26,15 +26,16 @@ import java.util.stream.Collectors;
 public class SeatServiceImpl implements SeatService {
     @Autowired
     private DetailSeatRepository detailSeatRepository;
-
     @Autowired
-    private SeatRepository seatRepository;
-
-    @Autowired
-    private RoomRepository roomRepository;
-
+    private InvoiceService invoiceService;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private SeatRepository seatRepository;
+    @Autowired
+    private RoomRepository roomRepository;
+    @Autowired
+    private InvoiceRepository invoiceRepository;
 
     public SeatDTO createSeat(SeatDTO dto) {
         Seat seat = toEntity(dto);
@@ -213,45 +214,93 @@ public class SeatServiceImpl implements SeatService {
                 .collect(Collectors.toList());
     }
     @Override
+    @Transactional
     public void updateSeatsInRoom(SeatUpdateRequest request) {
-
         Integer roomId = request.getRoomId();
         List<Integer> vipSeatIds = request.getVipSeatIds() != null ? request.getVipSeatIds() : new ArrayList<>();
         Map<Integer, Seat_Status> newStatuses = request.getSeatStatuses();
 
         List<Seat> seatsInRoom = seatRepository.findByRoom_RoomID(roomId);
+        if (seatsInRoom == null || seatsInRoom.isEmpty()) {
+            return;
+        }
+
+        Map<Integer, String> notificationsToSend = new HashMap<>();
 
         for (Seat seat : seatsInRoom) {
+            // --- LẤY THÔNG TIN CŨ VÀ MỚI ---
             Seat_Status oldStatus = seat.getStatus();
-            Seat_Status newStatus = newStatuses.get(seat.getSeatID());
-            if (newStatus != null && oldStatus == Seat_Status.Active && newStatus == Seat_Status.Inactive) {
+            double oldPrice = seat.getUnitPrice();
+            boolean isNowVip = vipSeatIds.contains(seat.getSeatID());
+            Seat_Status newStatus = (newStatuses != null) ? newStatuses.get(seat.getSeatID()) : oldStatus;
+            Double newPrice = isNowVip ? request.getVipPrice() : request.getNonVipPrice();
+            String notificationReason = null;
+            if (oldStatus == Seat_Status.Active && newStatus != Seat_Status.Active) {
+                notificationReason = String.format("your selected seat **%s** has become unavailable due to technical reasons.", seat.getPosition());
+            }
+            else if (newPrice != null && Math.abs(newPrice - oldPrice) > 0.01) {
+                notificationReason = String.format(
+                        "the price for your seat **%s** has been updated from **%,.0f VND** to **%,.0f VND**.",
+                        seat.getPosition(), oldPrice, newPrice
+                );
+            }
 
-                // 1. Tìm các vé trong tương lai bị ảnh hưởng
+            if (notificationReason != null) {
                 List<DetailSeat> futureBookings = detailSeatRepository.findFutureBookingsBySeatID(seat.getSeatID(), LocalDateTime.now());
-
-                // 2. Nếu có, gửi email thông báo
-                if (!futureBookings.isEmpty()) {
-                    emailService.sendSeatCancellationNotice(futureBookings);}
+                for (DetailSeat affectedBooking : futureBookings) {
+                    notificationsToSend.put(affectedBooking.getInvoice().getInvoiceID(), notificationReason);
+                }
             }
 
-            // --- TIẾN HÀNH CẬP NHẬT DỮ LIỆU ---
-            // Cập nhật VIP và giá vé
-            if (vipSeatIds.contains(seat.getSeatID())) {
-                seat.setIsVIP(true);
-                seat.setUnitPrice(request.getVipPrice());
-            } else {
-                seat.setIsVIP(false);
-                seat.setUnitPrice(request.getNonVipPrice());
+            // --- CẬP NHẬT THUỘC TÍNH CỦA GHẾ ---
+            seat.setIsVIP(isNowVip);
+            if (newPrice != null) {
+                seat.setUnitPrice(newPrice);
             }
-
             if (newStatus != null) {
                 seat.setStatus(newStatus);
             }
         }
 
+        // --- GỬI EMAIL THÔNG BÁO ---
+        if (!notificationsToSend.isEmpty()) {
+            for (Map.Entry<Integer, String> entry : notificationsToSend.entrySet()) {
+                Integer invoiceId = entry.getKey();
+                String reason = entry.getValue();
+
+                Invoice invoice = invoiceRepository.findById(invoiceId).orElse(null);
+                if (invoice == null) continue;
+
+                String recipientEmail = null, recipientName = "Valued Customer";
+                if (invoice.getCustomer() != null && invoice.getCustomer().getAccount() != null) {
+                    recipientEmail = invoice.getCustomer().getAccount().getEmail();
+                    recipientName = invoice.getCustomer().getFullName();
+                } else if (invoice.getGuestEmail() != null) {
+                    recipientEmail = invoice.getGuestEmail();
+                    recipientName = invoice.getGuestName() != null ? invoice.getGuestName() : recipientName;
+                }
+
+                if (recipientEmail != null) {
+                    String movieName = invoice.getDetailSeats().get(0).getSchedule().getMovie().getMovieName();
+                    String subject = "Important Update Regarding Your Booking for '" + movieName + "'";
+
+                    // Nội dung email chung cho mọi thay đổi
+                    String body = String.format(
+                            "Dear %s,\n\n" +
+                                    "We are writing to inform you about an update regarding your booking: %s\n\n" +
+                                    "Please review this change. If you have any questions, please do not hesitate to contact our support team.\n\n" +
+                                    "Sincerely,\n" +
+                                    "The Cinemax Team",
+                            recipientName,
+                            reason
+                    );
+                    emailService.sendNotifyScheduleEmail(recipientEmail, subject, body);
+                }
+            }
+        }
+
         seatRepository.saveAll(seatsInRoom);
     }
-    //for booking web
     public List<SeatDTO> getSeatsWithStatus(Integer roomId, Integer scheduleId) {
         List<Seat> seats = seatRepository.findByRoomRoomID(roomId);
         List<SeatDTO> seatDTOs = new ArrayList<>();

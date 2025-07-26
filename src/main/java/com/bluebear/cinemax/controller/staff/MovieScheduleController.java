@@ -181,7 +181,7 @@ public class MovieScheduleController {
         try {
             ScheduleDTO schedule = scheduleServiceImpl.getScheduleById(scheduleId);
             if (schedule != null) {
-                boolean isExistedInDetailSeat = scheduleServiceImpl.isExisted(scheduleId);
+                boolean isExistedInDetailSeat = scheduleServiceImpl.isExistedV2(scheduleId);
                 response.put("isExisted", isExistedInDetailSeat);
 
                 RoomDTO room = roomServiceImpl.getRoomById(schedule.getRoomID());
@@ -212,72 +212,8 @@ public class MovieScheduleController {
         }
         return response;
     }
-    @PostMapping("/update_schedule")
-    public String updateSchedule(@RequestParam(value = "scheduleID") Integer scheduleId,
-                                 @RequestParam(value = "movieID") Integer movieId,
-                                 @RequestParam(value = "roomId", required = false) Integer roomId, // Đổi tên từ lần trước
-                                 @RequestParam(value = "startTimeUpdate") String startTime_raw,
-                                 @RequestParam(value = "dateUpdate") String date_raw,
-                                 @RequestParam(value = "theaterUpdate") Integer theaterId,
-                                 @RequestParam(value = "statusUpdate") String status,
-                                 RedirectAttributes redirectAttributes) {
 
-        if (scheduleServiceImpl.isExisted(scheduleId)) {
-            redirectAttributes.addFlashAttribute("message", "Cannot edit this schedule. It has associated bookings.");
-            return "redirect:/staff/movie_schedule/show_schedule?movieId=" + movieId;
-        }
 
-        if (roomId == null) {
-            redirectAttributes.addFlashAttribute("message", "Please select a room!");
-            return "redirect:/staff/movie_schedule/show_schedule?movieId=" + movieId;
-        }
-
-        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm");
-        LocalDate date = LocalDate.parse(date_raw, dateFormatter);
-        LocalTime startTime = LocalTime.parse(startTime_raw, timeFormatter);
-        MovieDTO movie = movieServiceImpl.getMovieById(movieId).get();
-        LocalDateTime actualStartTime = LocalDateTime.of(date, startTime);
-        LocalDateTime actualEndTime = actualStartTime.plusMinutes(movie.getDuration());
-
-        ScheduleDTO conflictingSchedule = scheduleServiceImpl.isRoomAvailableForUpdate(roomId, actualStartTime, actualEndTime, scheduleId);
-
-        if (conflictingSchedule != null) {
-            // Nếu có xung đột, xây dựng thông báo lỗi chi tiết
-            String errorMessage = String.format(
-                    "The selected room '%s' in theater '%s' is unavailable. It is already scheduled for the movie '%s' from %s to %s.",
-                    conflictingSchedule.getRoomName(),
-                    conflictingSchedule.getTheaterName(),
-                    conflictingSchedule.getMovieName(),
-                    conflictingSchedule.getFormattedStartTime(), // Giả sử bạn có phương thức này trong DTO
-                    conflictingSchedule.getFormattedEndTime() // Giả sử bạn có phương thức này trong DTO
-            );
-            redirectAttributes.addFlashAttribute("message", errorMessage);
-            return "redirect:/staff/movie_schedule/show_schedule?movieId=" + movieId;
-        }
-        // --- KẾT THÚC VALIDATION MỚI ---
-
-        // --- Logic cập nhật (giữ nguyên) ---
-        ScheduleDTO existingSchedule = scheduleServiceImpl.getScheduleById(scheduleId);
-        if (existingSchedule == null) {
-            redirectAttributes.addFlashAttribute("message", "Schedule not found for update!");
-            return "redirect:/staff/movie_schedule/show_schedule?movieId=" + movieId;
-        }
-        existingSchedule.setStartTime(actualStartTime);
-        existingSchedule.setEndTime(actualEndTime);
-        existingSchedule.setMovieID(movieId);
-        existingSchedule.setRoomID(roomId);
-        try {
-            existingSchedule.setStatus(Schedule_Status.valueOf(status));
-        } catch (IllegalArgumentException e) {
-            redirectAttributes.addFlashAttribute("message", "Invalid status value: " + status);
-            return "redirect:/staff/movie_schedule/show_schedule?movieId=" + movieId;
-        }
-        scheduleServiceImpl.saveSchedule(existingSchedule);
-
-        redirectAttributes.addFlashAttribute("message", "Schedule updated successfully!");
-        return "redirect:/staff/movie_schedule/show_schedule?movieId=" + movieId;
-    }
     @PostMapping("/update_schedule_ajax")
     @ResponseBody
     public Map<String, Object> updateScheduleAjax(@RequestParam(value = "scheduleID") Integer scheduleId,
@@ -290,9 +226,9 @@ public class MovieScheduleController {
 
         Map<String, Object> response = new HashMap<>();
 
-        if (scheduleServiceImpl.isExisted(scheduleId)) {
+        if (scheduleServiceImpl.isExistedV2(scheduleId)) {
             response.put("success", false);
-            response.put("message", "Cannot edit this schedule. It has associated bookings.");
+            response.put("message", "Cannot edit this schedule. It has associated bookings in the past.");
             return response;
         }
 
@@ -339,7 +275,7 @@ public class MovieScheduleController {
             existingSchedule.setRoomID(roomId);
             existingSchedule.setStatus(Schedule_Status.valueOf(status));
 
-            scheduleServiceImpl.saveSchedule(existingSchedule);
+            scheduleServiceImpl.updateScheduleAndNotifyCustomers(existingSchedule);
 
             response.put("success", true);
             response.put("message", "Schedule updated successfully!");

@@ -47,4 +47,7 @@ public interface ScheduleService {
                                                    LocalDateTime startDate, LocalDateTime endDate,
                                                    Pageable pageable);
     public List<ScheduleDTO> findSchedulesByTheaterAndDate(Integer theaterId, LocalDate date);
+    public boolean isExistedV2(Integer scheduleId);
+    ScheduleDTO updateScheduleAndNotifyCustomers(ScheduleDTO updatedScheduleDTO);
+
 }

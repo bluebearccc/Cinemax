@@ -285,6 +285,7 @@
     }
 
     document.addEventListener('DOMContentLoaded', function() {
+        // ... (giữ nguyên các biến và thiết lập map như cũ)
         const originalLatValue = document.getElementById('original-latitude').value;
         const originalLngValue = document.getElementById('original-longitude').value;
         const ORIGINAL_LAT = originalLatValue !== 'null' ? parseFloat(originalLatValue) : null;
@@ -311,6 +312,74 @@
 
         let currentMarker = null;
 
+        // 1. NGĂN CHẶN FORM TỰ ĐỘNG SUBMIT KHI NHẤN ENTER
+        const mainForm = document.getElementById('stockForm');
+
+        // Ngăn chặn form submit khi nhấn Enter trong bất kỳ input nào
+        mainForm.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                // Chỉ cho phép Enter hoạt động trong address input
+                if (event.target.id !== 'address-input') {
+                    event.preventDefault();
+                    return false;
+                }
+            }
+        });
+
+        // 2. XỬ LÝ RIÊNG ENTER CHO ADDRESS INPUT
+        addressInput.addEventListener('keydown', function(event) {
+            if (event.key === 'Enter') {
+                event.preventDefault(); // Ngăn form submit
+                event.stopPropagation(); // Ngăn event bubble up
+
+                const address = addressInput.value.trim();
+                if (address) {
+                    searchAddress(address);
+                } else {
+                    alert('Vui lòng nhập địa chỉ để tìm kiếm');
+                }
+                return false;
+            }
+        });
+
+        // 3. XỬ LÝ CLICK BUTTON SEARCH (giữ nguyên)
+        searchBtn.addEventListener('click', function(event) {
+            event.preventDefault(); // Ngăn form submit
+            const address = addressInput.value.trim();
+            if (address) {
+                searchAddress(address);
+            } else {
+                alert('Vui lòng nhập địa chỉ để tìm kiếm');
+            }
+        });
+
+        // 4. THÊM XỬ LÝ CHO CÁC INPUT KHÁC (tùy chọn)
+        // Ngăn chặn Enter submit form cho tất cả input text khác
+        const allTextInputs = mainForm.querySelectorAll('input[type="text"]');
+        allTextInputs.forEach(input => {
+            if (input.id !== 'address-input') { // Trừ address input đã xử lý riêng
+                input.addEventListener('keydown', function(event) {
+                    if (event.key === 'Enter') {
+                        event.preventDefault();
+                        // Tùy chọn: chuyển focus sang input tiếp theo
+                        const nextInput = getNextInput(this);
+                        if (nextInput) {
+                            nextInput.focus();
+                        }
+                    }
+                });
+            }
+        });
+
+        // Hàm helper để tìm input tiếp theo
+        function getNextInput(currentInput) {
+            const allInputs = Array.from(mainForm.querySelectorAll('input[type="text"], input[type="radio"], select, textarea'));
+            const currentIndex = allInputs.indexOf(currentInput);
+            return allInputs[currentIndex + 1] || null;
+        }
+
+        // ... (giữ nguyên các hàm khác: addDraggableMarker, updateLocationAndAddress, searchAddress, etc.)
+
         function addDraggableMarker(lat, lng, placeName) {
             if (currentMarker) {
                 currentMarker.remove();
@@ -336,7 +405,7 @@
                 .then(data => {
                     if (data.features && data.features.length > 0) {
                         const placeName = data.features[0].place_name;
-                        addressInput.value = placeName; // Cập nhật ô địa chỉ
+                        addressInput.value = placeName;
                         if (currentMarker) {
                             currentMarker.getPopup().setText(placeName);
                         }
@@ -367,7 +436,7 @@
 
         function loadOriginalLocation() {
             if (ORIGINAL_LAT && ORIGINAL_LNG) {
-                console.log( {lat: ORIGINAL_LAT, lng: ORIGINAL_LNG});
+                console.log({lat: ORIGINAL_LAT, lng: ORIGINAL_LNG});
                 latitudeField.value = ORIGINAL_LAT.toFixed(6);
                 longitudeField.value = ORIGINAL_LNG.toFixed(6);
                 addressInput.value = ORIGINAL_ADDR;
@@ -378,20 +447,11 @@
             }
         }
 
-        searchBtn.addEventListener('click', () => {
-            const address = addressInput.value.trim();
-            if (address) searchAddress(address);
-            else alert('Select adress on map');
+        // Event listeners khác
+        resetLocationBtn.addEventListener('click', function(event) {
+            event.preventDefault(); // Ngăn form submit
+            loadOriginalLocation();
         });
-
-        addressInput.addEventListener('keypress', (event) => {
-            if (event.key === 'Enter') {
-                event.preventDefault();
-                searchBtn.click();
-            }
-        });
-
-        resetLocationBtn.addEventListener('click', loadOriginalLocation);
 
         map.on('click', (e) => {
             const { lng, lat } = e.lngLat;

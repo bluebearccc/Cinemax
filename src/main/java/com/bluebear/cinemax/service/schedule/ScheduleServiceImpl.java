@@ -1,7 +1,8 @@
 package com.bluebear.cinemax.service.schedule;
 
-import com.bluebear.cinemax.entity.Theater;
-import com.bluebear.cinemax.repository.DetailSeatRepository;
+import com.bluebear.cinemax.entity.*;
+import com.bluebear.cinemax.repository.*;
+import com.bluebear.cinemax.service.email.EmailService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -9,23 +10,21 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import com.bluebear.cinemax.dto.ScheduleDTO;
-import com.bluebear.cinemax.entity.Movie;
-import com.bluebear.cinemax.entity.Room;
-import com.bluebear.cinemax.entity.Schedule;
 import com.bluebear.cinemax.enumtype.Schedule_Status;
-import com.bluebear.cinemax.repository.MovieRepository;
-import com.bluebear.cinemax.repository.RoomRepository;
-import com.bluebear.cinemax.repository.ScheduleRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class ScheduleServiceImpl implements ScheduleService {
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private ScheduleRepository scheduleRepository;
     @Autowired
@@ -34,6 +33,8 @@ public class ScheduleServiceImpl implements ScheduleService {
     private RoomRepository roomRepository;
     @Autowired
     private DetailSeatRepository detailSeatRepository;
+    @Autowired
+    private InvoiceRepository invoiceRepository;
 
     public ScheduleDTO createSchedule(ScheduleDTO dto) {
         Schedule schedule = toEntity(dto);
@@ -243,6 +244,96 @@ public class ScheduleServiceImpl implements ScheduleService {
         return schedules.stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
+    }
+    public boolean isExistedV2(Integer scheduleId) {
+        List<Schedule> schedules = scheduleRepository.findSchedulesByDetailSeatInthePast(scheduleId);
+        if(schedules.size() > 0){
+            return true;
+        }
+        return false;
+    }
+    @Override
+    @Transactional
+    public ScheduleDTO updateScheduleAndNotifyCustomers(ScheduleDTO updatedScheduleDTO) {
+        Schedule existingSchedule = scheduleRepository.findById(updatedScheduleDTO.getScheduleID())
+                .orElseThrow(() -> new RuntimeException("Cannot find schedule with ID: " + updatedScheduleDTO.getScheduleID()));
+
+        LocalDateTime oldStartTime = existingSchedule.getStartTime();
+        Room oldRoom = existingSchedule.getRoom();
+        Schedule_Status oldStatus = existingSchedule.getStatus();
+        String movieName = existingSchedule.getMovie().getMovieName();
+
+        List<Invoice> relatedInvoices = invoiceRepository.findActiveBookingsForSchedule(existingSchedule.getScheduleID());
+
+        Movie movie = movieRepository.findById(updatedScheduleDTO.getMovieID()).orElse(null);
+        Room newRoom = roomRepository.findById(updatedScheduleDTO.getRoomID()).orElse(null);
+
+        existingSchedule.setStartTime(updatedScheduleDTO.getStartTime());
+        existingSchedule.setEndTime(updatedScheduleDTO.getEndTime());
+        existingSchedule.setMovie(movie);
+        existingSchedule.setRoom(newRoom);
+        existingSchedule.setStatus(updatedScheduleDTO.getStatus());
+
+        Schedule savedSchedule = scheduleRepository.save(existingSchedule);
+
+        if (!relatedInvoices.isEmpty()) {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm 'on' EEEE, MMMM dd, yyyy", new Locale("en"));
+
+            StringBuilder changesSummary = new StringBuilder();
+
+            if (!oldStartTime.isEqual(savedSchedule.getStartTime())) {
+                changesSummary.append(String.format("  - Showtime has been changed from %s to %s.\n", oldStartTime.format(formatter), savedSchedule.getStartTime().format(formatter)));
+            }
+
+            if (oldRoom != null && newRoom != null && !oldRoom.getRoomID().equals(newRoom.getRoomID())) {
+                changesSummary.append(String.format("  - The screening room has been moved from '%s' to '%s'.\n", oldRoom.getName(), newRoom.getName()));
+            }
+
+            if (oldStatus != savedSchedule.getStatus()) {
+                if (oldStatus == Schedule_Status.Active && savedSchedule.getStatus() == Schedule_Status.Inactive) {
+                    changesSummary.append("  - This movie schedule has been suspended.\n");
+                }
+                else if (oldStatus == Schedule_Status.Inactive && savedSchedule.getStatus() == Schedule_Status.Active) {
+                    changesSummary.append("  - This movie schedule has been reactivated.\n");
+                }
+            }
+
+            if (changesSummary.length() > 0) {
+                for (Invoice invoice : relatedInvoices) {
+                    String recipientEmail = null;
+                    String recipientName = "Valued Customer";
+
+                    if (invoice.getCustomer() != null && invoice.getCustomer().getAccount().getEmail() != null) {
+                        recipientEmail = invoice.getCustomer().getAccount().getEmail();
+                        recipientName = invoice.getCustomer().getFullName();
+                    } else if (invoice.getGuestEmail() != null) {
+                        recipientEmail = invoice.getGuestEmail();
+                        recipientName = invoice.getGuestName() != null ? invoice.getGuestName() : recipientName;
+                    }
+
+                    if (recipientEmail != null) {
+                        String subject = "Important Update Regarding Your Booking for " + movieName;
+                        String body = String.format(
+                                "Dear %s,\n\n" +
+                                        "Please note that there have been some changes to the movie showtime for \"%s\" that you have booked.\n\n" +
+                                        "Details of the changes are as follows:\n" +
+                                        "%s\n" +
+                                        "Your ticket details are automatically updated. " +
+                                        "If you have any questions or concerns, please do not hesitate to contact our support team.\n\n" +
+                                        "Thank you for your understanding.\n\n" +
+                                        "Sincerely,\n" +
+                                        "The Cinemax Team",
+                                recipientName,
+                                movieName,
+                                changesSummary.toString()
+                        );
+                        emailService.sendNotifyScheduleEmail(recipientEmail, subject, body);
+                    }
+                }
+            }
+        }
+
+        return toDTO(savedSchedule);
     }
 }
 

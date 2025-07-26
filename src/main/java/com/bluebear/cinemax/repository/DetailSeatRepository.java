@@ -53,17 +53,6 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
 
     int countBySeat_SeatIDIn(List<Integer> seatIds);
 
-    @Query(value = """
-            SELECT ds.* 
-            FROM Detail_Seat ds
-            INNER JOIN Schedule s ON ds.ScheduleID = s.ScheduleID
-            WHERE ds.SeatID = :SeatID 
-            AND s.StartTime > :currentTime
-            AND ds.Status != 'Booked'
-            ORDER BY s.StartTime ASC
-            """, nativeQuery = true)
-    List<DetailSeat> findFutureBookingsBySeatID(@Param("SeatID") Integer seatId, @Param("currentTime") LocalDateTime currentTime);
-
     @Query("SELECT ds.seat.seatID FROM DetailSeat ds " +
             "WHERE ds.schedule.scheduleID = :scheduleId AND ds.status = :status")
     List<Integer> findSeatIdsByScheduleIdAndStatus(@Param("scheduleId") Integer scheduleId,
@@ -79,4 +68,6 @@ public interface DetailSeatRepository extends JpaRepository<DetailSeat, Integer>
                   AND i.status = :status
             """)
     boolean hasCustomerWatchedMovie(@Param("customerId") int customerId, @Param("movieId") int movieId, InvoiceStatus status);
+    @Query("SELECT ds FROM DetailSeat ds JOIN ds.schedule s WHERE ds.seat.seatID = :seatId AND s.startTime >= :now")
+    List<DetailSeat> findFutureBookingsBySeatID(@Param("seatId") Integer seatId, @Param("now") LocalDateTime now);
 }

@@ -44,4 +44,21 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
       AND s.endTime BETWEEN :start AND :end
 """)
     List<Invoice> findInvoicesInFeedbackWindow(LocalDateTime start, LocalDateTime end);
+    @Query(value = "SELECT DISTINCT  i.* FROM Invoice i " +
+            "JOIN Detail_Seat ds ON i.InvoiceID = ds.InvoiceID " +
+            "WHERE ds.ScheduleID = :scheduleId " +
+            "AND ds.ScheduleID IN (SELECT s.ScheduleID FROM Schedule s WHERE s.StartTime >= CURRENT_TIMESTAMP)",
+            nativeQuery = true)
+    List<Invoice> findActiveBookingsForSchedule(@Param("scheduleId") Integer scheduleId);
+    @Query("SELECT DISTINCT i FROM Invoice i " +
+            "JOIN i.detailSeats ds " +
+            "JOIN ds.schedule s " +
+            "JOIN s.room r " +
+            "WHERE r.theater.theaterID = :theaterId AND s.startTime >= :now")
+    List<Invoice> findActiveBookingsForTheater(@Param("theaterId") Integer theaterId, @Param("now") LocalDateTime now);
+    @Query("SELECT DISTINCT i FROM Invoice i " +
+            "JOIN i.detailSeats ds " +
+            "JOIN ds.schedule s " +
+            "WHERE s.room.roomID = :roomId AND s.startTime >= :now")
+    List<Invoice> findActiveBookingsForRoom(@Param("roomId") Integer roomId, @Param("now") LocalDateTime now);
 }
