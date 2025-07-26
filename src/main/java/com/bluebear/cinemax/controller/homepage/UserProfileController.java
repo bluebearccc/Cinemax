@@ -200,6 +200,7 @@ public class UserProfileController {
         return "redirect:/user/profile";
     }
 
+
     @GetMapping("/invoice/{invoiceId}/detail")
     @ResponseBody
     public ResponseEntity<InvoiceDetailDTO> getInvoiceDetail(@PathVariable("invoiceId") Integer invoiceId) {
