@@ -46,110 +46,6 @@ public class BookingServiceSFImp implements BookingServiceSF {
     private RoomRepository roomRepo;
     @Autowired
     private EmailService emailService;
-
-    @Override
-    @Transactional
-    public void finalizeBooking(Integer invoiceId) {
-        Invoice invoiceEntity = invoiceRepo.findById(invoiceId)
-                .orElseThrow(() -> new IllegalStateException("Không tìm thấy hóa đơn với ID: " + invoiceId));
-
-        if (invoiceEntity.getStatus() == InvoiceStatus.Booked) {
-            log.info("💡 Hóa đơn {} đã được thanh toán trước đó.", invoiceId);
-            return;
-        }
-
-        // Cập nhật trạng thái hóa đơn
-        invoiceEntity.setStatus(InvoiceStatus.Booked);
-        invoiceRepo.save(invoiceEntity);
-
-        // Cập nhật trạng thái DetailSeat (cách làm đơn giản và an toàn hơn)
-        List<DetailSeat> detailSeatEntities = detailSeatRepo.findByInvoiceInvoiceID(invoiceId);
-        for (DetailSeat entity : detailSeatEntities) {
-            entity.setStatus(DetailSeat_Status.Booked);
-            detailSeatRepo.save(entity);
-        }
-
-        // Cập nhật trạng thái combo (Detail_FD)
-        List<Detail_FD> comboEntities = detailFDRepo.findByInvoiceInvoiceID(invoiceId);
-        for (Detail_FD entity : comboEntities) {
-            entity.setStatus(DetailFD_Status.Booked);
-            detailFDRepo.save(entity);
-        }
-
-        // Gửi email xác nhận vé
-        Customer customer = invoiceEntity.getCustomer();
-        if (customer != null && customer.getAccount() != null && customer.getAccount().getEmail() != null) {
-            String customerEmail = customer.getAccount().getEmail();
-            try {
-                Map<String, Object> variables = new HashMap<>();
-                // Dùng hàm reconstruct đã được sửa lỗi để lấy dữ liệu an toàn
-                BookingPreviewDTO previewForEmail = reconstructBookingPreview(invoiceId);
-                variables.put("invoice", previewForEmail);
-                variables.put("customerName", customer.getFullName());
-
-                // SỬA LỖI: Gửi đến email thực của khách hàng
-                emailService.sendTicketHtmlTemplate(
-                        customerEmail,
-                        "Cinemax - Xác nhận đặt vé thành công #" + invoiceId,
-                        variables
-                );
-                log.info("📧 Đã gửi email xác nhận đến: {}", customerEmail);
-            } catch (Exception e) {
-                log.error("❌ Gửi email thất bại cho hóa đơn #{}: {}", invoiceId, e.getMessage(), e);
-            }
-        } else {
-            log.warn("⚠️ Không tìm thấy thông tin email của khách hàng cho hóa đơn #{}", invoiceId);
-        }
-
-        log.info("✅ finalizeBooking hoàn tất cho invoice #{}", invoiceId);
-    }
-
-    /**
-     * SỬA LỖI: Hàm này được làm cho an toàn hơn để tránh lỗi IndexOutOfBoundsException.
-     * Nó sẽ kiểm tra xem hóa đơn có ghế liên quan hay không trước khi xử lý.
-     */
-    @Override
-    public BookingPreviewDTO reconstructBookingPreview(Integer invoiceId) {
-        Invoice invoice = invoiceRepo.findById(invoiceId)
-                .orElseThrow(() -> new IllegalStateException("Không tìm thấy hóa đơn #" + invoiceId));
-
-        List<DetailSeat> detailSeats = detailSeatRepo.findByInvoiceInvoiceID(invoiceId);
-        List<Detail_FD> detailCombos = detailFDRepo.findByInvoiceInvoiceID(invoiceId);
-
-        // KIỂM TRA AN TOÀN: Nếu không có ghế nào được tìm thấy, trả về một preview rỗng để tránh crash
-        if (detailSeats.isEmpty()) {
-            log.warn("⚠️ Hóa đơn #{} không có ghế nào được liên kết khi cố gắng tái tạo preview.", invoiceId);
-            // Trả về một DTO rỗng hoặc với thông tin cơ bản để trang không bị lỗi
-            return new BookingPreviewDTO(
-                    new ScheduleDTO(), new RoomDTO(), Collections.emptyList(),
-                    Collections.emptyList(), Collections.emptyMap(),
-                    invoice.getTotalPrice(), invoice.getTotalPrice(), toDTO(invoice.getPromotion())
-            );
-        }
-
-        List<Seat> seats = detailSeats.stream().map(DetailSeat::getSeat).collect(Collectors.toList());
-        Schedule schedule = detailSeats.get(0).getSchedule();
-        Room room = schedule.getRoom();
-        Promotion promotion = invoice.getPromotion();
-
-        Map<Integer, Integer> comboQuantities = detailCombos.stream()
-                .collect(Collectors.toMap(fd -> fd.getTheaterStock().getStockID(), Detail_FD::getQuantity));
-        List<TheaterStock> combos = detailCombos.stream().map(Detail_FD::getTheaterStock).collect(Collectors.toList());
-
-        return new BookingPreviewDTO(
-                toDTO(schedule),
-                toDTO(room),
-                seatService.toSeatDTOList(seats),
-                toTheaterStockDTOList(combos),
-                comboQuantities,
-                invoice.getTotalPrice() + invoice.getDiscount(),
-                invoice.getTotalPrice(),
-                promotion != null ? toDTO(promotion) : null
-        );
-    }
-
-    // ... (Các hàm còn lại giữ nguyên)
-
     @Override
     public InvoiceDTO getInvoiceById(Integer invoiceId) {
         Invoice invoice = invoiceRepo.findById(invoiceId)
@@ -196,6 +92,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             seatTotal += seat.getUnitPrice().doubleValue();
         }
 
+        // Handle promotion
         Promotion appliedPromotion = null;
         double discount = 0.0;
         if (promotionCode != null && !promotionCode.isBlank()) {
@@ -218,6 +115,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             appliedPromotion = promo;
         }
 
+        // Prepare Invoice
         Customer customer = customerRepo.findById(1)
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy khách hàng."));
         Invoice invoice = new Invoice();
@@ -226,9 +124,10 @@ public class BookingServiceSFImp implements BookingServiceSF {
         invoice.setDiscount(discount);
         invoice.setBookingDate(LocalDateTime.now());
         invoice.setStatus(InvoiceStatus.Unpaid);
-        invoice.setTotalPrice(0.0);
+        invoice.setTotalPrice(0.0); // tạm thời, cập nhật sau
         invoice = invoiceRepo.save(invoice);
 
+        // Save detail seats
         Schedule schedule = scheduleRepo.findById(scheduleId)
                 .orElseThrow(() -> new IllegalStateException("Không tìm thấy lịch chiếu."));
         for (Seat seat : seats) {
@@ -239,6 +138,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             detailSeat.setStatus(DetailSeat_Status.Unpaid);
             detailSeatRepo.save(detailSeat);
         }
+        // Handle combos
         double comboTotal = 0.0;
         for (Map.Entry<Integer, Integer> entry : selectedCombos.entrySet()) {
             TheaterStock stock = theaterStockRepo.findById(entry.getKey())
@@ -252,7 +152,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             stock.setQuantity(stock.getQuantity() - quantity);
             theaterStockRepo.save(stock);
 
-            double comboPrice = stock.getPrice().doubleValue() * quantity;
+            double comboPrice = stock.getPrice().doubleValue() * 1000 * quantity;
             comboTotal += comboPrice;
 
             Detail_FD detailFD = new Detail_FD();
@@ -271,29 +171,36 @@ public class BookingServiceSFImp implements BookingServiceSF {
         return toDTO(invoice);
     }
 
+
+
+
     public BookingPreviewDTO prepareBookingPreview(Integer scheduleId, Integer roomId,
                                                    List<Integer> seatIds, String promotionCode,
                                                    Map<Integer, Integer> comboQuantities) {
+        // Lấy dữ liệu từ Repository
         Schedule schedule = scheduleRepo.findById(scheduleId).orElseThrow();
         Room room = roomRepo.findById(roomId).orElseThrow();
         List<Seat> selectedSeats = seatRepo.findAllById(seatIds);
         List<TheaterStock> combos = theaterStockRepo.findAllById(comboQuantities.keySet());
         Promotion promotion = promotionCode != null ? promotionRepo.findByPromotionCode(promotionCode).orElse(null) : null;
 
+        // Chuyển đổi sang DTO
         ScheduleDTO scheduleDTO = toDTO(schedule);
         RoomDTO roomDTO = toDTO(room);
         List<SeatDTO> seatDTOs = seatService.toSeatDTOList(selectedSeats);
         List<TheaterStockDTO> comboDTOs = toTheaterStockDTOList(combos);
         PromotionDTO promotionDTO = promotion != null ? toDTO(promotion) : null;
 
+        // Tính toán giá
         double totalSeatPrice = seatDTOs.stream().mapToDouble(SeatDTO::getUnitPrice).sum();
         double totalComboPrice = combos.stream()
                 .mapToDouble(combo -> combo.getPrice().doubleValue() * comboQuantities.getOrDefault(combo.getStockID(), 0))
                 .sum();
-        double totalPrice = totalSeatPrice + (totalComboPrice);
+        double totalPrice = totalSeatPrice + (totalComboPrice*1000);
         double discount = (promotionDTO != null && promotionDTO.isValid()) ? promotionDTO.getDiscount() / 100.0 : 0.0;
         double finalPrice = totalPrice * (1 - discount);
 
+        // Trả về BookingPreviewDTO
         return new BookingPreviewDTO(scheduleDTO, roomDTO, seatDTOs, comboDTOs, comboQuantities, totalPrice, finalPrice, promotionDTO);
     }
     public Map<Integer, Integer> extractComboQuantities(Map<String, String> allParams) {
@@ -304,15 +211,20 @@ public class BookingServiceSFImp implements BookingServiceSF {
                 String idStr = key.substring(16, key.length() - 1);
                 try {
                     Integer comboId = Integer.parseInt(idStr);
-                    Integer quantity = Integer.parseInt(entry.getValue());
+                    Integer quantity = Integer.parseInt(entry.getValue().replaceAll("\\D", ""));
                     if (quantity > 0) {
                         result.put(comboId, quantity);
                     }
-                } catch (NumberFormatException ignored) {}
+                } catch (NumberFormatException e) {
+                    // Ghi log cảnh báo nhưng bỏ qua lỗi
+                    System.out.println("⚠️ Không thể parse combo ID hoặc quantity: " + entry);
+                }
             }
         }
         return result;
     }
+
+
 
     public double calculateTotalAmount(Integer scheduleId, List<Integer> seatIds, String promotionCode) {
         List<Seat> seats = seatRepo.findAllById(seatIds);
@@ -336,6 +248,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
         return Math.max(totalSeatAmount - discount, 0);
     }
 
+
     public List<TheaterStockDTO> toTheaterStockDTOList(List<TheaterStock> stocks) {
         return stocks.stream().map(theaterStockService::convertToDTO).toList();
     }
@@ -355,17 +268,20 @@ public class BookingServiceSFImp implements BookingServiceSF {
                 .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn #" + invoiceId));
 
         if (invoice.getStatus() == InvoiceStatus.Unpaid) {
+            // Xoá Detail_FD
             List<Detail_FD> detailFDs = detailFDRepo.findByInvoiceInvoiceID(invoiceId);
             for (Detail_FD fd : detailFDs) {
                 TheaterStock stock = fd.getTheaterStock();
                 stock.setQuantity(stock.getQuantity() + fd.getQuantity());
-                theaterStockRepo.save(stock);
+                theaterStockRepo.save(stock); // cập nhật lại số lượng
             }
             detailFDRepo.deleteAll(detailFDs);
 
+            // Xoá DetailSeat
             List<DetailSeat> detailSeats = detailSeatRepo.findByInvoiceInvoiceID(invoiceId);
             detailSeatRepo.deleteAll(detailSeats);
 
+            // Xoá Invoice
             invoiceRepo.delete(invoice);
 
             log.info("🗑️ Đã xoá toàn bộ dữ liệu liên quan đến invoice #{}", invoiceId);
@@ -373,6 +289,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             log.warn("⚠️ Invoice #{} không ở trạng thái UNPAID, không thể huỷ và xoá.", invoiceId);
         }
     }
+
 
     @Override
     @Transactional
@@ -388,17 +305,103 @@ public class BookingServiceSFImp implements BookingServiceSF {
         }
     }
 
+    @Override
+    @Transactional
+    public void finalizeBooking(Integer invoiceId) {
+        Invoice invoiceEntity = invoiceRepo.findById(invoiceId)
+                .orElseThrow(() -> new IllegalStateException("Không tìm thấy hóa đơn với ID: " + invoiceId));
+
+        if (invoiceEntity.getStatus() == InvoiceStatus.Booked) {
+            log.info("💡 Hóa đơn {} đã được thanh toán trước đó.", invoiceId);
+            return;
+        }
+
+        invoiceEntity.setStatus(InvoiceStatus.Booked);
+        invoiceRepo.save(invoiceEntity);
+
+        InvoiceDTO invoiceDTO = toDTO(invoiceEntity);
+
+        // Cập nhật ghế: Unpaid -> Booked
+        List<DetailSeat> detailSeatEntities = detailSeatRepo.findByInvoiceInvoiceID(invoiceId);
+        for (DetailSeat entity : detailSeatEntities) {
+            DetailSeatDTO dto = toDTO(entity);
+            dto.setStatus(DetailSeat_Status.Booked);
+
+            DetailSeat updated = new DetailSeat();
+            updated.setId(dto.getId());
+            updated.setStatus(dto.getStatus());
+            updated.setInvoice(invoiceEntity);
+            seatRepo.findById(dto.getSeatID()).ifPresent(updated::setSeat);
+            scheduleRepo.findById(dto.getScheduleID()).ifPresent(updated::setSchedule);
+
+            detailSeatRepo.save(updated);
+        }
+
+        // Cập nhật combo: nếu status != Booked thì cập nhật
+        List<Detail_FD> comboEntities = detailFDRepo.findByInvoiceInvoiceID(invoiceId);
+        List<Detail_FDDTO> comboDTOs = new ArrayList<>();
+
+        for (Detail_FD entity : comboEntities) {
+            if (entity.getStatus() != DetailFD_Status.Booked) {
+                entity.setStatus(DetailFD_Status.Booked);
+                detailFDRepo.save(entity);
+            }
+
+            Detail_FDDTO dto = Detail_FDDTO.builder()
+                    .id(entity.getId())
+                    .invoiceId(invoiceId)
+                    .theaterStockId(entity.getTheaterStock().getStockID())
+                    .quantity(entity.getQuantity())
+                    .totalPrice(entity.getTotalPrice())
+                    .itemName(entity.getTheaterStock().getItemName())
+                    .bookingDate(invoiceEntity.getBookingDate())
+                    .build();
+            comboDTOs.add(dto);
+        }
+
+        // Gửi email xác nhận
+        if (invoiceDTO.getCustomerID() != null) {
+            customerRepo.findById(invoiceDTO.getCustomerID()).ifPresent(customer -> {
+                Account account = customer.getAccount();
+                if (account != null && account.getEmail() != null) {
+                    try {
+                        Map<String, Object> variables = new HashMap<>();
+                        variables.put("invoice", invoiceDTO);
+                        variables.put("combos", comboDTOs);
+                        variables.put("bookingDate", invoiceDTO.getBookingDate());
+                        variables.put("total", invoiceDTO.getTotalPrice());
+
+                        emailService.sendTicketHtmlTemplate(
+                                account.getEmail(),
+                                "Xác nhận đặt vé thành công",
+                                variables
+                        );
+                        log.info("📧 Đã gửi email xác nhận đến: {}", account.getEmail());
+                    } catch (Exception e) {
+                        log.error("❌ Gửi email thất bại: {}", e.getMessage(), e);
+                    }
+                } else {
+                    log.warn("⚠️ Không tìm thấy email trong Account của Customer ID: {}", customer.getId());
+                }
+            });
+        }
+
+        log.info("✅ finalizeBooking hoàn tất cho invoice #{}", invoiceId);
+    }
+
     public InvoiceDTO createTemporaryInvoice(BookingPreviewDTO previewData, Integer customerId) {
         Invoice invoice = new Invoice();
         invoice.setCustomer(customerRepo.findById(customerId).orElse(null));
         invoice.setStatus(InvoiceStatus.Unpaid);
         invoice.setBookingDate(LocalDateTime.now());
         invoice.setTotalPrice(previewData.getFinalPrice());
+
         invoice.setPromotion(previewData.getPromotion() != null ?
                 promotionRepo.findById(previewData.getPromotion().getPromotionID()).orElse(null) : null);
         invoice.setDiscount(previewData.getTotalPrice() - previewData.getFinalPrice());
         invoice = invoiceRepo.save(invoice);
 
+        // Ghi lại các ghế tạm thời
         Schedule schedule = scheduleRepo.findById(previewData.getSchedule().getScheduleID()).orElseThrow();
         for (SeatDTO seatDTO : previewData.getSelectedSeats()) {
             Seat seat = seatRepo.findById(seatDTO.getSeatID()).orElseThrow();
@@ -410,34 +413,95 @@ public class BookingServiceSFImp implements BookingServiceSF {
             detailSeatRepo.save(detailSeat);
         }
 
+        //  Ghi lại combo tạm thời
+        for (TheaterStockDTO comboDTO : previewData.getCombos()) {
+            int quantity = previewData.getComboQuantities().getOrDefault(comboDTO.getTheaterStockId(), 0);
+            if (quantity > 0) {
+                TheaterStock stock = theaterStockRepo.findById(comboDTO.getTheaterStockId()).orElseThrow();
+                double total = stock.getPrice().doubleValue() * 1000 * quantity;
+
+                Detail_FD detailFD = new Detail_FD();
+                detailFD.setInvoice(invoice);
+                detailFD.setTheaterStock(stock);
+                detailFD.setQuantity(quantity);
+                detailFD.setTotalPrice(total);
+                detailFD.setStatus(DetailFD_Status.Unpaid); // Sẽ được cập nhật sang Booked sau
+                detailFDRepo.save(detailFD);
+            }
+        }
+
         return toDTO(invoice);
     }
 
+
+    public BookingPreviewDTO reconstructBookingPreview(Integer invoiceId) {
+        Invoice invoice = invoiceRepo.findById(invoiceId).orElseThrow();
+        List<DetailSeat> detailSeats = detailSeatRepo.findByInvoiceInvoiceID(invoiceId);
+        List<Detail_FD> detailCombos = detailFDRepo.findByInvoiceInvoiceID(invoiceId);
+
+        List<Seat> seats = detailSeats.stream().map(DetailSeat::getSeat).toList();
+        Schedule schedule = detailSeats.get(0).getSchedule();
+        Room room = schedule.getRoom();
+        Promotion promotion = invoice.getPromotion();
+        Map<Integer, Integer> comboQuantities = detailCombos.stream()
+                .collect(Collectors.toMap(fd -> fd.getTheaterStock().getStockID(), Detail_FD::getQuantity));
+        List<TheaterStock> combos = detailCombos.stream().map(Detail_FD::getTheaterStock).toList();
+
+        return new BookingPreviewDTO(
+                toDTO(schedule),
+                toDTO(room),
+                seatService.toSeatDTOList(seats),
+                toTheaterStockDTOList(combos),
+                comboQuantities,
+                invoice.getTotalPrice() + invoice.getDiscount(),
+                invoice.getTotalPrice(),
+                promotion != null ? toDTO(promotion) : null
+        );
+    }
     public Map<String, Object> getTicketTemplateData(Integer invoiceId) {
-        InvoiceDTO invoice = getInvoiceById(invoiceId);
+        InvoiceDTO invoice = getInvoiceById(invoiceId); // Đảm bảo đã có hoặc viết method lấy từ DB
+
         Map<String, Object> data = new HashMap<>();
-        data.put("invoiceCode", "DH" + invoice.getInvoiceID());
+
+        data.put("invoiceCode", "DH" + invoice.getInvoiceID()); // Ví dụ định dạng mã đơn DH123
         data.put("guestName", invoice.getGuestName());
         data.put("guestEmail", invoice.getGuestEmail());
         data.put("guestPhone", invoice.getGuestPhone());
         data.put("bookingDate", invoice.getBookingDate());
+
+        // Ghế
         List<String> seatList = invoice.getDetailSeats()
                 .stream()
                 .map(detailSeatDTO -> {
-                    SeatDTO seat = seatService.getSeatById(detailSeatDTO.getSeatID());
-                    return seat.getPosition();
+                    SeatDTO seat = seatService.getSeatById(detailSeatDTO.getSeatID()); // hoặc từ Map
+                    return seat.getPosition(); // A1, B2, C3,...
                 })
                 .collect(Collectors.toList());
         data.put("seatList", seatList);
+
+        // Combo
         List<String> comboList = invoice.getDetail_FDDTO()
                 .stream()
                 .map(fd -> fd.getItemName() + " x" + fd.getQuantity())
                 .toList();
         data.put("comboList", comboList);
+
+        // Tổng tiền và giảm giá
         data.put("totalPrice", invoice.getTotalPrice());
         data.put("discount", invoice.getDiscount());
+
+        // Có thể thêm roomName, movieName, scheduleTime nếu bạn bổ sung vào DTO
+
+        // QR code base64 (nếu có xử lý tạo mã QR trong finalizeBooking)
+        // giả sử bạn có hàm này
+
+
         return data;
     }
+
+
+
+
 
     public InvoiceDTO toDTO(Invoice invoice) {
         return InvoiceDTO.builder()
@@ -470,7 +534,6 @@ public class BookingServiceSFImp implements BookingServiceSF {
     }
 
     public PromotionDTO toDTO(Promotion promotion) {
-        if (promotion == null) return null;
         return new PromotionDTO(
                 promotion.getPromotionID(),
                 promotion.getPromotionCode(),
@@ -481,6 +544,8 @@ public class BookingServiceSFImp implements BookingServiceSF {
                 promotion.getStatus()
         );
     }
+
+
 
     public SeatDTO toDTO(Seat seat) {
         SeatDTO dto = new SeatDTO();
@@ -495,7 +560,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
     }
 
     public RoomDTO toDTO(Room room) {
-        return RoomDTO.builder()
+        RoomDTO roomDTO = RoomDTO.builder()
                 .roomID(room.getRoomID())
                 .theaterID(room.getTheater().getTheaterID())
                 .name(room.getName())
@@ -504,8 +569,13 @@ public class BookingServiceSFImp implements BookingServiceSF {
                 .typeOfRoom(room.getTypeOfRoom())
                 .status(room.getStatus())
                 .seats(room.getSeats() != null ? room.getSeats().stream().map(this::toDTO).toList() : null)
-                .schedules(room.getSchedules() != null ? room.getSchedules().stream().map(schedule -> new ScheduleDTO()).toList() : null)
+                .schedules(room.getSchedules() != null ? room.getSchedules().stream().map(schedule -> {
+                    // Implement ScheduleDTO conversion logic here
+                    return new ScheduleDTO(); // Replace with actual conversion logic
+                }).toList() : null)
                 .build();
+
+        return roomDTO;
     }
 
     public ScheduleDTO toDTO(Schedule schedule) {
@@ -545,24 +615,33 @@ public class BookingServiceSFImp implements BookingServiceSF {
         return dto;
     }
 
+
     private Transaction mapToTransaction(SepayWebhookDTO dto) {
         Transaction tx = new Transaction();
         tx.setGateway(dto.getGateway());
+
+        // Format thời gian
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             tx.setTransactionDate(LocalDateTime.parse(dto.getTransactionDate(), formatter));
         } catch (Exception e) {
             log.warn("⚠ Không thể parse transactionDate '{}'", dto.getTransactionDate(), e);
         }
+
         tx.setAccountNumber(dto.getAccountNumber());
         tx.setSubAccount(dto.getSubAccount());
+
+        // Suy đoán loại giao dịch
         tx.setAmountIn(dto.getTransferAmount() != null && dto.getTransferAmount() > 0 ? dto.getTransferAmount() : 0.0);
-        tx.setAmountOut(0.0);
+        tx.setAmountOut(0.0); // vì Sepay gửi đến hệ thống mình nên là tiền vào
+
         tx.setAccumulated(dto.getAccumulated());
         tx.setCode(dto.getCode());
         tx.setTransactionContent(dto.getContent());
         tx.setReferenceNumber(dto.getReferenceCode());
-        tx.setBody(dto.toString());
+        tx.setBody(dto.toString()); // JSON raw lưu để debug nếu cần
         return tx;
     }
+
+
 }
