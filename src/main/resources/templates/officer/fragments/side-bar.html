@@ -1,29 +1,31 @@
 <div class="sidebar" th:fragment="sidebar">
-    <div class="admin-info">
-        <div class="admin-avatar"><i class="fas fa-user"></i></div>
-        <h3>Admin</h3>
+    <div class="admin-info-sidebar">
+        <div class="admin-avatar-sidebar"><i class="fas fa-user"></i></div>
+        <h3 class="sidebar-admin" th:text="${session.employee.fullName}"></h3>
     </div>
-    <ul class="nav-menu">
-        <li class="nav-item">
+    <ul class="nav-menu-sidebar">
+        <li class="nav-item-sidebar">
             <a th:href="@{/officer/blog-management}"
                th:classappend="${currentWebPage == 'blog-management'} ? 'active' : ''"
-               class="nav-link">
+               class="nav-link-sidebar">
                 Blog Management
             </a>
         </li>
     </ul>
-    <ul class="nav-menu">
-        <li class="nav-item">
+    <ul class="nav-menu-sidebar">
+        <li class="nav-item-sidebar">
             <a th:href="@{/officer/customer-care/feedbacks}"
                th:classappend="${currentWebPage == 'customer-care'} ? 'active' : ''"
-               class="nav-link">
+               class="nav-link-sidebar">
                 Customer Care
             </a>
         </li>
     </ul>
-    <ul class="nav-menu logout-menu"> <li class="nav-item">
-        <a th:href="@{/logout}" class="nav-link logout-button"> <i class="fas fa-sign-out-alt"></i> Logout
-        </a>
-    </li>
+    <ul class="nav-menu-sidebar logout-menu-sidebar">
+        <li class="nav-item-sidebar">
+            <a th:href="@{/logout}" class="nav-link-sidebar logout-button-sidebar">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </li>
     </ul>
 </div>

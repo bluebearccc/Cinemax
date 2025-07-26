@@ -5,7 +5,7 @@
 }
 
 body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background-color: #f8fafc;
     color: #334155;
     line-height: 1.6;
@@ -136,14 +136,14 @@ body {
     overflow-y: auto;
 }
 
-.admin-info {
+.admin-info-sidebar {
     text-align: center;
     margin-bottom: 30px;
     padding-bottom: 20px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.admin-avatar {
+.admin-avatar-sidebar {
     width: 60px;
     height: 60px;
     border-radius: 50%;
@@ -156,15 +156,22 @@ body {
     font-weight: bold;
 }
 
-.nav-menu {
+.nav-menu-sidebar {
     list-style: none;
+    padding: 0;
+    margin: 0;
 }
 
-.nav-item {
+.sidebar-admin {
+    font-size: 18.72px;
+}
+
+
+.nav-item-sidebar {
     margin-bottom: 10px;
 }
 
-.nav-link {
+.nav-link-sidebar {
     display: block;
     padding: 12px 15px;
     color: white;
@@ -174,8 +181,8 @@ body {
     cursor: pointer;
 }
 
-.nav-link:hover,
-.nav-link.active {
+.nav-link-sidebar:hover,
+.nav-link-sidebar.active {
     background: rgba(255, 255, 255, 0.2);
     transform: translateX(5px);
 }

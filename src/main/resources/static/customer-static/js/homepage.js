@@ -1,3 +1,7 @@
+function scrollToBookMovie(event) {
+    event.preventDefault();
+    document.querySelector("#book-movie-area").scrollIntoView({ behavior: "smooth" });
+}
 
 document.querySelectorAll('.carouselMovie-container').forEach(container => {
     const carouselMovie = container.querySelector('.carouselMovie');

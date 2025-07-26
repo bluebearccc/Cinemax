@@ -7,38 +7,70 @@
     <title>Edit Seats</title>
     <link rel="stylesheet" th:href="@{/staff/css/style.css}">
     <link rel="stylesheet" th:href="@{/staff/css/add_update_item.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
     <style>
         /* ========== CÁC STYLE CHUNG ========== */
         .alert {
-            padding: 15px; margin-bottom: 20px; border: 1px solid transparent;
-            border-radius: 4px; font-size: 16px; text-align: center;
+            padding: 15px;
+            margin-bottom: 20px;
+            border: 1px solid transparent;
+            border-radius: 4px;
+            font-size: 16px;
+            text-align: center;
         }
+
         .alert-error {
-            color: #a94442; background-color: #f2dede; border-color: #ebccd1;
+            color: #a94442;
+            background-color: #f2dede;
+            border-color: #ebccd1;
         }
+
         .alert-success {
-            color: #3c763d; background-color: #dff0d8; border-color: #d6e9c6;
+            color: #3c763d;
+            background-color: #dff0d8;
+            border-color: #d6e9c6;
         }
 
         /* ========== LAYOUT CHÍNH ========== */
         .seat-map-container {
-            background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            padding: 25px; margin-top: 20px; overflow-x: auto; max-width: 100%;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 25px;
+            margin-top: 20px;
+            overflow-x: auto;
+            max-width: 100%;
         }
+
         .seat-map-header {
-            text-align: center; margin-bottom: 30px; padding-bottom: 20px;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
             border-bottom: 2px solid #f0f0f0;
         }
+
         .seat-map-title {
-            font-size: 24px; font-weight: 600; color: #333; margin: 0 0 10px 0;
+            font-size: 24px;
+            font-weight: 600;
+            color: #333;
+            margin: 0 0 10px 0;
         }
+
         .screen-area {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; text-align: center; padding: 15px; border-radius: 8px;
-            margin: 0 auto 40px auto; max-width: 80%; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 0 auto 40px auto;
+            max-width: 80%;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
         }
+
         .screen-text {
-            font-size: 18px; font-weight: 600; margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            margin: 0;
         }
 
         /* ========== SƠ ĐỒ GHẾ ========== */
@@ -46,48 +78,85 @@
             margin: 0 auto;
             max-width: fit-content;
         }
+
         .seat-grid {
             display: grid;
             gap: 16px;
             justify-content: flex-start;
         }
+
         .seat-row {
             display: flex;
             align-items: center;
             gap: 16px;
         }
+
         .row-label {
-            width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;
-            font-weight: 600; color: #666; background: #f8f9fa; border-radius: 50%;
-            font-size: 14px; flex-shrink: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #666;
+            background: #f8f9fa;
+            border-radius: 50%;
+            font-size: 14px;
+            flex-shrink: 0;
         }
+
         .column-headers {
             display: flex;
             align-items: center;
             gap: 16px;
             margin-bottom: 10px;
         }
+
         .column-label {
-            width: 50px; height: 30px; display: flex; align-items: center; justify-content: center;
-            font-weight: 600; color: #333; background-color: #e9ecef; border-radius: 6px;
+            width: 50px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: #333;
+            background-color: #e9ecef;
+            border-radius: 6px;
         }
 
         /* ========== GIAO DIỆN GHẾ (ĐÃ SỬA LỖI) ========== */
         .seat-container {
             position: relative;
         }
+
         .seat-empty {
-            width: 50px; height: 50px; flex-shrink: 0;
+            width: 50px;
+            height: 50px;
+            flex-shrink: 0;
         }
+
         .seat {
-            width: 50px; height: 50px; display: flex; align-items: center; justify-content: center;
-            border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.2s ease-in-out;
-            background-color: #cceeff; border: 2px solid #99d6ff; color: #004085;
-            position: relative; user-select: none;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            background-color: #cceeff;
+            border: 2px solid #99d6ff;
+            color: #004085;
+            position: relative;
+            user-select: none;
         }
+
         .seat:hover {
-            transform: translateY(-3px); box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
         }
+
         .vip-checkbox-hidden {
             display: none;
         }
@@ -98,6 +167,7 @@
             border-color: #ffc107;
             color: #856404;
         }
+
         /* Thêm ngôi sao cho ghế VIP */
         .seat.vip::after {
             content: '⭐';
@@ -108,14 +178,28 @@
         }
 
         .delete-seat-btn {
-            position: absolute; top: -10px; right: -10px; background: white; border: 1px solid #ddd;
-            border-radius: 50%; width: 24px; height: 24px; display: flex; align-items: center;
-            justify-content: center; font-size: 12px; cursor: pointer; opacity: 0;
-            transition: opacity 0.2s; z-index: 10;
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.2s;
+            z-index: 10;
         }
+
         .seat-container:hover .delete-seat-btn {
             opacity: 1;
         }
+
         /* ========== STYLE CHO NÚT TOGGLE STATUS ========== */
         .seat-status-toggle {
             margin-top: 8px;
@@ -139,6 +223,7 @@
         .btn-set-status.inactive {
             background-color: #c82333;
         }
+
         .btn-set-status.inactive:hover {
             background-color: #a31c29;
         }
@@ -148,16 +233,18 @@
         .btn-set-status.active {
             background-color: #218838;
         }
+
         .btn-set-status.active:hover {
             background-color: #19692c;
         }
+
         /* ========== STYLE MỚI CHO TRẠNG THÁI VÀ NÚT TOGGLE ========== */
 
         /* Class này sẽ làm mờ ghế Inactive */
         .seat-container.seat-inactive .seat {
             background-color: #495057; /* Màu nền xám đậm */
-            border-color: #343a40;     /* Màu viền tối hơn một chút */
-            color: #ced4da;            /* Màu chữ sáng để dễ đọc */
+            border-color: #343a40; /* Màu viền tối hơn một chút */
+            color: #ced4da; /* Màu chữ sáng để dễ đọc */
             /* Xóa bỏ opacity và filter để màu hiển thị rõ nét */
         }
 
@@ -244,7 +331,7 @@
     </div>
 
     <form id="seatForm" th:action="@{/staff/theater/update_seat}" th:object="${seatUpdateRequest}" method="post">
-        <input type="hidden" name="roomId" th:value="${room.roomID}" />
+        <input type="hidden" name="roomId" th:value="${room.roomID}"/>
 
         <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
         <div th:if="${errorMessage}" class="alert alert-error" th:text="${errorMessage}"></div>
@@ -254,26 +341,46 @@
                 <div class="form-header"><p class="form-subtitle">Set ticket prices and select VIP seats</p></div>
                 <div class="form-group">
                     <label class="form-label">Standard Seat Price (VND)</label>
-                    <input type="number" class="form-input" th:field="*{nonVipPrice}" placeholder="Enter standard seat price" min="1000" step="0.01" required>
+                    <input type="number" class="form-input" th:field="*{nonVipPrice}"
+                           placeholder="Enter standard seat price" min="1000" step="0.01" required>
                 </div>
                 <div class="form-group">
                     <label class="form-label">VIP Seat Price (VND)</label>
-                    <input type="number" class="form-input" th:field="*{vipPrice}" placeholder="Enter VIP seat price" min="1000" step="0.01" required>
+                    <input type="number" class="form-input" th:field="*{vipPrice}" placeholder="Enter VIP seat price"
+                           min="1000" step="0.01" required>
                 </div>
                 <div id="price-error-message" class="alert alert-error" style="display:none; margin-top: 15px;"></div>
                 <div class="form-group">
                     <fieldset style="border: 1px solid #ddd; padding: 15px; border-radius: 8px; margin-top: 20px;">
                         <legend style="font-weight: 600; padding: 0 10px;">Set VIP by Range</legend>
                         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <div style="flex: 1;"><label class="form-label">From Row</label><input type="text" id="fromRow" class="form-input" placeholder="A" style="text-transform: uppercase;"></div>
-                            <div style="flex: 1;"><label class="form-label">To Row</label><input type="text" id="toRow" class="form-input" placeholder="C" style="text-transform: uppercase;"></div>
+                            <div style="flex: 1;"><label class="form-label">From Row</label><input type="text"
+                                                                                                   id="fromRow"
+                                                                                                   class="form-input"
+                                                                                                   placeholder="A"
+                                                                                                   style="text-transform: uppercase;">
+                            </div>
+                            <div style="flex: 1;"><label class="form-label">To Row</label><input type="text" id="toRow"
+                                                                                                 class="form-input"
+                                                                                                 placeholder="C"
+                                                                                                 style="text-transform: uppercase;">
+                            </div>
                         </div>
                         <div style="display: flex; gap: 10px;">
-                            <div style="flex: 1;"><label class="form-label">From Column</label><input type="number" id="fromCol" class="form-input" placeholder="1" min="1"></div>
-                            <div style="flex: 1;"><label class="form-label">To Column</label><input type="number" id="toCol" class="form-input" placeholder="5" min="1"></div>
+                            <div style="flex: 1;"><label class="form-label">From Column</label><input type="number"
+                                                                                                      id="fromCol"
+                                                                                                      class="form-input"
+                                                                                                      placeholder="1"
+                                                                                                      min="1"></div>
+                            <div style="flex: 1;"><label class="form-label">To Column</label><input type="number"
+                                                                                                    id="toCol"
+                                                                                                    class="form-input"
+                                                                                                    placeholder="5"
+                                                                                                    min="1"></div>
                         </div>
                         <div style="margin-top: 15px; display: flex; gap: 10px;">
-                            <button type="button" id="applyVipRangeBtn" class="btn btn-secondary">Apply VIP Range</button>
+                            <button type="button" id="applyVipRangeBtn" class="btn btn-secondary">Apply VIP Range
+                            </button>
                             <button type="button" id="clearVipBtn" class="btn btn-danger">Clear All VIP</button>
                         </div>
                     </fieldset>
@@ -282,7 +389,8 @@
 
             <div class="right-column">
                 <div class="seat-map-container">
-                    <div class="seat-map-header"><h3 class="seat-map-title" th:text="'Seat Map: ' + ${room.name}"></h3></div>
+                    <div class="seat-map-header"><h3 class="seat-map-title" th:text="'Seat Map: ' + ${room.name}"></h3>
+                    </div>
                     <div class="screen-area"><p class="screen-text">SCREEN</p></div>
 
                     <div class="seat-grid-wrapper">
@@ -296,10 +404,13 @@
                         <div class="seat-grid">
                             <th:block th:each="row : ${#numbers.sequence(1, room.row)}">
                                 <div class="seat-row">
-                                    <div class="row-label" th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row)}"></div>
+                                    <div class="row-label"
+                                         th:text="${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row)}"></div>
                                     <th:block th:each="col : ${#numbers.sequence(1, room.collumn)}">
-                                        <th:block th:with="seatPosition=${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row) + col}">
-                                            <th:block th:with="currentSeats=${room.seats.?[position == #vars.seatPosition]}">
+                                        <th:block
+                                                th:with="seatPosition=${#strings.substring('ABCDEFGHIJKLMNOPQRSTUVWXYZ', row - 1, row) + col}">
+                                            <th:block
+                                                    th:with="currentSeats=${room.seats.?[position == #vars.seatPosition]}">
 
                                                 <div th:if="${not #lists.isEmpty(currentSeats)}"
                                                      th:with="seat=${currentSeats[0]}"
@@ -307,23 +418,29 @@
                                                      th:classappend="${seat.status.name() == 'Inactive'} ? 'seat-inactive'"
                                                      th:id="'seat-container-' + ${seat.seatID}">
 
-                                                    <input type="checkbox" th:id="'vip-check-' + ${seat.seatID}" class="vip-checkbox-hidden" th:field="*{vipSeatIds}" th:value="${seat.seatID}" />
-                                                    <label th:for="'vip-check-' + ${seat.seatID}" class="seat" th:classappend="${seat.isVIP} ? 'vip'">
+                                                    <input type="checkbox" th:id="'vip-check-' + ${seat.seatID}"
+                                                           class="vip-checkbox-hidden" th:field="*{vipSeatIds}"
+                                                           th:value="${seat.seatID}"/>
+                                                    <label th:for="'vip-check-' + ${seat.seatID}" class="seat"
+                                                           th:classappend="${seat.isVIP} ? 'vip'">
                                                         <span class="seat-name" th:text="${seat.name}"></span>
-                                                        <button type="button" class="delete-seat-btn" th:data-seat-id="${seat.seatID}">❌</button>
+                                                        <button type="button" class="delete-seat-btn"
+                                                                th:data-seat-id="${seat.seatID}">❌
+                                                        </button>
                                                     </label>
 
                                                     <input type="hidden"
                                                            th:name="'seatStatuses[' + ${seat.seatID} + ']'"
                                                            th:value="${seat.status}"
-                                                           th:id="'status-input-' + ${seat.seatID}" />
+                                                           th:id="'status-input-' + ${seat.seatID}"/>
 
                                                     <button type="button"
                                                             class="status-toggle-btn"
                                                             th:classappend="${seat.status.name() == 'Active'} ? 'inactive' : 'active'"
                                                             th:attr="data-seat-id=${seat.seatID}"
                                                             th:title="${seat.status.name() == 'Active'} ? 'Set Inactive' : 'Set Active'">
-                                                        &#x23FB; </button>
+                                                        &#x23FB;
+                                                    </button>
                                                 </div>
 
                                                 <div th:if="${#lists.isEmpty(currentSeats)}" class="seat-empty"></div>
@@ -340,20 +457,21 @@
 
         <div class="form-buttons">
             <button type="submit" class="btn btn-primary">Save Prices & VIP</button>
-            <a th:href="@{/staff/theater/theater_detail(id=${room.theaterID})}" class="btn btn-danger">Go Back</Back></a>
+            <a th:href="@{/staff/theater/theater_detail(id=${room.theaterID})}" class="btn btn-danger">Go
+                Back</Back></a>
         </div>
     </form>
 </div>
 
 <script th:inline="javascript">
     /*<![CDATA[*/
-    document.addEventListener('DOMContentLoaded', function() {
+    document.addEventListener('DOMContentLoaded', function () {
         const mainContent = document.querySelector('.main-content');
         const seatGrid = document.querySelector('.seat-grid');
 
         // --- Xử lý xóa ghế ---
         if (seatGrid) {
-            seatGrid.addEventListener('click', function(event) {
+            seatGrid.addEventListener('click', function (event) {
                 if (event.target && event.target.classList.contains('delete-seat-btn')) {
                     event.preventDefault();
                     const seatId = event.target.getAttribute('data-seat-id');
@@ -376,8 +494,7 @@
                                 alert(error.message);
                             });
                     }
-                }
-                else if (event.target.classList.contains('status-toggle-btn')) {
+                } else if (event.target.classList.contains('status-toggle-btn')) {
                     const button = event.target;
                     const seatId = button.dataset.seatId;
                     const hiddenInput = document.getElementById('status-input-' + seatId);
@@ -398,7 +515,7 @@
                     }
                 }
             });
-            seatGrid.addEventListener('change', function(event) {
+            seatGrid.addEventListener('change', function (event) {
                 if (event.target.classList.contains('vip-checkbox-hidden')) {
                     const checkbox = event.target;
                     const seatLabel = checkbox.closest('.seat-container').querySelector('.seat');
@@ -438,9 +555,8 @@
         }
 
 
-        mainContent.addEventListener('click', function(event) {
+        mainContent.addEventListener('click', function (event) {
             const targetId = event.target.id;
-
 
 
             if (targetId === 'applyVipRangeBtn') {
@@ -465,7 +581,7 @@
                     const checkbox = document.getElementById('vip-check-' + seat.seatID);
                     if (checkbox && !checkbox.checked) {
                         checkbox.checked = true;
-                        checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                        checkbox.dispatchEvent(new Event('change', {bubbles: true}));
                     }
                 });
             }
@@ -474,7 +590,7 @@
             if (targetId === 'clearVipBtn') {
                 document.querySelectorAll('.vip-checkbox-hidden:checked').forEach(checkbox => {
                     checkbox.checked = false;
-                    checkbox.dispatchEvent(new Event('change', { bubbles: true }));
+                    checkbox.dispatchEvent(new Event('change', {bubbles: true}));
                 });
             }
         });

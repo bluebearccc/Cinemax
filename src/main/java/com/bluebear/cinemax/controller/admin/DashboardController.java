@@ -64,6 +64,7 @@ public class DashboardController {
         model.addAttribute("filter", filter);
         model.addAttribute("keyword", keyword);
         // ➤ Gửi dữ liệu feedback xuống view
+        model.addAttribute("activeLink", "dashboard");
         model.addAttribute("feedbacks", feedbackPageData.getContent());
         model.addAttribute("feedbackCurrentPage", feedbackPage);
         model.addAttribute("feedbackTotalPages", feedbackPageData.getTotalPages());

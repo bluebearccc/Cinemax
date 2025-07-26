@@ -2,7 +2,6 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Profile - Cinema</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link rel="stylesheet" th:href="@{/customer-static/css/bootstrap.min.css}">
@@ -231,15 +230,6 @@
                             Phone Number:
                         </div>
                         <div class="info-value" th:text="${customer.phone}">0901234567</div>
-                    </div>
-                    <div class="info-row">
-                        <div class="info-label">
-                            <i class="fas fa-star"></i>
-                            Reward Points
-                        </div>
-                        <div class="info-value">
-                            <span class="points-display" th:text="${customer.point} + ' points'">150 points</span>
-                        </div>
                     </div>
                     <div class="mt-4">
                         <button class="btn btn-edit" onclick="toggleEditForm()">

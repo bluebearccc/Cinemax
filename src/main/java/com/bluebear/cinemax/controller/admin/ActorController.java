@@ -188,7 +188,7 @@ public class ActorController {
 
         model.addAttribute("actors", actors);
         model.addAttribute("pageTitle", "Danh sách diễn viên");
-
+        model.addAttribute("activeLink", "actors");
         return "admin/list-actor";
     }
 
@@ -205,7 +205,7 @@ public class ActorController {
         model.addAttribute("actor", actor);
         model.addAttribute("movies", movies);
         model.addAttribute("pageTitle", "Chi tiết diễn viên - " + actor.getActorName());
-
+        model.addAttribute("activeLink", "actors");
         return "admin/detail-actor";
     }
 
@@ -230,7 +230,7 @@ public class ActorController {
         model.addAttribute("actors", actors);
         model.addAttribute("pageTitle", pageTitle);
         model.addAttribute("keyword", keyword);
-
+        model.addAttribute("activeLink", "actors");
         return "admin/list-actor";
     }
 
@@ -252,7 +252,7 @@ public class ActorController {
         model.addAttribute("allMovies", allMovies);
         model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Thêm diễn viên mới");
-
+        model.addAttribute("activeLink", "actors");
         return "admin/form-actor";
     }
 
@@ -407,7 +407,7 @@ public class ActorController {
         model.addAttribute("currentMovieIds", currentMovieIds);
         model.addAttribute("isEdit", true);
         model.addAttribute("pageTitle", "Chỉnh sửa diễn viên - " + actor.getActorName());
-
+        model.addAttribute("activeLink", "actors");
         return "admin/edit-actor";
     }
 

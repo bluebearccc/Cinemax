@@ -252,7 +252,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             stock.setQuantity(stock.getQuantity() - quantity);
             theaterStockRepo.save(stock);
 
-            double comboPrice = stock.getPrice().doubleValue() * 1000 * quantity;
+            double comboPrice = stock.getPrice().doubleValue() * quantity;
             comboTotal += comboPrice;
 
             Detail_FD detailFD = new Detail_FD();

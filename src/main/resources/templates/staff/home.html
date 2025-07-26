@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Quản Lý Rạp Phim</title>
+    <title>Dashboard Staff</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
     <style>
         .cinema-selector {
@@ -292,8 +292,32 @@
         .header a {
             margin-left: auto; /* Tự động đẩy phần tử này sang phải */
         }
+
+        .logout-btn {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            background-color: #fef2f2; /* Màu nền đỏ nhạt */
+            color: #b91c1c; /* Màu chữ đỏ đậm */
+            border: 1px solid #fecaca; /* Viền đỏ nhạt */
+            border-radius: 8px;
+            text-decoration: none; /* Bỏ gạch chân của link */
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease-in-out; /* Hiệu ứng chuyển động mượt */
+            cursor: pointer;
+        }
+
+        /* Hiệu ứng khi di chuột qua nút Logout */
+        .logout-btn:hover {
+            background-color: #fee2e2; /* Nền đậm hơn một chút */
+            color: #991b1b;
+            border-color: #fca5a5;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); /* Đổ bóng nhẹ */
+            transform: translateY(-2px); /* Nâng nút lên một chút */
+        }
     </style>
     <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
 </head>
 <body>
 <div class="dashboard">
@@ -324,7 +348,7 @@
         <!-- Header -->
         <div class="header">
             <h1>Theater Revenue</h1>
-            <a th:href="@{/staff/logout}">Logout</a>
+            <a th:href="@{/logout}" class="logout-btn">Logout</a>
         </div>
 
         <!-- Cinema Selection -->

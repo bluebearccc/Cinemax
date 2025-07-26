@@ -287,7 +287,7 @@ public class MovieController {
             model.addAttribute("totalMovies", totalMovies);
             model.addAttribute("nowShowingCount", nowShowingCount);
             model.addAttribute("upcomingCount", upcomingCount);
-
+            model.addAttribute("activeLink", "movies");
             model.addAttribute("keyword", keyword);
             model.addAttribute("selectedGenreId", genreId);
             model.addAttribute("selectedStatus", status);
@@ -318,6 +318,7 @@ public class MovieController {
             model.addAttribute("actors", actorService.getActorsByMovie(id));
             model.addAttribute("genres", genreService.getGenresByMovie(id));
             model.addAttribute("relatedMovies", movieService.getRelatedMovies(id.longValue()));
+            model.addAttribute("activeLink", "movies");
             model.addAttribute("pageTitle", movie.getMovieName());
             return "admin/detail";
         } catch (Exception e) {
@@ -334,6 +335,8 @@ public class MovieController {
             model.addAttribute("genres", genreRepository.findAll());
             model.addAttribute("actors", actorService.getAllActors());
             model.addAttribute("pageTitle", "Thêm phim mới");
+            model.addAttribute("activeLink", "movies");
+
             return "admin/add-movie";
         } catch (Exception e) {
             model.addAttribute("error", "Có lỗi xảy ra: " + e.getMessage());
@@ -501,6 +504,8 @@ public class MovieController {
             model.addAttribute("actors", allActors);
             model.addAttribute("movieGenreIds", movieGenreIds);
             model.addAttribute("movieActorIds", movieActorIds);
+            model.addAttribute("activeLink", "movies");
+
             model.addAttribute("pageTitle", "Chỉnh sửa phim: " + movie.getMovieName());
 
             return "admin/edit";

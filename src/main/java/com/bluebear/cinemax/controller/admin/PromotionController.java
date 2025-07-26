@@ -35,6 +35,8 @@ public class PromotionController {
         model.addAttribute("activeVouchers", activeVouchers);
         model.addAttribute("expiredVouchers", expiredVouchers);
         model.addAttribute("averageDiscount", averageDiscount);
+        model.addAttribute("activeLink", "vouchers");
+
         model.addAttribute("pageTitle", "Voucher Management");
 
         return "admin/list-voucher";
@@ -60,6 +62,8 @@ public class PromotionController {
         model.addAttribute("averageDiscount", averageDiscount);
         model.addAttribute("keyword", keyword);
         model.addAttribute("selectedStatus", status);
+        model.addAttribute("activeLink", "vouchers");
+
         model.addAttribute("pageTitle", "Voucher Search Results");
 
         return "admin/list-voucher";
@@ -75,6 +79,8 @@ public class PromotionController {
         }
 
         model.addAttribute("voucher", voucher.get());
+        model.addAttribute("activeLink", "vouchers");
+
         model.addAttribute("pageTitle", "Voucher Details");
 
         return "admin/detail-voucher";
@@ -84,6 +90,7 @@ public class PromotionController {
     @GetMapping("/add")
     public String showAddForm(Model model) {
         model.addAttribute("voucher", new PromotionDTO());
+        model.addAttribute("activeLink", "vouchers");
         model.addAttribute("pageTitle", "Add New Voucher");
         model.addAttribute("isEdit", false);
 
@@ -132,6 +139,7 @@ public class PromotionController {
         }
         model.addAttribute("pageTitle", "Edit Voucher");
         model.addAttribute("isEdit", true);
+        model.addAttribute("activeLink", "vouchers");
 
         return "admin/form-voucher";
     }

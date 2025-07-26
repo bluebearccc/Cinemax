@@ -7,15 +7,15 @@ body, html {
     background-color: #f3f3f3;
 }
 .login-container {
-    width: 960px;
+    width: 60rem; /* 960px / 16 */
     background: #fff;
-    box-shadow: 0 0 30px rgba(0,0,0,0.1);
+    box-shadow: 0 0 1.875rem rgba(0,0,0,0.1); /* 30px / 16 */
     display: flex;
-    border-radius: 20px;
+    border-radius: 1.25rem; /* 20px / 16 */
 }
 .login-left {
     flex: 1;
-    padding: 40px;
+    padding: 2.5rem; /* 40px / 16 */
 }
 .login-right {
     flex: 1;
@@ -24,16 +24,16 @@ body, html {
     display: flex;
     align-items: flex-end;
     justify-content: center;
-    padding: 20px;
-    border-top-right-radius: 20px;
-    border-bottom-right-radius: 20px;
+    padding: 1.25rem; /* 20px / 16 */
+    border-top-right-radius: 1.25rem; /* 20px / 16 */
+    border-bottom-right-radius: 1.25rem; /* 20px / 16 */
 }
 .login-right h4 {
     color: white;
     font-size: 1.5rem;
     background: rgba(0, 0, 0, 0.4);
-    padding: 10px 20px;
-    border-radius: 10px;
+    padding: 0.625rem 1.25rem; /* 10px 20px / 16 */
+    border-radius: 0.625rem; /* 10px / 16 */
 }
 .form-control {
     border-radius: 0;
@@ -45,13 +45,13 @@ body, html {
     border-radius: 0;
 }
 .social-btn {
-    border: 1px solid #ccc;
+    border: 0.0625rem solid #ccc; /* 1px / 16 */
     border-radius: 0;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 .social-btn img {
-    width: 20px;
-    margin-right: 10px;
+    width: 1.25rem; /* 20px / 16 */
+    margin-right: 0.625rem; /* 10px / 16 */
 }
