@@ -72,7 +72,7 @@ public class BookingProcessController {
             LocalDateTime queryEndDate;
 
             if (date != null) {
-                queryStartDate = date.toLocalDate().atStartOfDay();
+                queryStartDate = currentDate;
                 queryEndDate = date.toLocalDate().atTime(23, 59, 59);
             } else {
                 queryStartDate = currentDate;
