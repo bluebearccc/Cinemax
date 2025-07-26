@@ -170,11 +170,34 @@ public class UserProfileController {
 
     @PostMapping("/feedback/submit")
     public String submitServiceFeedback(@ModelAttribute ServiceFeedbackDTO feedbackDTO,
+                                        HttpSession session,
                                         RedirectAttributes redirectAttributes) {
-        userProfileService.submitFeedback(feedbackDTO); // Inject repository
 
-        redirectAttributes.addFlashAttribute("successMessage", "Feedback submitted successfully!");
-        return "redirect:/user/profile?customerId=" + feedbackDTO.getCustomerId();
+        // Lấy customer từ session (an toàn hơn client gửi lên)
+        CustomerDTO customerDTO = (CustomerDTO) session.getAttribute("customer");
+        if (customerDTO == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Your session has expired. Please log in again.");
+            return "redirect:/login";
+        }
+
+        // Check theaterId null để tránh lỗi IllegalArgumentException
+        if (feedbackDTO.getTheaterId() == null) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Invalid theater for feedback.");
+            return "redirect:/user/profile";
+        }
+
+        // Gán lại customerId từ session để tránh phụ thuộc dữ liệu client
+        feedbackDTO.setCustomerId(customerDTO.getId());
+
+        // Gửi đánh giá
+        try {
+            userProfileService.submitFeedback(feedbackDTO);
+            redirectAttributes.addFlashAttribute("successMessage", "Feedback submitted successfully!");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Failed to submit feedback. Please try again.");
+        }
+
+        return "redirect:/user/profile";
     }
 
     @GetMapping("/invoice/{invoiceId}/detail")
