@@ -101,7 +101,7 @@ public class MovieDetailController {
             return "customer/movie-detail";
         }
 
-        return "common/error404";
+        return "error/404";
     }
 
     @GetMapping("/loadSchedule")

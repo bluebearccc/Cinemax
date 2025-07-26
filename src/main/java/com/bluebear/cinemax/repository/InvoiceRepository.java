@@ -61,4 +61,10 @@ public interface InvoiceRepository extends JpaRepository<Invoice, Integer> {
             "JOIN ds.schedule s " +
             "WHERE s.room.roomID = :roomId AND s.startTime >= :now")
     List<Invoice> findActiveBookingsForRoom(@Param("roomId") Integer roomId, @Param("now") LocalDateTime now);
+    @Query("SELECT DISTINCT i FROM Invoice i " +
+            "JOIN i.detail_FD dfd " +         // Join đến chi tiết đồ ăn
+            "JOIN i.detailSeats ds " +       // Join đến chi tiết vé để lấy thông tin lịch chiếu
+            "WHERE dfd.theaterStock.stockID = :stockId " +
+            "AND ds.schedule.startTime >= :now")
+    List<Invoice> findActiveInvoicesByTheaterStockId(@Param("stockId") Integer stockId, @Param("now") LocalDateTime now);
 }

@@ -60,14 +60,10 @@ public class AuthenticationController {
     @Value("${app.base-url}")
     private String baseUrl;
 
-    @PostConstruct
-    public void init() {
-        genres = genreService.getAllGenres();
-        theaters = theaterService.getAllTheaters();
-    }
-
     @GetMapping("/login")
     public String login(Model model, @CookieValue(name = "LOGIN_ERROR", required = false) String loginError, HttpServletResponse response) {
+        genres = genreService.getAllGenres();
+        theaters = theaterService.getAllTheaters();
         model.addAttribute("genres", genres);
         model.addAttribute("theaters", theaters);
         if (loginError != null) {
@@ -88,6 +84,8 @@ public class AuthenticationController {
 
     @GetMapping("/register")
     public String register(Model model) {
+        genres = genreService.getAllGenres();
+        theaters = theaterService.getAllTheaters();
         model.addAttribute("genres", genres);
         model.addAttribute("theaters", theaters);
         return "common/register";
@@ -123,11 +121,17 @@ public class AuthenticationController {
     @GetMapping("/verifytoken")
     public String verifyToken(@RequestParam("token") String token, HttpSession session, Model model) {
         VerifyTokenDTO verifyTokenDTO = verifyTokenService.findByToken(token);
+        genres = genreService.getAllGenres();
+        theaters = theaterService.getAllTheaters();
         if (verifyTokenDTO == null) {
+            model.addAttribute("genres", genres);
+            model.addAttribute("theaters", theaters);
             model.addAttribute("error", "Invalid token");
             return "common/register";
         } else if (verifyTokenDTO.getExpiresAt().before(new Date(System.currentTimeMillis()))) {
             verifyTokenService.deleteTokenByEmail(verifyTokenDTO.getEmail());
+            model.addAttribute("genres", genres);
+            model.addAttribute("theaters", theaters);
             model.addAttribute("error", "Expired token");
             return "common/register";
         } else {
@@ -232,24 +236,11 @@ public class AuthenticationController {
     @PostMapping("/updatepassword")
     public String updatePassword(@RequestParam("password") String password, HttpSession session, Model model) {
         AccountDTO account = (AccountDTO) session.getAttribute("account");
+        session.invalidate();
         if (account != null) {
             account.setPassword(password);
             AccountDTO newAcc = accountService.save(account);
-            session.setAttribute("account", newAcc);
-            CustomerDTO customerDTO = customerService.getUserByAccountID(account.getId());
-            if (customerDTO != null) {
-                session.setAttribute("customer", customerDTO);
-            } else {
-                session.setAttribute("employee", employeeService.findByAccountId(account.getId()));
-            }
-            return switch (account.getRole()) {
-                case Admin -> "redirect:/admin/dashboard";
-                case Customer -> "redirect:";
-                case Staff -> "redirect:/staff/home";
-                case Cashier -> "redirect:/cashier/home";
-                case Customer_Officer -> "redirect:/officer/home";
-                default -> "redirect:/newpass";
-            };
+            return "redirect:/login";
         }
         model.addAttribute("error", "Something went wrong");
         return "redirect:/newpass";

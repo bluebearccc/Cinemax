@@ -194,7 +194,8 @@ public class RoomServiceImpl implements RoomService {
         Room room = toEntity(roomDTO);
         room.setTheater(theater);
         Room savedRoom = roomRepository.save(room);
-
+        int q = theater.getRoomQuantity();
+        theater.setRoomQuantity(q + 1);
 
         List<Seat> seatsToCreate = new ArrayList<>();
         int rows = savedRoom.getRow();
@@ -270,7 +271,9 @@ public class RoomServiceImpl implements RoomService {
         if (seatsToDelete != null && !seatsToDelete.isEmpty()) {
             seatRepository.deleteAll(seatsToDelete);
         }
-
+        Theater theater = roomToDelete.getTheater();
+        int q = theater.getRoomQuantity();
+        theater.setRoomQuantity(q - 1);
         roomRepository.delete(roomToDelete);
     }
 

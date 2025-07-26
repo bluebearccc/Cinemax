@@ -85,7 +85,7 @@ public class VnpayController {
 
                 Map<String, Object> emailData = Map.of(
                         "invoiceId", txnRef,
-                        "amount", Long.parseLong(amount) / 100,
+                        "amount", Long.parseLong(amount),
                         "bankCode", bankCode,
                         "movieName", schedule.getMovieName(),
                         "room", schedule.getRoomName(),

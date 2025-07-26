@@ -4,6 +4,8 @@ import com.bluebear.cinemax.dto.*;
 import com.bluebear.cinemax.entity.*;
 import com.bluebear.cinemax.enumtype.*;
 import com.bluebear.cinemax.repository.*;
+import com.bluebear.cinemax.service.MovieService;
+import com.bluebear.cinemax.service.VnpayService;
 import com.bluebear.cinemax.service.email.EmailService;
 import com.bluebear.cinemax.service.seat.SeatService;
 import com.bluebear.cinemax.service.theaterstock.TheaterStockService;
@@ -46,6 +48,8 @@ public class BookingServiceSFImp implements BookingServiceSF {
     private RoomRepository roomRepo;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private MovieService movieService;
     @Override
     public InvoiceDTO getInvoiceById(Integer invoiceId) {
         Invoice invoice = invoiceRepo.findById(invoiceId)
@@ -152,7 +156,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             stock.setQuantity(stock.getQuantity() - quantity);
             theaterStockRepo.save(stock);
 
-            double comboPrice = stock.getPrice().doubleValue() * 1000 * quantity;
+            double comboPrice = stock.getPrice().doubleValue() * quantity;
             comboTotal += comboPrice;
 
             Detail_FD detailFD = new Detail_FD();
@@ -196,7 +200,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
         double totalComboPrice = combos.stream()
                 .mapToDouble(combo -> combo.getPrice().doubleValue() * comboQuantities.getOrDefault(combo.getStockID(), 0))
                 .sum();
-        double totalPrice = totalSeatPrice + (totalComboPrice*1000);
+        double totalPrice = totalSeatPrice + (totalComboPrice);
         double discount = (promotionDTO != null && promotionDTO.isValid()) ? promotionDTO.getDiscount() / 100.0 : 0.0;
         double finalPrice = totalPrice * (1 - discount);
 
@@ -318,8 +322,15 @@ public class BookingServiceSFImp implements BookingServiceSF {
 
         invoiceEntity.setStatus(InvoiceStatus.Booked);
         invoiceRepo.save(invoiceEntity);
-
+        DetailSeat updatedDetailSeat = null;
         InvoiceDTO invoiceDTO = toDTO(invoiceEntity);
+
+
+        List<String> seatPositions = invoiceEntity.getDetailSeats().stream()
+                .map(ds -> ds.getSeat().getPosition())
+                .collect(Collectors.toList());
+
+        String seatString = String.join(", ", seatPositions);
 
         // Cập nhật ghế: Unpaid -> Booked
         List<DetailSeat> detailSeatEntities = detailSeatRepo.findByInvoiceInvoiceID(invoiceId);
@@ -334,7 +345,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             seatRepo.findById(dto.getSeatID()).ifPresent(updated::setSeat);
             scheduleRepo.findById(dto.getScheduleID()).ifPresent(updated::setSchedule);
 
-            detailSeatRepo.save(updated);
+            updatedDetailSeat = detailSeatRepo.save(updated);
         }
 
         // Cập nhật combo: nếu status != Booked thì cập nhật
@@ -359,17 +370,24 @@ public class BookingServiceSFImp implements BookingServiceSF {
             comboDTOs.add(dto);
         }
 
+        Schedule schedule = updatedDetailSeat.getSchedule();
+
         // Gửi email xác nhận
         if (invoiceDTO.getCustomerID() != null) {
             customerRepo.findById(invoiceDTO.getCustomerID()).ifPresent(customer -> {
                 Account account = customer.getAccount();
                 if (account != null && account.getEmail() != null) {
+
                     try {
-                        Map<String, Object> variables = new HashMap<>();
-                        variables.put("invoice", invoiceDTO);
-                        variables.put("combos", comboDTOs);
-                        variables.put("bookingDate", invoiceDTO.getBookingDate());
-                        variables.put("total", invoiceDTO.getTotalPrice());
+                        Map<String, Object> variables = Map.of(
+                                "invoiceId", invoiceDTO.getInvoiceID(),
+                                "amount", invoiceDTO.getTotalPrice(),
+                                "bankCode", "TPBANK",
+                                "movieName", schedule.getMovie().getMovieName(),
+                                "room", schedule.getRoom().getName(),
+                                "seats", seatString,
+                                "showtime", schedule.getStartTime().format(DateTimeFormatter.ofPattern("HH:mm - dd/MM/yyyy"))
+                        );
 
                         emailService.sendTicketHtmlTemplate(
                                 account.getEmail(),
@@ -418,7 +436,7 @@ public class BookingServiceSFImp implements BookingServiceSF {
             int quantity = previewData.getComboQuantities().getOrDefault(comboDTO.getTheaterStockId(), 0);
             if (quantity > 0) {
                 TheaterStock stock = theaterStockRepo.findById(comboDTO.getTheaterStockId()).orElseThrow();
-                double total = stock.getPrice().doubleValue() * 1000 * quantity;
+                double total = stock.getPrice().doubleValue() * quantity;
 
                 Detail_FD detailFD = new Detail_FD();
                 detailFD.setInvoice(invoice);

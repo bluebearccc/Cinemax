@@ -9,6 +9,7 @@ import com.bluebear.cinemax.service.bookingSF.BookingServiceSF;
 import com.bluebear.cinemax.service.VnpayService;
 import com.bluebear.cinemax.service.promotion.PromotionService;
 import com.bluebear.cinemax.service.seat.SeatService;
+import com.bluebear.cinemax.service.theater.TheaterService;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +39,8 @@ public class BookingController {
     private SeatRepository seatRepo;
     @Autowired
     private InvoiceRepository invoiceRepo;
+    @Autowired
+    private TheaterService theaterService;
     // Trang 1: Đặt vé
     @GetMapping("")
     public String showBookingPage(@RequestParam("scheduleId") Integer scheduleId,
@@ -97,6 +100,7 @@ public class BookingController {
             int fromIndex = (page - 1) * pageSize;
             int toIndex = Math.min(fromIndex + pageSize, totalItems);
             List<TheaterStockDTO> combosPage = combos.subList(fromIndex, toIndex);
+
 
             model.addAttribute("scheduleId", scheduleId);
             model.addAttribute("roomId", roomId);
@@ -201,6 +205,7 @@ public class BookingController {
         BookingPreviewDTO preview = bookingService.reconstructBookingPreview(invoiceId);
         model.addAttribute("schedule", preview.getSchedule());
         model.addAttribute("room", preview.getRoom());
+        model.addAttribute("theater", theaterService.getTheaterById(preview.getRoom().getTheaterID()));
         model.addAttribute("selectedSeats", preview.getSelectedSeats());
         model.addAttribute("comboQuantities", preview.getComboQuantities());
         model.addAttribute("comboList", preview.getCombos());

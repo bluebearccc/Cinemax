@@ -24,7 +24,7 @@ public class ChatService {
     private final QuestionAnswerAdvisor qaAdvisor;
 
     @Autowired
-    public ChatService(@Qualifier("groqChatClientBuilder") ChatClient.Builder builder,
+    public ChatService(@Qualifier("openAiChatClientBuilder") ChatClient.Builder builder,
                        SimpleVectorStore simpleVectorStore,
                        CommonFunction commonFunction, MovieFunction movieFunction, ScheduleFunction scheduleFunction, TheaterFunction theaterFunction) {
         this.chatClient = builder.defaultTools(commonFunction, movieFunction, scheduleFunction, theaterFunction).build();
