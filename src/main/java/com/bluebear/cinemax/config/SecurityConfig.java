@@ -2,15 +2,23 @@ package com.bluebear.cinemax.config;
 
 import com.bluebear.cinemax.enumtype.Role;
 import com.bluebear.cinemax.security.*;
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.oidc.userinfo.OidcUserRequest;
+import org.springframework.security.oauth2.client.userinfo.OAuth2UserService;
+import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
     @Autowired private CustomSuccessHandler customSuccessHandler;
@@ -37,9 +45,9 @@ public class SecurityConfig {
                                 .requestMatchers("/static/**", "/customer-static/**", "/common-static/**", "/admin-static/**",
                                         "/staff-static/**", "/cashier-static/**", "/officer-static/**", "/docs/**", "/data/**").permitAll()
                                 // OAuth2 endpoints
-                                .requestMatchers("/oauth/**").permitAll()
+                                .requestMatchers("/oauth2/**").permitAll()
 
-                                .requestMatchers("/booking/**").hasAuthority(Role.Customer.name())
+                                .requestMatchers("/booking/**", "/user/**").hasAuthority(Role.Customer.name())
 
                                 // Admin pages
                                 .requestMatchers("/admin/**").hasAuthority(Role.Admin.name())
@@ -56,7 +64,7 @@ public class SecurityConfig {
                                 // Any other request needs authentication
                                 .requestMatchers("/vnpay_return/**").permitAll()
 
-                                .anyRequest().permitAll()
+                                .anyRequest().authenticated()
                 ).formLogin(form ->
                         form
                                 .loginPage("/login")
@@ -69,8 +77,10 @@ public class SecurityConfig {
                                 .loginPage("/login")
                                 .authorizationEndpoint(endpoint ->
                                         endpoint.baseUri("/oauth2/authorize"))
-                                .userInfoEndpoint(endpoint ->
-                                        endpoint.userService(customOAuth2UserService))
+                                .userInfoEndpoint(userInfo -> userInfo
+                                        .userService(customOAuth2UserService)
+                                        .oidcUserService(oidcUserService())
+                                )
                                 .successHandler(customOauthSuccessHandler)
                                 .failureHandler(customOauthFailureHandler)
                 ).logout(logout ->
@@ -96,4 +106,16 @@ public class SecurityConfig {
         return http.build();
     }
 
+
+    @Bean
+    public OAuth2UserService<OidcUserRequest, OidcUser> oidcUserService() {
+        return userRequest -> {
+            OAuth2User oAuth2User = customOAuth2UserService.loadUser(userRequest);
+            return new DefaultOidcUser(
+                    oAuth2User.getAuthorities(),
+                    userRequest.getIdToken(),
+                    "email"
+            );
+        };
+    }
 }

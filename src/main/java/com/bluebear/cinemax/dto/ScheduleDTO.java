@@ -42,7 +42,6 @@ public class ScheduleDTO {
         return startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd"));
     }
 
-
     public void setRoom(RoomDTO roomDTO) {
         setRoomID(roomDTO.getRoomID());
     }

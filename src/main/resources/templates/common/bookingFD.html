@@ -66,9 +66,6 @@
 
                     <div class="combo-content">
                         <h3 class="combo-title" th:text="${combo.foodName}">Special Combo</h3>
-                        <p class="combo-description">
-                            This combo is prepared in-house with fresh ingredients, ensuring the highest quality for your movie experience.
-                        </p>
 
                         <div class="combo-price-section">
                             <div class="combo-price" th:text="${#numbers.formatInteger(combo.unitPrice, 0, 'POINT')} + '₫'">
@@ -215,7 +212,7 @@
 
                 // Add success animation
                 btn.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
-                btn.style.background = 'none';
+                // btn.style.background = 'none';
 
                 setTimeout(() => {
                     btn.innerHTML = '<i class="fas fa-cart-plus me-2"></i>Add to Cart';

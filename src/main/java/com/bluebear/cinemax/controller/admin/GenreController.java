@@ -81,6 +81,7 @@ public class GenreController {
             model.addAttribute("genresWithMovies", 0L);
             model.addAttribute("mostPopularGenre", null);
             model.addAttribute("mostPopularGenreName", "N/A");
+            model.addAttribute("activeLink", "genres");
         }
 
         return "/admin/list-genre";
@@ -91,7 +92,6 @@ public class GenreController {
     public String searchGenres(
             @RequestParam String keyword,
             Model model) {
-
         return listGenres(keyword, model);
     }
 
@@ -104,6 +104,7 @@ public class GenreController {
         model.addAttribute("genre", new GenreDTO());
         model.addAttribute("isEdit", false);
         model.addAttribute("pageTitle", "Add New Genre");
+        model.addAttribute("activeLink", "genres");
 
         // Lấy danh sách tất cả movies để chọn
         try {
@@ -267,6 +268,7 @@ public class GenreController {
             model.addAttribute("movieCount", movieCount);
             model.addAttribute("movies", movies);
             model.addAttribute("pageTitle", "Genre Detail");
+            model.addAttribute("activeLink", "genres");
             System.out.println("Returning: detail-genre");
             return "/admin/detail-genre";
         } catch (Exception e) {
@@ -298,6 +300,8 @@ public class GenreController {
             model.addAttribute("genre", genre);
             model.addAttribute("movies", movies);
             model.addAttribute("movieCount", movieCount);
+            model.addAttribute("activeLink", "genres");
+
             model.addAttribute("pageTitle", "Movies in " + genre.getGenreName());
 
             return "/admin/genre-movies";
@@ -348,6 +352,8 @@ public class GenreController {
         boolean exists = genreService.isGenreNameExists(name, excludeId);
         model.addAttribute("nameExists", exists);
         model.addAttribute("genreName", name);
+        model.addAttribute("activeLink", "genres");
+
         return "/admin/check-genre-name"; // Trả về view hiển thị kết quả
     }
 

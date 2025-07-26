@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title th:text="${pageTitle}">Actor Details - BlueBear Cinema</title>
+    <title th:text="${pageTitle}">Actor Details - Cinemax</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -800,7 +801,7 @@
 </head>
 <body>
 <!-- Premium Sidebar -->
-<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='actors')}"></div>
 
 <!-- Main Content -->
 <div class="main-content">

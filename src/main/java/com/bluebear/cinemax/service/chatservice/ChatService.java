@@ -36,14 +36,11 @@ public class ChatService {
                                 .topK(6)
                                 .build()
                 ).build();
-
-
     }
 
     public String chat(ChatRequest request) {
         SystemMessage systemMessage = new SystemMessage("""
-                You are Cinemax AI. 
-                
+                You are Cinemax AI.
                 Instructions:
                 - Always respond with **short, clear, and direct answers**.
                 - **Do not** start answers with phrases like: "According to the data", "Based on the document", or similar.
@@ -52,10 +49,10 @@ public class ChatService {
                 If any required parameter is missing or empty (e.g., empty string, null, undefined),
                 Instead, politely ask the user for the missing information before proceeding.
                 Only proceed with the tool call once you have all necessary information.
-                - When the answer contains a list, format it using markdown list format like:
-                - item 1\n
-                - item 2\n
-                - item 3\n
+                - When the answer contains a list, format it using list format like:
+                - item 1
+                - item 2
+                - item 3
                 - Respond naturally and conversationally like a human. 
                 - Do not mention or reference any tools, APIs, documents, models, or systems you may be using. 
                 - If a question cannot be answered using documents or tools, reply it yourself but do not answer by saying that you don’t know or that the tools failed. 

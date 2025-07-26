@@ -28,10 +28,16 @@ public class ScheduleFunction {
         return scheduleService.findSchedulesByTheaterAndDate(theaterService.getTheaterByName(theaterName).getTheaterID(), date.toLocalDate());
     }
 
-    @Tool(description = "Get schedules at a specific theater in a specific day and movie and in type of room (single or couple)")
+    @Tool(description = "Get schedules of a movie at a specific theater in a specific day and in type of room (single or couple)")
     public List<ScheduleDTO> getScheduleByTheaterAndDateAndMovie(String theaterName, int dayOffSet, String movieName, String roomType) {
-        LocalDateTime date = calculateDate( dayOffSet);
+        LocalDateTime date = calculateDate(dayOffSet);
         return scheduleService.getScheduleByMovieIdAndTheaterIdAndDateAndRoomType(movieService.findMovieByMovieName(movieName).getMovieID(), theaterService.getTheaterByName(theaterName).getTheaterID(), date, roomType).getContent();
+    }
+
+    @Tool(description = "Get schedules of a movie at a specific day")
+    public List<ScheduleDTO> getScheduleByMovieAndDate(String movieName, int dayOffSet) {
+        LocalDateTime date = calculateDate(dayOffSet);
+        return scheduleService.getScheduleByMovieIdAndDate(movieService.findMovieByMovieName(movieName).getMovieID(), date).getContent();
     }
 
     @Tool(description = "Get the number of seat available in a schedule (you need to ask user to get the scheduleId)")

@@ -157,7 +157,11 @@ public class BlogServiceImpl implements BlogService {
         existing.setContent(dto.getContent());
         existing.setUpdatedAt(dto.getUpdatedAt());
         existing.setLikeCount(dto.getLikeCount());
-        existing.setImage(imageUrl);
+        if (imageUrl != null) {
+            existing.setImage(imageUrl);
+        } else {
+            existing.setImage(dto.getImage());
+        }
         existing.setViewCount(dto.getViewCount());
         existing.setCategories(dto.getCategories().stream()
                 .map(catDTO -> blogCategoryRepository.findById(catDTO.getCategoryID()).orElse(null))

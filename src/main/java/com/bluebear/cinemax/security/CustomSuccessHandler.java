@@ -36,9 +36,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
         String email = authentication.getName();
         AccountDTO account = accountService.findAccountByEmail(email);
         HttpSession session = request.getSession();
-
         session.setAttribute("account", account);
-
         CustomerDTO customer = customerService.getUserByAccountID(account.getId());
         if (customer != null) {
             session.setAttribute("customer", customer);
@@ -47,10 +45,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
             session.setAttribute("employee", employee);
         }
 
-        System.out.println("hehehehehehe\n\n\n\n");
-        System.out.println("context: " + request.getContextPath());
         String redirectUrl = request.getParameter("redirect");
-        System.out.println(redirectUrl);
         if (redirectUrl != null && !redirectUrl.isEmpty()) {
             String decodedUrl = URLDecoder.decode(redirectUrl, StandardCharsets.UTF_8);
             response.sendRedirect(decodedUrl);
@@ -63,7 +58,7 @@ public class CustomSuccessHandler implements AuthenticationSuccessHandler {
 
     private String getRedirectUrl(Role role) {
         return switch (role) {
-            case Admin -> "/admin/";
+            case Admin -> "/admin/dashboard";
             case Customer -> "/";
             case Staff -> "/staff/home";
             case Cashier -> "/cashier/movie/";

@@ -49,7 +49,7 @@ public class MovieFunction {
     }
 
     @Tool(description = "Get the movies currently showing at specific theater at specific day in specific type of room (single or couple)")
-    public List<MovieDTO> getCurrentlyShowingMoviesAtTheaterAdnRoom(String theaterName, int dayOffSet, TypeOfRoom roomType) {
+    public List<MovieDTO> getCurrentlyShowingMoviesAtTheaterAndRoom(String theaterName, int dayOffSet, TypeOfRoom roomType) {
         TheaterDTO theaterDTO = theaterService.getTheaterByName(theaterName);
         LocalDateTime date = calculateDate( dayOffSet);
         return movieService.findMoviesByScheduleAndTheaterAndRoomType(date, theaterDTO.getTheaterID(), roomType.name()).getContent();
@@ -88,6 +88,16 @@ public class MovieFunction {
         return movieService.findMoviesByGenre(genreDTO.getGenreID(), Pageable.unpaged()).getContent();
     }
 
+    @Tool(description = "Get movies currently showing")
+    public List<MovieDTO> getCurrentlyShowingMovies() {
+        return movieService.findAllShowingMovies();
+    }
+
+    @Tool(description = "Get movies will be shown in the future")
+    public List<MovieDTO> getMoviesWillBeShownInFuture() {
+        return movieService.findAllMoviesWillShow().getContent();
+    }
+
     @Tool(description = "Get movies by actor")
     public List<MovieDTO> getMoviesByActor (String actorName) {
         return movieService.getMoviesByActor(actorName);
@@ -96,6 +106,12 @@ public class MovieFunction {
     @Tool(description = "Get movie detail by name")
     public MovieDTO getMovieByName (String movieName) {
         return movieService.findMoviesByName(movieName, Pageable.unpaged()).getContent().get(0);
+    }
+
+    @Tool(description = "Get movies show in a specific day")
+    public List<MovieDTO> getMoviesShowAtDate (int dayOffSet) {
+        LocalDateTime date = calculateDate( dayOffSet);
+        return movieService.findMoviesByScheduleToday(date).getContent();
     }
 
 }

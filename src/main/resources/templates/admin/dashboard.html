@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Dashboard - Cinema Management</title>
+    <title>Dashboard - Cinemax</title>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -9,6 +9,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
     <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
     <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
     <style>
         :root {
             --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
@@ -193,7 +194,7 @@
     </style>
 </head>
 <body>
-<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='accounts')}"></div>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='dashboard')}"></div>
 
 <div class="container">
     <h1 class="page-title"></h1>
