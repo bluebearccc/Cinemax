@@ -1,0 +1,39 @@
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem; /* 10px / 16 */
+}
+
+.user-name {
+    font-size: 0.9em;
+    color: #f0f2ff;
+}
+
+.user-avatar {
+    width: 2.5rem; /* 40px / 16 */
+    height: 2.5rem; /* 40px / 16 */
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    font-weight: bold;
+    color: white;
+}
+
+.logout-btn {
+    width: 100%;
+    font-size: 0.7rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: 0.0625rem solid rgba(255, 255, 255, 0.3); /* 1px / 16 */
+    color: white;
+    height: 1.875rem; /* 30px / 16 */
+    border-radius: 1.25rem; /* 20px / 16 */
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.logout-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-0.125rem); /* -2px / 16 */
+}

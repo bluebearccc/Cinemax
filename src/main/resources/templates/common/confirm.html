@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Ticket Confirmation</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+</head>
+<body>
+<div class="main-container">
+    <div class="header">
+        <div class="success-icon">
+            <i class="fas fa-check-circle"></i>
+        </div>
+        <h1>Booking Successful!</h1>
+        <p class="subtitle">Thank you for choosing our service</p>
+    </div>
+
+    <div class="content-card">
+        <div class="info-section">
+            <div class="section-header">
+                <i class="fas fa-calendar-alt"></i>
+                <h3>Showtime Information</h3>
+            </div>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label">Time:</span>
+                    <span class="value" th:text="${#temporals.format(schedule.startTime, 'dd/MM/yyyy HH:mm')}">25/07/2024 19:30</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Screen:</span>
+                    <span class="value" th:text="${room.name}">Screen 01</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Theater:</span>
+                    <span class="value" th:text="${theater.theaterName}">CGV Vincom</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section">
+            <div class="section-header">
+                <i class="fas fa-couch"></i>
+                <h3>Seats Booked</h3>
+            </div>
+            <div class="seats-container">
+                <div class="seat-item" th:each="seat : ${selectedSeats}">
+                    <div class="seat-info">
+                        <span class="seat-position" th:text="${seat.position}">A12</span>
+                        <span class="seat-type" th:text="${seat.seatType}">VIP</span>
+                    </div>
+                    <span class="seat-price" th:text="${#numbers.formatInteger(seat.unitPrice, 1, 'COMMA')} + ' VND'">150,000 VND</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-section" th:if="${comboList != null and !comboList.empty}">
+            <div class="section-header">
+                <i class="fas fa-utensils"></i>
+                <h3>Combos Booked</h3>
+            </div>
+            <div class="combo-container">
+                <div class="combo-item" th:each="combo : ${comboList}">
+                    <div class="combo-info">
+                        <span class="combo-name" th:text="${combo.foodName}">Popcorn & Drink Combo</span>
+                        <span class="combo-quantity">
+                                × <span th:text="${comboQuantities[combo.theaterStockId]}">2</span>
+                            </span>
+                    </div>
+                    <span class="combo-price" th:text="${#numbers.formatInteger(combo.unitPrice * comboQuantities[combo.theaterStockId], 1, 'COMMA')} + ' VND'">120,000 VND</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="payment-section">
+            <div class="section-header">
+                <i class="fas fa-receipt"></i>
+                <h3>Payment Information</h3>
+            </div>
+
+            <div class="payment-details">
+                <div class="payment-row">
+                    <span class="payment-label">Subtotal (Seats + Combos):</span>
+                    <span class="payment-value" th:text="${#numbers.formatInteger(totalPrice, 1, 'COMMA')} + ' VND'">270,000 VND</span>
+                </div>
+
+                <div class="payment-row discount-row" th:if="${promotion != null}">
+                        <span class="payment-label">
+                            Discount (<span th:text="${promotion.promotionCode}">SUMMER20</span>):
+                        </span>
+                    <span class="payment-value discount-value">
+                            -<span th:text="${promotion.discount}">10</span>%
+                        </span>
+                </div>
+
+                <div class="payment-row total-row">
+                    <span class="payment-label">Total Amount:</span>
+                    <span class="payment-value total-value" th:text="${#numbers.formatInteger(finalPrice, 1, 'COMMA')} + ' VND'">243,000 VND</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="action-section">
+        <a href="/" class="home-btn">
+            <i class="fas fa-home"></i>
+            Return to Homepage
+        </a>
+    </div>
+</div>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #001232 0%, #1e3c72 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #333;
+    }
+
+    .main-container {
+        max-width: 800px;
+        margin: 0 auto;
+    }
+
+    /* Header Styles */
+    .header {
+        text-align: center;
+        margin-bottom: 30px;
+        color: white;
+    }
+
+    .success-icon {
+        font-size: 4rem;
+        color: #27ae60;
+        margin-bottom: 20px;
+        animation: checkmark 0.6s ease-in-out;
+    }
+
+    @keyframes checkmark {
+        0% { transform: scale(0); }
+        50% { transform: scale(1.2); }
+        100% { transform: scale(1); }
+    }
+
+    .header h1 {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 10px;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+    }
+
+    .subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    /* Content Card */
+    .content-card {
+        background: white;
+        border-radius: 20px;
+        padding: 40px;
+        box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        margin-bottom: 30px;
+    }
+
+    /* Section Styles */
+    .info-section {
+        margin-bottom: 35px;
+        border-bottom: 1px solid #eee;
+        padding-bottom: 30px;
+    }
+
+    .info-section:last-child {
+        border-bottom: none;
+        margin-bottom: 0;
+        padding-bottom: 0;
+    }
+
+    .section-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 20px;
+        color: #001232;
+    }
+
+    .section-header i {
+        font-size: 1.5rem;
+        margin-right: 12px;
+        color: #001232;
+    }
+
+    .section-header h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+    }
+
+    /* Info Grid */
+    .info-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+
+    .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border-left: 4px solid #001232;
+    }
+
+    .label {
+        font-weight: 500;
+        color: #666;
+    }
+
+    .value {
+        font-weight: 600;
+        color: #001232;
+    }
+
+    /* Seats Container */
+    .seats-container {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+    }
+
+    .seat-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .seat-item:hover {
+        border-color: #001232;
+        transform: translateY(-2px);
+    }
+
+    .seat-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .seat-position {
+        font-weight: 700;
+        color: #001232;
+        font-size: 1.1rem;
+    }
+
+    .seat-type {
+        font-size: 0.9rem;
+        color: #666;
+        text-transform: uppercase;
+    }
+
+    .seat-price {
+        font-weight: 600;
+        color: #27ae60;
+    }
+
+    /* Combo Container */
+    .combo-container {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .combo-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px 20px;
+        background: #f8f9fa;
+        border-radius: 12px;
+        border: 2px solid #e9ecef;
+    }
+
+    .combo-info {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .combo-name {
+        font-weight: 600;
+        color: #001232;
+    }
+
+    .combo-quantity {
+        color: #666;
+        font-weight: 500;
+    }
+
+    .combo-price {
+        font-weight: 600;
+        color: #27ae60;
+    }
+
+    /* Payment Section */
+    .payment-section {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        padding: 25px;
+        border-radius: 15px;
+        border: 2px solid #001232;
+    }
+
+    .payment-details {
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+    }
+
+    .payment-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 12px 0;
+    }
+
+    .payment-label {
+        font-weight: 500;
+        color: #333;
+    }
+
+    .payment-value {
+        font-weight: 600;
+        color: #001232;
+    }
+
+    .discount-row {
+        border-top: 1px dashed #ccc;
+        border-bottom: 1px dashed #ccc;
+    }
+
+    .discount-value {
+        color: #e74c3c;
+    }
+
+    .total-row {
+        border-top: 2px solid #001232;
+        padding-top: 20px;
+        margin-top: 10px;
+    }
+
+    .total-row .payment-label {
+        font-size: 1.1rem;
+        font-weight: 700;
+        color: #001232;
+    }
+
+    .total-value {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: #27ae60;
+    }
+
+    /* Action Section */
+    .action-section {
+        text-align: center;
+    }
+
+    .home-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        background: linear-gradient(135deg, #27ae60 0%, #2ecc71 100%);
+        color: white;
+        padding: 15px 30px;
+        text-decoration: none;
+        border-radius: 50px;
+        font-weight: 600;
+        font-size: 1.1rem;
+        box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+        transition: all 0.3s ease;
+    }
+
+    .home-btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(39, 174, 96, 0.4);
+    }
+
+    .home-btn i {
+        font-size: 1.2rem;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 768px) {
+        body {
+            padding: 15px;
+        }
+
+        .content-card {
+            padding: 25px 20px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+        }
+
+        .info-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .seats-container {
+            grid-template-columns: 1fr;
+        }
+
+        .info-item,
+        .seat-item,
+        .combo-item {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .payment-row {
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 5px;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .header h1 {
+            font-size: 1.8rem;
+        }
+
+        .success-icon {
+            font-size: 3rem;
+        }
+
+        .content-card {
+            padding: 20px 15px;
+        }
+    }
+</style>
+</body>
+</html>

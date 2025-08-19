@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <link rel="stylesheet" th:href="@{/customer-static/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/odometer.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
+    <link rel="stylesheet" th:href="@{/common-static/css/404css.css}">
+
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+
+    <title>500 Internal Server Error</title>
+</head>
+<body>
+<div class="bubble"></div>
+<div class="bubble"></div>
+<div class="bubble"></div>
+<div class="bubble"></div>
+
+<div class="fish"><i class="fas fa-fish"></i></div>
+<div class="fish"><i class="fas fa-fish"></i></div>
+
+<div class="custom-container">
+    <div class="error-code">500</div>
+    <h1 class="error-title">Oops! Something Went Wrong</h1>
+    <p class="error-message">
+        It seems our server is having some trouble. <br>
+        We're working on it, please try again later.
+    </p>
+    <a th:href="@{/}" class="home-btn">
+        <span>Return to Homepage</span>
+    </a>
+</div>
+
+<script>
+    // Add interactive effects
+    document.addEventListener('mousemove', (e) => {
+        const bubbles = document.querySelectorAll('.bubble');
+        const x = e.clientX / window.innerWidth;
+        const y = e.clientY / window.innerHeight;
+
+        bubbles.forEach((bubble, index) => {
+            const speed = (index + 1) * 0.02;
+            const translateX = (x - 0.5) * 20 * speed;
+            const translateY = (y - 0.5) * 20 * speed;
+
+            bubble.style.transform += ` translate(${translateX}px, ${translateY}px)`;
+        });
+    });
+
+    // Add CSS for ripple animation
+    const style = document.createElement('style');
+    style.textContent = `
+            @keyframes ripple {
+                to {
+                    transform: scale(4);
+                    opacity: 0;
+                }
+            }
+        `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>

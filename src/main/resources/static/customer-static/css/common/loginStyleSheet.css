@@ -1,0 +1,57 @@
+body, html {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #f3f3f3;
+}
+.login-container {
+    width: 60rem; /* 960px / 16 */
+    background: #fff;
+    box-shadow: 0 0 1.875rem rgba(0,0,0,0.1); /* 30px / 16 */
+    display: flex;
+    border-radius: 1.25rem; /* 20px / 16 */
+}
+.login-left {
+    flex: 1;
+    padding: 2.5rem; /* 40px / 16 */
+}
+.login-right {
+    flex: 1;
+    background: url('../../images/login.jpg') center/cover no-repeat;
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 1.25rem; /* 20px / 16 */
+    border-top-right-radius: 1.25rem; /* 20px / 16 */
+    border-bottom-right-radius: 1.25rem; /* 20px / 16 */
+}
+.login-right h4 {
+    color: white;
+    font-size: 1.5rem;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 0.625rem 1.25rem; /* 10px 20px / 16 */
+    border-radius: 0.625rem; /* 10px / 16 */
+}
+.form-control {
+    border-radius: 0;
+}
+.btn-login {
+    width: 100%;
+    background-color: #000;
+    color: #fff;
+    border-radius: 0;
+}
+.social-btn {
+    border: 0.0625rem solid #ccc; /* 1px / 16 */
+    border-radius: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.social-btn img {
+    width: 1.25rem; /* 20px / 16 */
+    margin-right: 0.625rem; /* 10px / 16 */
+}

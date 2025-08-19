@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Actor</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <!-- Custom CSS -->
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .content-wrapper {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+            transform: translateY(-1px);
+        }
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .movie-checkbox {
+            margin-right: 15px;
+            margin-bottom: 10px;
+        }
+        .alert {
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <!-- Sidebar -->
+        <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+            <div class="position-sticky pt-3">
+                <div class="text-center mb-4">
+                    <h4 class="text-white">
+                        <i class="fas fa-film me-2"></i>
+                        CineMax Admin
+                    </h4>
+                </div>
+
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/admin/dashboard">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/admin/movies">
+                            <i class="fas fa-video me-2"></i>
+                            Quản lý phim
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/admin/genres">
+                            <i class="fas fa-tags me-2"></i>
+                            Thể loại
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="/admin/users">
+                            <i class="fas fa-users me-2"></i>
+                            Người dùng
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white active" href="/admin/actors">
+                            <i class="fas fa-user-tie me-2"></i>
+                            Diễn viên
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <!-- Main content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 content-wrapper">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+                <h1 class="h2">
+                    <i class="fas fa-edit me-2"></i>
+                    Chỉnh sửa diễn viên
+                </h1>
+                <div class="btn-toolbar mb-2 mb-md-0">
+                    <a href="/admin/actors" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Quay lại
+                    </a>
+                </div>
+            </div>
+
+            <!-- Alert Messages -->
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span th:text="${warning}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+
+            <!-- Edit Form -->
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-tie me-2"></i>
+                        Thông tin diễn viên: <span th:text="${actor != null ? actor.actorName : 'N/A'}"></span>
+                    </h5>
+                </div>
+
+                <div class="card-body">
+                    <form th:action="@{/admin/actors/edit/{id}(id=${actor.actorID})}"
+                          method="post"
+                          enctype="multipart/form-data">
+
+                        <div class="row">
+                            <!-- Left Column -->
+                            <div class="col-md-8">
+                                <!-- Actor Name -->
+                                <div class="mb-3">
+                                    <label for="actorName" class="form-label">
+                                        <i class="fas fa-user me-2"></i>
+                                        Tên diễn viên <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control"
+                                           id="actorName"
+                                           name="actorName"
+                                           th:value="${actor != null ? actor.actorName : ''}"
+                                           required
+                                           maxlength="255"
+                                           placeholder="Nhập tên diễn viên...">
+                                </div>
+
+                                <!-- Movies -->
+                                <div class="mb-3">
+                                    <label class="form-label">
+                                        <i class="fas fa-film me-2"></i>
+                                        Phim tham gia
+                                    </label>
+                                    <div class="border rounded p-3" style="max-height: 300px; overflow-y: auto;">
+                                        <div th:if="${allMovies != null and !allMovies.isEmpty()}">
+                                            <div th:each="movie : ${allMovies}" class="form-check movie-checkbox">
+                                                <!-- Kiểm tra xem movieID có đúng không, nếu lỗi thì sửa thành: -->
+                                                <input class="form-check-input"
+                                                       type="checkbox"
+                                                       th:id="'movie_' + ${movie.movieID}"
+                                                       name="movieIds"
+                                                       th:value="${movie.movieID}"
+                                                       th:checked="${currentMovieIds != null and currentMovieIds.contains(movie.movieID)}">
+                                                <label class="form-check-label" th:for="'movie_' + ${movie.movieID}">
+                                                    <span th:text="${movie.movieName}"></span>
+                                                    <small class="text-muted">
+                                                        (<span th:text="${movie.status}"></span>)
+                                                    </small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                        <div th:if="${allMovies == null or allMovies.isEmpty()}">
+                                            <p class="text-muted">Không có phim nào trong hệ thống</p>
+                                        </div>
+                                    </div>
+                                    <small class="form-text text-muted">
+                                        Chọn các phim mà diễn viên tham gia
+                                    </small>
+                                </div>
+                            </div>
+
+                            <!-- Right Column - Image -->
+                            <div class="col-md-4">
+                                <!-- Current Image -->
+                                <div class="mb-4">
+                                    <label class="form-label">
+                                        <i class="fas fa-image me-2"></i>
+                                        Ảnh hiện tại
+                                    </label>
+                                    <div class="text-center">
+                                        <div th:if="${actor != null and actor.image != null and !#strings.isEmpty(actor.image)}">
+                                            <img th:src="@{${actor.image}}"
+                                                 alt="Current Image"
+                                                 class="img-fluid image-preview mb-2"
+                                                 onerror="this.src='/uploads/default-actor.jpg'">
+                                            <p class="text-muted small">Ảnh hiện tại</p>
+                                        </div>
+                                        <div th:if="${actor == null or actor.image == null or #strings.isEmpty(actor.image)}">
+                                            <div class="border rounded p-4 text-muted">
+                                                <i class="fas fa-user fa-3x mb-2"></i>
+                                                <p>Chưa có ảnh</p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Upload New Image -->
+                                <div class="mb-4">
+                                    <label for="imageFile" class="form-label">
+                                        <i class="fas fa-upload me-2"></i>
+                                        Tải lên ảnh mới
+                                    </label>
+                                    <input type="file"
+                                           class="form-control"
+                                           id="imageFile"
+                                           name="imageFile"
+                                           accept="image/*">
+                                    <small class="form-text text-muted">
+                                        JPG, PNG, GIF, WEBP - Tối đa 5MB
+                                    </small>
+                                    <div id="image-preview-container" class="mt-2"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <hr>
+                                <div class="d-flex justify-content-between">
+                                    <div>
+                                        <a href="/admin/actors" class="btn btn-secondary">
+                                            <i class="fas fa-times me-2"></i>
+                                            Hủy bỏ
+                                        </a>
+                                    </div>
+                                    <div>
+                                        <button type="reset" class="btn btn-outline-secondary me-2">
+                                            <i class="fas fa-undo me-2"></i>
+                                            Đặt lại
+                                        </button>
+                                        <button type="submit" class="btn btn-primary btn-lg">
+                                            <i class="fas fa-save me-2"></i>
+                                            Cập nhật diễn viên
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Actor Info Card -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Thông tin bổ sung
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>ID diễn viên:</strong> <span th:text="${actor != null ? actor.actorID : 'N/A'}"></span></p>
+                            <p><strong>Tên diễn viên:</strong> <span th:text="${actor != null ? actor.actorName : 'N/A'}"></span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Số phim tham gia:</strong>
+                                <span th:text="${currentMovieIds != null ? currentMovieIds.size() : 0}"></span>
+                            </p>
+                            <p><strong>Phim hiện tại:</strong>
+                                <span th:if="${actor != null and actor.movies != null and !actor.movies.isEmpty()}">
+                                    <span th:each="movieName, iterStat : ${actor.movies}"
+                                          th:text="${movieName} + ${!iterStat.last ? ', ' : ''}"></span>
+                                </span>
+                                <span th:if="${actor == null or actor.movies == null or actor.movies.isEmpty()}"
+                                      class="text-muted">Chưa có phim</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JavaScript -->
+<script>
+    // Preview uploaded image
+    document.getElementById('imageFile').addEventListener('change', function(e) {
+        previewImage(e, 'image-preview-container');
+    });
+
+    function previewImage(event, containerId) {
+        const file = event.target.files[0];
+        const container = document.getElementById(containerId);
+
+        // Clear previous preview
+        container.innerHTML = '';
+
+        if (file) {
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File không được vượt quá 5MB!');
+                event.target.value = '';
+                return;
+            }
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                alert('Vui lòng chọn file hình ảnh!');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.className = 'img-fluid image-preview';
+                preview.src = e.target.result;
+                preview.alt = 'Preview';
+
+                const label = document.createElement('p');
+                label.className = 'text-muted small text-center mt-1';
+                label.textContent = 'Ảnh mới sẽ tải lên';
+
+                container.appendChild(preview);
+                container.appendChild(label);
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Validate form before submit
+    document.querySelector('form').addEventListener('submit', function(e) {
+        // Validate actor name
+        const actorName = document.getElementById('actorName').value.trim();
+        if (!actorName) {
+            e.preventDefault();
+            alert('Tên diễn viên không được để trống!');
+            return false;
+        }
+
+        // Validate movies (at least 1 movie should be selected)
+        const checkedMovies = document.querySelectorAll('input[name="movieIds"]:checked');
+        if (checkedMovies.length === 0) {
+            if (!confirm('Diễn viên chưa được chọn tham gia phim nào. Bạn có muốn tiếp tục?')) {
+                e.preventDefault();
+                return false;
+            }
+        }
+    });
+
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+
+    // Debug: Log loaded data to console
+    console.log('Actor edit page loaded');
+    console.log('Current movie IDs:', Array.from(document.querySelectorAll('input[name="movieIds"]:checked')).map(cb => cb.value));
+</script>
+</body>
+</html>

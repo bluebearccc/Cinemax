@@ -1,0 +1,1460 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Add New Movie - Cinemax</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --dark-glass: rgba(0, 0, 0, 0.1);
+
+            --text-primary: #1a1a1a;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+            --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Premium Sidebar */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 100vh;
+            width: 280px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .logo-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .logo-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: -2px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            padding: 24px 16px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding: 0 12px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 16px 12px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 12px;
+            margin: 4px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover::before {
+            transform: translateX(0);
+        }
+
+        .nav-link:hover {
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        .nav-icon {
+            width: 20px;
+            margin-right: 16px;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 32px;
+            min-height: 100vh;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Premium Back Navigation */
+        .back-nav {
+            margin-bottom: 32px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Premium Form Container */
+        .form-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .form-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+
+        .card-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 32px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .card-header h5 {
+            color: white;
+            font-weight: 700;
+            font-size: 1.5rem;
+            margin: 0;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .card-header small {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            margin-top: 8px;
+            display: block;
+        }
+
+        .card-body {
+            padding: 40px;
+            position: relative;
+            z-index: 1;
+        }
+
+        /* Premium Form Controls */
+        .form-label {
+            color: #2d1b69;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .form-label i {
+            color: #667eea;
+            font-size: 1.1rem;
+        }
+
+        .form-label .text-danger {
+            color: #e74c3c !important;
+        }
+
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            color: #2d1b69;
+            padding: 14px 18px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-control::placeholder {
+            color: rgba(45, 27, 105, 0.6);
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.95);
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+            color: #2d1b69;
+            outline: none;
+        }
+
+        .form-control.required-field {
+            background: rgba(231, 76, 60, 0.1) !important;
+            border-color: rgba(231, 76, 60, 0.3) !important;
+        }
+
+        .form-text {
+            color: #4a3577;
+            font-size: 0.875rem;
+            margin-top: 6px;
+        }
+
+        /* Premium Selection Grids */
+        .selection-grid {
+            max-height: 300px;
+            overflow-y: auto;
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-check {
+            margin-bottom: 12px;
+            padding: 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid transparent;
+        }
+
+        .form-check:hover {
+            background: rgba(255, 255, 255, 0.8);
+            border-color: rgba(102, 126, 234, 0.3);
+            transform: translateX(4px);
+        }
+
+        .form-check-input {
+            margin-right: 12px;
+            transform: scale(1.2);
+            accent-color: #667eea;
+        }
+
+        .form-check-label {
+            color: #2d1b69;
+            font-weight: 500;
+            cursor: pointer;
+        }
+
+        /* Premium Buttons */
+        .btn-primary {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 28px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            font-size: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-premium);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 14px 28px;
+            color: rgba(255, 255, 255, 0.9);
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            text-decoration: none;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .btn-outline-secondary {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.8);
+            border-radius: 12px;
+            padding: 14px 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-secondary:hover {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        /* Premium Image Preview */
+        .image-preview {
+            max-width: 200px;
+            max-height: 200px;
+            object-fit: cover;
+            border-radius: 15px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+
+        .image-preview:hover {
+            border-color: #667eea;
+            transform: scale(1.05);
+        }
+
+        /* Premium Info Cards */
+        .upload-info, .auto-rating-info, .image-required-warning, .trailer-required-warning {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 12px;
+            font-size: 0.9rem;
+        }
+
+        .upload-info .info-title,
+        .auto-rating-info .info-title {
+            color: #2d1b69;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .upload-info .info-item,
+        .auto-rating-info .info-item {
+            color: #4a3577;
+            margin: 4px 0;
+        }
+
+        .image-required-warning, .trailer-required-warning {
+            background: rgba(231, 76, 60, 0.2);
+            border-color: rgba(231, 76, 60, 0.3);
+        }
+
+        .image-required-warning .warning-title,
+        .trailer-required-warning .warning-title {
+            color: #e74c3c;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .image-required-warning .warning-item,
+        .trailer-required-warning .warning-item {
+            color: #c0392b;
+            margin: 4px 0;
+        }
+
+        /* Premium Requirements Card */
+        .requirements-card {
+            background: rgba(231, 76, 60, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(231, 76, 60, 0.3);
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .requirements-header {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            padding: 16px;
+            font-weight: 600;
+        }
+
+        .requirements-body {
+            padding: 16px;
+            font-size: 0.9rem;
+            color: #4a3577;
+        }
+
+        .requirements-body ul {
+            margin: 0;
+            padding-left: 20px;
+        }
+
+        .requirements-body li {
+            margin-bottom: 4px;
+        }
+
+        /* Premium Alerts */
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            color: white;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: white;
+        }
+
+        .alert-warning {
+            background: rgba(255, 193, 7, 0.2);
+            color: white;
+        }
+
+        /* Premium Counters */
+        #genre-counter, #actor-counter {
+            font-weight: 600;
+            padding: 8px 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            margin-top: 8px;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 280px;
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .card-header, .card-body {
+                padding: 24px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-nav { animation-delay: 0.1s; }
+        .form-container { animation-delay: 0.2s; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+<!-- Premium Sidebar -->
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='movies')}"></div>
+
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Premium Back Navigation -->
+    <div class="back-nav fade-in">
+        <a th:href="@{/admin/movies}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Cinema Collection
+        </a>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${warning}" class="alert alert-warning alert-dismissible fade show">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span th:text="${warning}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Premium Add Movie Form -->
+    <div class="form-container fade-in">
+        <div class="card-header">
+            <h5>
+                <i class="fas fa-plus"></i>
+                Create New Cinema Experience
+            </h5>
+            <small>All fields marked with (*) are mandatory. Database requires all fields to be filled completely.</small>
+        </div>
+
+        <div class="card-body">
+            <form th:action="@{/admin/movies/add}"
+                  method="post"
+                  enctype="multipart/form-data"
+                  id="movieForm">
+
+                <!-- Hidden field for default rating -->
+                <input type="hidden" name="movieRate" value="0.0">
+
+                <div class="row">
+                    <!-- Left Column -->
+                    <div class="col-md-8">
+                        <!-- Movie Name -->
+                        <div class="mb-3">
+                            <label for="movieName" class="form-label">
+                                <i class="fas fa-film"></i>
+                                Cinema Title <span class="text-danger">*</span>
+                            </label>
+                            <input type="text"
+                                   class="form-control required-field"
+                                   id="movieName"
+                                   name="movieName"
+                                   required
+                                   maxlength="255"
+                                   placeholder="Enter compelling movie title (required)...">
+                            <small class="form-text">Movie title must be unique and captivating (max 255 characters)</small>
+                        </div>
+
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label for="description" class="form-label">
+                                <i class="fas fa-align-left"></i>
+                                Cinematic Story <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control required-field"
+                                      id="description"
+                                      name="description"
+                                      required
+                                      rows="4"
+                                      maxlength="2000"
+                                      placeholder="Craft an engaging movie description (required)..."></textarea>
+                            <small class="form-text">Compelling story description that captivates audiences (max 2000 characters)</small>
+                        </div>
+
+                        <!-- Studio and Duration -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="studio" class="form-label">
+                                        <i class="fas fa-building"></i>
+                                        Production Studio <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="text"
+                                           class="form-control required-field"
+                                           id="studio"
+                                           name="studio"
+                                           required
+                                           maxlength="100"
+                                           placeholder="Enter production studio (required)...">
+                                    <small class="form-text">Movie production studio (max 100 characters)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="duration" class="form-label">
+                                        <i class="fas fa-clock"></i>
+                                        Runtime (minutes) <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="number"
+                                           class="form-control required-field"
+                                           id="duration"
+                                           name="duration"
+                                           required
+                                           min="1"
+                                           max="500"
+                                           placeholder="Enter movie duration...">
+                                    <small class="form-text">Runtime between 1-500 minutes</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Age Limit -->
+                        <div class="mb-3">
+                            <label for="ageLimit" class="form-label">
+                                <i class="fas fa-shield-alt"></i>
+                                Age Rating <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select required-field" id="ageLimit" name="ageLimit" required>
+                                <option value="">-- Select age rating --</option>
+                                <option value="AGE_P">AGE_P - General Audiences (All ages)</option>
+                                <option value="AGE_13_PLUS">AGE_13_PLUS - For ages 13 and above</option>
+                                <option value="AGE_16_PLUS">AGE_16_PLUS - For ages 16 and above</option>
+                                <option value="AGE_18_PLUS">AGE_18_PLUS - For ages 18 and above (Adults only)</option>
+                            </select>
+                            <small class="form-text">Select appropriate age rating for content (required)</small>
+                        </div>
+
+                        <!-- Trailer URL - REQUIRED -->
+                        <div class="mb-3">
+                            <label for="trailer" class="form-label">
+                                <i class="fas fa-play"></i>
+                                Trailer Experience <span class="text-danger">*</span>
+                            </label>
+                            <input type="url"
+                                   class="form-control required-field"
+                                   id="trailer"
+                                   name="trailer"
+                                   required
+                                   placeholder="https://youtube.com/watch?v=... (REQUIRED - database constraint)">
+                            <small class="form-text">Official movie trailer URL (REQUIRED - database cannot be null)</small>
+                            <div class="trailer-required-warning">
+                                <div class="warning-title">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Trailer URL is mandatory
+                                </div>
+                                <div class="warning-item">• Database requires valid trailer URL</div>
+                                <div class="warning-item">• Cannot be empty or null</div>
+                                <div class="warning-item">• Must be valid YouTube/video URL</div>
+                            </div>
+                        </div>
+
+                        <!-- Auto Rating Info -->
+                        <div class="auto-rating-info mb-3">
+                            <div class="info-title">
+                                <i class="fas fa-star"></i>
+                                Audience Rating System
+                            </div>
+                            <div class="info-item">• Initial rating set to 0.0/5.0 for new releases</div>
+                            <div class="info-item">• Audience will rate after viewing experience</div>
+                            <div class="info-item">• Rating can be modified post-release</div>
+                        </div>
+
+                        <!-- Start and End Date -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="startDate" class="form-label">
+                                        <i class="fas fa-calendar-alt"></i>
+                                        Release Date <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="datetime-local"
+                                           class="form-control required-field"
+                                           id="startDate"
+                                           name="startDate"
+                                           required>
+                                    <small class="form-text">Cinema release date (from today onwards)</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="endDate" class="form-label">
+                                        <i class="fas fa-calendar-times"></i>
+                                        End Screening <span class="text-danger">*</span>
+                                    </label>
+                                    <input type="datetime-local"
+                                           class="form-control required-field"
+                                           id="endDate"
+                                           name="endDate"
+                                           required>
+                                    <small class="form-text">Final screening date (after release date)</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="mb-3">
+                            <label for="status" class="form-label">
+                                <i class="fas fa-toggle-on"></i>
+                                Release Status <span class="text-danger">*</span>
+                            </label>
+                            <select class="form-select required-field" id="status" name="status" required>
+                                <option value="">-- Select release status --</option>
+                                <option value="Active" selected>Active Release</option>
+                                <option value="Removed">Archived</option>
+                            </select>
+                            <small class="form-text">Current cinema release status</small>
+                        </div>
+
+                        <!-- Genres -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-tags"></i>
+                                Content Categories <span class="text-danger">*</span>
+                            </label>
+                            <div class="selection-grid">
+                                <div th:each="genre : ${genres}" class="form-check genre-checkbox">
+                                    <input class="form-check-input genre-input"
+                                           type="checkbox"
+                                           th:id="'genre_' + ${genre.genreID}"
+                                           name="genreIds"
+                                           th:value="${genre.genreID}">
+                                    <label class="form-check-label" th:for="'genre_' + ${genre.genreID}">
+                                        <span th:text="${genre.genreName}"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="form-text">
+                                Select at least 1 category (maximum 5 categories)
+                            </small>
+                            <div id="genre-counter" class="mt-1 text-info small"></div>
+                        </div>
+
+                        <!-- Actors -->
+                        <div class="mb-3">
+                            <label class="form-label">
+                                <i class="fas fa-users"></i>
+                                Cast Members <span class="text-danger">*</span>
+                            </label>
+                            <div class="selection-grid">
+                                <div th:each="actor : ${actors}" class="form-check actor-checkbox">
+                                    <input class="form-check-input actor-input"
+                                           type="checkbox"
+                                           th:id="'actor_' + ${actor.actorID}"
+                                           name="actorIds"
+                                           th:value="${actor.actorID}">
+                                    <label class="form-check-label" th:for="'actor_' + ${actor.actorID}">
+                                        <span th:text="${actor.actorName}"></span>
+                                    </label>
+                                </div>
+                            </div>
+                            <small class="form-text">
+                                Select at least 1 actor (maximum 10 actors)
+                            </small>
+                            <div id="actor-counter" class="mt-1 text-info small"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right Column - Images & Requirements -->
+                    <div class="col-md-4">
+                        <!-- Upload Poster - REQUIRED -->
+                        <div class="mb-4">
+                            <label for="posterFile" class="form-label">
+                                <i class="fas fa-upload"></i>
+                                Cinema Poster <span class="text-danger">*</span>
+                            </label>
+                            <input type="file"
+                                   class="form-control required-image-field"
+                                   id="posterFile"
+                                   name="posterFile"
+                                   accept="image/*"
+                                   required>
+                            <small class="form-text">
+                                JPG, PNG, GIF, WEBP - Max 5MB (REQUIRED)
+                            </small>
+                            <div class="image-required-warning">
+                                <div class="warning-title">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Poster image required
+                                </div>
+                                <div class="warning-item">• Must upload poster image</div>
+                                <div class="warning-item">• Displays in movie collection</div>
+                            </div>
+                            <div class="upload-info">
+                                <div class="info-title">Image storage format:</div>
+                                <div class="info-item">movie_{id}_poster.extension</div>
+                                <div class="info-item">Example: movie_1_poster.jpg</div>
+                            </div>
+                            <div id="poster-preview-container" class="mt-2"></div>
+                        </div>
+
+                        <!-- Upload Banner - REQUIRED -->
+                        <div class="mb-4">
+                            <label for="bannerFile" class="form-label">
+                                <i class="fas fa-upload"></i>
+                                Cinema Banner <span class="text-danger">*</span>
+                            </label>
+                            <input type="file"
+                                   class="form-control required-image-field"
+                                   id="bannerFile"
+                                   name="bannerFile"
+                                   accept="image/*"
+                                   required>
+                            <small class="form-text">
+                                JPG, PNG, GIF, WEBP - Max 5MB (REQUIRED)
+                            </small>
+                            <div class="image-required-warning">
+                                <div class="warning-title">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Banner image required
+                                </div>
+                                <div class="warning-item">• Must upload banner image</div>
+                                <div class="warning-item">• Displays in movie details</div>
+                            </div>
+                            <div class="upload-info">
+                                <div class="info-title">Image storage format:</div>
+                                <div class="info-item">movie_{id}_banner.extension</div>
+                                <div class="info-item">Example: movie_1_banner.jpg</div>
+                            </div>
+                            <div id="banner-preview-container" class="mt-2"></div>
+                        </div>
+
+                        <!-- Validation Requirements -->
+                        <div class="card requirements-card">
+                            <div class="card-header requirements-header">
+                                <h6 class="mb-0">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    Content Requirements
+                                </h6>
+                            </div>
+                            <div class="card-body requirements-body">
+                                <ul class="mb-0">
+                                    <li>Cinema title (unique, ≤255 chars)</li>
+                                    <li>Story description (engaging, ≤2000 chars)</li>
+                                    <li>Production studio (≤100 chars)</li>
+                                    <li>Runtime (1-500 minutes)</li>
+                                    <li>Age rating (P/13+/16+/18+)</li>
+                                    <li><strong>Trailer URL (REQUIRED - cannot be null)</strong></li>
+                                    <li>Release date (from today)</li>
+                                    <li>End screening (after release)</li>
+                                    <li>Release status</li>
+                                    <li>At least 1 category (max 5)</li>
+                                    <li>At least 1 cast member (max 10)</li>
+                                    <li><strong>Poster image (REQUIRED)</strong></li>
+                                    <li><strong>Banner image (REQUIRED)</strong></li>
+                                </ul>
+                                <hr>
+                                <small class="text-danger">
+                                    <i class="fas fa-database"></i>
+                                    All fields are required by database constraints
+                                </small>
+                                <br>
+                                <small class="text-success">
+                                    <i class="fas fa-star"></i>
+                                    Rating automatically set to 0.0
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="row mt-4">
+                    <div class="col-12">
+                        <hr style="border-color: rgba(255, 255, 255, 0.2);">
+                        <div class="d-flex justify-content-between">
+                            <div>
+                                <a th:href="@{/admin/movies}" class="btn btn-secondary">
+                                    <i class="fas fa-times me-2"></i>
+                                    Cancel Creation
+                                </a>
+                            </div>
+                            <div>
+                                <button type="reset" class="btn btn-outline-secondary me-2">
+                                    <i class="fas fa-undo me-2"></i>
+                                    Reset Form
+                                </button>
+                                <button type="submit" class="btn btn-primary btn-lg" id="submitBtn">
+                                    <i class="fas fa-plus me-2"></i>
+                                    Create Cinema Experience
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // Set default dates
+    document.addEventListener('DOMContentLoaded', function() {
+        const now = new Date();
+        const startDate = new Date(now.getTime() + 24 * 60 * 60 * 1000); // Tomorrow
+        const endDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000); // +30 days
+
+        document.getElementById('startDate').value = startDate.toISOString().slice(0, 16);
+        document.getElementById('endDate').value = endDate.toISOString().slice(0, 16);
+
+        updateCounters();
+    });
+
+    // Preview uploaded images
+    document.getElementById('posterFile').addEventListener('change', function(e) {
+        previewImage(e, 'poster-preview-container');
+    });
+
+    document.getElementById('bannerFile').addEventListener('change', function(e) {
+        previewImage(e, 'banner-preview-container');
+    });
+
+    function previewImage(event, containerId) {
+        const file = event.target.files[0];
+        const container = document.getElementById(containerId);
+
+        // Clear previous preview
+        container.innerHTML = '';
+
+        if (file) {
+            // Check file size (5MB limit)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('File size cannot exceed 5MB!');
+                event.target.value = '';
+                return;
+            }
+
+            // Check file type
+            if (!file.type.startsWith('image/')) {
+                alert('Please select an image file!');
+                event.target.value = '';
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('img');
+                preview.className = 'image-preview';
+                preview.src = e.target.result;
+                preview.alt = 'Preview';
+
+                const label = document.createElement('p');
+                label.className = 'text-muted small text-center mt-1';
+                label.textContent = 'Image ready for upload';
+                label.style.color = '#4a3577';
+
+                container.appendChild(preview);
+                container.appendChild(label);
+            }
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Update counters for genres and actors
+    function updateCounters() {
+        const genreInputs = document.querySelectorAll('.genre-input:checked');
+        const actorInputs = document.querySelectorAll('.actor-input:checked');
+
+        const genreCounter = document.getElementById('genre-counter');
+        const actorCounter = document.getElementById('actor-counter');
+
+        genreCounter.textContent = `Selected: ${genreInputs.length}/5 categories`;
+        actorCounter.textContent = `Selected: ${actorInputs.length}/10 cast members`;
+
+        // Change color based on selection
+        if (genreInputs.length === 0) {
+            genreCounter.className = 'mt-1 text-danger small';
+            genreCounter.textContent += ' (Must select at least 1)';
+        } else if (genreInputs.length <= 5) {
+            genreCounter.className = 'mt-1 text-success small';
+        }
+
+        if (actorInputs.length === 0) {
+            actorCounter.className = 'mt-1 text-danger small';
+            actorCounter.textContent += ' (Must select at least 1)';
+        } else if (actorInputs.length <= 10) {
+            actorCounter.className = 'mt-1 text-success small';
+        }
+    }
+
+    // Genre and Actor checkbox validation
+    document.querySelectorAll('.genre-input').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('.genre-input:checked').length;
+            if (checkedCount > 5) {
+                this.checked = false;
+                alert('Maximum 5 categories allowed!');
+            }
+            updateCounters();
+        });
+    });
+
+    document.querySelectorAll('.actor-input').forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('.actor-input:checked').length;
+            if (checkedCount > 10) {
+                this.checked = false;
+                alert('Maximum 10 cast members allowed!');
+            }
+            updateCounters();
+        });
+    });
+
+    // Enhanced form validation with required trailer and images
+    document.querySelector('#movieForm').addEventListener('submit', function(e) {
+        let isValid = true;
+        let errorMessages = [];
+
+        // Validate movie name
+        const movieName = document.getElementById('movieName').value.trim();
+        if (!movieName) {
+            errorMessages.push('Cinema title cannot be empty');
+            isValid = false;
+        } else if (movieName.length > 255) {
+            errorMessages.push('Cinema title cannot exceed 255 characters');
+            isValid = false;
+        }
+
+        // Validate description
+        const description = document.getElementById('description').value.trim();
+        if (!description) {
+            errorMessages.push('Story description cannot be empty');
+            isValid = false;
+        } else if (description.length > 2000) {
+            errorMessages.push('Description cannot exceed 2000 characters');
+            isValid = false;
+        }
+
+        // Validate studio
+        const studio = document.getElementById('studio').value.trim();
+        if (!studio) {
+            errorMessages.push('Production studio cannot be empty');
+            isValid = false;
+        } else if (studio.length > 100) {
+            errorMessages.push('Production studio cannot exceed 100 characters');
+            isValid = false;
+        }
+
+        // Validate duration
+        const duration = parseInt(document.getElementById('duration').value);
+        if (!duration || duration <= 0 || duration > 500) {
+            errorMessages.push('Runtime must be between 1-500 minutes');
+            isValid = false;
+        }
+
+        // Validate age limit
+        const ageLimit = document.getElementById('ageLimit').value;
+        if (!ageLimit) {
+            errorMessages.push('Must select age rating');
+            isValid = false;
+        }
+
+        // Validate age limit enum values
+        const validAgeLimits = ['AGE_P', 'AGE_13_PLUS', 'AGE_16_PLUS', 'AGE_18_PLUS'];
+        if (ageLimit && !validAgeLimits.includes(ageLimit)) {
+            errorMessages.push('Invalid age rating selected');
+            isValid = false;
+        }
+
+        // Validate trailer URL - REQUIRED (database constraint)
+        const trailer = document.getElementById('trailer').value.trim();
+        if (!trailer) {
+            errorMessages.push('Trailer URL cannot be empty (database requires this field)');
+            isValid = false;
+        } else {
+            // Basic URL validation
+            try {
+                new URL(trailer);
+            } catch (e) {
+                errorMessages.push('Trailer URL must be a valid URL format');
+                isValid = false;
+            }
+        }
+
+        // Validate dates
+        const startDateInput = document.getElementById('startDate');
+        const endDateInput = document.getElementById('endDate');
+
+        if (!startDateInput.value) {
+            errorMessages.push('Release date cannot be empty');
+            isValid = false;
+        }
+
+        if (!endDateInput.value) {
+            errorMessages.push('End screening date cannot be empty');
+            isValid = false;
+        }
+
+        if (startDateInput.value && endDateInput.value) {
+            const startDate = new Date(startDateInput.value);
+            const endDate = new Date(endDateInput.value);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            if (startDate < today) {
+                errorMessages.push('Release date must be from today onwards');
+                isValid = false;
+            }
+
+            if (startDate >= endDate) {
+                errorMessages.push('End screening must be after release date');
+                isValid = false;
+            }
+        }
+
+        // Validate status
+        const status = document.getElementById('status').value;
+        if (!status) {
+            errorMessages.push('Please select release status');
+            isValid = false;
+        }
+
+        // Validate genres
+        const checkedGenres = document.querySelectorAll('.genre-input:checked');
+        if (checkedGenres.length === 0) {
+            errorMessages.push('Must select at least 1 category');
+            isValid = false;
+        } else if (checkedGenres.length > 5) {
+            errorMessages.push('Maximum 5 categories allowed');
+            isValid = false;
+        }
+
+        // Validate actors
+        const checkedActors = document.querySelectorAll('.actor-input:checked');
+        if (checkedActors.length === 0) {
+            errorMessages.push('Must select at least 1 cast member');
+            isValid = false;
+        } else if (checkedActors.length > 10) {
+            errorMessages.push('Maximum 10 cast members allowed');
+            isValid = false;
+        }
+
+        // Validate required images
+        const posterFile = document.getElementById('posterFile').files[0];
+        const bannerFile = document.getElementById('bannerFile').files[0];
+
+        if (!posterFile) {
+            errorMessages.push('Must upload poster image (required by database)');
+            isValid = false;
+        }
+
+        if (!bannerFile) {
+            errorMessages.push('Must upload banner image (required by database)');
+            isValid = false;
+        }
+
+        // Validate image file types and sizes
+        if (posterFile) {
+            if (!posterFile.type.startsWith('image/')) {
+                errorMessages.push('Poster must be an image file');
+                isValid = false;
+            }
+            if (posterFile.size > 5 * 1024 * 1024) {
+                errorMessages.push('Poster cannot exceed 5MB');
+                isValid = false;
+            }
+        }
+
+        if (bannerFile) {
+            if (!bannerFile.type.startsWith('image/')) {
+                errorMessages.push('Banner must be an image file');
+                isValid = false;
+            }
+            if (bannerFile.size > 5 * 1024 * 1024) {
+                errorMessages.push('Banner cannot exceed 5MB');
+                isValid = false;
+            }
+        }
+
+        if (!isValid) {
+            e.preventDefault();
+            alert('Please fix the following errors:\n\n' + errorMessages.join('\n'));
+            return false;
+        }
+
+        // Show loading state
+        const submitBtn = document.getElementById('submitBtn');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating cinema experience...';
+        submitBtn.disabled = true;
+
+        // Re-enable button after timeout (in case of error)
+        setTimeout(() => {
+            if (submitBtn.disabled) {
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }, 10000);
+    });
+
+    // Age limit change handler for visual feedback
+    document.getElementById('ageLimit').addEventListener('change', function() {
+        const selectedValue = this.value;
+        const ageInfoMap = {
+            'AGE_P': 'General Audiences - All ages admitted, suitable for everyone',
+            'AGE_13_PLUS': 'For ages 13 and above - May contain mild violence or suggestive themes',
+            'AGE_16_PLUS': 'For ages 16 and above - May contain moderate violence, strong language',
+            'AGE_18_PLUS': 'Adults only (18+) - May contain strong violence, sexual content, adult themes'
+        };
+
+        // Update form text with description
+        const formText = this.parentElement.querySelector('.form-text');
+        if (selectedValue && ageInfoMap[selectedValue]) {
+            formText.textContent = ageInfoMap[selectedValue];
+            formText.style.color = '#4facfe';
+            formText.style.fontWeight = '500';
+        } else {
+            formText.textContent = 'Select appropriate age rating for content (required)';
+            formText.style.color = '#4a3577';
+            formText.style.fontWeight = 'normal';
+        }
+
+        // Add visual feedback with color coding
+        const selectElement = this;
+        selectElement.style.borderColor = '';
+        if (selectedValue) {
+            switch(selectedValue) {
+                case 'AGE_P':
+                    selectElement.style.borderColor = '#28a745';
+                    break;
+                case 'AGE_13_PLUS':
+                    selectElement.style.borderColor = '#ffc107';
+                    break;
+                case 'AGE_16_PLUS':
+                    selectElement.style.borderColor = '#ff9800';
+                    break;
+                case 'AGE_18_PLUS':
+                    selectElement.style.borderColor = '#dc3545';
+                    break;
+            }
+        }
+    });
+
+    // Auto-dismiss alerts after 5 seconds
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach(function(alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+
+    // Reset form handler
+    document.querySelector('button[type="reset"]').addEventListener('click', function() {
+        setTimeout(() => {
+            updateCounters();
+
+            // Reset date fields to default
+            const now = new Date();
+            const startDate = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+            const endDate = new Date(startDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+            document.getElementById('startDate').value = startDate.toISOString().slice(0, 16);
+            document.getElementById('endDate').value = endDate.toISOString().slice(0, 16);
+
+            // Clear image previews
+            document.getElementById('poster-preview-container').innerHTML = '';
+            document.getElementById('banner-preview-container').innerHTML = '';
+        }, 50);
+    });
+
+    // Premium loading sequence
+    setTimeout(() => {
+        document.querySelectorAll('.fade-in').forEach((el, index) => {
+            setTimeout(() => {
+                el.style.opacity = '1';
+                el.style.transform = 'translateY(0)';
+            }, index * 100);
+        });
+    }, 100);
+
+    console.log('Premium cinema creation interface loaded with database constraints validation');
+</script>
+
+<style>
+    @keyframes float {
+        0%, 100% {
+            transform: translateY(0px) rotate(0deg);
+            opacity: 0;
+        }
+        50% {
+            transform: translateY(-20px) rotate(180deg);
+            opacity: 1;
+        }
+    }
+</style>
+</body>
+</html>

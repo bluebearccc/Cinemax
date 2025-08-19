@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Actor Management</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --dark-glass: rgba(0, 0, 0, 0.1);
+
+            --text-primary: #1a1a1a;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+            --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 100vh;
+            width: 280px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .logo-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .logo-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: -2px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            padding: 24px 16px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding: 0 12px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 16px 12px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 12px;
+            margin: 4px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover::before {
+            transform: translateX(0);
+        }
+
+        .nav-link:hover {
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        .nav-icon {
+            width: 20px;
+            margin-right: 16px;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 32px;
+            min-height: 100vh;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .header-section {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .header-section h2 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .breadcrumb-text {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+            font-weight: 400;
+            margin: 0;
+        }
+
+        .btn-add {
+            background: var(--success-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: var(--shadow-lg);
+            font-size: 1rem;
+        }
+
+        .btn-add:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-premium);
+            color: white;
+            text-decoration: none;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 28px;
+            text-align: center;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .stat-card:hover::before {
+            opacity: 1;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px) scale(1.02);
+            box-shadow: var(--shadow-premium);
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 1;
+        }
+
+        .stat-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1rem;
+            font-weight: 500;
+            position: relative;
+            z-index: 1;
+        }
+
+        .search-section {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .search-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+
+        .search-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .search-title {
+            display: flex;
+            align-items: center;
+            color: white;
+            font-weight: 600;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .search-title i {
+            color: rgba(255, 255, 255, 0.9);
+            margin-right: 12px;
+            font-size: 1.2rem;
+        }
+
+        .form-control {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            color: white;
+            padding: 14px 18px;
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .form-control::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .form-control:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25);
+            color: white;
+            outline: none;
+        }
+
+        .btn-search {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 12px;
+            padding: 14px 24px;
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-md);
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-search:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+            color: white;
+        }
+
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 14px 18px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: all 0.3s ease;
+            position: relative;
+            z-index: 1;
+        }
+
+        .btn-reset:hover {
+            border-color: rgba(255, 255, 255, 0.4);
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .search-results-info {
+            background: rgba(102, 126, 234, 0.2);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(102, 126, 234, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+            margin-bottom: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .filter-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            margin: 4px 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .results-count {
+            background: var(--success-gradient);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .actor-table-container {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .actor-table-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+
+        .table {
+            color: white;
+            margin-bottom: 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .table thead th {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-color: rgba(255, 255, 255, 0.2);
+            color: #2d1b69;
+            font-weight: 700;
+            padding: 20px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+
+        .table tbody td {
+            border-color: rgba(255, 255, 255, 0.1);
+            padding: 20px;
+            vertical-align: middle;
+            color: #1a0d3a;
+            font-weight: 500;
+        }
+
+        .table tbody tr {
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .table tbody tr:hover {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+        }
+
+        /* OPTIMIZED IMAGE CONTAINER */
+        .actor-image-container {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .actor-image-container:hover {
+            transform: scale(1.05);
+            border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .actor-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .actor-image.loaded {
+            opacity: 1;
+        }
+
+        .actor-image.failed {
+            display: none;
+        }
+
+        .actor-image-placeholder {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1.5rem;
+            transition: color 0.3s ease;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+        }
+
+        .actor-image-container:hover .actor-image-placeholder {
+            color: white;
+        }
+
+        .image-loading {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.8rem;
+        }
+
+        .image-status {
+            position: absolute;
+            top: -2px;
+            right: -2px;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .image-status.success {
+            background: #22c55e;
+            color: white;
+        }
+
+        .image-status.error {
+            background: #ef4444;
+            color: white;
+        }
+
+        .actor-name {
+            font-weight: 700;
+            color: #2d1b69 !important;
+            margin-bottom: 4px;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            padding: 8px 14px;
+            border-radius: 10px;
+            display: inline-block;
+            border: 1px solid rgba(45, 27, 105, 0.3);
+            text-shadow: none;
+            font-size: 1.05rem;
+            box-shadow: 0 2px 8px rgba(45, 27, 105, 0.2);
+        }
+
+        .actor-id {
+            font-size: 0.85rem;
+            color: #4a3577;
+            font-weight: 600;
+        }
+
+        .movies-list {
+            max-height: 100px;
+            overflow-y: auto;
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        .movies-list::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .movies-list::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .movies-list::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 2px;
+        }
+
+        .movie-badge {
+            background: rgba(45, 27, 105, 0.8);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 6px 14px;
+            border-radius: 16px;
+            font-size: 0.85rem;
+            margin: 3px;
+            display: inline-block;
+            border: 1px solid rgba(45, 27, 105, 0.9);
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(45, 27, 105, 0.3);
+        }
+
+        .movie-count {
+            background: var(--success-gradient);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 16px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-action {
+            padding: 10px 12px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            border: none;
+            transition: all 0.3s ease;
+            color: white;
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm);
+        }
+
+        .btn-view {
+            background: var(--primary-gradient);
+        }
+
+        .btn-view:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .no-results i {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            opacity: 0.6;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            color: white;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: white;
+        }
+
+        .image-info {
+            position: absolute;
+            top: -35px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            padding: 6px 12px;
+            font-size: 10px;
+            color: white;
+            white-space: nowrap;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+            z-index: 1000;
+        }
+
+        .actor-image-container:hover .image-info {
+            opacity: 1;
+        }
+
+        .showing-info {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+            margin-top: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 280px;
+                padding: 24px;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 20px;
+            }
+
+            .header-section {
+                padding: 24px;
+                margin-bottom: 24px;
+            }
+
+            .header-section h2 {
+                font-size: 2rem;
+            }
+
+            .search-section {
+                padding: 24px;
+                margin-bottom: 24px;
+            }
+
+            .search-header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: stretch;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 16px;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                gap: 6px;
+            }
+
+            .actor-image-container {
+                width: 45px;
+                height: 45px;
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header-section { animation-delay: 0.1s; }
+        .stats-grid { animation-delay: 0.2s; }
+        .search-section { animation-delay: 0.3s; }
+        .actor-table-container { animation-delay: 0.4s; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+<!-- Premium Sidebar -->
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='actors')}"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Premium Header -->
+    <div class="header-section fade-in">
+        <div class="header-content">
+            <h2 th:text="${pageTitle}">Talent Management</h2>
+            <p class="breadcrumb-text">Executive Dashboard > Talent Management > Actor Portfolio</p>
+        </div>
+    </div>
+
+    <!-- Premium Stats Cards -->
+    <div class="stats-grid fade-in">
+        <div class="stat-card">
+            <div class="stat-number" th:text="${#lists.size(actors)}">0</div>
+            <div class="stat-label">Total Talent</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" th:text="${#lists.size(actors.?[!movies.isEmpty()])}">0</div>
+            <div class="stat-label">Active Performers</div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-number" th:text="${#lists.size(actors.?[movies.isEmpty()])}">0</div>
+            <div class="stat-label">Available Talent</div>
+        </div>
+    </div>
+
+    <!-- Premium Search & Filter Section -->
+    <div class="search-section fade-in">
+        <div class="search-header">
+            <div class="search-title">
+                <i class="fas fa-search"></i>Talent Discovery & Filtering
+            </div>
+            <a href="/admin/actors/add" class="btn-add">
+                <i class="fas fa-user-plus"></i>Add New Talent
+            </a>
+        </div>
+        <form th:action="@{/admin/actors/search}" method="get" id="searchForm">
+            <div class="row g-3">
+                <div class="col-md-9">
+                    <input type="text" class="form-control" name="keyword"
+                           th:value="${keyword}" placeholder="Search by performer name or specialty">
+                </div>
+                <div class="col-md-3">
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn-search flex-fill">
+                            <i class="fas fa-search me-1"></i>Discover
+                        </button>
+                        <a href="/admin/actors" class="btn-reset">
+                            <i class="fas fa-times"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </form>
+
+        <!-- Search Results Info -->
+        <div th:if="${keyword != null and !#strings.isEmpty(keyword)}" class="search-results-info">
+            <div class="d-flex justify-content-between align-items-center flex-wrap">
+                <div>
+                    <i class="fas fa-filter me-2"></i>
+                    <span>Active Filters:</span>
+                    <span class="filter-badge">
+                        <i class="fas fa-search"></i>
+                        Talent Search: "<span th:text="${keyword}"></span>"
+                    </span>
+                </div>
+                <div>
+                    <span class="results-count">
+                        <i class="fas fa-users"></i>
+                        <span th:text="${#lists.size(actors)}">0</span> performers found
+                    </span>
+                </div>
+            </div>
+        </div>
+
+        <div class="showing-info">
+            <small>Displaying <span th:text="${#lists.size(actors)}">0</span> talented performers from our exclusive roster</small>
+        </div>
+    </div>
+
+    <!-- Premium Actor Table -->
+    <div class="actor-table-container fade-in">
+        <div class="table-responsive">
+            <table class="table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Performer</th>
+                    <th>Portrait</th>
+                    <th>Productions</th>
+                    <th>Portfolio Size</th>
+                    <th>Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="actor : ${actors}">
+                    <td>
+                        <div class="actor-id" th:text="${actor.actorID}">1</div>
+                    </td>
+                    <td>
+                        <div class="actor-name" th:text="${actor.actorName}">John Doe</div>
+                    </td>
+                    <td>
+                        <div class="actor-image-container" th:data-actor-id="${actor.actorID}">
+                            <!-- Loading indicator -->
+                            <div class="image-loading">
+                                <i class="fas fa-spinner fa-spin"></i>
+                            </div>
+
+                            <!-- Image element (hidden initially) -->
+                            <img th:if="${actor.image != null and !#strings.isEmpty(actor.image)}"
+                                 th:data-src="@{${actor.image}}"
+                                 th:alt="${actor.actorName}"
+                                 class="actor-image lazy-load"
+                                 loading="lazy">
+
+                            <!-- Placeholder (hidden initially) -->
+                            <div class="actor-image-placeholder" style="display: none;">
+                                <i class="fas fa-user"></i>
+                            </div>
+
+                            <!-- Default placeholder for no image -->
+                            <div th:if="${actor.image == null or #strings.isEmpty(actor.image)}"
+                                 class="actor-image-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+
+                            <!-- Image info tooltip -->
+                            <div class="image-info">Loading...</div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="movies-list" th:if="${!#lists.isEmpty(actor.movies)}">
+                            <span th:each="movie : ${actor.movies}" class="movie-badge" th:text="${movie}">Production</span>
+                        </div>
+                        <div th:if="${#lists.isEmpty(actor.movies)}" class="text-muted">
+                            <i class="fas fa-clock"></i> <span style="color: rgba(255, 255, 255, 0.7);">Available for casting</span>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="movie-count" th:text="${#lists.size(actor.movies)}">0</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <a th:href="@{/admin/actors/{id}(id=${actor.actorID})}"
+                               class="btn-action btn-view" title="View Talent Profile">
+                                <i class="fas fa-eye"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                <!-- No results message -->
+                <tr th:if="${#lists.isEmpty(actors)}">
+                    <td colspan="6" class="no-results">
+                        <i class="fas fa-star"></i>
+                        <p>No talent matches your search criteria</p>
+                        <small>Refine your search parameters or explore our comprehensive talent database</small>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    // OPTIMIZED IMAGE LOADING SYSTEM
+    class ImageCache {
+        constructor() {
+            this.cache = new Map();
+            this.loadingPromises = new Map();
+        }
+
+        async loadImage(src) {
+            // Return cached result if available
+            if (this.cache.has(src)) {
+                return this.cache.get(src);
+            }
+
+            // Return existing promise if already loading
+            if (this.loadingPromises.has(src)) {
+                return this.loadingPromises.get(src);
+            }
+
+            // Create new loading promise
+            const loadPromise = new Promise((resolve, reject) => {
+                const img = new Image();
+
+                img.onload = () => {
+                    const result = { success: true, img, src };
+                    this.cache.set(src, result);
+                    this.loadingPromises.delete(src);
+                    resolve(result);
+                };
+
+                img.onerror = () => {
+                    const result = { success: false, error: 'Failed to load', src };
+                    this.cache.set(src, result);
+                    this.loadingPromises.delete(src);
+                    resolve(result); // Don't reject, just return failed result
+                };
+
+                img.src = src;
+            });
+
+            this.loadingPromises.set(src, loadPromise);
+            return loadPromise;
+        }
+
+        getCacheSize() {
+            return this.cache.size;
+        }
+
+        clearCache() {
+            this.cache.clear();
+            this.loadingPromises.clear();
+        }
+    }
+
+    // Create global image cache instance
+    const imageCache = new ImageCache();
+
+    // OPTIMIZED LAZY LOADING WITH INTERSECTION OBSERVER
+    class LazyImageLoader {
+        constructor() {
+            this.observer = null;
+            this.loadedImages = new Set();
+            this.init();
+        }
+
+        init() {
+            // Create intersection observer
+            this.observer = new IntersectionObserver(
+                (entries) => this.handleIntersection(entries),
+                {
+                    root: null,
+                    rootMargin: '50px',
+                    threshold: 0.1
+                }
+            );
+
+            // Observe all lazy load images
+            this.observeImages();
+        }
+
+        observeImages() {
+            const lazyImages = document.querySelectorAll('.lazy-load');
+            lazyImages.forEach(img => {
+                if (!this.loadedImages.has(img)) {
+                    this.observer.observe(img);
+                }
+            });
+        }
+
+        async handleIntersection(entries) {
+            for (const entry of entries) {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    const container = img.closest('.actor-image-container');
+
+                    if (!this.loadedImages.has(img)) {
+                        await this.loadImage(img, container);
+                        this.loadedImages.add(img);
+                        this.observer.unobserve(img);
+                    }
+                }
+            }
+        }
+
+        async loadImage(imgElement, container) {
+            const src = imgElement.dataset.src;
+            const actorId = container.dataset.actorId;
+            const loadingIndicator = container.querySelector('.image-loading');
+            const placeholder = container.querySelector('.actor-image-placeholder');
+            const tooltip = container.querySelector('.image-info');
+
+            if (!src) {
+                this.showPlaceholder(imgElement, container, placeholder, tooltip, 'No image source');
+                return;
+            }
+
+            try {
+                // Show loading state
+                if (loadingIndicator) loadingIndicator.style.display = 'block';
+                if (tooltip) tooltip.textContent = 'Loading portrait...';
+
+                console.log(`Loading image for actor ${actorId}: ${src}`);
+
+                // Use cached loading
+                const result = await imageCache.loadImage(src);
+
+                if (result.success) {
+                    // Success: show image
+                    imgElement.src = src;
+                    imgElement.classList.add('loaded');
+                    imgElement.style.display = 'block';
+
+                    if (placeholder) placeholder.style.display = 'none';
+                    if (loadingIndicator) loadingIndicator.style.display = 'none';
+                    if (tooltip) tooltip.textContent = 'Portrait loaded successfully';
+
+                    // Add success indicator
+                    this.addStatusIndicator(container, 'success', '✓');
+
+                    console.log(`✓ Image loaded successfully for actor ${actorId}`);
+                } else {
+                    // Failed: show placeholder
+                    this.showPlaceholder(imgElement, container, placeholder, tooltip, 'Failed to load portrait');
+                    console.log(`✗ Image failed to load for actor ${actorId}: ${result.error}`);
+                }
+            } catch (error) {
+                console.error(`Error loading image for actor ${actorId}:`, error);
+                this.showPlaceholder(imgElement, container, placeholder, tooltip, 'Loading error');
+            }
+        }
+
+        showPlaceholder(imgElement, container, placeholder, tooltip, message) {
+            const loadingIndicator = container.querySelector('.image-loading');
+
+            // Hide image and loading
+            imgElement.classList.add('failed');
+            imgElement.style.display = 'none';
+            if (loadingIndicator) loadingIndicator.style.display = 'none';
+
+            // Show placeholder
+            if (placeholder) {
+                placeholder.style.display = 'flex';
+            }
+
+            // Update tooltip
+            if (tooltip) tooltip.textContent = message;
+
+            // Add error indicator
+            this.addStatusIndicator(container, 'error', '!');
+        }
+
+        addStatusIndicator(container, type, symbol) {
+            // Remove existing status indicator
+            const existingStatus = container.querySelector('.image-status');
+            if (existingStatus) {
+                existingStatus.remove();
+            }
+
+            // Add new status indicator
+            const statusDiv = document.createElement('div');
+            statusDiv.className = `image-status ${type}`;
+            statusDiv.textContent = symbol;
+            container.appendChild(statusDiv);
+        }
+
+        // Method to reload failed images
+        retryFailedImages() {
+            const failedImages = document.querySelectorAll('.actor-image.failed');
+            failedImages.forEach(img => {
+                const container = img.closest('.actor-image-container');
+                if (container) {
+                    // Reset state
+                    img.classList.remove('failed');
+                    this.loadedImages.delete(img);
+
+                    // Retry loading
+                    this.loadImage(img, container);
+                }
+            });
+        }
+    }
+
+    // Initialize lazy loader when DOM is ready
+    let lazyLoader;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('=== OPTIMIZED IMAGE LOADING SYSTEM INITIALIZED ===');
+
+        // Initialize lazy image loader
+        lazyLoader = new LazyImageLoader();
+
+        // Enhanced intersection observer for staggered animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver(function(entries) {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('fade-in');
+                }
+            });
+        }, observerOptions);
+
+        // Observe all animatable elements
+        document.querySelectorAll('.header-section, .stats-grid, .search-section, .actor-table-container').forEach(el => {
+            observer.observe(el);
+        });
+
+        // Auto-submit form on Enter key
+        const searchInput = document.querySelector('input[name="keyword"]');
+        if (searchInput) {
+            searchInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    document.getElementById('searchForm').submit();
+                }
+            });
+        }
+
+        // Premium hover effects for stat cards
+        document.querySelectorAll('.stat-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-8px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Enhanced table row interactions
+        document.querySelectorAll('.table tbody tr').forEach(row => {
+            if (!row.querySelector('.no-results')) {
+                row.addEventListener('mouseenter', function() {
+                    this.style.background = 'rgba(255, 255, 255, 0.15)';
+                    this.style.transform = 'translateX(4px)';
+                });
+
+                row.addEventListener('mouseleave', function() {
+                    this.style.background = '';
+                    this.style.transform = 'translateX(0)';
+                });
+            }
+        });
+
+        // Sidebar navigation enhancement
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.paddingLeft = '16px';
+                }
+            });
+
+            link.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('active')) {
+                    this.style.paddingLeft = '12px';
+                }
+            });
+        });
+
+        // Premium loading sequence
+        setTimeout(() => {
+            document.querySelectorAll('.fade-in').forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }, 100);
+
+        // Dynamic background particles (premium effect)
+        function createParticle() {
+            const particle = document.createElement('div');
+            particle.style.cssText = `
+                position: fixed;
+                width: 2px;
+                height: 2px;
+                background: rgba(255, 255, 255, 0.4);
+                border-radius: 50%;
+                pointer-events: none;
+                z-index: 0;
+                left: ${Math.random() * 100}vw;
+                top: ${Math.random() * 100}vh;
+                animation: float ${3 + Math.random() * 4}s ease-in-out infinite;
+            `;
+
+            document.body.appendChild(particle);
+
+            setTimeout(() => {
+                particle.remove();
+            }, 7000);
+        }
+
+        // Create premium floating particles
+        setInterval(createParticle, 3000);
+
+        // Add debugging tools
+        window.imageDebug = {
+            getCacheSize: () => imageCache.getCacheSize(),
+            clearCache: () => imageCache.clearCache(),
+            retryFailedImages: () => lazyLoader.retryFailedImages(),
+            getLoadedImagesCount: () => lazyLoader.loadedImages.size,
+            showCacheContents: () => {
+                console.log('Image Cache Contents:');
+                imageCache.cache.forEach((value, key) => {
+                    console.log(`${key}: ${value.success ? 'SUCCESS' : 'FAILED'}`);
+                });
+            }
+        };
+
+        console.log('=== DEBUG TOOLS AVAILABLE ===');
+        console.log('Use window.imageDebug for debugging:');
+        console.log('- getCacheSize(): Get number of cached images');
+        console.log('- clearCache(): Clear image cache');
+        console.log('- retryFailedImages(): Retry loading failed images');
+        console.log('- getLoadedImagesCount(): Get number of loaded images');
+        console.log('- showCacheContents(): Show cache contents');
+    });
+
+    // Add CSS animation for floating particles
+    const style = document.createElement('style');
+    style.textContent = `
+        @keyframes float {
+            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.4; }
+            50% { transform: translateY(-20px) rotate(180deg); opacity: 0.8; }
+        }
+    `;
+    document.head.appendChild(style);
+</script>
+</body>
+</html>

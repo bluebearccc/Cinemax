@@ -1,0 +1,49 @@
+
+<div th:fragment="chatbot">
+    <button class="chat-toggle-chat-bot" id="chatToggle">
+        <svg class="chat-icon-chat-bot" viewBox="0 0 24 24">
+            <path d="M20 2H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h4l4 4 4-4h4c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2zm-2 12H6v-2h12v2zm0-3H6V9h12v2zm0-3H6V6h12v2z"/>
+        </svg>
+        <svg class="close-icon-chat-bot" viewBox="0 0 24 24">
+            <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
+        </svg>
+    </button>
+
+    <div class="chat-widget-chat-bot" id="chatWidget">
+        <div class="chat-header-chat-bot">
+            <h3>🤖 Cinemax AI</h3>
+            <div class="chat-status-chat-bot">
+                <span class="status-dot-chat-bot"></span>
+                Im here to help !
+            </div>
+        </div>
+
+        <div class="chat-messages-chat-bot" id="chatMessages">
+            <div class="welcome-msg-chat-bot">
+                <p><strong>Hi there! 👋</strong></p>
+                <p>Im Cinemax AI. What do you need?</p>
+            </div>
+
+            <div class="quick-options-chat-bot">
+                <div class="quick-option-chat-bot" onclick="sendQuickMessage('Hôm nay chiếu gì')">Today's Showtimes at CGV Thái Nguyên</div>
+                <div class="quick-option-chat-bot" onclick="sendQuickMessage('What genres are available?')">What genres are available?</div>
+            </div>
+        </div>
+
+        <div class="chat-input-area-chat-bot">
+            <div class="chat-input-wrapper-chat-bot">
+                <input
+                        type="text"
+                        class="chat-input-chat-bot"
+                        id="chatInput"
+                        maxlength="500"
+                >
+                <button class="send-btn-chat-bot" onclick="sendMessage()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

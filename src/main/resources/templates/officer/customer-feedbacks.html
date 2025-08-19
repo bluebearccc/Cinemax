@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer Care Management</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.6.0/remixicon.min.css"/>
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/css/customerCare.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+</head>
+<body>
+
+<div class="sidebar" th:replace="officer/fragments/side-bar :: sidebar"></div>
+
+<main class="main-content">
+    <div class="stats-grid grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
+<!--        <div class="stat-card bg-white rounded-lg shadow-sm p-6">-->
+<!--            <div class="flex items-center">-->
+<!--                <div class="stat-icon total mr-4">-->
+<!--                    <i class="ri-ticket-2-line"></i>-->
+<!--                </div>-->
+<!--            </div>-->
+<!--        </div>-->
+
+        <div class="stat-card bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center">
+                <div class="stat-icon resolved mr-4">
+                    <i class="ri-checkbox-circle-line ri-lg"></i>
+                </div>
+                <div>
+                    <p class="stat-label">Resolved</p>
+                    <h3 class="stat-number" th:text="${resolvedCount}">0</h3>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="stat-card bg-white rounded-lg shadow-sm p-6">
+            <div class="flex items-center">
+                <div class="stat-icon pending mr-4">
+                    <i class="ri-error-warning-line ri-lg"></i>
+                </div>
+                <div>
+                    <p class="stat-label">Pending</p>
+                    <h3 class="stat-number" th:text="${pendingCount}">0</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <div class="content-grid">
+        <div>
+            <div class="search-section">
+                <form class="search-form" th:action="@{/officer/customer-care/feedbacks}" method="get">
+                    <div class="form-group">
+                        <label class="form-label">Search</label>
+                        <div class="input-group">
+                            <i class="fas fa-search"></i>
+                            <input type="text" name="keyword" th:value="${keyword}" class="form-control" placeholder="Name, email, or phone number...">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select name="priority" class="form-control">
+                            <option th:value="''" th:selected="${priority} == null or priority == ''">All Priorities</option>
+                            <option th:value="HIGH" th:selected="${priority} == 'HIGH'">High</option>
+                            <option th:value="MEDIUM" th:selected="${priority} == 'MEDIUM'">Medium</option>
+                            <option th:value="LOW" th:selected="${priority} == 'LOW'">Low</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Search
+                    </button>
+                    <button type="button" class="btn btn-outline" onclick="location.reload()">
+                        <i class="fas fa-sync-alt"></i>
+                        Refresh
+                    </button>
+                </form>
+            </div>
+
+            <div class="ticket-table">
+                <div class="table-header">
+                    <i class="fas fa-ticket-alt"></i>
+                    Support Ticket List
+                </div>
+                <table class="table">
+                    <thead>
+                    <tr>
+                        <th>Ticket ID</th>
+                        <th>Customer</th>
+                        <th>Issue</th>
+                        <th>Status</th>
+                        <th>Priority</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="ticket, iterStat : ${feedbackList}"
+                        th:attr="data-id=${ticket.customerId},
+                                         data-page=${currentPage},
+                                         data-keyword=${keyword},
+                                         data-priority=${priority}"
+                        onclick="handleRowClick(this)">
+                        <td class="ticket-id">
+                            <span>#TK<span th:text="${iterStat.index + 1021}"></span></span>
+                        </td>
+                        <td>
+                            <div class="customer-info">
+                                <div class="customer-avatar" th:text="${ticket.fullName.substring(0,1)}"></div>
+                                <div class="customer-details">
+                                    <h4 th:text="${ticket.fullName}"></h4>
+                                    <p th:text="${ticket.email}"></p>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="issue-content" th:text="${ticket.content}"></div>
+                        </td>
+                        <td>
+                            <span class="badge badge-warning" th:if="${ticket.status == 'Not_Suported'}">Pending</span>
+                            <span class="badge badge-success" th:if="${ticket.status != 'Not_Suported'}">Resolved</span>
+                        </td>
+                        <td>
+                            <span class="badge badge-danger" th:if="${ticket.serviceRate == 1}">high</span>
+                            <span class="badge badge-warning" th:if="${ticket.serviceRate == 2}">low</span>
+                            <span class="badge badge-info" th:if="${ticket.serviceRate == 3}">medium</span>
+                            <span class="badge badge-info" th:if="${ticket.serviceRate > 3}">good</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+                <div th:if="${totalPages > 1}" class="pagination-wrapper" style="padding: 1rem 1.5rem; border-top: 1px solid #e2e8f0;">
+                    <nav>
+                        <ul class="pagination" style="display: flex; gap: 0.5rem; list-style: none; margin: 0; padding: 0;">
+                            <li th:classappend="${currentPage == 0} ? 'disabled' : ''" style="display: flex;">
+                                <a th:href="@{/officer/customer-care/feedbacks(page=${currentPage - 1}, keyword=${keyword}, priority=${priority})}"
+                                   style="padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; text-decoration: none; color: #6b7280;">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            <li th:each="i : ${#numbers.sequence(0, totalPages - 1)}"
+                                th:classappend="${i} == ${currentPage} ? 'active' : ''"
+                                style="display: flex;">
+                                <a th:href="@{/officer/customer-care/feedbacks(page=${i}, keyword=${keyword}, priority=${priority})}"
+                                   th:text="${i + 1}"
+                                   style="padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; text-decoration: none; color: #6b7280;"
+                                   th:style="${i == currentPage} ? 'background: #3b82f6; color: white; border-color: #3b82f6;' : ''">
+                                </a>
+                            </li>
+                            <li th:classappend="${currentPage == totalPages - 1} ? 'disabled' : ''" style="display: flex;">
+                                <a th:href="@{/officer/customer-care/feedbacks(page=${currentPage + 1}, keyword=${keyword}, priority=${priority})}"
+                                   style="padding: 0.5rem 0.75rem; border: 1px solid #d1d5db; border-radius: 0.375rem; text-decoration: none; color: #6b7280;">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <div class="customer-detail" th:if="${selectedCustomer != null}">
+            <div th:if="${smsStatus}" class="alert alert-info" style="margin: 1rem 1.5rem; padding: 1rem; background: #dbeafe; border: 1px solid #93c5fd; border-radius: 0.5rem; color: #1e40af;" th:text="${smsStatus}"></div>
+
+            <div class="customer-header">
+                <div class="customer-avatar-large" th:text="${selectedCustomer.fullName.substring(0,1)}"></div>
+                <div class="customer-name" th:text="${selectedCustomer.fullName}"></div>
+                <div class="customer-subtitle">Customer Information</div>
+            </div>
+
+            <div class="detail-section">
+                <div class="detail-row">
+                    <span class="detail-label">Email</span>
+                    <span class="detail-value" th:text="${selectedCustomer.email}"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Phone Number</span>
+                    <span class="detail-value" th:text="${selectedCustomer.phone}"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Loyalty Points</span>
+                    <span class="detail-value">
+                            <span th:text="${selectedCustomer.point}"></span> points
+                        </span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Issue</span>
+                    <span class="detail-value" th:text="${selectedTicket.content}"></span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Status</span>
+                    <span class="badge badge-warning" th:if="${selectedTicket.status == 'Not_Suported'}">Pending</span>
+                    <span class="badge badge-success" th:if="${selectedTicket.status != 'Not_Suported'}">Resolved</span>
+                </div>
+
+                <div class="detail-row">
+                    <span class="detail-label">Priority</span>
+                    <span class="badge badge-danger" th:if="${selectedTicket.serviceRate == 1}">high</span>
+                    <span class="badge badge-warning" th:if="${selectedTicket.serviceRate == 2}">low</span>
+                    <span class="badge badge-info" th:if="${selectedTicket.serviceRate == 3}">Medium</span>
+                    <span class="badge badge-info" th:if="${selectedTicket.serviceRate > 3}">Low</span>
+                </div>
+            </div>
+
+            <div class="detail-section">
+                <h3 style="display: flex; align-items: center; gap: 0.5rem; margin-bottom: 1rem; color: #3b82f6; font-size: 1.125rem;">
+                    <i class="fas fa-film"></i>
+                    Movie History
+                </h3>
+                <div class="movie-history">
+                    <div th:if="${watchedMovies != null and !watchedMovies.isEmpty()}">
+                        <div class="movie-item" th:each="wm : ${watchedMovies}">
+                            <div class="movie-icon">
+                                <i class="fas fa-play"></i>
+                            </div>
+                            <div class="movie-info">
+                                <h4 th:text="${wm.movie.movieName}"></h4>
+                                <p th:text="${wm.theater.theaterName}"></p>
+                            </div>
+                        </div>
+                    </div>
+                    <div th:if="${watchedMovies == null or watchedMovies.isEmpty()}" class="empty-state">
+                        <i class="fas fa-film"></i>
+                        <p>No movie history available</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="btn btn-primary" style="width: 100%;">
+                    <i class="fas fa-reply"></i>
+                    Respond to Customer
+                </button>
+                <form th:action="@{/officer/customer-care/feedbacks/resolve}"
+                      method="post"
+                      th:if="${selectedTicket.status == 'Not_Suported'}"
+                      style="width: 100%;"
+                      th:onsubmit="|return confirm('Are you sure you want to mark feedback #${selectedTicket.feedbackId} as resolved?');|">
+                    <input type="hidden" name="feedbackId" th:value="${selectedTicket.feedbackId}" />
+                    <button type="submit" class="btn btn-outline" style="width: 100%;">
+                        <i class="fas fa-check"></i>
+                        Mark as Resolved
+                    </button>
+                </form>
+
+
+            </div>
+        </div>
+
+        <div class="customer-detail" th:if="${selectedCustomer == null}">
+            <div class="empty-state">
+                <i class="fas fa-user-circle"></i>
+                <h3>Select a ticket to view details</h3>
+                <p>Click on a row in the table to view customer details</p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function handleRowClick(row) {
+        // Remove active class from all rows
+        document.querySelectorAll('.table tbody tr').forEach(tr => {
+            tr.classList.remove('active');
+        });
+
+        // Add active class to clicked row
+        row.classList.add('active');
+
+        const id = row.getAttribute('data-id');
+        const page = row.getAttribute('data-page') || 0;
+        const keyword = row.getAttribute('data-keyword') || '';
+        const priority = row.getAttribute('data-priority') || '';
+
+        const url = `/officer/customer-care/feedbacks?id=${id}&page=${page}&keyword=${encodeURIComponent(keyword)}&priority=${encodeURIComponent(priority)}`;
+        window.location.href = url;
+    }
+
+    // Add smooth scrolling and animations
+    document.addEventListener('DOMContentLoaded', function() {
+        // Add loading animation to stats cards
+        const statCards = document.querySelectorAll('.stat-card');
+        statCards.forEach((card, index) => {
+            card.style.opacity = '0';
+            card.style.transform = 'translateY(20px)';
+            setTimeout(() => {
+                card.style.transition = 'all 0.6s ease';
+                card.style.opacity = '1';
+                card.style.transform = 'translateY(0)';
+            }, index * 150);
+        });
+
+        // Add hover effects to table rows
+        const tableRows = document.querySelectorAll('.table tbody tr');
+        tableRows.forEach(row => {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        });
+        const totalCount = document.querySelectorAll('.table tbody tr').length;
+        const totalEl = document.getElementById('total-count');
+        if (totalEl) totalEl.textContent = totalCount;
+
+        // Count pending tickets
+        const pendingCount = document.querySelectorAll('.table tbody tr td span.badge.warning, .table tbody tr td span.badge-warning').length;
+        const pendingEl = document.getElementById('pending-count');
+        if (pendingEl) pendingEl.textContent = pendingCount;
+
+        // Count resolved tickets
+        const resolvedCount = document.querySelectorAll('.table tbody tr td span.badge-success, .table tbody tr td span.badge.success').length;
+        const resolvedEl = document.getElementById('resolved-count');
+        if (resolvedEl) resolvedEl.textContent = resolvedCount;
+
+        // Count processing tickets
+        const processingCount = document.querySelectorAll('.table tbody tr td span.badge.processing, .table tbody tr td span.badge-processing').length;
+        const processingEl = document.getElementById('processing-count');
+        if (processingEl) processingEl.textContent = processingCount;
+    });
+</script>
+
+</body>
+</html>

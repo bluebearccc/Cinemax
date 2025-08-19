@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Food & Beverage Receipt</title>
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <style>
+        body { font-family: monospace; }
+        .receipt {
+            width: 300px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 2px dashed #555;
+        }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        table { width: 100%; border-collapse: collapse; }
+        td, th { padding: 5px; }
+        .total-row td { border-top: 1px solid #000; font-weight: bold; }
+        @media print {
+            .no-print { display: none; }
+            body { margin: 0; }
+            .receipt { margin: 0; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="receipt" th:if="${bookingResult != null and bookingResult.foodItems != null and !bookingResult.foodItems.isEmpty()}">
+    <div class="text-center">
+        <h3>CINEMAX F&B</h3>
+        <p>================================</p>
+        <h4>FOOD & BEVERAGE RECEIPT</h4>
+    </div>
+
+    <p><strong>Invoice ID:</strong> <span th:text="${bookingResult.invoiceId}"></span></p>
+    <p><strong>Date:</strong> <span th:text="${#temporals.format(bookingResult.bookingDate, 'dd/MM/yyyy HH:mm')}"></span></p>
+
+    <p>================================</p>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Item</th>
+            <th class="text-center">Qty</th>
+            <th class="text-right">Subtotal</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="food : ${bookingResult.foodItems}">
+            <td th:text="${food.name}"></td>
+            <td class="text-center" th:text="${food.quantity}"></td>
+            <td class="text-right" th:text="${#numbers.formatDecimal(food.unitPrice * food.quantity, 0, 'COMMA', 2, 'POINT')} + ' USD'"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <p>================================</p>
+
+    <table>
+        <tr class="total-row">
+            <td colspan="2"><strong>TOTAL:</strong></td>
+            <td class="text-right">
+                <strong th:text="${#numbers.formatDecimal(bookingResult.totalFoodPrice, 0, 'COMMA', 2, 'POINT')} + ' USD'"></strong>
+            </td>
+        </tr>
+    </table>
+
+    <div class="text-center" style="margin-top: 20px;">
+        <p>Enjoy your meal!</p>
+    </div>
+</div>
+
+<div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()">Print Receipt</button>
+    <button onclick="window.close()">Close</button>
+</div>
+
+</body>
+</html>

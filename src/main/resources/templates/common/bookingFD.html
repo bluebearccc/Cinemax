@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cinema Food & Drink Combos</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/bookingFD.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <title>BookingFD</title>
+</head>
+<body>
+<div class="container-fluid px-0">
+    <header class="cinema-header">
+        <div class="container text-center">
+            <a th:href="@{/booking?scheduleId={scheduleId}&roomId={roomId}(scheduleId=${scheduleId}, roomId=${roomId})}"
+               class="btn btn-secondary btn-back">
+                <i class="fas fa-arrow-left me-2"></i>Back to Seat Selection
+            </a>
+            <h1 class="header-title">
+                <i class="fas fa-popcorn me-3"></i>Special Food & Drink Combos
+            </h1>
+            <p class="header-subtitle">
+                Enjoy unique combos prepared in-house - Elevate your movie experience
+            </p>
+        </div>
+    </header>
+
+    <div class="combo-container">
+        <div class="combo-search-bar mb-4 d-flex justify-content-between align-items-center px-4">
+            <form method="post" th:action="@{/booking/step1}" class="d-flex w-100" style="gap: 10px;">
+                <input type="hidden" name="scheduleId" th:value="${scheduleId}" />
+                <input type="hidden" name="roomId" th:value="${roomId}" />
+                <input type="hidden" name="page" th:value="1" />
+                <th:block th:each="seatId : ${selectedSeats}">
+                    <input type="hidden" name="selectedSeats" th:value="${seatId}" />
+                </th:block>
+
+                <input type="text" name="search" class="form-control" th:value="${search}" placeholder="Search by combo name...">
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-search me-1"></i> Search
+                </button>
+            </form>
+        </div>
+
+        <form th:action="@{/booking/step2}" method="post" id="comboForm">
+            <input type="hidden" name="scheduleId" th:value="${scheduleId}">
+            <input type="hidden" name="roomId" th:value="${roomId}">
+            <input type="hidden" name="promotionCode" th:value="${promotionCode}">
+
+            <th:block th:each="seatId : ${selectedSeats}">
+                <input type="hidden" name="selectedSeats" th:value="${seatId}" />
+            </th:block>
+            <div class="combo-grid" id="comboGrid">
+                <div th:each="combo : ${combos}" class="combo-card" th:attr="data-combo-id=${combo.theaterStockId}">
+                    <div class="combo-image-container">
+                        <img th:src="@{${combo.image}}"
+                             class="combo-image"
+                             th:alt="${combo.foodName}"
+                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjI1MCIgdmlld0JveD0iMCAwIDQwMCAyNTAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSI0MDAiIGhlaWdodD0iMjUwIiBmaWxsPSIjZjFmMmY2Ii8+CjxjaXJjbGUgY3g9IjIwMCIgY3k9IjEyNSIgcj0iNDAiIGZpbGw9IiNmZjZiNmIiLz4KPHRleHQgeD0iMjAwIiB5PSIxODAiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZvbnQtZmFtaWx5PSJBcmlhbCIgZm9udC1zaXplPSIxNCIgZmlsbD0iIzJmMzY0MCI+Rm9vZCBDb21ibzwvdGV4dD4KPC9zdmc+Cg=='">
+                        <div class="combo-overlay"></div>
+                        <div class="combo-badge">
+                            <i class="fas fa-fire me-1"></i>Hot
+                        </div>
+                    </div>
+
+                    <div class="combo-content">
+                        <h3 class="combo-title" th:text="${combo.foodName}">Special Combo</h3>
+
+                        <div class="combo-price-section">
+                            <div class="combo-price" th:text="${#numbers.formatInteger(combo.unitPrice, 0, 'POINT')} + '₫'">
+                                50.000₫
+                            </div>
+                            <div class="combo-stock">
+                                <i class="fas fa-box me-1"></i>
+                                <span th:text="'In Stock: ' + ${combo.quantity}">In Stock: 25</span>
+                            </div>
+                        </div>
+
+                        <div class="quantity-section">
+                            <span class="quantity-label">Quantity:</span>
+                            <div class="quantity-controls">
+                                <button type="button" class="quantity-btn minus-btn" th:attr="data-combo=${combo.theaterStockId}">
+                                    <i class="fas fa-minus"></i>
+                                </button>
+                                <input type="number"
+                                       class="quantity-input"
+                                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                                       th:id="'quantity-' + ${combo.theaterStockId}"
+                                       min="0"
+                                       th:max="${combo.quantity}"
+                                       value="0"
+                                       th:attr="data-price=${combo.unitPrice}, data-max=${combo.quantity}">
+                                <button type="button" class="quantity-btn plus-btn" th:attr="data-combo=${combo.theaterStockId}">
+                                    <i class="fas fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <button type="button" class="add-to-cart-btn" th:attr="data-combo=${combo.theaterStockId}">
+                            <i class="fas fa-cart-plus me-2"></i>Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="pagination justify-content-center mt-4">
+                <ul class="pagination" id="comboPagination"></ul>
+            </div>
+            <div class="checkout-section">
+                <button type="submit" class="checkout-btn" id="checkoutBtn" style="padding: 15px 15rem;opacity: 0.7;">
+                    <i class="fas fa-shopping-cart me-2"></i>Order Combos Now
+                    <span class="total-display" id="totalDisplay">Total: 0₫</span>
+                </button>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<div class="order-summary" id="orderSummary">
+    <i class="fas fa-shopping-bag me-2"></i>
+    <span id="summaryText">Selected 0 combos - Total: 0</span>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let totalAmount = 0;
+    let totalItems = 0;
+
+    function updateQuantity(comboId, change) {
+        const input = document.getElementById(`quantity-${comboId}`);
+        const currentValue = parseInt(input.value) || 0;
+        const maxValue = parseInt(input.getAttribute('data-max'));
+        const newValue = Math.max(0, Math.min(maxValue, currentValue + change));
+
+        input.value = newValue;
+        updateTotals();
+
+        // Add animation effect
+        input.style.transform = 'scale(1.1)';
+        setTimeout(() => {
+            input.style.transform = 'scale(1)';
+        }, 150);
+    }
+
+    function updateTotals() {
+        totalAmount = 0;
+        totalItems = 0;
+
+        document.querySelectorAll('.quantity-input').forEach(input => {
+            const quantity = parseInt(input.value) || 0;
+            const price = parseInt(input.getAttribute('data-price')) || 0;
+
+            totalAmount += quantity * price ;
+            totalItems += quantity;
+        });
+
+        // Update displays
+        const formatPrice = (price) => {
+            return new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND'
+            }).format(price);
+        };
+
+        document.getElementById('totalDisplay').textContent = `Total: ${formatPrice(totalAmount)}`;
+        document.getElementById('summaryText').textContent =
+            `Selected ${totalItems} combos - Total: ${formatPrice(totalAmount)}`;
+
+        // Show/hide order summary
+        const orderSummary = document.getElementById('orderSummary');
+        if (totalItems > 0) {
+            orderSummary.classList.add('show');
+        } else {
+            orderSummary.classList.remove('show');
+        }
+
+        // Update checkout button state
+        const checkoutBtn = document.getElementById('checkoutBtn');
+        checkoutBtn.style.opacity = totalItems > 0 ? '1' : '0.7';
+    }
+
+    // Event listeners
+    document.querySelectorAll('.minus-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const comboId = btn.getAttribute('data-combo');
+            updateQuantity(comboId, -1);
+        });
+    });
+
+    document.querySelectorAll('.plus-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const comboId = btn.getAttribute('data-combo');
+            updateQuantity(comboId, 1);
+        });
+    });
+
+    document.querySelectorAll('.quantity-input').forEach(input => {
+        input.addEventListener('change', updateTotals);
+        input.addEventListener('input', updateTotals);
+    });
+
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const comboId = btn.getAttribute('data-combo');
+            const input = document.getElementById(`quantity-${comboId}`);
+            const currentValue = parseInt(input.value) || 0;
+            const maxValue = parseInt(input.getAttribute('data-max'));
+
+            if (currentValue < maxValue) {
+                updateQuantity(comboId, 1);
+
+                // Add success animation
+                btn.innerHTML = '<i class="fas fa-check me-2"></i>Added!';
+                // btn.style.background = 'none';
+
+                setTimeout(() => {
+                    btn.innerHTML = '<i class="fas fa-cart-plus me-2"></i>Add to Cart';
+                }, 1000);
+            }
+        });
+    });
+
+    // Form submission
+
+
+    // Initialize
+    updateTotals();
+
+    // Add entrance animations
+    setTimeout(() => {
+        document.querySelectorAll('.combo-card').forEach((card, index) => {
+            setTimeout(() => {
+                card.style.animation = 'fadeInUp 0.6s ease forwards';
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+
+                setTimeout(() => {
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 50);
+            }, index * 100);
+        });
+    }, 300);
+    //phân trang
+    const itemsPerPage = 6;
+    let currentComboPage = 1;
+
+    function showComboPage(page) {
+        const cards = document.querySelectorAll('.combo-card');
+        const totalPages = Math.ceil(cards.length / itemsPerPage);
+
+        currentComboPage = Math.max(1, Math.min(page, totalPages));
+
+        cards.forEach((card, index) => {
+            card.style.display = (index >= (currentComboPage - 1) * itemsPerPage &&
+                index < currentComboPage * itemsPerPage) ? 'block' : 'none';
+        });
+
+        renderPagination(totalPages);
+    }
+
+    function renderPagination(totalPages) {
+        const pagination = document.getElementById('comboPagination');
+        pagination.innerHTML = '';
+
+        // Prev button
+        const prev = document.createElement('li');
+        prev.className = 'page-item' + (currentComboPage === 1 ? ' disabled' : '');
+        prev.innerHTML = `<button class="page-link">«</button>`;
+        prev.querySelector('button').addEventListener('click', () => showComboPage(currentComboPage - 1));
+        pagination.appendChild(prev);
+
+        // Page numbers
+        for (let i = 1; i <= totalPages; i++) {
+            const li = document.createElement('li');
+            li.className = 'page-item' + (i === currentComboPage ? ' active' : '');
+            li.innerHTML = `<button class="page-link">${i}</button>`;
+            li.querySelector('button').addEventListener('click', () => showComboPage(i));
+            pagination.appendChild(li);
+        }
+
+        // Next button
+        const next = document.createElement('li');
+        next.className = 'page-item' + (currentComboPage === totalPages ? ' disabled' : '');
+        next.innerHTML = `<button class="page-link">»</button>`;
+        next.querySelector('button').addEventListener('click', () => showComboPage(currentComboPage + 1));
+        pagination.appendChild(next);
+    }
+
+    // Gọi hàm hiển thị lần đầu khi DOM sẵn sàng
+    document.addEventListener('DOMContentLoaded', () => {
+        showComboPage(1);
+    });
+
+</script>
+</body>
+</html>

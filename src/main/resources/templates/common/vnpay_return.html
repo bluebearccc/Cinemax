@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>VNPAY Payment Result</title>
+    <link rel="stylesheet" th:href="@{/css/bootstrap.min.css}" />
+    <link rel="stylesheet" th:href="@{/css/vnpay.css}">
+    <title>vnpay return</title>
+</head>
+<body>
+<div class="container">
+    <div class="payment-card fade-in">
+        <div class="card-header">
+            <div class="vnpay-logo">VNPAY</div>
+            <h1>Payment Result</h1>
+            <p class="subtitle">Transaction Status & Details</p>
+        </div>
+
+        <div class="status-section">
+            <div class="status-alert" th:classappend="${responseCode} == '00' ? 'status-success' : 'status-error'">
+                <span class="status-icon" th:text="${responseCode} == '00' ? '✓' : '✗'">✓</span>
+                <span th:text="${message}">[Notification Message]</span>
+            </div>
+        </div>
+
+        <div class="details-section">
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <span class="detail-label">Invoice ID</span>
+                    <span class="detail-value" th:text="${invoiceId}">[Invoice ID]</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Amount</span>
+                    <span class="detail-value amount-highlight" th:text="${amount} + ' VND'">[Amount] VND</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Response Code</span>
+                    <span class="detail-value" th:text="${responseCode ?: 'N/A'}">[Response Code]</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Transaction Status</span>
+                    <span class="detail-value" th:text="${transactionStatus}">[Transaction Status]</span>
+                </div>
+
+                <div class="detail-item">
+                    <span class="detail-label">Payment Bank</span>
+                    <span class="detail-value" th:text="${bankCode}">[Bank Code]</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="actions-section">
+            <a href="/" class="btn-home">
+                <span class="btn-icon">🏠</span>
+                Back to Homepage
+            </a>
+        </div>
+    </div>
+</div>
+</body>
+</html>

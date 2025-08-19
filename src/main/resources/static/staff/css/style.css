@@ -1,0 +1,569 @@
+/* === CSS CẬP NHẬT ĐỂ KHỚP VỚI GIAO DIỆN MỚI NHẤT === */
+
+/* --- Thiết lập lại và Font chữ cơ bản --- */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    background-color: #F9FAFB; /* Màu nền chính của trang */
+    color: #374151;
+    display: flex;
+}
+
+/* --- SIDEBAR --- */
+.sidebar {
+    position: fixed;
+    left: 0;
+    top: 0;
+    width: 240px; /* Chiều rộng của sidebar */
+    height: 100%;
+    background-color: #edf7ff; /* THAY ĐỔI: Sidebar có nền xanh nhạt */
+    padding: 20px 10px;
+    border-right: 1px solid #E5E7EB; /* Đường viền phải rất nhạt để phân tách */
+    display: flex;
+    flex-direction: column;
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    padding: 10px 10px 20px 10px; /* Thêm padding dưới */
+    gap: 12px;
+}
+
+.user-avatar {
+    width: 40px;
+    height: 40px;
+    background-color: #F97316;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+    flex-shrink: 0;
+}
+
+.user-name {
+    color: #111827;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    padding: 12px 15px;
+    margin: 2px 0; /* Khoảng cách dọc giữa các mục */
+    border-radius: 8px; /* Bo góc cho tất cả sidebar item */
+    text-decoration: none;
+    color: #6B7280; /* Màu chữ mặc định nhạt hơn */
+    gap: 12px;
+    transition: all 0.2s ease-in-out;
+}
+
+.sidebar-item:hover {
+    background-color: #E5E7EB; /* Màu hover nhạt hơn trên nền xám */
+    color: #374151;
+}
+
+/* THAY ĐỔI QUAN TRỌNG: Giao diện cho mục đang active */
+.sidebar-item.active {
+    background-color: #fffffd; /* Nền trắng kem khi active */
+    color: #374151;             /* Chữ màu xám đậm */
+    font-weight: 600;
+    border-radius: 8px;         /* Bo góc */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); /* Đổ bóng nhẹ */
+}
+
+.sidebar-icon {
+    font-size: 20px;
+    color: inherit; /* Kế thừa màu từ thẻ cha (.sidebar-item) */
+}
+
+.sidebar-text {
+    font-size: 14px;
+    font-weight: inherit; /* Kế thừa font-weight */
+    color: inherit; /* Kế thừa màu */
+}
+
+/* --- MAIN CONTENT (Nội dung chính) --- */
+.main-content {
+    /* QUAN TRỌNG: margin-left phải bằng chiều rộng của sidebar */
+    margin-left: 240px;
+    padding: 32px;
+    width: calc(100% - 240px);
+}
+
+/* Các style còn lại được giữ nguyên và tinh chỉnh lại một chút */
+h1 {
+    font-size: 28px;
+    font-weight: 600;
+    color: #111827;
+    margin-bottom: 24px;
+}
+
+.controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+/* --- SEARCH CONTAINER & FORM --- */
+.search-container {
+    /* Thay đổi: Xóa display:flex và justify-content:center để form tự động căn lề trái */
+    margin-bottom: 25px; /* Giảm khoảng cách dưới một chút cho cân đối */
+}
+
+.search-form {
+    display: flex;
+    align-items: center;
+    /* Thay đổi: Giảm chiều rộng tối đa của form */
+    max-width: 450px;
+
+    /* Các thuộc tính còn lại được giữ nguyên hoặc tinh chỉnh nhẹ */
+    background: white;
+    border-radius: 10px; /* Giảm bo góc một chút cho hợp với kích thước mới */
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.07);
+    padding: 4px;
+    border: 1px solid #E5E7EB;
+}
+
+.search-input {
+    flex: 1;
+    /* Thay đổi: Giảm padding để thu nhỏ chiều cao của ô input */
+    padding: 8px 12px;
+    font-size: 14px;
+
+    /* Các thuộc tính còn lại giữ nguyên */
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    outline: none;
+    color: #374151;
+}
+
+.search-input::placeholder {
+    color: #9CA3AF;
+}
+
+.search-button {
+    /* Thay đổi: Giảm padding để thu nhỏ chiều cao và chiều rộng nút */
+    padding: 8px 16px;
+    font-size: 14px;
+    margin-left: 4px; /* Giảm khoảng cách với ô input */
+
+    /* Các thuộc tính còn lại giữ nguyên */
+    background: linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+
+.search-button:hover {
+    background: linear-gradient(135deg, #2563EB 0%, #1E40AF 100%);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.search-button:active {
+    transform: translateY(0);
+}
+
+a.navbar-brand u, .add-new-item {
+    color: #3B82F6;
+    font-weight: 500;
+    text-decoration: underline;
+}
+
+.table-container {
+    background: white;
+    border-radius: 12px;
+    border: 1px solid #E5E7EB;
+    overflow: hidden;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th, .table td {
+    padding: 16px 24px;
+    text-align: left;
+    border-bottom: 1px solid #E5E7EB;
+    vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table th {
+    background-color: #F9FAFB;
+    color: #6B7280;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.table td {
+    color: #374151;
+    font-size: 14px;
+}
+
+.table td img {
+    width: 100px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 4px;
+    display: block;
+    margin: 0 auto;
+}
+
+.table td .action-buttons {
+    display: flex;
+    gap: 8px;
+}
+
+.action-btn {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    background: transparent;
+}
+
+.btn-edit { color: #2563EB; }
+.btn-delete { color: #DC2626; }
+.btn-itemsold { color: #16A34A; }
+.page-title {
+    font-size: 28px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 30px;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+}
+
+.header h1 { font-size: 24px; font-weight: 600; }
+.controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+.search-box { position: relative; width: 300px; }
+.search-input { width: 100%; padding: 10px 16px; border: 1px solid #e2e8f0; border-radius: 8px; }
+.table-container { background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1); }
+.table { width: 100%; border-collapse: collapse; }
+.table th, .table td { padding: 16px; text-align: center; border-bottom: 1px solid #f1f5f9; }
+.table th { background-color: #f8fafc; }
+.action-buttons { display: flex; gap: 8px; }
+.action-btn { padding: 6px 12px; border: none; border-radius: 6px; cursor: pointer; }
+.btn-edit { background-color: #eff6ff; color: #3b82f6; }
+.btn-delete { background-color: #fef2f2; color: #dc2626; }
+.btn-itemsold { background-color: #f0fdf4; color: #16a34a; }
+.alert { margin-bottom: 20px; padding: 15px; border-radius: 8px; }
+.alert.success { background-color: #d1fae5; color: #065f46; }
+.alert.error { background-color: #fee2e2; color: #991b1b; }
+.alert.warning { background-color: #fef3c7; color: #92400e; }
+.modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); }
+.modal.show { display: flex; align-items: center; justify-content: center; }
+.modal-content { background: white; border-radius: 12px; width: 90%; max-width: 800px; }
+
+.movie-grid {
+    display: flex;
+    flex-wrap: wrap; /* Cho phép các thẻ tự động xuống hàng */
+    margin: 0 -12.5px; /* Bù trừ cho padding của các cột */
+}
+
+.movie-column {
+    flex: 0 0 20%; /* Mỗi cột chiếm 20% chiều rộng -> 5 cột mỗi hàng */
+    max-width: 20%;
+    padding: 0 12.5px; /* Tạo khoảng cách ngang giữa các cột */
+    margin-bottom: 25px; /* Tạo khoảng cách dọc giữa các hàng */
+}
+
+.movie-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+    overflow: hidden;
+    width: 100%; /* Card sẽ lấp đầy cột chứa nó */
+}
+.movie-card a {
+    text-decoration: none;
+    color: inherit; /* Giữ lại màu chữ được định nghĩa cho movie-title */
+}
+.movie-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.movie-poster {
+    width: 100%;
+    height: 280px;
+    background: linear-gradient(45deg, #667eea 0%, #764ba2 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 48px;
+    position: relative;
+    overflow: hidden;
+}
+
+.movie-poster img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.movie-title {
+    padding: 15px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    text-align: center;
+    line-height: 1.3;
+}
+
+@media (max-width: 1400px) {
+    .movie-column {
+        flex: 0 0 25%; /* 4 cột */
+        max-width: 25%;
+    }
+}
+@media (max-width: 1200px) {
+    .movie-column {
+        flex: 0 0 33.33%; /* 3 cột */
+        max-width: 33.33%;
+    }
+}
+@media (max-width: 992px) {
+    .movie-column {
+        flex: 0 0 50%; /* 2 cột */
+        max-width: 50%;
+    }
+}
+@media (max-width: 768px) {
+    .search-form {
+        max-width: 100%;
+        margin: 0 16px;
+    }
+
+    .search-button {
+        padding: 10px 16px;
+        font-size: 13px;
+    }
+
+    .movie-column {
+        flex: 0 0 100%; /* 1 cột */
+        max-width: 100%;
+    }
+
+    .main-content {
+        margin-left: 0;
+        width: 100%;
+        padding: 16px;
+    }
+
+    .sidebar {
+        transform: translateX(-100%);
+        transition: transform 0.3s ease;
+    }
+
+    .sidebar.show {
+        transform: translateX(0);
+    }
+}
+@media (max-width: 576px) {
+    .movie-column {
+        flex: 0 0 100%; /* 1 cột */
+        max-width: 100%;
+    }
+}
+.schedule-time-slot {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    position: relative;
+    z-index: 1;
+
+}
+
+.schedule-time-slot:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(102, 126, 234, 0.4);
+}
+
+.time-display {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+}
+
+/* Schedule Cards Container */
+.schedule-cards-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 20px;
+    padding: 0;
+    background-color: transparent;
+    border-radius: 12px;
+    border: none;
+}
+
+/* Individual Schedule Card */
+.schedule-card {
+    background: white;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 15px;
+    min-width: 200px;
+    flex: 1;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.schedule-card:hover {
+    border-color: #007bff;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.2);
+    transform: translateY(-1px);
+}
+
+.schedule-card-time {
+    font-size: 16px;
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 8px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.schedule-card-theater {
+    font-size: 14px;
+    color: #6c757d;
+    margin-bottom: 4px;
+}
+
+.schedule-card-theater:before {
+    content: "🎬 ";
+    margin-right: 5px;
+}
+
+.schedule-card-room {
+    font-size: 14px;
+    color: #6c757d;
+    font-weight: 500;
+}
+
+.schedule-card-room:before {
+    content: "🚪 ";
+    margin-right: 5px;
+}
+
+/* Responsive design for smaller screens */
+@media (max-width: 768px) {
+    .schedule-cards-container {
+        flex-direction: column;
+    }
+
+    .schedule-card {
+        min-width: unset;
+    }
+
+    .time-display {
+        font-size: 16px;
+    }
+}
+
+/* Animation for showing/hiding cards */
+.schedule-cards-container {
+    animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+.schedule-list {
+    display: flex;
+    flex-wrap: wrap; /* Cho phép các mục xuống dòng nếu không đủ chỗ */
+    align-items: flex-start; /* Quan trọng: Ngăn các mục tự kéo dài chiều cao */
+    gap: 15px; /* Tạo khoảng cách giữa các mục cho đẹp hơn */
+}
+.movie-start-time,
+.movie-end-time {
+    padding: 8px 15px;
+    font-size: 13px;
+    color: #666;
+    background: #f8f9fa;
+    border-top: 1px solid #e9ecef;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: all 0.3s ease;
+}
+
+.movie-start-time {
+    border-bottom: 1px solid #e9ecef;
+}
+
+/* Style the date spans inside start/end time */
+.movie-start-time span,
+.movie-end-time span {
+    font-weight: 600;
+    color: #333;
+    background: #e3f2fd;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+/* Different colors for start and end dates */
+.movie-start-time span {
+    background: #e8f5e8;
+    color: #2e7d32;
+}
+
+.movie-end-time span {
+    background: #fff3e0;
+    color: #f57c00;
+}

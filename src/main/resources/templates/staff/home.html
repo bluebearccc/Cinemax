@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Staff</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        .cinema-selector {
+            margin-bottom: 24px;
+        }
+
+        .cinema-selector label {
+            display: block;
+            font-weight: 500;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+
+        .cinema-selector select {
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            background: white;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .cinema-selector select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .chart-container {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .chart-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1f2937;
+            display: flex;
+            align-items: center;
+        }
+
+        .chart-title::before {
+            content: "📈";
+            margin-right: 8px;
+        }
+
+        .period-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .period-btn {
+            padding: 8px 16px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: #f3f4f6;
+            color: #374151;
+        }
+
+        .period-btn.active {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .period-btn:hover:not(.active) {
+            background: #e5e7eb;
+        }
+
+        .chart-canvas {
+            width: 100% !important;
+            height: 300px !important;
+        }
+
+        .top-food-title::before {
+            content: "🍿";
+            margin-right: 8px;
+        }
+
+        .sidebar-right {
+            position: fixed;
+            right: 0;
+            top: 0;
+            width: 300px;
+            height: 100vh;
+            background: white;
+            border-left: 1px solid #e5e7eb;
+            box-shadow: -2px 0 10px rgba(0, 0, 0, 0.1);
+            overflow-y: auto;
+        }
+        .sidebar-section {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .sidebar-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+        }
+
+        .calendar-title::before {
+            content: "📅";
+            margin-right: 8px;
+        }
+
+        .schedule-title::before {
+            content: "🕐";
+            margin-right: 8px;
+        }
+
+        .calendar-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .calendar-nav button {
+            background: none;
+            border: none;
+            font-size: 1.25rem;
+            cursor: pointer;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .calendar-nav button:hover {
+            background: #f3f4f6;
+        }
+
+        .calendar-month {
+            font-weight: 500;
+            color: #1f2937;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 2px;
+            text-align: center;
+        }
+
+        .calendar-day-header {
+            font-weight: 500;
+            color: #6b7280;
+            padding: 8px 0;
+            font-size: 0.875rem;
+        }
+
+        .calendar-day {
+            padding: 8px 0;
+            font-size: 0.875rem;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+
+        .calendar-day:hover {
+            background: #dbeafe;
+        }
+
+        .calendar-day.other-month {
+            color: #d1d5db;
+        }
+
+        .calendar-day.today {
+            background: #3b82f6;
+            color: white;
+        }
+
+        .schedule-items {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .schedule-item {
+            background: #f8fafc;
+            border-radius: 8px;
+            padding: 16px;
+            border-left: 4px solid #3b82f6;
+        }
+
+        .schedule-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 8px;
+        }
+
+        .schedule-time {
+            font-weight: 600;
+            color: #3b82f6;
+            font-size: 0.875rem;
+        }
+
+        .schedule-status {
+            font-size: 0.75rem;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+
+        .status-available {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .status-full {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        .status-nearly-full {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .schedule-movie {
+            font-weight: 500;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+
+        .schedule-room {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .schedule-room::before {
+            content: "📍";
+            margin-right: 4px;
+        }
+        .main-content-home {
+            /* Đẩy nội dung sang phải một khoảng bằng chiều rộng sidebar trái */
+            margin-left: 240px;
+
+            /* Đẩy nội dung sang trái một khoảng bằng chiều rộng sidebar phải */
+            margin-right: 320px;
+
+            /* (Tùy chọn) Thêm padding để nội dung bên trong không bị dính sát vào lề */
+            padding: 24px;
+
+            width: 980px;
+
+            /* THÊM DÒNG NÀY VÀO */
+            box-sizing: border-box;
+        }
+
+        @media (max-width: 768px) {
+            .main-content-home {
+                margin-right: 0;
+                padding: 16px;
+            }
+
+            .sidebar {
+                display: none;
+            }
+        }
+        .calendar-day.selected {
+            background-color: #dc3545; /* Một màu đỏ để làm nổi bật */
+            color: white;
+            font-weight: bold;
+            border: 2px solid #a41d2a;
+        }
+        .header a {
+            margin-left: auto; /* Tự động đẩy phần tử này sang phải */
+        }
+
+        .logout-btn {
+            display: inline-block;
+            padding: 0.5rem 1.25rem;
+            background-color: #fef2f2; /* Màu nền đỏ nhạt */
+            color: #b91c1c; /* Màu chữ đỏ đậm */
+            border: 1px solid #fecaca; /* Viền đỏ nhạt */
+            border-radius: 8px;
+            text-decoration: none; /* Bỏ gạch chân của link */
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s ease-in-out; /* Hiệu ứng chuyển động mượt */
+            cursor: pointer;
+        }
+
+        /* Hiệu ứng khi di chuột qua nút Logout */
+        .logout-btn:hover {
+            background-color: #fee2e2; /* Nền đậm hơn một chút */
+            color: #991b1b;
+            border-color: #fca5a5;
+            box-shadow: 0 4px 10px rgba(239, 68, 68, 0.2); /* Đổ bóng nhẹ */
+            transform: translateY(-2px); /* Nâng nút lên một chút */
+        }
+    </style>
+    <link rel="stylesheet" th:href="@{/staff/css/style.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+</head>
+<body>
+<div class="dashboard">
+    <div class="sidebar">
+        <div class="user-info">
+            <div class="user-avatar" th:text="${#strings.substring(name,0,1)}"></div>
+            <div class="user-name" th:text="${name}"></div>
+        </div>
+
+        <a th:href="@{/staff/home}" class="sidebar-item active">
+            <div class="sidebar-icon">🏠</div>
+            <div class="sidebar-text">Home</div>
+        </a>
+        <a th:href="@{/staff/theater_stock}" class="sidebar-item ">
+            <div class="sidebar-icon">🍿</div>
+            <div class="sidebar-text">Food and Drinks</div>
+        </a>
+        <a th:href="@{/staff/movie_schedule}" class="sidebar-item">
+            <div class="sidebar-icon">📅</div>
+            <div class="sidebar-text">Set Schedule</div>
+        </a>
+        <a th:href="@{/staff/theater}" class="sidebar-item">
+            <div class="sidebar-icon">🎬</div>
+            <div class="sidebar-text">Manage Theater</div>
+        </a>
+    </div>
+    <div class="main-content-home">
+        <!-- Header -->
+        <div class="header">
+            <h1>Theater Revenue</h1>
+            <a th:href="@{/logout}" class="logout-btn">Logout</a>
+        </div>
+
+        <!-- Cinema Selection -->
+        <div class="cinema-selector">
+            <label for="cinema-select">Select Theater</label>
+            <select id="cinema-select">
+                <option th:each="theater : ${theaters}" th:value="${theater.theaterID}"
+                        th:text="${theater.theaterName}"
+                        th:selected="${theater.theaterID != null && theater.theaterID.equals(selectedTheaterId)}"
+                ></option>
+            </select>
+        </div>
+
+        <!-- Revenue Chart -->
+        <div class="chart-container">
+            <div class="chart-header">
+                <h2 class="chart-title">Food And Drink Revenue</h2>
+                <div class="date-selectors">
+                    <select id="month-select"></select>
+                    <select id="year-select"></select>
+                </div>
+            </div>
+            <canvas id="revenue-chart" class="chart-canvas"></canvas>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="sidebar-right">
+        <!-- Calendar -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title calendar-title">Schedule</h3>
+            <div class="cinema-selector" style="margin-bottom: 16px;">
+                <label for="sidebar-cinema-select" style="font-size: 0.8rem;">Select Theater</label>
+                <select id="sidebar-cinema-select">
+                    <option th:each="theater : ${theaters}" th:value="${theater.theaterID}"
+                            th:text="${theater.theaterName}"
+                            th:selected="${theater.theaterID != null && theater.theaterID.equals(selectedTheaterId)}"
+                    ></option>
+                </select>
+            </div>
+            <div class="calendar-nav">
+                <button id="prev-month">←</button>
+                <div class="calendar-month" id="current-month"></div>
+                <button id="next-month">→</button>
+            </div>
+            <div class="calendar-grid" id="calendar-grid"></div>
+        </div>
+
+        <!-- Schedule -->
+        <div class="sidebar-section">
+            <h3 class="sidebar-title schedule-title">Today Schedule</h3>
+            <div class="schedule-items" id="schedule-items"></div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let selectedDateSchedule = new Date();
+    function generateCalendar() {
+        const year = currentDate.getFullYear();
+        const month = currentDate.getMonth();
+        const firstDay = new Date(year, month, 1);
+        const grid = document.getElementById('calendar-grid');
+        const monthDisplay = document.getElementById('current-month');
+        const startDate = new Date(firstDay);
+        startDate.setDate(startDate.getDate() - firstDay.getDay());
+
+        grid.innerHTML = '';
+
+        const dayHeaders = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+        dayHeaders.forEach(day => {
+            const dayHeader = document.createElement('div');
+            dayHeader.className = 'calendar-day-header';
+            dayHeader.textContent = day;
+            grid.appendChild(dayHeader);
+        });
+
+        const today = new Date();
+        const currentDayIterator = new Date(startDate);
+        for (let i = 0; i < 42; i++) {
+            const dayDiv = document.createElement('div');
+            dayDiv.className = 'calendar-day';
+            dayDiv.textContent = currentDayIterator.getDate();
+
+            if (currentDayIterator.getMonth() !== month) {
+                dayDiv.classList.add('other-month');
+            }
+
+            const dayDate = new Date(currentDayIterator + 1);
+
+            dayDiv.addEventListener('click', () => {
+                const previouslySelected = document.querySelector('.calendar-day.selected');
+                console.log(dayDate);
+                if (previouslySelected) {
+                    previouslySelected.classList.remove('selected');
+                }
+                dayDiv.classList.add('selected');
+                selectedDateSchedule = dayDate;
+                displayScheduleForDate(dayDate);
+            });
+
+            grid.appendChild(dayDiv);
+            currentDayIterator.setDate(currentDayIterator.getDate() + 1);
+        }
+        monthDisplay.textContent = currentDate.toLocaleDateString('en-EN', { month: 'long', year: 'numeric' });
+    }
+    async function displayScheduleForDate(date) {
+        const scheduleContainer = document.getElementById('schedule-items');
+        const scheduleTitle = document.querySelector('.schedule-title');
+        const cinemaSelect = document.getElementById('sidebar-cinema-select');
+        const theaterId = cinemaSelect.value;
+
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0')
+        const day = String(date.getDate()).padStart(2, '0');
+        const formattedDateForAPI = `${year}-${month}-${day}`;
+
+        const formattedDateForTitle = date.toLocaleDateString('en-EN', { weekday: 'long', day: '2-digit', month: '2-digit' });
+        scheduleTitle.textContent = `Movie Schedule ${formattedDateForTitle}`;
+        scheduleContainer.innerHTML = '<li></li>';
+        console.log(theaterId);
+        try {
+            const apiUrl = `/schedules?theaterId=${theaterId}&date=${formattedDateForAPI}`;
+            console.log("Đang gọi API lịch chiếu:", apiUrl);
+            const response = await fetch(apiUrl);
+            scheduleContainer.innerHTML = '';
+            if (response.status === 204) {
+                scheduleContainer.innerHTML = '<li>No schedule</li>';
+                return;
+            }
+            if (!response.ok) {
+                throw new Error(`Lỗi ${response.status}`);
+            }
+            const schedules = await response.json();
+            schedules.forEach(item => {
+                const scheduleDiv = document.createElement('div');
+                scheduleDiv.className = 'schedule-item';
+                const startTime = new Date(item.startTime).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+                const endTimeDate = new Date(item.endTime);
+                const formattedEndTime = endTimeDate.toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' });
+
+                scheduleDiv.innerHTML = `
+                <div class="schedule-header">
+                   <span class="schedule-time"> From: ${startTime} - To: ${formattedEndTime}</span>
+                </div>
+                <div class="schedule-movie">${item.movieName}</div>
+                <div class="schedule-room">${item.roomName}</div>
+            `;
+                scheduleContainer.appendChild(scheduleDiv);
+            });
+        } catch (error) {
+            console.error("Lỗi khi lấy lịch chiếu:", error);
+            scheduleContainer.innerHTML = '<li>Có lỗi xảy ra khi tải lịch chiếu.</li>';
+        }
+    }
+    async function handleSelectChange(){
+        console.log("Combobox sidebar đã thay đổi. Tải lại lịch chiếu...");
+        try{
+            console.log(selectedDateSchedule);
+            if (selectedDateSchedule) {
+                await displayScheduleForDate(selectedDateSchedule);
+            }
+        }catch (error){
+            console.error("Không thể lấy dữ liệu lịch chiếu:", error);
+        }
+    }
+    async function handleFilterChange() {
+        console.log("Lựa chọn đã thay đổi. Đang lấy dữ liệu mới...");
+
+        const newData = await fetchRevenueData();
+
+        if (newData) {
+            drawChart(newData);
+        }
+    }
+    function populateDateSelectors() {
+        const monthSelect = document.getElementById('month-select');
+        const yearSelect = document.getElementById('year-select');
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        const currentMonth = now.getMonth() + 1;
+        for (let year = currentYear; year >= currentYear - 5; year--) {
+            const option = document.createElement('option');
+            option.value = year;
+            option.textContent = `Year ${year}`;
+            if (year === currentYear) {
+                option.selected = true;
+            }
+            yearSelect.appendChild(option);
+        }
+        for (let month = 1; month <= 12; month++) {
+            const option = document.createElement('option');
+            option.value = month;
+            option.textContent = `Month ${month}`;
+            if (month === currentMonth) {
+                option.selected = true;
+            }
+            monthSelect.appendChild(option);
+        }
+    }
+    async function fetchRevenueData() {
+        const cinemaSelect = document.getElementById('cinema-select');
+        const yearSelect = document.getElementById('year-select');
+        const monthSelect = document.getElementById('month-select');
+        const theaterId = cinemaSelect.value;
+        const year = yearSelect.value;
+        const month = monthSelect.value;
+        if (!theaterId) {
+            console.log("Vui lòng chọn một rạp phim.");
+            return;
+        }
+        const apiUrl = `/revenue/food?theaterId=${theaterId}&year=${year}&month=${month}`;
+        console.log("Đang gọi API với URL:", apiUrl);
+        try {
+            const response = await fetch(apiUrl);
+            if (!response.ok) {
+                throw new Error(`Lỗi mạng: ${response.status}`);
+            }
+
+            const revenueData = await response.json();
+            return revenueData;
+
+        } catch (error) {
+            console.error("Không thể lấy dữ liệu doanh thu:", error);
+        }
+    }
+    let revenueChart;
+    let currentDate = new Date();
+    function drawChart(chartData) {
+        if (revenueChart) {
+            revenueChart.destroy();
+        }
+
+        const ctx = document.getElementById('revenue-chart').getContext('2d');
+
+        revenueChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: chartData.labels,
+                datasets: [{
+                    label: 'Item',
+                    data: chartData.data,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                    borderColor: 'rgba(59, 130, 246, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true
+            }
+        });
+    }
+    // Xử lý sự kiện lịch
+    document.getElementById('prev-month').addEventListener('click', function() {
+        currentDate.setMonth(currentDate.getMonth() - 1);
+        generateCalendar();
+    });
+
+    document.getElementById('next-month').addEventListener('click', function() {
+        currentDate.setMonth(currentDate.getMonth() + 1);
+        generateCalendar();
+    });
+
+    document.addEventListener('DOMContentLoaded', async function () {
+        populateDateSelectors();
+        const initialData = await fetchRevenueData();
+        if (initialData) {
+            drawChart(initialData);
+        }
+        const cinemaSelect = document.getElementById('cinema-select');
+        const cinemaSidebarSelect = document.getElementById('sidebar-cinema-select');
+        const monthSelect = document.getElementById('month-select');
+        const yearSelect = document.getElementById('year-select');
+        cinemaSelect.addEventListener('change', handleFilterChange);
+        monthSelect.addEventListener('change', handleFilterChange);
+        yearSelect.addEventListener('change', handleFilterChange);
+        generateCalendar();
+        cinemaSidebarSelect.addEventListener('change', handleSelectChange);
+    });
+
+</script>
+</body>
+</html>

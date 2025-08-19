@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Feedback Service</title>
+
+</head>
+<body>
+<h2>Chào <span th:text="${customerName}">khách hàng</span>,</h2>
+
+<p>Cảm ơn bạn đã đến xem phim tại rạp <strong th:text="${theaterName}">Tên Rạp</strong>.</p>
+<p>Chúng tôi rất mong muốn nhận được phản hồi từ bạn để cải thiện chất lượng dịch vụ.</p>
+
+<p>
+    Vui lòng nhấn vào nút bên dưới để gửi phản hồi:
+</p>
+
+<p>
+    <a href="https://cinemax-movie.online/" style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none;">
+        Gửi phản hồi
+    </a>
+</p>
+
+<p>Trân trọng,<br/>Đội ngũ Cinemax</p>
+</body>
+</html>

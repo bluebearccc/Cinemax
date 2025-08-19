@@ -1,0 +1,124 @@
+<div class="card card-custom mb-4" th:if="${currentStep == 3}" th:fragment="seat-selection">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-couch me-2"></i>Chọn Ghế</h5>
+        <a th:href="@{'/cashier/' + ${selectedMovie.movieId} + '/select-schedule'}"
+           class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Chọn suất khác
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="mb-3">
+            <h6 th:text="${selectedMovie.movieName}"></h6>
+            <p class="text-muted">
+                <span th:text="${selectedSchedule.time}"></span> -
+                Phòng <span th:text="${selectedSchedule.roomName}"></span>
+                <span th:if="${selectedSchedule.roomType == 'Couple'}" class="badge bg-danger ms-2">Phòng đôi</span>
+                <span th:unless="${selectedSchedule.roomType == 'Couple'}" class="badge bg-primary ms-2">Phòng đơn</span>
+            </p>
+        </div>
+
+        <!-- Error message for seat selection -->
+        <div th:if="${seatError}" class="alert alert-danger">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span th:text="${seatError}"></span>
+        </div>
+
+        <!-- Seat Legend -->
+        <div class="seat-legend">
+            <div class="legend-item">
+                <span class="seat available" style="width: 20px; height: 20px;"></span>
+                <small>Trống</small>
+            </div>
+            <div class="legend-item">
+                <span class="seat occupied" style="width: 20px; height: 20px;"></span>
+                <small>Đã đặt</small>
+            </div>
+            <div class="legend-item">
+                <span class="seat selected" style="width: 20px; height: 20px;"></span>
+                <small>Đang chọn</small>
+            </div>
+            <div class="legend-item" th:if="${selectedSchedule.roomType != 'Couple'}">
+                <span class="seat vip available" style="width: 20px; height: 20px;"></span>
+                <small>VIP</small>
+            </div>
+            <div class="legend-item" th:if="${selectedSchedule.roomType == 'Couple'}">
+                <span class="seat couple available" style="width: 40px; height: 20px;"></span>
+                <small>Ghế đôi</small>
+            </div>
+        </div>
+
+        <!-- Seat Selection Form -->
+        <div th:if="${seatGridData != null and seatGridData.rows != null and !seatGridData.rows.isEmpty()}">
+            <form action="/cashier/customer-info" method="post" onsubmit="return validateSeatSelection()">
+
+                <!-- Screen -->
+                <div class="screen">
+                    <i class="fas fa-desktop me-2"></i>MÀN HÌNH
+                </div>
+
+                <!-- Seats Grid -->
+                <div class="seats-container">
+                    <div th:each="row, rowStat : ${seatGridData.rows}" class="seat-row">
+                        <!-- Row Label -->
+                        <span class="row-label" th:text="${row.rowLabel}"></span>
+
+                        <!-- Seats in Row -->
+                        <div style="display: inline-block;">
+                            <th:block th:each="seatData, seatStat : ${row.seats}">
+                                <!-- Existing Seat -->
+                                <span th:if="${seatData.exists}"
+                                      th:class="${seatData.cssClass}"
+                                      th:text="${seatData.position}"
+                                      th:data-seat-position="${seatData.position}"
+                                      th:data-seat-booked="${seatData.isBooked}"
+                                      th:data-seat-type="${seatData.seatType}"
+                                      th:title="${seatData.seatType == 'COUPLE' ? 'Ghế đôi' : (seatData.isVIP ? 'Ghế VIP' : 'Ghế thường')}"
+                                      onclick="toggleSeat(this)"
+                                      style="cursor: pointer;">
+                                            </span>
+                                <!-- Placeholder for non-existing seat -->
+                                <span th:unless="${seatData.exists}" class="seat-placeholder"></span>
+                            </th:block>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Hidden input for selected seats -->
+                <input type="hidden" id="selectedSeatsInput" name="selectedSeats" value="">
+
+                <!-- Selected Seats Summary -->
+                <div class="mt-4 text-center">
+                    <div id="selectedSeatsDisplay" class="mb-3" style="display: none;">
+                        <div class="alert alert-info">
+                            <strong>Ghế đã chọn: </strong>
+                            <span id="selectedSeatsList"></span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Continue Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-warning btn-lg" id="continueBtn">
+                        <i class="fas fa-arrow-right me-2"></i>Tiếp tục
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- No Seats Available -->
+        <div th:if="${seatGridData == null or seatGridData.rows == null or seatGridData.rows.isEmpty()}"
+             class="text-center py-4">
+            <i class="fas fa-exclamation-triangle fa-3x text-warning mb-3"></i>
+            <h5 class="text-warning">Không có ghế trong phòng này</h5>
+            <p class="text-muted">
+                Room Type: <span th:text="${selectedSchedule != null ? selectedSchedule.roomType : 'Unknown'}"></span><br>
+                Grid Data: <span th:text="${seatGridData != null ? 'Available' : 'Null'}"></span><br>
+                Seats Count: <span th:text="${seats != null ? #lists.size(seats) : 'Null'}"></span>
+            </p>
+            <a th:href="@{'/cashier/' + ${selectedMovie.movieId} + '/select-schedule'}"
+               class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left me-1"></i>Chọn suất khác
+            </a>
+        </div>
+    </div>
+</div>

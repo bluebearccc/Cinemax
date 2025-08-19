@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${pageTitle}">Actor Details - Cinemax</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --dark-glass: rgba(0, 0, 0, 0.1);
+
+            --text-primary: #1a1a1a;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+            --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+            font-weight: 400;
+            line-height: 1.6;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background:
+                    radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+                    radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Premium Sidebar */
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 100vh;
+            width: 280px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-premium);
+        }
+
+        .sidebar::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(180deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        .sidebar-header {
+            padding: 32px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .logo-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: var(--shadow-lg);
+            transition: transform 0.3s ease;
+        }
+
+        .logo-icon:hover {
+            transform: rotate(5deg) scale(1.05);
+        }
+
+        .logo-icon i {
+            font-size: 1.5rem;
+            color: white;
+        }
+
+        .logo-text {
+            color: white;
+            font-weight: 700;
+            font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-subtitle {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-top: -2px;
+            letter-spacing: 0.5px;
+        }
+
+        .sidebar-nav {
+            padding: 24px 16px;
+        }
+
+        .nav-section {
+            margin-bottom: 24px;
+        }
+
+        .nav-section-title {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 12px;
+            padding: 0 12px;
+        }
+
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 16px 12px;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+            border-radius: 12px;
+            margin: 4px 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+            font-weight: 500;
+        }
+
+        .nav-link::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .nav-link:hover::before {
+            transform: translateX(0);
+        }
+
+        .nav-link:hover {
+            color: white;
+            transform: translateX(4px);
+        }
+
+        .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .nav-link.active::after {
+            content: '';
+            position: absolute;
+            right: 0;
+            top: 20%;
+            bottom: 20%;
+            width: 3px;
+            background: white;
+            border-radius: 2px;
+        }
+
+        .nav-icon {
+            width: 20px;
+            margin-right: 16px;
+            font-size: 1.1rem;
+            position: relative;
+            z-index: 1;
+        }
+
+        .nav-text {
+            position: relative;
+            z-index: 1;
+        }
+
+        .main-content {
+            margin-left: 280px;
+            padding: 32px;
+            min-height: 100vh;
+            transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Premium Back Navigation */
+        .back-nav {
+            margin-bottom: 32px;
+        }
+
+        .back-btn {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            padding: 14px 20px;
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: var(--shadow-md);
+        }
+
+        .back-btn:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            text-decoration: none;
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        /* Premium Actor Hero Section */
+        .actor-hero {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            margin-bottom: 32px;
+            position: relative;
+            box-shadow: var(--shadow-xl);
+            padding: 40px;
+        }
+
+        .actor-hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .actor-main-info {
+            display: flex;
+            gap: 32px;
+            align-items: flex-start;
+            position: relative;
+            z-index: 2;
+        }
+
+        .actor-image-container {
+            position: relative;
+            width: 300px;
+            height: 400px;
+            flex-shrink: 0;
+        }
+
+        .actor-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 15px;
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+            border: 3px solid rgba(255, 255, 255, 0.9);
+        }
+
+        .actor-image-placeholder {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 3px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 12px 40px rgba(102, 126, 234, 0.3);
+        }
+
+        .actor-image-placeholder i {
+            font-size: 4rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .actor-details {
+            flex: 1;
+            padding-top: 20px;
+        }
+
+        .actor-name {
+            font-size: 3rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 16px;
+            line-height: 1.1;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .actor-id-badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            font-weight: 600;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .movie-count-badge {
+            background: var(--success-gradient);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
+        }
+
+        .btn-action {
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            backdrop-filter: blur(10px);
+        }
+
+        .btn-primary {
+            background: var(--success-gradient);
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-premium);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-warning {
+            background: var(--warning-gradient);
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-premium);
+            color: white;
+            text-decoration: none;
+        }
+
+        .btn-danger {
+            background: var(--danger-gradient);
+            color: white;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-premium);
+            color: white;
+        }
+
+        .btn-outline {
+            background: rgba(255, 255, 255, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            text-decoration: none;
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Premium Information Cards */
+        .info-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+        }
+
+        .info-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            border-radius: inherit;
+            pointer-events: none;
+        }
+
+        .card-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px 24px;
+            position: relative;
+            z-index: 1;
+            border-radius: 15px 15px 0 0;
+        }
+
+        .card-header h5 {
+            color: white;
+            font-weight: 600;
+            font-size: 1.1rem;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-header h5 i {
+            color: #4facfe;
+        }
+
+        .card-body {
+            padding: 24px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .info-row {
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .info-row:last-child {
+            border-bottom: none;
+        }
+
+        .info-label {
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+        }
+
+        .info-value {
+            color: white;
+            font-weight: 600;
+        }
+
+        /* Premium Movie Grid */
+        .movies-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .movie-card {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+        }
+
+        .movie-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg,
+            rgba(255, 255, 255, 0.1) 0%,
+            rgba(255, 255, 255, 0.05) 100%);
+            pointer-events: none;
+        }
+
+        .movie-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-premium);
+            border-color: #4facfe;
+        }
+
+        .movie-poster {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .movie-poster-placeholder {
+            width: 100%;
+            height: 200px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+        }
+
+        .movie-poster-placeholder i {
+            font-size: 2rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .movie-card-content {
+            padding: 16px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .movie-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: white;
+            margin-bottom: 8px;
+            line-height: 1.3;
+        }
+
+        .movie-year {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .movie-badges {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+
+        .badge {
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .badge.bg-info {
+            background: var(--success-gradient);
+        }
+
+        .no-movies {
+            text-align: center;
+            padding: 40px 20px;
+            color: rgba(255, 255, 255, 0.8);
+            position: relative;
+            z-index: 1;
+        }
+
+        .no-movies i {
+            font-size: 3rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+
+        /* Premium Alerts */
+        .alert {
+            border-radius: 12px;
+            margin-bottom: 24px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            font-weight: 500;
+        }
+
+        .alert-success {
+            background: rgba(40, 167, 69, 0.2);
+            color: white;
+        }
+
+        .alert-danger {
+            background: rgba(220, 53, 69, 0.2);
+            color: white;
+        }
+
+        /* Premium Modal */
+        .modal-content {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px;
+        }
+
+        .modal-header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 15px 15px 0 0;
+        }
+
+        .modal-title {
+            color: white;
+            font-weight: 600;
+        }
+
+        .modal-body {
+            color: white;
+        }
+
+        .modal-footer {
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-close {
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            opacity: 1;
+        }
+
+        .btn-close:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.25);
+            color: white;
+            border-color: rgba(255, 255, 255, 0.4);
+        }
+
+        @media (max-width: 1024px) {
+            .main-content {
+                margin-left: 280px;
+                padding: 24px;
+            }
+
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+            }
+
+            .main-content {
+                margin-left: 0;
+                padding: 16px;
+            }
+
+            .actor-hero {
+                padding: 24px;
+            }
+
+            .actor-main-info {
+                flex-direction: column;
+                text-align: center;
+                gap: 20px;
+            }
+
+            .actor-image-container {
+                width: 250px;
+                height: 300px;
+                margin: 0 auto;
+            }
+
+            .actor-name {
+                font-size: 2.2rem;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .movies-grid {
+                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            }
+        }
+
+        .fade-in {
+            animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            opacity: 0;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .back-nav { animation-delay: 0.1s; }
+        .actor-hero { animation-delay: 0.2s; }
+        .info-card { animation-delay: 0.3s; }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+    </style>
+</head>
+<body>
+<!-- Premium Sidebar -->
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='actors')}"></div>
+
+<!-- Main Content -->
+<div class="main-content">
+    <!-- Premium Back Navigation -->
+    <div class="back-nav fade-in">
+        <a href="/admin/actors" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            Back to Talent Portfolio
+        </a>
+    </div>
+
+    <!-- Alert Messages -->
+    <div th:if="${success}" class="alert alert-success alert-dismissible fade show">
+        <i class="fas fa-check-circle me-2"></i>
+        <span th:text="${success}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <div th:if="${error}" class="alert alert-danger alert-dismissible fade show">
+        <i class="fas fa-exclamation-circle me-2"></i>
+        <span th:text="${error}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Premium Actor Hero Section -->
+    <div class="actor-hero fade-in">
+        <div class="actor-main-info">
+            <div class="actor-image-container">
+                <div th:if="${actor.image != null and !#strings.isEmpty(actor.image)}">
+                    <img th:src="@{${actor.image}}"
+                         th:alt="${actor.actorName}"
+                         class="actor-image"
+                         onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+                </div>
+                <div th:if="${actor.image == null or #strings.isEmpty(actor.image)}"
+                     class="actor-image-placeholder">
+                    <i class="fas fa-user"></i>
+                </div>
+            </div>
+
+            <div class="actor-details">
+                <h1 class="actor-name" th:text="${actor.actorName}">Actor Name</h1>
+
+                <div class="actor-id-badge" th:text="'Actor ID: #' + ${actor.actorID}">#001</div>
+
+                <div class="movie-count-badge" th:text="${movies.size() + ' Movies Featured'}">0 Movies Featured</div>
+
+                <div class="action-buttons">
+                    <a th:href="@{/admin/actors/edit/{id}(id=${actor.actorID})}" class="btn-action btn-warning">
+                        <i class="fas fa-edit"></i>
+                        Edit Profile
+                    </a>
+                    <button type="button" class="btn-action btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                        <i class="fas fa-trash"></i>
+                        Delete Actor
+                    </button>
+                    <a href="/admin/actors" class="btn-action btn-outline">
+                        <i class="fas fa-users"></i>
+                        All Actors
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Main Information -->
+        <div class="col-lg-8">
+            <!-- Movies List -->
+            <div class="info-card fade-in">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-film"></i>
+                        Cinema Portfolio
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div th:if="${#lists.isEmpty(movies)}" class="no-movies">
+                        <i class="fas fa-film"></i>
+                        <p>This talent hasn't appeared in any movies yet.</p>
+                    </div>
+                    <div th:unless="${#lists.isEmpty(movies)}" class="movies-grid">
+                        <div th:each="movie : ${movies}" class="movie-card">
+                            <div th:if="${movie.image != null and !#strings.isEmpty(movie.image)}">
+                                <img th:src="${movie.image}"
+                                     th:alt="${movie.movieName}"
+                                     class="movie-poster">
+                            </div>
+                            <div th:if="${movie.image == null or #strings.isEmpty(movie.image)}"
+                                 class="movie-poster-placeholder">
+                                <i class="fas fa-film"></i>
+                            </div>
+                            <div class="movie-card-content">
+                                <div class="movie-title" th:text="${movie.movieName}">Movie Title</div>
+                                <div class="movie-year" th:text="${#temporals.year(movie.startDate)}">2024</div>
+                                <div class="movie-badges">
+                                    <div th:if="${movie.genres != null and !movie.genres.isEmpty()}">
+                                        <span th:each="genre : ${movie.genres}" class="badge" th:text="${genre.genreName}">Genre</span>
+                                    </div>
+                                    <span th:if="${movie.genres == null or movie.genres.isEmpty()}" class="badge">No Genre</span>
+                                    <span class="badge bg-info" th:text="${movie.duration + ' min'}">120 min</span>
+                                </div>
+                                <a th:href="@{/admin/movies/{id}(id=${movie.movieID})}" class="btn-action btn-primary btn-sm">
+                                    <i class="fas fa-eye"></i> View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Side Information -->
+        <div class="col-lg-4">
+            <div class="info-card fade-in">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-info-circle"></i>
+                        Talent Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="info-row">
+                        <span class="info-label">Actor ID</span>
+                        <span class="info-value" th:text="'#' + ${actor.actorID}">#001</span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Display Name</span>
+                        <span class="info-value" th:text="${actor.actorName}">Actor Name</span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Image Path</span>
+                        <span class="info-value">
+                            <small th:text="${actor.image ?: 'No image'}">image/path.jpg</small>
+                        </span>
+                    </div>
+
+                    <div class="info-row">
+                        <span class="info-label">Movies Featured</span>
+                        <span class="info-value" th:text="${movies.size() + ' movies'}">0 movies</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card fade-in">
+                <div class="card-header">
+                    <h5>
+                        <i class="fas fa-lightbulb"></i>
+                        Management Guidelines
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled" style="color: rgba(255, 255, 255, 0.9);">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            Update actor information regularly
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            Ensure high-quality display images
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            Verify actor name accuracy
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success"></i>
+                            Link movies with actors correctly
+                        </li>
+                        <li>
+                            <i class="fas fa-check text-success"></i>
+                            Delete only when no movies are linked
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Premium Delete Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-triangle text-danger"></i>
+                    Confirm Deletion
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Are you sure you want to delete actor <strong th:text="${actor.actorName}">Actor Name</strong>?</p>
+
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Warning:</strong> This action cannot be undone!
+                </div>
+
+                <div class="alert alert-warning" th:if="${movies.size() > 0}">
+                    <i class="fas fa-info-circle"></i>
+                    <strong>Notice:</strong> If you delete this actor, the following movies will lose actor information:
+                    <ul class="mt-2 mb-0">
+                        <li th:each="movie : ${movies}" th:text="${movie.movieName}">Movie Name</li>
+                    </ul>
+                    <p class="mt-2 mb-0"><strong>Total: <span th:text="${movies.size()}">0</span> movies will be affected.</strong></p>
+                </div>
+
+                <div class="alert alert-success" th:if="${movies.size() == 0}">
+                    <i class="fas fa-check-circle"></i>
+                    This actor hasn't appeared in any movies yet. Safe to delete.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn-action btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Cancel
+                </button>
+                <form th:action="@{/admin/actors/delete/{id}(id=${actor.actorID})}" method="post" class="d-inline">
+                    <button type="submit" class="btn-action btn-danger">
+                        <i class="fas fa-trash"></i>
+                        <span th:text="${movies.size() > 0 ? 'Delete Actor & Affect ' + movies.size() + ' Movies' : 'Delete Actor'}">
+                            Delete Actor
+                        </span>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Initialize fade-in animations
+        initializeFadeInAnimations();
+
+        // Auto-hide alerts after 5 seconds
+        setTimeout(function() {
+            const alerts = document.querySelectorAll('.alert');
+            alerts.forEach(function(alert) {
+                const bsAlert = new bootstrap.Alert(alert);
+                bsAlert.close();
+            });
+        }, 5000);
+
+        // Image error handling
+        const actorImages = document.querySelectorAll('.actor-image');
+        actorImages.forEach(function(img) {
+            img.addEventListener('error', function() {
+                // If image fails to load, replace with placeholder
+                const container = this.parentElement;
+                const placeholder = document.createElement('div');
+                placeholder.className = 'actor-image-placeholder';
+                placeholder.innerHTML = '<i class="fas fa-user"></i>';
+                container.replaceChild(placeholder, this);
+            });
+        });
+
+        const moviePosters = document.querySelectorAll('.movie-poster');
+        moviePosters.forEach(function(img) {
+            img.addEventListener('error', function() {
+                // If image fails to load, replace with placeholder
+                const container = this.parentElement;
+                const placeholder = document.createElement('div');
+                placeholder.className = 'movie-poster-placeholder';
+                placeholder.innerHTML = '<i class="fas fa-film"></i>';
+                container.replaceChild(placeholder, this);
+            });
+        });
+
+        // Movie card hover effects
+        document.querySelectorAll('.movie-card').forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-4px) scale(1.02)';
+            });
+
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0) scale(1)';
+            });
+        });
+
+        // Confirm delete with detailed warning
+        document.querySelector('#deleteModal form').addEventListener('submit', function(e) {
+            const movieCount = parseInt(document.querySelector('.movie-count-badge').textContent.match(/\d+/)[0]);
+
+            if (movieCount > 0) {
+                const confirmed = confirm(
+                    `WARNING: You are about to delete this actor!\n\n` +
+                    `• ${movieCount} movies will lose actor information\n` +
+                    `• This action cannot be undone\n\n` +
+                    `Are you sure you want to continue?`
+                );
+
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            } else {
+                const confirmed = confirm('Are you sure you want to delete this actor?');
+                if (!confirmed) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+
+    // Initialize fade-in animations
+    function initializeFadeInAnimations() {
+        // Premium loading sequence
+        setTimeout(() => {
+            document.querySelectorAll('.fade-in').forEach((el, index) => {
+                setTimeout(() => {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+        }, 100);
+    }
+
+    // Console log for debugging
+    console.log('Premium actor detail page loaded');
+</script>
+</body>
+</html>

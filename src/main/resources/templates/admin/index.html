@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${pageTitle}">Dashboard - Cinemax</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+  <style>
+    :root {
+      --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+      --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+      --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+      --dark-gradient: linear-gradient(135deg, #434343 0%, #000000 100%);
+
+      --primary-blue: #667eea;
+      --primary-purple: #764ba2;
+      --glass-bg: rgba(255, 255, 255, 0.25);
+      --glass-border: rgba(255, 255, 255, 0.18);
+      --dark-glass: rgba(0, 0, 0, 0.1);
+
+      --text-primary: #1a1a1a;
+      --text-secondary: #64748b;
+      --text-light: #94a3b8;
+      --border-light: rgba(255, 255, 255, 0.1);
+
+      --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+      --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+      --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+      --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+      --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.15);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+      font-weight: 400;
+      line-height: 1.6;
+    }
+
+    /* Glass Morphism Background */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background:
+              radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+              radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    /* Premium Sidebar */
+    .sidebar {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      min-height: 100vh;
+      width: 280px;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 1000;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      box-shadow: var(--shadow-premium);
+    }
+
+    .sidebar::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(180deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 100%);
+      border-radius: inherit;
+      pointer-events: none;
+    }
+
+    .sidebar-header {
+      padding: 32px 24px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      position: relative;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo-icon {
+      width: 48px;
+      height: 48px;
+      background: var(--primary-gradient);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow-lg);
+      transition: transform 0.3s ease;
+    }
+
+    .logo-icon:hover {
+      transform: rotate(5deg) scale(1.05);
+    }
+
+    .logo-icon i {
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .logo-text {
+      color: white;
+      font-weight: 700;
+      font-size: 1.3rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .logo-subtitle {
+      color: rgba(255, 255, 255, 0.7);
+      font-size: 0.75rem;
+      font-weight: 500;
+      margin-top: -2px;
+      letter-spacing: 0.5px;
+    }
+
+    .sidebar-nav {
+      padding: 24px 16px;
+    }
+
+    .nav-section {
+      margin-bottom: 24px;
+    }
+
+    .nav-section-title {
+      color: rgba(255, 255, 255, 0.6);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+      padding: 0 12px;
+    }
+
+    .nav-link {
+      color: rgba(255, 255, 255, 0.8);
+      padding: 16px 12px;
+      display: flex;
+      align-items: center;
+      text-decoration: none;
+      border-radius: 12px;
+      margin: 4px 0;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      position: relative;
+      overflow: hidden;
+      font-weight: 500;
+    }
+
+    .nav-link::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(255, 255, 255, 0.1);
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+    }
+
+    .nav-link:hover::before {
+      transform: translateX(0);
+    }
+
+    .nav-link:hover {
+      color: white;
+      transform: translateX(4px);
+    }
+
+    .nav-link.active {
+      color: white;
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(10px);
+      box-shadow: var(--shadow-md);
+    }
+
+    .nav-link.active::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      top: 20%;
+      bottom: 20%;
+      width: 3px;
+      background: white;
+      border-radius: 2px;
+    }
+
+    .nav-icon {
+      width: 20px;
+      margin-right: 16px;
+      font-size: 1.1rem;
+      position: relative;
+      z-index: 1;
+    }
+
+    .nav-text {
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Main Content Area */
+    .main-content {
+      margin-left: 280px;
+      padding: 32px;
+      min-height: 100vh;
+      transition: margin-left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    /* Premium Header */
+    .header-section {
+      background: rgba(255, 255, 255, 0.2);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 32px;
+      box-shadow: var(--shadow-xl);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .header-section::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 100%);
+      pointer-events: none;
+    }
+
+    .header-content {
+      position: relative;
+      z-index: 1;
+    }
+
+    .header-section h2 {
+      font-size: 2.5rem;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: white;
+      text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .header-section p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 1.1rem;
+      font-weight: 400;
+      margin: 0;
+    }
+
+    /* Hero Welcome Card */
+    .welcome-hero {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(30px);
+      -webkit-backdrop-filter: blur(30px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 24px;
+      padding: 48px;
+      text-align: center;
+      margin-bottom: 40px;
+      box-shadow: var(--shadow-premium);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .welcome-hero::before {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255, 255, 255, 0.1) 0%, transparent 70%);
+      animation: shimmer 8s ease-in-out infinite;
+      pointer-events: none;
+    }
+
+    @keyframes shimmer {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(180deg); }
+    }
+
+    .welcome-icon-container {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 24px;
+    }
+
+    .welcome-icon {
+      width: 120px;
+      height: 120px;
+      background: var(--primary-gradient);
+      border-radius: 30px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto;
+      box-shadow: var(--shadow-premium);
+      position: relative;
+      z-index: 1;
+      animation: float 6s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
+    }
+
+    .welcome-icon::before {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      background: linear-gradient(45deg, #667eea, #764ba2, #f093fb, #f5576c);
+      border-radius: 32px;
+      z-index: -1;
+      animation: rotate 4s linear infinite;
+    }
+
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .welcome-icon i {
+      font-size: 3rem;
+      color: white;
+      position: relative;
+      z-index: 2;
+    }
+
+    .welcome-hero h3 {
+      color: white;
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 16px;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .welcome-hero p {
+      color: rgba(255, 255, 255, 0.85);
+      font-size: 1.1rem;
+      line-height: 1.7;
+      max-width: 600px;
+      margin: 0 auto;
+      font-weight: 400;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Premium Action Cards */
+    .quick-actions {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 32px;
+    }
+
+    .action-card {
+      background: rgba(255, 255, 255, 0.15);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 20px;
+      padding: 32px 24px;
+      text-align: center;
+      transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      text-decoration: none;
+      color: inherit;
+      box-shadow: var(--shadow-lg);
+      position: relative;
+      overflow: hidden;
+      group: true;
+    }
+
+    .action-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.1) 0%,
+      rgba(255, 255, 255, 0.05) 100%);
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+
+    .action-card:hover::before {
+      opacity: 1;
+    }
+
+    .action-card:hover {
+      transform: translateY(-8px) scale(1.02);
+      box-shadow: var(--shadow-premium);
+      text-decoration: none;
+      color: inherit;
+      border-color: rgba(255, 255, 255, 0.4);
+    }
+
+    .action-icon {
+      width: 64px;
+      height: 64px;
+      background: var(--primary-gradient);
+      border-radius: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 20px;
+      box-shadow: var(--shadow-lg);
+      transition: all 0.3s ease;
+      position: relative;
+      z-index: 1;
+    }
+
+    .action-card:hover .action-icon {
+      transform: scale(1.1) rotate(5deg);
+      box-shadow: var(--shadow-premium);
+    }
+
+    .action-icon i {
+      font-size: 1.5rem;
+      color: white;
+    }
+
+    .action-card h6 {
+      color: white;
+      font-weight: 600;
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+      text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .action-card p {
+      color: rgba(255, 255, 255, 0.8);
+      font-size: 0.95rem;
+      line-height: 1.6;
+      margin: 0;
+      font-weight: 400;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Responsive Design */
+    @media (max-width: 1024px) {
+      .main-content {
+        margin-left: 280px;
+        padding: 24px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        transform: translateX(-100%);
+        width: 280px;
+      }
+
+      .main-content {
+        margin-left: 0;
+        padding: 20px;
+      }
+
+      .header-section {
+        padding: 24px;
+        margin-bottom: 24px;
+      }
+
+      .header-section h2 {
+        font-size: 2rem;
+      }
+
+      .welcome-hero {
+        padding: 32px 24px;
+        margin-bottom: 32px;
+      }
+
+      .welcome-icon {
+        width: 100px;
+        height: 100px;
+        border-radius: 24px;
+      }
+
+      .welcome-icon i {
+        font-size: 2.5rem;
+      }
+
+      .welcome-hero h3 {
+        font-size: 1.75rem;
+      }
+
+      .quick-actions {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .action-card {
+        padding: 24px 20px;
+      }
+    }
+
+    /* Loading Animation */
+    .fade-in {
+      animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+      opacity: 0;
+    }
+
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(30px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Stagger animation delays */
+    .header-section { animation-delay: 0.1s; }
+    .welcome-hero { animation-delay: 0.2s; }
+    .action-card:nth-child(1) { animation-delay: 0.3s; }
+    .action-card:nth-child(2) { animation-delay: 0.4s; }
+    .action-card:nth-child(3) { animation-delay: 0.5s; }
+    .action-card:nth-child(4) { animation-delay: 0.6s; }
+
+    /* Smooth scrollbar */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.3);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: rgba(255, 255, 255, 0.5);
+    }
+  </style>
+</head>
+<body>
+<!-- Premium Sidebar -->
+<div class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo-container">
+      <div class="logo-icon">
+        <i class="fas fa-film"></i>
+      </div>
+      <div>
+        <div class="logo-text">BlueBear</div>
+        <div class="logo-subtitle">CINEMA SUITE</div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <div class="nav-section">
+      <div class="nav-section-title">Main</div>
+      <a class="nav-link active" href="/admin/">
+        <i class="nav-icon fas fa-home"></i>
+        <span class="nav-text">Dashboard</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Content</div>
+      <a class="nav-link" href="/admin/movies">
+        <i class="nav-icon fas fa-film"></i>
+        <span class="nav-text">Movies</span>
+      </a>
+      <a class="nav-link" href="/admin/actors">
+        <i class="nav-icon fas fa-users"></i>
+        <span class="nav-text">Actors</span>
+      </a>
+      <a class="nav-link" href="/admin/genres">
+        <i class="nav-icon fas fa-tags"></i>
+        <span class="nav-text">Genres</span>
+      </a>
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-title">Marketing</div>
+      <a class="nav-link" href="/admin/vouchers">
+        <i class="nav-icon fas fa-ticket-alt"></i>
+        <span class="nav-text">Vouchers</span>
+      </a>
+    </div>
+  </nav>
+</div>
+
+<!-- Main Content -->
+<div class="main-content">
+  <!-- Premium Header -->
+  <div class="header-section fade-in">
+    <div class="header-content">
+      <h2>Executive Dashboard</h2>
+      <p>Your premium cinema management experience</p>
+    </div>
+  </div>
+
+  <!-- Hero Welcome Section -->
+  <div class="welcome-hero fade-in">
+    <div class="welcome-icon-container">
+      <div class="welcome-icon">
+        <i class="fas fa-crown"></i>
+      </div>
+    </div>
+    <h3>Welcome to BlueBear Cinema Suite</h3>
+    <p>
+      Experience the future of cinema management with our premium administrative platform.
+      Streamline operations, enhance productivity, and deliver exceptional entertainment experiences
+      with our comprehensive suite of management tools.
+    </p>
+  </div>
+
+  <!-- Premium Quick Actions -->
+  <div class="quick-actions fade-in">
+    <a href="/admin/movies" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-film"></i>
+      </div>
+      <h6>Movie Library</h6>
+      <p>Curate and manage your premium movie collection with advanced metadata and analytics</p>
+    </a>
+
+    <a href="/admin/actors" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-star"></i>
+      </div>
+      <h6>Talent Management</h6>
+      <p>Comprehensive actor profiles and relationship management for your entertainment portfolio</p>
+    </a>
+
+    <a href="/admin/vouchers" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-magic"></i>
+      </div>
+      <h6>Promotions Suite</h6>
+      <p>Create compelling promotional campaigns and manage customer engagement strategies</p>
+    </a>
+
+    <a href="/admin/genres" class="action-card">
+      <div class="action-icon">
+        <i class="fas fa-palette"></i>
+      </div>
+      <h6>Content Categories</h6>
+      <p>Organize and categorize your content library for optimal discovery and user experience</p>
+    </a>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    // Enhanced intersection observer for staggered animations
+    const observerOptions = {
+      threshold: 0.1,
+      rootMargin: '0px 0px -50px 0px'
+    };
+
+    const observer = new IntersectionObserver(function(entries) {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('fade-in');
+        }
+      });
+    }, observerOptions);
+
+    // Observe all animatable elements
+    document.querySelectorAll('.action-card, .welcome-hero, .header-section').forEach(el => {
+      observer.observe(el);
+    });
+
+    // Add premium hover effects
+    document.querySelectorAll('.action-card').forEach(card => {
+      card.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-8px) scale(1.02)';
+      });
+
+      card.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0) scale(1)';
+      });
+    });
+
+    // Sidebar navigation enhancement
+    document.querySelectorAll('.nav-link').forEach(link => {
+      link.addEventListener('mouseenter', function() {
+        this.style.paddingLeft = '16px';
+      });
+
+      link.addEventListener('mouseleave', function() {
+        if (!this.classList.contains('active')) {
+          this.style.paddingLeft = '12px';
+        }
+      });
+    });
+
+    // Premium loading sequence
+    setTimeout(() => {
+      document.querySelectorAll('.fade-in').forEach((el, index) => {
+        setTimeout(() => {
+          el.style.opacity = '1';
+          el.style.transform = 'translateY(0)';
+        }, index * 100);
+      });
+    }, 100);
+
+    // Dynamic background particles (subtle)
+    function createParticle() {
+      const particle = document.createElement('div');
+      particle.style.cssText = `
+        position: fixed;
+        width: 2px;
+        height: 2px;
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 50%;
+        pointer-events: none;
+        z-index: 0;
+        left: ${Math.random() * 100}vw;
+        top: ${Math.random() * 100}vh;
+        animation: float ${3 + Math.random() * 4}s ease-in-out infinite;
+      `;
+
+      document.body.appendChild(particle);
+
+      setTimeout(() => {
+        particle.remove();
+      }, 7000);
+    }
+
+    // Create subtle floating particles
+    setInterval(createParticle, 2000);
+  });
+</script>
+</body>
+</html>

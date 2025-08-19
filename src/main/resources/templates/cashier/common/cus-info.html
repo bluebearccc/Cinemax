@@ -1,0 +1,77 @@
+<div class="card card-custom mb-4" th:if="${currentStep == 4}" th:fragment="customer-info">
+    <div class="card-header d-flex justify-content-between align-items-center">
+        <h5 class="mb-0"><i class="fas fa-user me-2"></i>Thông Tin Khách Hàng</h5>
+        <a href="/cashier/back-to-seats" class="btn btn-outline-secondary btn-sm">
+            <i class="fas fa-arrow-left me-1"></i>Chọn lại ghế
+        </a>
+    </div>
+    <div class="card-body">
+        <div class="mb-4">
+            <h6 th:text="${selectedMovie.movieName}"></h6>
+            <p class="text-muted">
+                <span th:text="${selectedSchedule.time}"></span> -
+                Phòng <span th:text="${selectedSchedule.roomName}"></span><br>
+                <strong>Ghế đã chọn:</strong>
+                <span th:each="seat, iterStat : ${selectedSeats}">
+                                <span class="badge bg-warning text-dark" th:text="${seat}"></span><span th:if="${!iterStat.last}">, </span>
+                            </span>
+            </p>
+        </div>
+        <hr>
+
+        <form action="/cashier/confirm-booking" method="post">
+            <div class="row">
+                <div class="col-md-6">
+                    <h6 class="mb-3"><i class="fas fa-user-circle me-2"></i>Thông tin khách hàng</h6>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="customerName" class="form-label">Họ tên</label>
+                            <input type="text" class="form-control" id="customerName"
+                                   name="customerName" placeholder="Nhập họ tên">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="customerPhone" class="form-label">Số điện thoại</label>
+                            <input type="tel" class="form-control" id="customerPhone"
+                                   name="customerPhone" placeholder="Nhập số điện thoại">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="customerEmail" class="form-label">Email (tùy chọn)</label>
+                        <input type="email" class="form-control" id="customerEmail"
+                               name="customerEmail" placeholder="Nhập email">
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <h6 class="mb-3"><i class="fas fa-hamburger me-2"></i>Đồ ăn & Nước uống</h6>
+                    <!-- Method 1: Simple approach -->
+                    <div th:if="${theaterStock != null and !theaterStock.isEmpty()}">
+                        <div class="row">
+                            <div class="col-md-6 mb-3" th:each="food : ${theaterStock}">
+                                <div class="card h-100">
+                                    <img th:src="@{${food.image}}" class="card-img-top" alt="Food Image">
+                                    <div class="card-body">
+                                        <h6 th:text="${food.foodName}"></h6>
+                                        <p>Giá: <span th:text="${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 0, 'POINT')}"></span> đ</p>
+                                        <p>Số lượng còn: <span th:text="${food.quantity}"></span></p>
+                                        <input type="number" min="0" max="10" name="foodQuantities[__${food.theaterStockId}__]" class="form-control mt-2" placeholder="Số lượng">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+
+            <hr class="my-4">
+            <div class="d-flex justify-content-end">
+                <button type="submit" class="btn btn-warning btn-lg">
+                    <i class="fas fa-arrow-right me-2"></i>Xác nhận đặt vé
+                </button>
+            </div>
+        </form>
+    </div>
+</div>

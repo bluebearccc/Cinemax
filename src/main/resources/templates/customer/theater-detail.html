@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" th:href="@{/customer-static/css/bootstrap.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/all.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/animate.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/flaticon.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/magnific-popup.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/odometer.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.carousel.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/owl.theme.default.min.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/nice-select.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/main.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/footer-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/theater-detail.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/header-area.css}">
+    <link rel="stylesheet" th:href="@{/customer-static/css/common/chatbot.css}">
+    <script src='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.js'></script>
+    <link href='https://api.mapbox.com/mapbox-gl-js/v3.1.2/mapbox-gl.css' rel='stylesheet'/>
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <title th:text="${currentTheater.theaterName}"></title>
+</head>
+
+<body>
+<!-- ==========Preloader========== -->
+<div th:replace="common/fragments/preloader :: preloader">
+</div>
+<!-- ==========Preloader========== -->
+<!-- ==========Overlay========== -->
+<a href="#0" class="scrollToTop">
+    <i class="fas fa-angle-up"></i>
+</a>
+<!-- ==========Overlay========== -->
+<!-- ==========Header-Section========== -->
+<header th:replace="common/fragments/header :: header-section">
+</header>
+<!-- ==========Header-Section========== -->
+<div class="floating-shapes">
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+    <div class="shape"></div>
+</div>
+<div class="hero-banner" th:style="'background-image:url(' + @{${currentTheater.image}} + ');'">
+    <div class="hero-content">
+        <h1 class="theater-name" th:text="${currentTheater.theaterName}"
+            th:data-name="${currentTheater.theaterName}"></h1>
+        <input type="hidden" id="theaterId" th:value="${currentTheater.theaterID}">
+        <div class="theater-address">
+            <input type="hidden" id="theaterLat" th:value="${currentTheater.latitude}">
+            <input type="hidden" id="theaterLng" th:value="${currentTheater.longitude}">
+            <span th:text="${currentTheater.address}"></span>
+        </div>
+        <div class="theater-rating">
+            <span class="rating-stars">⭐</span>
+            <span class="rating-score" th:text="${currentTheater.serviceRate}"></span>
+            <span style="color: #b0bec5;" th:text="'(' + ${currentTheater.numberOfRate} + ' rates)'"></span>
+        </div>
+    </div>
+</div>
+
+<div class="container custom-container">
+    <main class="main-content-theater">
+        <!-- Address -->
+        <section class="address-section">
+            <h2 style="margin-bottom: 1.5rem;" class="section-title">
+                <i class="fas fa-map-marker-alt"></i> Địa chỉ & Liên hệ
+            </h2>
+
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 2rem;">
+                <div>
+                    <h4 style="margin-bottom: 1rem; color: #667eea;">
+                        <i class="fas fa-location-dot"></i> Địa chỉ
+                    </h4>
+                    <p style="font-size: 1.1rem; line-height: 1.8;" th:text="${currentTheater.address}">
+                    </p>
+                </div>
+            </div>
+
+            <div id="map"></div>
+        </section>
+
+        <div id="book-theater-detail-wrapper">
+            <div class="container book-movie-area"
+                 th:replace="customer/fragments/theater-detail/book-theater-detail :: book-theater-detail"
+                 id="book-theater-detail">
+            </div>
+        </div>
+    </main>
+
+    <div class="sidebar">
+        <h3 class="sidebar-title">Now Showing</h3>
+        <div class="recommended-movie" th:each="recommnedMovie : ${top5movies.content}"
+             th:onclick="|window.location.href='/customer/movie-detail?movieId=${recommnedMovie.movieID}'|">
+            <div class="recommended-poster">
+                <img class="img-poster" th:src="${recommnedMovie.image}">
+            </div>
+            <div class="recommended-info">
+                <h4 th:text="${recommnedMovie.movieName}"></h4>
+                <div class="recommended-rating">
+                    <i class="fas fa-star"></i>
+                    <span th:text="${recommnedMovie.movieRate}"></span>
+                </div>
+                <div class="recommended-rating" style="color: rgba(255,255,255,0.73)">
+                    <i class="fas fa-clock"></i>
+                    <span th:text="${recommnedMovie.duration} + ' minutes'"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- ==========ChatBot-Section========== -->
+<div class="chatbot-container" th:replace="common/fragments/chatbot :: chatbot"></div>
+<!-- ==========ChatBot-Section========== -->
+<!-- ==========Footer-Section========== -->
+<footer class="footer-section" th:replace="common/fragments/footer :: footer">
+</footer>
+<!-- ==========Footer-Section========== -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script th:src="@{/customer-static/js/theater-detail.js}"></script>
+<script th:src="@{/customer-static/js/chatbot.js}"></script>
+<script th:src="@{/customer-static/js/jquery-3.3.1.min.js}"></script>
+<script th:src="@{/customer-static/js/modernizr-3.6.0.min.js}"></script>
+<script th:src="@{/customer-static/js/plugins.js}"></script>
+<script th:src="@{/customer-static/js/bootstrap.min.js}"></script>
+<script th:src="@{/customer-static/js/isotope.pkgd.min.js}"></script>
+<script th:src="@{/customer-static/js/magnific-popup.min.js}"></script>
+<script th:src="@{/customer-static/js/owl.carousel.min.js}"></script>
+<script th:src="@{/customer-static/js/wow.min.js}"></script>
+<script th:src="@{/customer-static/js/countdown.min.js}"></script>
+<script th:src="@{/customer-static/js/odometer.min.js}"></script>
+<script th:src="@{/customer-static/js/viewport.jquery.js}"></script>
+<script th:src="@{/customer-static/js/main.js}"></script>
+</body>
+
+</html>

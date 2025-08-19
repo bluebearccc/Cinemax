@@ -1,0 +1,5 @@
+<select class="form-control" style="width: 150px;" id="sortSelect" onchange="filterBlog(null);" th:fragment="category-select">
+    <option value="0">All</option>
+    <option th:each="category : ${categories}" th:value="${category.categoryID}"
+            th:text="${category.categoryName}"></option>
+</select>

@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Payment Invoice</title>
+    <script src="https://cdn.jsdelivr.net/npm/jsbarcode@3.11.5/dist/JsBarcode.all.min.js"></script>
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <style>
+        body { font-family: 'Courier New', Courier, monospace; line-height: 1.4; }
+        .invoice-box {
+            width: 380px;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0, 0, 0, .15);
+            font-size: 14px;
+            color: #555;
+        }
+        .invoice-box table { width: 100%; line-height: inherit; text-align: left; border-collapse: collapse; }
+        .invoice-box table td { padding: 5px; vertical-align: top; }
+        .invoice-box table tr.top table td { padding-bottom: 20px; }
+        .invoice-box table tr.information table td { padding-bottom: 40px; }
+        .invoice-box table tr.heading td { background: #eee; border-bottom: 1px solid #ddd; font-weight: bold; }
+        .invoice-box table tr.details td { padding-bottom: 20px; }
+        .invoice-box table tr.item td { border-bottom: 1px solid #eee; }
+        .invoice-box table tr.item.last td { border-bottom: none; }
+        .invoice-box table tr.total td:nth-child(2) { border-top: 2px solid #eee; font-weight: bold; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .barcode { padding-top: 20px; text-align: center; }
+
+        @media print {
+            .no-print { display: none; }
+            body { margin: 0; }
+            .invoice-box { width: 100%; box-shadow: none; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="invoice-box" th:if="${bookingResult != null}">
+    <table cellpadding="0" cellspacing="0">
+        <tr class="top">
+            <td colspan="4">
+                <table>
+                    <tr>
+                        <td class="text-center">
+                            <h2 style="margin-bottom: 5px;">CINEMAX THEATER</h2>
+                            <p style="font-size: 12px; margin: 0;">PAYMENT INVOICE</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr class="information">
+            <td colspan="4">
+                <table>
+                    <tr>
+                        <td>
+                            Invoice ID: <strong th:text="${bookingResult.invoiceId}"></strong><br>
+                            Date: <span th:text="${#temporals.format(bookingResult.bookingDate, 'MM/dd/yyyy HH:mm')}"></span><br>
+                            Cashier: Admin
+                        </td>
+                        <td class="text-right">
+                            Customer:<br>
+                            <span th:text="${bookingResult.customerName ?: 'Guest'}"></span>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+
+        <tr class="heading">
+            <td>Description</td>
+            <td class="text-center">Qty</td>
+            <td class="text-right">Price</td>
+            <td class="text-right">Total</td>
+        </tr>
+
+        <tr class="details">
+            <td colspan="4" style="font-weight: bold; padding-top: 15px;">Movie Ticket: <span th:text="${bookingResult.movieName}"></span></td>
+        </tr>
+        <tr class="item" th:each="seat : ${bookingResult.seatPositions}">
+            <td th:text="'Seat ' + ${seat}"></td>
+            <td class="text-center">1</td>
+            <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(bookingResult.unitTicketPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+            <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(bookingResult.unitTicketPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+        </tr>
+
+        <tr class="details" th:if="${bookingResult.foodItems != null and !bookingResult.foodItems.isEmpty()}">
+            <td colspan="4" style="font-weight: bold; padding-top: 15px;">Food & Drinks:</td>
+        </tr>
+        <tr class="item" th:each="food : ${bookingResult.foodItems}">
+            <td th:text="${food.name}"></td>
+            <td class="text-center" th:text="${food.quantity}"></td>
+            <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(food.unitPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+            <td class="text-right" th:text="'$' + ${#numbers.formatDecimal(food.unitPrice * food.quantity, 0, 'COMMA', 2, 'POINT')}"></td>
+        </tr>
+
+        <tr class="total">
+            <td colspan="3" class="text-right" style="padding-top: 20px;">Subtotal:</td>
+            <td class="text-right" style="padding-top: 20px;" th:text="'$' + ${#numbers.formatDecimal(bookingResult.subTotalPrice, 0, 'COMMA', 2, 'POINT')}"></td>
+        </tr>
+        <tr class="total" th:if="${bookingResult.discountAmount != null and bookingResult.discountAmount > 0}">
+            <td colspan="3" class="text-right">Discount (<span th:text="${bookingResult.promotionName}"></span>):</td>
+            <td class="text-right" th:text="'-$' + ${#numbers.formatDecimal(bookingResult.discountAmount, 0, 'COMMA', 2, 'POINT')}"></td>
+        </tr>
+        <tr class="total">
+            <td colspan="3" class="text-right" style="font-size: 1.2em;"><strong>TOTAL DUE:</strong></td>
+            <td class="text-right" style="font-size: 1.2em;">
+                <strong th:text="'$' + ${#numbers.formatDecimal(bookingResult.totalPrice, 0, 'COMMA', 2, 'POINT')}"></strong>
+            </td>
+        </tr>
+    </table>
+
+    <div class="barcode">
+        <svg id="barcode"></svg>
+    </div>
+    <p class="text-center" style="font-size: 12px; margin-top: 20px;">Thank you and see you again!</p>
+</div>
+
+<div class="no-print" style="text-align: center; margin-top: 20px;">
+    <button onclick="window.print()">Print Invoice</button>
+    <button onclick="window.close()">Close</button>
+</div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    var invoiceId = /*[[${bookingResult.invoiceId}]]*/ 'default-id';
+    JsBarcode("#barcode", invoiceId, {
+        format: "CODE128",
+        lineColor: "#000",
+        width: 2,
+        height: 50,
+        displayValue: true
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>

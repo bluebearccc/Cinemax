@@ -1,0 +1,64 @@
+<header class="header-section" th:fragment="header-section">
+    <div class="container">
+        <div class="header-wrapper">
+            <div class="logo">
+                <a th:href="@{/}">
+                    <img th:src="@{/customer-static/images/logo/logo.png}" style="height: 80px; width: 80px;"
+                         alt="logo">
+                </a>
+            </div>
+            <ul class="menu">
+                <li>
+                    <a th:href="@{/}" th:class="${currentWebPage == 'home'} ? 'active' : ''">Home</a>
+                </li>
+                <li>
+                    <a th:href="@{/customer/movies}" th:class="${currentWebPage == 'movies'} ? 'active' : ''">movies</a>
+                    <ul class="submenu">
+                        <li>
+                            <a th:href="@{/customer/movies(movieGenre=null)}">All genres</a>
+                        </li>
+                        <li th:each="genre : ${genres}">
+                            <a th:href="@{/customer/movies(movieGenre=${genre.genreID})}"
+                               th:text="${genre.genreName}"></a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a th:href="@{/customer/theater-detail(theaterId=${theaters.content.getFirst().theaterID})}"
+                       th:class="${currentWebPage == 'theaters'} ? 'active' : ''">Theaters</a>
+                    <ul class="submenu">
+                        <li th:each="theater : ${theaters.content}">
+                            <a th:href="@{/customer/theater-detail(theaterId=${theater.theaterID})}"
+                               th:text="${theater.theaterName}"></a>
+                        </li>
+                    </ul>
+                </li>
+                <li>
+                    <a th:href="@{/customer/blog}" th:class="${currentWebPage == 'blogs'} ? 'active' : ''">Blogs</a>
+                </li>
+                <li class="header-button pr-0" th:if="${session.account == null}">
+                    <a th:href="@{/login}">Sign in</a>
+                </li>
+                <li th:if="${session.account != null}" th:onclick="|window.location.href='/user/profile'|">
+                    <div class="user-info">
+                        <div class="user-avatar" id="userAvatar"><i class="fa fa-user"></i></div>
+                        <div th:if="${session.customer != null}">
+                            <span class="user-name" th:text="${session.customer.fullName}"></span>
+                        </div>
+                        <div th:if="${session.employee != null}">
+                            <span class="user-name" th:text="${session.employee.fullName}"></span>
+                        </div>
+                    </div>
+                </li>
+                <li th:if="${session.account != null}">
+                    <button class="logout-btn" onclick="window.location.href='/logout'">Logout</button>
+                </li>
+            </ul>
+            <div class="header-bar d-lg-none">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </div>
+    </div>
+</header>

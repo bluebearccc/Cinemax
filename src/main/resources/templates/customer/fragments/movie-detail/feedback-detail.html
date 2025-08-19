@@ -1,0 +1,70 @@
+<div class="comments-section" th:fragment="feedback-detail">
+    <h2 class="section-title">Comments & Reviews</h2>
+
+    <div class="comments-list">
+        <div class="comment-section-movie-detail">
+            <div th:if="${session.customer != null and isViewed == true}">
+                <form class="comment-form-main-movie-detail" id="mainCommentFormMovieDetail">
+                    <div class="comment-form-movie-detail">
+                        <div class="comment-avatar"><i class="fas fa-user"></i></div>
+                        <div class="comment-input-wrapper-movie-detail">
+                            <div class="star-rating-input-movie-detail">
+                                <i class="star-movie-detail far fa-star" data-value="1"></i>
+                                <i class="star-movie-detail far fa-star" data-value="2"></i>
+                                <i class="star-movie-detail far fa-star" data-value="3"></i>
+                                <i class="star-movie-detail far fa-star" data-value="4"></i>
+                                <i class="star-movie-detail far fa-star" data-value="5"></i>
+                                <input type="hidden" name="rating" class="rating-value-movie-detail">
+                            </div>
+                            <textarea name="text" class="comment-input-movie-detail"
+                                      placeholder="Write your thought here..." rows="1" required></textarea>
+                            <div class="form-actions-movie-detail" style="display: none;">
+                                <button type="button" class="btn-cancel-movie-detail"
+                                        id="main-cancel-btn">Cancel
+                                </button>
+                                <button type="submit" class="btn-submit-movie-detail">Submit</button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div th:if="${#lists.isEmpty(listFeedback.content)}" class="no-comments empty-state">
+                <p style="text-align: center; font-size: 25px; display: flex; flex-direction: column; gap: 20px; margin-top: 50px;">
+                    <i class="fas fa-comment empty-icon"></i> <span>No comments yet. Be the first to comment!</span>
+                </p>
+            </div>
+
+            <div class="comment-list-movie-detail">
+                <div class="comment-item-movie-detail" th:each="feedback : ${listFeedback.content}">
+                    <div class="comment-avatar"><i class="fas fa-user"></i></div>
+                    <div class="comment-content-movie-detail bigger-comment-movie-detail">
+                        <div class="comment-meta-movie-detail">
+                            <span class="comment-author-movie-detail" th:text="${feedback.customerName}"></span>
+                            <div class="star-rating-display-movie-detail" th:if="${feedback.movieRate != null}">
+                                <i class="fas fa-star"
+                                   th:each="i : ${#numbers.sequence(1, feedback.movieRate)}"></i>
+                            </div>
+                            <span class="comment-time-movie-detail"
+                                  th:text="${#temporals.format(feedback.createdDate, 'dd/MM/yyyy HH:mm')}"></span>
+                        </div>
+                        <p class="comment-text-movie-detail" th:text="${feedback.content}"></p>
+                        <div class="comment-actions-movie-detail" th:if="${session.customer != null}">
+                            <a href="#" class="reply-btn-movie-detail"
+                               th:data-author-id="${feedback.customerId}">Reply</a>
+                        </div>
+                        <div class="replies-ajax">
+                            <div class="replies-movie-detail"
+                                 th:replace="customer/fragments/movie-detail/feedback-comment :: feedback-comment(feedback=${feedback})">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <input type="hidden" th:value="${currentPage}" id="currentPage">
+                <input type="hidden" th:value="${totalPage}" id="totalPage">
+                <button class="load-more-btn" id="load-feedback"
+                        th:style="(${currentPage < totalPage - 1} ? '' : 'display:none')">Load More
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

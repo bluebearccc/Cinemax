@@ -1,0 +1,36 @@
+<div class="main-blog-list" th:fragment="list-blog">
+    <div class="blog-grid" id="blogGrid" >
+        <div class="empty-state" th:if="${#lists.isEmpty(blogs.content)}">
+            <div class="empty-icon">😔</div>
+            <h3>No suitable blog found.</h3>
+            <p>Please try again with different search criteria.</p>
+        </div>
+        <div class="blog-card" th:each="blog : ${blogs}">
+            <img th:src="${blog.image}" class="blog-image">
+            <div class="blog-content">
+                <h3 class="blog-title" th:text="${blog.title}"></h3>
+                <div class="blog-meta">
+                    <div class="blog-author" th:text="'Author: ' + ${blog.authorName}"></div>
+                    <div class="blog-date"
+                         th:text="'Date Posted: ' + ${#temporals.format(blog.createdAt, 'dd/MM/yyyy')}"></div>
+                    <div class="blog-information"
+                         th:text="'👁️' + ${blog.viewCount} + ' | ❤️ ' + ${blog.likeCount} "></div>
+                    <div class="blog-category">
+                        Category: <span th:each="category : ${blog.categories}"
+                                        th:text="${category.categoryName} + ' '"></span>
+                    </div>
+                </div>
+                <div class="blog-actions">
+                    <button class="btn btn-warning" th:onclick="'window.location.href=\'/officer/blog-management/edit/' + ${blog.blogID} + '\';'">Edit</button>
+                    <button class="btn btn-danger" th:onclick="'window.location.href=\'/officer/blog-management/delete/' + ${blog.blogID} + '\';'">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="pagination-controls" id="paginationControls">
+        <button th:onclick="'filterBlog(' + (${i}) + ')'"
+                th:class="${i == blogs.number + 1} ? 'pagination-btn active' : 'pagination-btn'"
+                th:each="i : ${#numbers.sequence(1, blogs.getTotalPages(), 1)}" th:text="${i}"></button>
+    </div>
+
+</div>

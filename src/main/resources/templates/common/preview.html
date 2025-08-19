@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <title>View Movie Ticket</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/preview.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <title>checkout</title>
+</head>
+<body>
+<div class="countdown-wrapper">
+    <div class="countdown-text">Time remaining for payment:</div>
+    <div id="countdown" class="countdown-time">5:00</div>
+</div>
+
+<div class="main-container">
+    <div class="checkout-card">
+        <div class="card-header-custom">
+            <h2>
+                <i class="fas fa-ticket-alt"></i>
+                Confirm Booking
+            </h2>
+        </div>
+
+        <div class="card-body-custom">
+            <div th:if="${promotionError != null}" class="alert alert-danger alert-custom">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                [[${promotionError}]]
+            </div>
+
+            <div class="promotion-section">
+                <form method="post" th:action="@{/booking/step2}">
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                    <input type="hidden" name="roomId" th:value="${room.roomID}">
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
+                    <input type="hidden" th:each="combo : ${comboList}"
+                           th:if="${comboQuantities[combo.theaterStockId] != null}"
+                           th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                           th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                    <label for="promotionCode" class="form-label">
+                        <i class="fas fa-tags me-2"></i>
+                        <strong>Enter discount code:</strong>
+                    </label>
+                    <div class="input-group promotion-input-group">
+                        <input type="text" id="promotionCode" class="form-control form-control-custom"
+                               name="promotionCode" placeholder="Enter your discount code"
+                               th:value="${param.promotionCode}">
+                        <button class="btn btn-apply" type="submit">
+                            <i class="fas fa-check me-1"></i>
+                            Apply
+                        </button>
+                    </div>
+
+                    <div th:if="${promotionError != null}" class="promotion-error">
+                        <i class="fas fa-times-circle me-2"></i>
+                        [[${promotionError}]]
+                    </div>
+
+                    <div th:if="${promotion != null}" class="promotion-success">
+                        <i class="fas fa-check-circle me-2"></i>
+                        Code [[${promotion.promotionCode}]] has been applied ([[${promotion.discount}]]% off).
+                    </div>
+                </form>
+            </div>
+
+            <div class="info-section">
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-film"></i>
+                        Showtime:
+                    </div>
+                    <div class="info-value">
+                        [[${schedule.movieName}]]<br>
+                        <small>[[${#temporals.format(schedule.startTime, 'dd/MM/yyyy HH:mm')}]]</small>
+                    </div>
+                </div>
+
+                <div class="info-card">
+                    <div class="info-label">
+                        <i class="fas fa-door-open"></i>
+                        Auditorium:
+                    </div>
+                    <div class="info-value">
+                        [[${room.name}]]
+                    </div>
+                </div>
+            </div>
+
+            <div class="info-card mb-3">
+                <div class="info-label">
+                    <i class="fas fa-chair"></i>
+                    Selected Seats:
+                </div>
+                <div class="info-value">
+                        <span th:each="seat : ${selectedSeats}">
+                            <span class="seat-badge">
+                                [[${seat.position}]] - [[${#numbers.formatDecimal(seat.unitPrice, 0, 0)}]]đ
+                            </span>
+                        </span>
+                </div>
+            </div>
+
+            <div class="info-card mb-3" th:if="${comboList != null and !comboList.isEmpty()}">
+                <div class="info-label">
+                    <i class="fas fa-hamburger"></i>
+                    Selected Combos:
+                </div>
+                <div class="info-value">
+                        <span th:each="combo : ${comboList}"
+                              th:if="${comboQuantities[combo.theaterStockId] != null and comboQuantities[combo.theaterStockId] > 0}">
+                            <span class="combo-badge">
+                                [[${combo.foodName}]] x[[${comboQuantities[combo.theaterStockId]}]] - [[${#numbers.formatDecimal(combo.unitPrice, 0, 0)}]]đ
+                            </span>
+                        </span>
+                </div>
+            </div>
+
+            <div class="price-summary">
+                <div class="price-row">
+                    <span class="price-label">Subtotal:</span>
+                    <span class="price-value">[[${#numbers.formatDecimal(totalPrice, 0, 0)}]]đ</span>
+                </div>
+
+                <div class="price-row">
+                    <span class="price-label">Promotion:</span>
+                    <span class="price-value" th:if="${promotion != null}">
+                            [[${promotion.promotionCode}]] ([[${promotion.discount}]]%)
+                        </span>
+                    <span class="price-value text-muted" th:if="${promotion == null}">
+                            None
+                        </span>
+                </div>
+
+                <div class="price-row">
+                    <span class="price-label">Total Amount:</span>
+                    <span class="price-value">[[${#numbers.formatDecimal(finalPrice, 0, 0)}]]đ</span>
+                </div>
+            </div>
+
+            <div class="qr-section" th:if="${qrUrl != null}">
+                <h5 class="qr-title">
+                    <i class="fas fa-qrcode"></i>
+                    Scan SePay QR Code to Pay
+                </h5>
+
+                <img th:src="${qrUrl}" alt="QR Code SePay" class="qr-image img-fluid" />
+
+                <div class="qr-note">
+                    <i class="fas fa-info-circle me-1"></i>
+                    After scanning the QR code and paying, the system will automatically confirm the booking via webhook.
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <form th:action="@{/booking/step1}" method="post">
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                    <input type="hidden" name="roomId" th:value="${room.roomID}">
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}">
+                    <input type="hidden" name="promotionCode" th:value="${promotion}">
+
+                    <button type="submit" class="btn btn-custom btn-back">
+                        <i class="fas fa-arrow-left"></i>
+                        Go Back
+                    </button>
+                </form>
+
+                <form method="post" th:action="@{/booking/confirm}">
+                    <input type="hidden" name="invoiceId" th:value="${invoiceId}" />
+                    <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}" />
+                    <input type="hidden" name="roomId" th:value="${room.roomID}" />
+                    <input type="hidden" name="promotionCode"
+                           th:value="${promotion != null} ? ${promotion.promotionCode} : ''" />
+                    <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats"
+                           th:value="${seat.seatID}" />
+                    <input type="hidden" th:each="combo : ${comboList}"
+                           th:if="${comboQuantities[combo.theaterStockId] != null}"
+                           th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                           th:value="${comboQuantities[combo.theaterStockId]}" />
+
+                    <button type="submit" class="btn btn-custom btn-vnpay">
+                        <i class="fas fa-credit-card"></i>
+                        Pay with VNPay
+                    </button>
+                </form>
+            </div>
+
+            <form th:action="@{/booking/cancel}" method="post" class="mt-3">
+                <input type="hidden" name="invoiceId" th:value="${invoiceId}" />
+                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}" />
+                <input type="hidden" name="roomId" th:value="${room.roomID}" />
+                <button type="submit" class="btn btn-custom btn-cancel w-100">
+                    <i class="fas fa-times-circle"></i>
+                    Cancel Booking
+                </button>
+            </form>
+
+            <form method="post" th:action="@{/webhook/sepay}" style="display: none;">
+                <input type="hidden" name="scheduleId" th:value="${schedule.scheduleID}">
+                <input type="hidden" name="roomId" th:value="${room.roomID}">
+                <div th:if="${promotion != null}">
+                    <input type="hidden" name="promotionCode" th:value="${promotion.promotionCode}">
+                </div>
+                <div th:if="${promotion == null}">
+                    <input type="hidden" name="promotionCode" value="">
+                </div>
+                <input type="hidden" th:each="seat : ${selectedSeats}" name="selectedSeats" th:value="${seat.seatID}" />
+                <input type="hidden" th:each="combo : ${comboList}"
+                       th:if="${comboQuantities[combo.theaterStockId] != null}"
+                       th:name="'comboQuantities[' + ${combo.theaterStockId} + ']'"
+                       th:value="${comboQuantities[combo.theaterStockId]}" />
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:inline="javascript">
+    let timeLeft = 5 * 60; // 5 phút = 300 giây
+
+    function formatTime(seconds) {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    }
+
+    function updateCountdown() {
+        const countdownEl = document.getElementById('countdown');
+        if (timeLeft <= 0) {
+            countdownEl.innerText = "00:00";
+            alert("Time's up! Your booking will be automatically cancelled.");
+            window.location.href = "/booking/timeout?invoiceId=" + [[${invoiceId}]];
+            return;
+        }
+        countdownEl.innerText = formatTime(timeLeft);
+        timeLeft--;
+    }
+
+    setInterval(updateCountdown, 1000);
+
+    const invoiceId = [[${invoiceId}]];
+    setInterval(() => {
+        fetch('/booking/check-status?invoiceId=' + invoiceId)
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'BOOKED') {
+                    window.location.href = '/booking/confirm-success?invoiceId=' + invoiceId;
+                }
+            })
+            .catch(err => console.log('Status check failed:', err));
+    }, 5000);
+</script>
+</body>
+</html>

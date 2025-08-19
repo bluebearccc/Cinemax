@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Dashboard - Cinemax</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/litepicker/dist/css/litepicker.css"/>
+    <script src="https://cdn.jsdelivr.net/npm/litepicker/dist/litepicker.js"></script>
+    <link rel="stylesheet" th:href="@{/css/dashboard.css}">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --secondary-gradient: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.18);
+            --text-primary: #1a1a1a;
+            --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+            --shadow-md: 0 4px 6px rgba(0, 0, 0, 0.07);
+            --shadow-lg: 0 10px 15px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px rgba(0, 0, 0, 0.1);
+            --shadow-premium: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: radial-gradient(circle at 20% 50%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
+            radial-gradient(circle at 40% 80%, rgba(120, 219, 255, 0.3) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        .sidebar {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            min-height: 100vh;
+            width: 280px;
+            position: fixed;
+            left: 0; top: 0; z-index: 1000;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: var(--shadow-premium);
+        }
+        .sidebar-header {
+            padding: 32px 24px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .logo-container { display: flex; align-items: center; gap: 12px; }
+        .logo-icon {
+            width: 48px; height: 48px;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--shadow-lg);
+        }
+        .logo-icon i { font-size: 1.5rem; color: white; }
+        .logo-text { color: white; font-weight: 700; font-size: 1.3rem; }
+        .logo-subtitle { color: rgba(255, 255, 255, 0.7); font-size: 0.75rem; font-weight: 500; margin-top: -2px; }
+        .sidebar-nav { padding: 24px 16px; }
+        .nav-section { margin-bottom: 24px; }
+        .nav-section-title {
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 12px; padding: 0 12px;
+        }
+        .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 16px 12px; display: flex; align-items: center; text-decoration: none;
+            border-radius: 12px; margin: 4px 0; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .nav-link:hover { color: white; transform: translateX(4px); background: rgba(255, 255, 255, 0.1); }
+        .nav-link.active {
+            color: white; background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px); box-shadow: var(--shadow-md);
+        }
+        .nav-icon { width: 20px; margin-right: 16px; font-size: 1.1rem; }
+        .main-content { margin-left: 280px; padding: 32px; min-height: 100vh; }
+        .header-section {
+            background: rgba(255, 255, 255, 0.2); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.3); border-radius: 20px;
+            padding: 32px; margin-bottom: 32px; box-shadow: var(--shadow-xl);
+        }
+        .header-section h2 {
+            font-size: 2.5rem; font-weight: 700; color: white;
+            text-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .breadcrumb-text { color: rgba(255, 255, 255, 0.8); font-size: 1.1rem; }
+        .btn-add {
+            background: var(--success-gradient); border: none; border-radius: 12px;
+            padding: 14px 24px; color: white; font-weight: 600; transition: all 0.3s ease;
+            text-decoration: none; display: inline-flex; align-items: center;
+            gap: 10px; box-shadow: var(--shadow-lg); font-size: 1rem;
+        }
+        .btn-add:hover { transform: translateY(-2px); box-shadow: var(--shadow-premium); color: white; }
+        .search-section {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;
+            padding: 32px; margin-bottom: 32px; box-shadow: var(--shadow-xl);
+        }
+        .search-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        .search-title {
+            display: flex; align-items: center; color: white;
+            font-weight: 600; font-size: 1.3rem;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .search-title i { margin-right: 12px; }
+        .form-control, .form-select {
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
+            color: white; padding: 14px 18px; transition: all 0.3s ease;
+        }
+        .form-control::placeholder { color: rgba(255, 255, 255, 0.6); }
+        .form-control:focus, .form-select:focus {
+            background: rgba(255, 255, 255, 0.15); border-color: rgba(255, 255, 255, 0.4);
+            box-shadow: 0 0 0 0.2rem rgba(255, 255, 255, 0.25); color: white; outline: none;
+        }
+        .form-select option { background: rgba(102, 126, 234, 0.9); color: white; }
+        .btn-search {
+            background: var(--primary-gradient); border: none; border-radius: 12px;
+            padding: 14px 24px; color: white; font-weight: 600;
+            transition: all 0.3s ease; box-shadow: var(--shadow-md);
+        }
+        .btn-search:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); color: white; }
+        .btn-reset {
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 12px;
+            padding: 14px 18px; color: rgba(255, 255, 255, 0.8); transition: all 0.3s ease;
+        }
+        .btn-reset:hover { border-color: rgba(255, 255, 255, 0.4); color: white; background: rgba(255, 255, 255, 0.15); }
+        .data-table-container {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;
+            overflow: hidden; box-shadow: var(--shadow-xl);
+        }
+        .table { color: white; margin-bottom: 0; }
+        .table thead th {
+            background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px);
+            border-color: rgba(255, 255, 255, 0.2); color: #2d1b69; font-weight: 700;
+            padding: 20px; border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+            text-shadow: 0 1px 2px rgba(255, 255, 255, 0.8); font-size: 1.1rem;
+        }
+        .table tbody td {
+            border-color: rgba(255, 255, 255, 0.1); padding: 20px;
+            vertical-align: middle; color: #1a0d3a; font-weight: 500;
+        }
+        .table tbody tr { transition: all 0.3s ease; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
+        .table tbody tr:hover { background: rgba(255, 255, 255, 0.1); transform: translateX(4px); }
+        .status-badge {
+            padding: 8px 16px; border-radius: 20px; font-size: 0.8rem; font-weight: 600;
+            text-transform: uppercase; min-width: 90px; text-align: center; display: inline-block;
+        }
+        .status-active { background: var(--success-gradient); color: white; box-shadow: 0 2px 8px rgba(40, 167, 69, 0.3); }
+        .status-danger { background: var(--secondary-gradient); color: white; box-shadow: 0 2px 8px rgba(220, 53, 69, 0.3); }
+        .action-buttons { display: flex; gap: 8px; }
+        .btn-action {
+            padding: 10px 12px; border-radius: 10px; font-size: 0.875rem; border: none;
+            transition: all 0.3s ease; color: white; backdrop-filter: blur(10px);
+            box-shadow: var(--shadow-sm); text-decoration: none;
+        }
+        .btn-edit { background: var(--warning-gradient); }
+        .btn-delete { background: var(--secondary-gradient); }
+        .btn-action:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); color: white; }
+        .pagination-container {
+            background: rgba(255, 255, 255, 0.15); backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2); border-radius: 20px;
+            padding: 20px; margin-top: 32px;
+        }
+        .pagination .page-item .page-link {
+            background-color: rgba(255, 255, 255, 0.2); border-color: rgba(255, 255, 255, 0.3);
+            color: white; margin: 0 4px; border-radius: 8px;
+        }
+        .pagination .page-item.active .page-link { background: var(--primary-gradient); border: none; }
+        .pagination .page-item.disabled .page-link { background-color: rgba(255, 255, 255, 0.1); color: rgba(255, 255, 255, 0.5); }
+        .showing-info { color: rgba(255, 255, 255, 0.8); font-weight: 500; }
+        .fade-in { animation: fadeInUp 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards; opacity: 0; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+    </style>
+</head>
+<body>
+<div th:replace="~{admin/fragment/sidebar :: adminSidebar(activeLink='dashboard')}"></div>
+
+<div class="container">
+    <h1 class="page-title"></h1>
+    <div style="display: flex; justify-content: flex-end; align-items: center; margin-bottom: 10px;">
+        <form method="get" th:action="@{/admin/dashboard}" style="display: flex; align-items: center; gap: 8px;">
+            <input type="hidden" name="page" th:value="${currentPage}"/>
+            <input type="hidden" name="filter" th:value="${filter}"/>
+            <input type="hidden" name="keyword" th:value="${keyword}"/>
+            <input type="hidden" name="minRate" th:value="${minRate}"/>
+            <input type="hidden" name="maxRate" th:value="${maxRate}"/>
+            <input type="hidden" name="feedbackPage" th:value="${feedbackCurrentPage}"/>
+
+            <input type="text" id="dateRangePicker" class="form-control w-auto" placeholder="Select date range" readonly>
+            <input type="hidden" id="startDate" name="startDate">
+            <input type="hidden" id="endDate" name="endDate">
+            <button type="submit" class="btn btn-primary">Filter</button>
+        </form>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card revenue">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+            <div class="stat-title">Total Revenue</div>
+            <div class="stat-value">
+                <span th:text="${dashboard.revenueYear}"></span> VND
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                Revenue this year
+            </div>
+        </div>
+
+        <div class="stat-card food">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-chair"></i>
+                </div>
+            </div>
+            <div class="stat-title">Total Seats Booked</div>
+            <div class="stat-value">
+                <span th:text="${dashboard.ticketsThisYear}"></span> seats
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                Seats booked this year
+            </div>
+        </div>
+
+        <div class="stat-card movies">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-film"></i>
+                </div>
+            </div>
+            <div class="stat-title">Movies Now Showing</div>
+            <div class="stat-value">
+                <span th:text="${dashboard.showingMovies}"></span> movies
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                Currently showing movies
+            </div>
+        </div>
+
+        <div class="stat-card shows">
+            <div class="stat-header">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+            </div>
+            <div class="stat-title">Tickets Today</div>
+            <div class="stat-value">
+                <span th:text="${dashboard.ticketsToday}"></span> tickets
+            </div>
+            <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i>
+                Tickets sold today
+            </div>
+        </div>
+    </div>
+
+    <div class="charts-section">
+        <div class="chart-card">
+            <h3 class="chart-title">
+                <i class="fas fa-chart-bar"></i>
+                Revenue Over Time
+            </h3>
+            <canvas id="revenueChart"></canvas>
+        </div>
+
+        <div class="chart-card">
+            <h3 class="chart-title">
+                <i class="fas fa-ticket-alt"></i>
+                Tickets Sold
+            </h3>
+            <canvas id="ticketsChart"></canvas>
+        </div>
+    </div>
+
+    <div class="trend-section">
+        <h2 class="chart-title">
+            <i class="fas fa-chart-area"></i>
+            Revenue Trend (based on booking date)
+        </h2>
+        <div class="trend-controls">
+            <label for="revenueRange">Select time range:</label>
+            <select id="revenueRange" class="trend-select" onchange="fetchRevenueTrend()">
+                <option value="7">Last 7 days</option>
+                <option value="30">Last 30 days</option>
+                <option value="365">Last 365 days</option>
+            </select>
+        </div>
+        <canvas id="trendChart" height="100"></canvas>
+    </div>
+
+    <div class="movies-section" style="display: flex; gap: 20px; align-items: flex-start;">
+        <div style="flex: 2;">
+            <h2 class="chart-title">
+                <i class="fas fa-list"></i>
+                Statistics by Movie
+            </h2>
+
+            <form method="get" action="/admin/dashboard">
+                <div class="filters">
+                    <div class="filter-group">
+                        <label>Filter movies:</label>
+                        <select name="filter" class="filter-select">
+                            <option value="" th:selected="${filter == null or filter == ''}">All</option>
+                            <option value="showing" th:selected="${filter == 'showing'}">Now Showing</option>
+                            <option value="coming" th:selected="${filter == 'coming'}">Coming Soon</option>
+                        </select>
+                    </div>
+
+                    <div class="filter-group">
+                        <label>Search movie:</label>
+                        <input type="text" name="keyword" class="filter-input" placeholder="Enter movie name..." th:value="${keyword}">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i>
+                        Apply
+                    </button>
+                </div>
+            </form>
+
+            <form method="get" action="/admin/dashboard" style="display:inline-block;">
+                <button type="submit" class="btn btn-secondary">
+                    <i class="fas fa-sync"></i>
+                    Reset
+                </button>
+            </form>
+
+            <table class="movies-table">
+                <thead>
+                <tr>
+                    <th>No.</th>
+                    <th>Image</th>
+                    <th>Movie Title</th>
+                    <th>Screening Dates</th>
+                    <th>Tickets Sold</th>
+                    <th>Revenue</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="movie, iterStat : ${movies}">
+                    <td th:text="${iterStat.index + 1 + (currentPage * 5)}"></td>
+                    <td><img th:src="@{${movie.image}}" alt="Movie poster" class="movie-image"/></td>
+                    <td th:text="${movie.movieName}"></td>
+                    <td th:text="${#temporals.format(movie.startDate, 'dd/MM/yyyy')} + ' - ' + ${#temporals.format(movie.endDate, 'dd/MM/yyyy')}"></td>
+                    <td th:text="${movie.totalTickets}"></td>
+                    <td th:text="${movie.totalRevenue} + ' VND'"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination">
+                <span class="pagination-info">Page <span th:text="${currentPage + 1}"></span> / <span th:text="${totalPages}"></span></span>
+                <div th:if="${currentPage > 0}">
+                    <a th:href="@{/dashboard(page=${currentPage - 1}, filter=${filter}, keyword=${keyword})}" class="pagination-link">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </div>
+                <div th:if="${currentPage + 1 < totalPages}">
+                    <a th:href="@{/dashboard(page=${currentPage + 1}, filter=${filter}, keyword=${keyword})}" class="pagination-link">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div style="flex: 1;">
+            <h2 class="chart-title">
+                <i class="fas fa-star"></i>
+                Service Feedback
+            </h2>
+
+            <form method="get" action="/admin/dashboard" style="margin-bottom: 10px;">
+                <input type="hidden" name="page" th:value="${currentPage}"/>
+                <input type="hidden" name="filter" th:value="${filter}"/>
+                <input type="hidden" name="keyword" th:value="${keyword}"/>
+
+                <label>Rate from:</label>
+                <select name="minRate">
+                    <option th:each="i : ${#numbers.sequence(1, 5)}" th:value="${i}" th:text="${i}" th:selected="${minRate == i}"></option>
+                </select>
+                <label>to</label>
+                <select name="maxRate">
+                    <option th:each="i : ${#numbers.sequence(1, 5)}" th:value="${i}" th:text="${i}" th:selected="${maxRate == i}"></option>
+                </select>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-filter"></i> Filter
+                </button>
+            </form>
+
+            <table class="movies-table" style="font-size: 0.85rem;">
+                <thead>
+                <tr>
+                    <th>Customer ID</th>
+                    <th>Content</th>
+                    <th>Rate</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="fb : ${feedbacks}">
+                    <td th:text="${fb.customerId}"></td>
+                    <th th:text="${fb.content}"></th>
+                    <td th:text="${fb.serviceRate}"></td>
+                    <td th:text="${fb.status}"></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <div class="pagination" style="margin-top: 10px;">
+                <span>Page <span th:text="${feedbackCurrentPage + 1}"></span> / <span th:text="${feedbackTotalPages}"></span></span>
+                <div th:if="${feedbackCurrentPage > 0}">
+                    <a th:href="@{/dashboard(page=${currentPage}, feedbackPage=${feedbackCurrentPage - 1}, filter=${filter}, keyword=${keyword}, minRate=${minRate}, maxRate=${maxRate})}" class="pagination-link">
+                        <i class="fas fa-chevron-left"></i> Previous
+                    </a>
+                </div>
+                <div th:if="${feedbackCurrentPage + 1 < feedbackTotalPages}">
+                    <a th:href="@{/dashboard(page=${currentPage}, feedbackPage=${feedbackCurrentPage + 1}, filter=${filter}, keyword=${keyword}, minRate=${minRate}, maxRate=${maxRate})}" class="pagination-link">
+                        Next <i class="fas fa-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    // Revenue Chart
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const revenueChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Today', 'This Month', 'This Year'],
+            datasets: [{
+                label: 'Revenue (VND)',
+                data: [
+                    [[${dashboard.revenueToday}]],
+                    [[${dashboard.revenueMonth}]],
+                    [[${dashboard.revenueYear}]]
+                ],
+                backgroundColor: [
+                    'rgba(102, 126, 234, 0.8)',
+                    'rgba(245, 87, 108, 0.8)',
+                    'rgba(16, 185, 129, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(102, 126, 234, 1)',
+                    'rgba(245, 87, 108, 1)',
+                    'rgba(16, 185, 129, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        color: '#6b7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6b7280'
+                    }
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+
+    // Tickets Chart
+    const ticketsToday = parseInt([[${dashboard.ticketsToday}]]);
+    const ticketsMonth = parseInt([[${dashboard.ticketsMonth}]]);
+    const ticketsYear = parseInt([[${dashboard.ticketsThisYear}]]);
+
+    const maxTickets = Math.max(ticketsToday, ticketsMonth, ticketsYear);
+    const yMax = Math.ceil(maxTickets * 1.1);
+
+    const ticketsChart = new Chart(document.getElementById('ticketsChart').getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: ['Today', 'This Month', 'This Year'],
+            datasets: [{
+                label: 'Tickets Sold',
+                data: [ticketsToday, ticketsMonth, ticketsYear],
+                backgroundColor: [
+                    'rgba(79, 172, 254, 0.8)',
+                    'rgba(237, 201, 72, 0.8)',
+                    'rgba(176, 122, 161, 0.8)'
+                ],
+                borderColor: [
+                    'rgba(79, 172, 254, 1)',
+                    'rgba(237, 201, 72, 1)',
+                    'rgba(176, 122, 161, 1)'
+                ],
+                borderWidth: 2,
+                borderRadius: 8,
+                borderSkipped: false,
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: 'white',
+                    bodyColor: 'white',
+                    borderColor: 'rgba(255, 255, 255, 0.2)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    suggestedMax: yMax,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
+                    },
+                    ticks: {
+                        precision: 0,
+                        color: '#6b7280'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#6b7280'
+                    }
+                }
+            },
+            animation: {
+                duration: 2000,
+                easing: 'easeInOutQuart'
+            }
+        }
+    });
+
+    // Trend Chart
+    let trendChart;
+
+    async function fetchRevenueTrend() {
+        try {
+            const days = document.getElementById("revenueRange").value;
+            const res = await fetch(`/admin/dashboard/revenue-trend?days=${days}`);
+            const data = await res.json();
+
+            const labels = Object.keys(data);
+            const values = Object.values(data);
+
+            if (trendChart) trendChart.destroy();
+
+            const ctx = document.getElementById("trendChart").getContext("2d");
+
+            trendChart = new Chart(ctx, {
+                type: "line",
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: "Daily Revenue (VND)",
+                        data: values,
+                        fill: true,
+                        borderColor: "rgba(102, 126, 234, 1)",
+                        backgroundColor: "rgba(102, 126, 234, 0.1)",
+                        tension: 0.4,
+                        borderWidth: 3,
+                        pointBackgroundColor: "rgba(102, 126, 234, 1)",
+                        pointBorderColor: "white",
+                        pointBorderWidth: 2,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointHoverBackgroundColor: "rgba(102, 126, 234, 1)",
+                        pointHoverBorderColor: "white",
+                        pointHoverBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                            titleColor: 'white',
+                            bodyColor: 'white',
+                            borderColor: 'rgba(255, 255, 255, 0.2)',
+                            borderWidth: 1,
+                            cornerRadius: 8,
+                            displayColors: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: {
+                                color: 'rgba(0, 0, 0, 0.05)'
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#6b7280'
+                            },
+                            title: {
+                                display: true,
+                                text: "Booking Date",
+                                color: '#6b7280'
+                            }
+                        }
+                    },
+                    animation: {
+                        duration: 2000,
+                        easing: 'easeInOutQuart'
+                    },
+                    elements: {
+                        line: {
+                            tension: 0.4
+                        }
+                    }
+                }
+            });
+        } catch (error) {
+            console.error('Error fetching revenue trend:', error);
+        }
+    }
+
+    // Initialize trend chart on page load
+    document.addEventListener("DOMContentLoaded", function() {
+        fetchRevenueTrend();
+    });
+    //data range
+    const picker = new Litepicker({
+        element: document.getElementById('dateRangePicker'),
+        singleMode: false,
+        format: 'YYYY-MM-DD',
+        lang: 'en-US',
+        autoApply: true,
+        setup: (picker) => {
+            picker.on('selected', (start, end) => {
+                document.getElementById('startDate').value = start.format('YYYY-MM-DD');
+                document.getElementById('endDate').value = end.format('YYYY-MM-DD');
+            });
+        }
+    });
+
+    // If startDate and endDate are available from the server => display them again
+    window.addEventListener('DOMContentLoaded', () => {
+        const start = document.getElementById('startDate').value;
+        const end = document.getElementById('endDate').value;
+        if (start && end) {
+            picker.setDateRange(start, end);
+            document.getElementById('dateRangePicker').value = `${start} - ${end}`;
+        }
+    });
+</script>
+</body>
+</html>

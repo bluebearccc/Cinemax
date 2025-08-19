@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Email Verify</title>
+    <link th:href="@{/common-static/css/email-verify.css}" rel="stylesheet">
+    <link rel="shortcut icon" th:href="@{/customer-static/images/logo/logo.png}" type="image/x-icon">
+</head>
+<body>
+<div class="bg-particles">
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+    <div class="particle"></div>
+</div>
+
+<div class="container">
+    <div class="icon-container">
+        <div class="mail-icon">
+            <img th:src="@{/common-static/images/emaillogo.png}" alt="Mail Icon">
+        </div>
+    </div>
+
+    <a th:href="@{/login}" class="back-to-login">
+        ← Back to Login
+    </a>
+
+    <h1>Email Verification</h1>
+    <p class="subtitle">
+        Enter your email address to receive a verification code.
+        We'll send you a 6-digit code to verify your account.
+    </p>
+
+    <form id="emailForm" th:action="@{/verifyemail}" method="GET">
+        <div class="form-group">
+            <label class="form-label" for="emailInput">Email Address</label>
+            <div style="position: relative;">
+                <input
+                        type="email"
+                        id="emailInput"
+                        class="email-input"
+                        name="email"
+                        placeholder="Enter your email..."
+                        required
+                >
+            </div>
+            <p class="error-message" th:text="${error}" id="confirmError"></p>
+        </div>
+
+        <button type="submit" class="send-btn" id="sendBtn">
+            Send Verification Code
+        </button>
+    </form>
+
+</div>
+</body>
+</html>
